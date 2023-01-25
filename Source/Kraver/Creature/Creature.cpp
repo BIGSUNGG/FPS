@@ -3,6 +3,7 @@
 
 #include "Creature.h"
 #include "Components/WidgetComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -12,8 +13,8 @@ ACreature::ACreature()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRING_ARM"));
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 
 	SpringArm->SetupAttachment(GetMesh());
 	Camera->SetupAttachment(SpringArm);
@@ -35,6 +36,7 @@ void ACreature::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(ACreature, IsSprint);
 }
 
 // Called when the game starts or when spawned
@@ -55,6 +57,7 @@ void ACreature::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	AimOffset(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -73,10 +76,28 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
+void ACreature::SetIsSprint(bool value)
+{
+	IsSprint = value;
+	OnServer_SetIsSprint(value);
+}
+
 void ACreature::MoveForward(float NewAxisValue)
 {
-	if(NewAxisValue == 0 || Controller == nullptr || NewAxisValue == 0)
-		return;
+	if(!GetMovementComponent()->IsFalling())
+	{ 
+		SetIsSprint(false);
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+		if(NewAxisValue == 0 || Controller == nullptr || NewAxisValue == 0)
+			return;
+
+		if (NewAxisValue >= 0.5f && IsRunning)
+		{
+			SetIsSprint(true);
+			GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+		}
+	}
 
 	FRotator Rotation = GetController()->GetControlRotation();
 	FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
@@ -108,12 +129,10 @@ void ACreature::RunButtonPressed()
 	if (IsRunning)
 	{
 		IsRunning = false;
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	}
 	else
 	{
 		IsRunning = true;
-		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	}
 }
 
@@ -146,3 +165,26 @@ void ACreature::JumpingButtonReleased()
 	}
 }
 
+void ACreature::AimOffset(float DeltaTime)
+{
+	{
+		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		AO_Yaw = 0.f;
+		bUseControllerRotationYaw = true;
+	}
+
+	AO_Pitch = GetBaseAimRotation().Pitch;
+	if (AO_Pitch > 90.f && !IsLocallyControlled())
+	{
+		// map pitch from [270, 360) to [-90, 0)
+		FVector2D InRange(270.f, 360.f);
+		FVector2D OutRange(-90.f, 0.f);
+		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+	}
+}
+
+void ACreature::OnServer_SetIsSprint_Implementation(bool value)
+{
+	IsSprint = value;
+
+}

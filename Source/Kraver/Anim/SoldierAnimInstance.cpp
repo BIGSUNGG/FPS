@@ -11,8 +11,8 @@ void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	UCreatureAnimInstance::NativeUpdateAnimation(DeltaSeconds);
 
-	Player = Cast<ASoldier>(Creature);
-	if(Player == nullptr) 
+	Soldier = Cast<ASoldier>(Creature);
+	if(Soldier == nullptr)
 		return;
 
 }

@@ -43,8 +43,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
 		bool IsRunning;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Movement, meta = (AllowPrivateAccess = "true"))
+		bool IsSprint = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Angle, Meta = (AllowPrivateAccess = true))
-		float VerticalAngle;
+		float AO_Pitch;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Angle, Meta = (AllowPrivateAccess = true))
-		float HorizonAngle;
+		float AO_Yaw;
 };

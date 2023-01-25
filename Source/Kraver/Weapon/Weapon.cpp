@@ -9,21 +9,34 @@ AWeapon::AWeapon()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
-	SetRootComponent(WeaponMesh);
 
+	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
+	SetRootComponent(WeaponMesh);
+	WeaponMesh->SetCollisionProfileName(FName("WeaponMesh"));
+
+	//ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
+	//ProjectileMovement->bShouldBounce = true;
+	//ProjectileMovement->bBounceAngleAffectsFriction = true;
+	//ProjectileMovement->Bounciness = 0.3f;
 }
 
 // Called when the game starts or when spawned
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
 void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+}
+
+void AWeapon::Equipped(ACharacter* Character , bool AttachToMesh)
+{
+	OwnerCharacter = Character;
 
 }
 

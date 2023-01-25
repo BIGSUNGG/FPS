@@ -4,6 +4,7 @@
 
 #include "EngineMinimal.h"
 #include "Creature.h"
+#include "Kraver/Weapon/Weapon.h"
 #include "Soldier.generated.h"
 
 /**
@@ -31,12 +32,12 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-	void ChangeView();
-		
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ViewType, meta = (AllowPrivateAccess = "true"))
-		EViewType ViewType = EViewType::FIRST_PERSON;
+	UFUNCTION(Server, reliable)
+		void OnServer_EqiupWeapon(AWeapon* Weapon);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Arm, meta = (AllowPrivateAccess = "true"))
-		USkeletalMeshComponent* ArmMesh;
+	virtual void EqiupWeapon(AWeapon* Weapon);
+
+protected:
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+		AWeapon* CurWeapon;
 };

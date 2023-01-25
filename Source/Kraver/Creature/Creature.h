@@ -29,20 +29,31 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	FORCEINLINE FRotator GetCreatureAngle() { return Camera->GetComponentRotation() - GetMesh()->GetComponentRotation(); }
+	virtual FRotator GetCreatureAngle() { return FRotator::ZeroRotator; }
 
-	bool GetIsRunning() {return IsRunning;}
+	FORCEINLINE bool GetIsRunning() { return IsRunning; }
+	FORCEINLINE bool GetIsSprint() {return IsSprint;}
+	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
+	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
+
+	void SetIsSprint(bool value);
+protected:
+	virtual void MoveForward(float NewAxisValue);
+	virtual void MoveRight(float NewAxisValue);
+	virtual void LookUp(float NewAxisValue);
+	virtual void Turn(float NewAxisValue);
+
+	virtual void RunButtonPressed();
+	virtual void CrouchButtonPressed();
+	virtual void JumpingButtonPressed();
+	virtual void JumpingButtonReleased();
+
+	virtual void AimOffset(float DeltaTime);
 
 protected:
-	void MoveForward(float NewAxisValue);
-	void MoveRight(float NewAxisValue);
-	void LookUp(float NewAxisValue);
-	void Turn(float NewAxisValue);
+	UFUNCTION(Server, reliable)
+		void OnServer_SetIsSprint(bool value);
 
-	void RunButtonPressed();
-	void CrouchButtonPressed();
-	void JumpingButtonPressed();
-	void JumpingButtonReleased();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))
@@ -50,14 +61,21 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))
 		USpringArmComponent* SpringArm;
 
+	float AO_Yaw;
+	float AO_Pitch;
+	FRotator StartingAimRotation;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		bool IsJumping = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		bool IsRunning = false;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
+		bool IsSprint = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		float RunSpeed = 600.f;
+		float RunSpeed = 1200.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		float WalkSpeed = 350.f;
+		float WalkSpeed = 800.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float CrouchSpeed = 200.f;
+
 }; 

@@ -44,10 +44,11 @@ void UCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	IsCrouching = Creature->GetMovementComponent()->IsCrouching();
 	IsFalling = Creature->GetMovementComponent()->IsFalling();
 	IsRunning = Creature->GetIsRunning();
+	IsSprint = Creature->GetIsSprint();
 
 	FRotator CreatureRotation = Creature->GetCreatureAngle();
-	HorizonAngle = CreatureRotation.Roll;
-	VerticalAngle = CreatureRotation.Pitch;
+	AO_Yaw = Creature->GetAO_Yaw();
+	AO_Pitch = Creature->GetAO_Pitch();
 }
 
 void UCreatureAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

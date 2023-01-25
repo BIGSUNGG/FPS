@@ -20,7 +20,7 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 protected:
-	ASoldier* Player;
+	ASoldier* Soldier;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = true))
 		bool IsEquippingWeapon;
