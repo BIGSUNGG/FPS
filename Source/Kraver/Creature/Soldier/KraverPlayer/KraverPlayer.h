@@ -31,7 +31,7 @@ protected:
 	virtual void ChangeView();
 	virtual void RefreshSpringArm();
 	virtual void RefreshCurViewType();
-	virtual void EqiupWeapon(AWeapon* Weapon) override;
+	virtual void EquipWeapon(AWeapon* Weapon) override;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))
 		EViewType ViewType = EViewType::FIRST_PERSON;

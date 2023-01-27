@@ -2,6 +2,7 @@
 
 
 #include "Weapon.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -20,6 +21,13 @@ AWeapon::AWeapon()
 	//ProjectileMovement->Bounciness = 0.3f;
 }
 
+void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AWeapon, WeaponState);
+}
+
 // Called when the game starts or when spawned
 void AWeapon::BeginPlay()
 {
@@ -34,17 +42,36 @@ void AWeapon::Tick(float DeltaTime)
 
 }
 
-void AWeapon::Equipped(ACreature* Character , bool AttachToMesh)
+void AWeapon::Equipped(ACreature* Character)
 {
 	OwnerCharacter = Character;
 	Character->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
 	Character->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
 
+	Server_Equipped(Character);
+}
+
+void AWeapon::Server_Equipped_Implementation(ACreature* Character)
+{
+	WeaponState = EWeaponState::EQUIPPED;
+}
+
+bool AWeapon::GetCanInteract()
+{
+	switch (WeaponState)
+	{
+		case EWeaponState::NONE:
+			return true;
+		case EWeaponState::EQUIPPED:
+			return false;
+		default:
+			return false;
+	}
 }
 
 void AWeapon::AttackStartEvent()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Start"));
+	UE_LOG(LogTemp, Log, TEXT("AttackStart"));
 	IsAttacking = true;
 	Attack();
 	if(IsAutomaticAttack)
@@ -53,7 +80,7 @@ void AWeapon::AttackStartEvent()
 
 void AWeapon::AttackEndEvent()
 {
-	UE_LOG(LogTemp, Warning, TEXT("End"));
+	UE_LOG(LogTemp, Log, TEXT("AttackEnd"));
 	IsAttacking = false;
 	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle);
 }

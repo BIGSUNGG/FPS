@@ -33,9 +33,9 @@ public:
 
 protected:
 	UFUNCTION(Server, reliable)
-		void OnServer_EqiupWeapon(AWeapon* Weapon);
+		void Server_EquipWeapon(AWeapon* Weapon);
 
-	virtual void EqiupWeapon(AWeapon* Weapon);
+	virtual void EquipWeapon(AWeapon* Weapon);
 
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))

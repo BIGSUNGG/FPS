@@ -5,7 +5,9 @@
 
 AGun::AGun() : AWeapon()
 {
-	FireEffect = CreateDefaultSubobject<UParticleSystem>("FireEffect");
+	FireEffect = CreateDefaultSubobject<UNiagaraComponent>("FireEffect");
+	FireEffect->AttachToComponent(WeaponMesh,FAttachmentTransformRules::SnapToTargetIncludingScale, FireEffectSocketName);
+	FireEffect->bAutoActivate =false;
 }
 
 void AGun::Attack()
@@ -27,6 +29,5 @@ void AGun::Server_ShowFireEffect_Implementation()
 
 void AGun::Multicast_ShowFireEffect_Implementation()
 {
-	FRotator Rotation = WeaponMesh->GetSocketRotation(FireEffectSocketName) + FRotator(-WeaponMesh->GetSocketRotation(FireEffectSocketName).Roll, 90, 0);
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, WeaponMesh->GetSocketLocation(FireEffectSocketName), Rotation);
+	FireEffect->Activate(true);
 }

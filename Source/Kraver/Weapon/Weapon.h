@@ -8,6 +8,13 @@
 #include "Kraver/Creature/Creature.h"
 #include "Weapon.generated.h"
 
+UENUM(BlueprintType)
+enum class EWeaponState : uint8
+{
+	NONE   UMETA(DisplayName = "NONE"),
+	EQUIPPED   UMETA(DisplayName = "EQUIPPED"),
+};
+
 UCLASS()
 class KRAVER_API AWeapon : public AActor
 {
@@ -17,6 +24,8 @@ public:
 	// Sets default values for this actor's properties
 	AWeapon();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -24,11 +33,12 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void Equipped(ACreature* Character, bool AttachToMesh = true);
-
+	virtual void Equipped(ACreature* Character);
+	UFUNCTION(Server, Reliable)
+		void Server_Equipped(ACreature* Character);
 public:
 	const FName& GetAttachSocketName() { return AttachSocketName; }
-	bool GetCanInteract() { return (OwnerCharacter == nullptr); }
+	bool GetCanInteract();
 	USkeletalMeshComponent* GetWeaponMesh() {return WeaponMesh;}
 protected:
 	UFUNCTION()
@@ -39,15 +49,18 @@ protected:
 	virtual void Attack();
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "WeaponState", meta = (AllowPrivateAccess = "true"))
+		EWeaponState WeaponState = EWeaponState::NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* WeaponMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		TMap<FName, UStaticMeshComponent*> AttachmentMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		FName AttachSocketName = "SOCKET_Weapon_L";
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim", meta = (AllowPrivateAccess = "true"))
 		UAnimationAsset* IdleAnim;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Owner", meta = (AllowPrivateAccess = "true"))

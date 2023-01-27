@@ -33,7 +33,7 @@ void ASoldier::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	DOREPLIFETIME(ASoldier, CurWeapon);
 }
 
-void ASoldier::OnServer_EqiupWeapon_Implementation(AWeapon* Weapon)
+void ASoldier::Server_EquipWeapon_Implementation(AWeapon* Weapon)
 {
 	CurWeapon = Weapon;
 	CurWeapon->SetOwner(this);
@@ -41,14 +41,16 @@ void ASoldier::OnServer_EqiupWeapon_Implementation(AWeapon* Weapon)
 	CurWeapon->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CurWeapon->GetAttachSocketName());
 }
 
-void ASoldier::EqiupWeapon(AWeapon* Weapon)
+void ASoldier::EquipWeapon(AWeapon* Weapon)
 {
 	if(!Weapon)
 	 return;
 
 	CurWeapon = Weapon;
+	Server_EquipWeapon(Weapon);
+
+	CurWeapon->SetOwner(this);
 	CurWeapon->Equipped(this);
 
 	CurWeapon->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CurWeapon->GetAttachSocketName());
-	OnServer_EqiupWeapon(Weapon);
 }

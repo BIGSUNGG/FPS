@@ -62,15 +62,11 @@ void AKraverPlayer::EquipButtonPressed()
 	if(CanInteractWeapon == nullptr) 
 		return;	
 
-	EqiupWeapon(CanInteractWeapon);                 
+	EquipWeapon(CanInteractWeapon);
 }
 
 void AKraverPlayer::CheckCanInteractionWeapon()
 {
-	if (InteractionWidget == nullptr)                                                       
-	{
-		//UE_LOG(LogTemp, Fatal , TEXT("InteractionWidget is nullptr"));
-	}
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 	float Radius = 5.f;
@@ -149,12 +145,12 @@ void AKraverPlayer::RefreshCurViewType()
 		ChangeView();
 }
 
-void AKraverPlayer::EqiupWeapon(AWeapon* Weapon)
+void AKraverPlayer::EquipWeapon(AWeapon* Weapon)
 {	
 	if(!Weapon)
 		return;
 
-	ASoldier::EqiupWeapon(Weapon);
+	ASoldier::EquipWeapon(Weapon);
 	ArmWeaponMesh->SetSkeletalMesh(CurWeapon->GetWeaponMesh()->GetSkeletalMeshAsset());
 	ArmWeaponMesh->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, CurWeapon->GetAttachSocketName());
 	RefreshCurViewType();

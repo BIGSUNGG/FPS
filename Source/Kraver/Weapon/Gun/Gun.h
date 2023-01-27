@@ -4,11 +4,14 @@
 
 #include "EngineMinimal.h"
 #include "Kraver/Weapon/Weapon.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "Gun.generated.h"
 
 /**
  * 
  */
+
 UCLASS()
 class KRAVER_API AGun : public AWeapon
 {
@@ -27,7 +30,7 @@ protected:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
-		UParticleSystem* FireEffect;
+		UNiagaraComponent* FireEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
 		FName FireEffectSocketName = "SOCKET_Muzzle";
