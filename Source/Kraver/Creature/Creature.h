@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "Creature.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackStartDele);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackEndDele);
+
 UCLASS()
 class KRAVER_API ACreature : public ACharacter
 {
@@ -43,6 +46,8 @@ protected:
 	virtual void LookUp(float NewAxisValue);
 	virtual void Turn(float NewAxisValue);
 
+	virtual void AttackButtonPressed();
+	virtual void AttackButtonReleased();
 	virtual void RunButtonPressed();
 	virtual void CrouchButtonPressed();
 	virtual void JumpingButtonPressed();
@@ -54,6 +59,9 @@ protected:
 	UFUNCTION(Server, reliable)
 		void OnServer_SetIsSprint(bool value);
 
+public:
+	FAttackStartDele OnAttackStartDelegate;
+	FAttackEndDele OnAttackEndDelegate;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))

@@ -11,11 +11,12 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	ArmMesh->SetCastShadow(false);
 	ArmMesh->SetOnlyOwnerSee(true);
 
+	InteractionWidget = CreateDefaultSubobject<UInteractionWidget>(TEXT("InteractionWidget"));
+
 	ArmWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmWeaponMesh"));
 	ArmWeaponMesh->SetCastShadow(false);
 	ArmWeaponMesh->SetOnlyOwnerSee(true);
 
-	InteractionWidget = CreateDefaultSubobject<UInteractionWidget>(TEXT("InteractionWidget"));
 }
 
 void AKraverPlayer::BeginPlay()
@@ -103,7 +104,7 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 	}
 
 	if(InteractionWidget && !bCheckedInterctionObject && InteractionWidget->IsVisible())
-		InteractionWidget->RemoveFromViewport();
+		InteractionWidget->RemoveFromParent();
 }
 
 void AKraverPlayer::ChangeView()

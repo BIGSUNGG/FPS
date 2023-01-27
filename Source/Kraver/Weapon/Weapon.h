@@ -5,6 +5,7 @@
 #include "EngineMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kraver/Creature/Creature.h"
 #include "Weapon.generated.h"
 
 UCLASS()
@@ -23,26 +24,43 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void Equipped(ACharacter* Character, bool AttachToMesh = true);
+	virtual void Equipped(ACreature* Character, bool AttachToMesh = true);
 
 public:
-	USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
 	const FName& GetAttachSocketName() { return AttachSocketName; }
 	bool GetCanInteract() { return (OwnerCharacter == nullptr); }
+	USkeletalMeshComponent* GetWeaponMesh() {return WeaponMesh;}
+protected:
+	UFUNCTION()
+		virtual void AttackStartEvent();
+	UFUNCTION()
+		virtual void AttackEndEvent();	
+
+	virtual void Attack();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* WeaponMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+		TMap<FName, UStaticMeshComponent*> AttachmentMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 		FName AttachSocketName = "SOCKET_Weapon_L";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, meta = (AllowPrivateAccess = "true"))
 		UAnimationAsset* IdleAnim;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Owner", meta = (AllowPrivateAccess = "true"))
+		ACreature* OwnerCharacter = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Owner, meta = (AllowPrivateAccess = "true"))
-		ACharacter* OwnerCharacter;
+	bool IsAttacking = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		bool IsAutomaticAttack = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack" , meta = (AllowPrivateAccess = "true"))
+		float AttackDelay = 0.2f;
 
+	FTimerHandle AutomaticAttackHandle;
+	
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	//	UProjectileMovementComponent* ProjectileMovement;
 

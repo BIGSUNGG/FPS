@@ -37,7 +37,6 @@ void ASoldier::OnServer_EqiupWeapon_Implementation(AWeapon* Weapon)
 {
 	CurWeapon = Weapon;
 	CurWeapon->SetOwner(this);
-	CurWeapon->Equipped(this);
 
 	CurWeapon->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CurWeapon->GetAttachSocketName());
 }
@@ -48,5 +47,8 @@ void ASoldier::EqiupWeapon(AWeapon* Weapon)
 	 return;
 
 	CurWeapon = Weapon;
+	CurWeapon->Equipped(this);
+
+	CurWeapon->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CurWeapon->GetAttachSocketName());
 	OnServer_EqiupWeapon(Weapon);
 }

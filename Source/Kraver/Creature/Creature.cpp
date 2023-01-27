@@ -68,6 +68,8 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis(TEXT("LookUp")	, this, &ACreature::LookUp);
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ACreature::Turn);
 
+	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &ACreature::AttackButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Released, this, &ACreature::AttackButtonReleased);
 	PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &ACreature::RunButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Released, this, &ACreature::RunButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Pressed, this, &ACreature::CrouchButtonPressed);
@@ -122,6 +124,16 @@ void ACreature::LookUp(float NewAxisValue)
 void ACreature::Turn(float NewAxisValue)
 {
 	AddControllerYawInput(NewAxisValue);
+}
+
+void ACreature::AttackButtonPressed()
+{
+	OnAttackStartDelegate.Broadcast();
+}
+
+void ACreature::AttackButtonReleased()
+{
+	OnAttackEndDelegate.Broadcast();
 }
 
 void ACreature::RunButtonPressed()

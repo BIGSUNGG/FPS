@@ -3,7 +3,7 @@
 #pragma once
 
 #include "EngineMinimal.h"
-#include "Kraver/Creature/Soldier.h"
+#include "Kraver/Creature/Soldier/Soldier.h"
 #include "Kraver/Hud/InteractionWidget.h"
 #include "KraverPlayer.generated.h"
 
