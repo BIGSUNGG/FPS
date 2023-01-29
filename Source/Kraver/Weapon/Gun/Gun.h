@@ -20,6 +20,9 @@ class KRAVER_API AGun : public AWeapon
 public:
 	AGun();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual int32 AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh) override;
 protected:
 	virtual void Attack() override;
 	virtual void ShowFireEffect();
@@ -28,9 +31,14 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_ShowFireEffect();
 
+public:
+	UNiagaraComponent* GetFireEffect() { return FireEffect; }
+	TArray<UNiagaraComponent*> GetAdditiveFireEffect() { return AdditiveFireEffect; }
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
 		UNiagaraComponent* FireEffect;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Additive", meta = (AllowPrivateAccess = "true"))
+		TArray<UNiagaraComponent*> AdditiveFireEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
 		FName FireEffectSocketName = "SOCKET_Muzzle";

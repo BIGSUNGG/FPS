@@ -5,18 +5,12 @@
 #include "EngineMinimal.h"
 #include "Kraver/Creature/Creature.h"
 #include "Kraver/Weapon/Weapon.h"
+#include "Kraver/KraverComponent/CombatComponent.h"
 #include "Soldier.generated.h"
 
 /**
  * 
  */
-
-UENUM(BlueprintType)
-enum class EViewType : uint8
-{
-	FIRST_PERSON   UMETA(DisplayName = "FIRST_PERSON"),
-	THIRD_PERSON   UMETA(DisplayName = "THIRD_PERSON"),
-};
 
 UCLASS()
 class KRAVER_API ASoldier : public ACreature
@@ -32,12 +26,14 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-	UFUNCTION(Server, reliable)
-		void Server_EquipWeapon(AWeapon* Weapon);
-
 	virtual void EquipWeapon(AWeapon* Weapon);
 
+	UFUNCTION()
+		virtual void OnEquipWeaponSuccess(AWeapon* Weapon);
+	UFUNCTION(Server, reliable)
+		virtual void Server_OnEquipWeaponSuccess(AWeapon* Weapon);
+
 protected:
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-		AWeapon* CurWeapon;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		UCombatComponent* CombatComponent;
 };

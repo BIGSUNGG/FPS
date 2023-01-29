@@ -15,6 +15,13 @@ enum class EWeaponState : uint8
 	EQUIPPED   UMETA(DisplayName = "EQUIPPED"),
 };
 
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	NONE   UMETA(DisplayName = "NONE"),
+	GUN   UMETA(DisplayName = "GUN"),
+};
+
 UCLASS()
 class KRAVER_API AWeapon : public AActor
 {
@@ -33,13 +40,14 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void Equipped(ACreature* Character);
+
+	virtual int32 AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh);
+	UFUNCTION(Server, Reliable)
+		virtual void Server_AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh);
+
+	virtual bool Equipped(ACreature* Character);
 	UFUNCTION(Server, Reliable)
 		void Server_Equipped(ACreature* Character);
-public:
-	const FName& GetAttachSocketName() { return AttachSocketName; }
-	bool GetCanInteract();
-	USkeletalMeshComponent* GetWeaponMesh() {return WeaponMesh;}
 protected:
 	UFUNCTION()
 		virtual void AttackStartEvent();
@@ -48,12 +56,23 @@ protected:
 
 	virtual void Attack();
 
+public:
+	bool GetCanInteracted();
+	EWeaponType GetWeaponType() { return WeaponType; }
+	EWeaponState GetWeaponState() { return WeaponState; }
+	const FName& GetAttachSocketName() { return AttachSocketName; }
+	USkeletalMeshComponent* GetWeaponMesh() {return WeaponMesh;}
+
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "WeaponState", meta = (AllowPrivateAccess = "true"))
 		EWeaponState WeaponState = EWeaponState::NONE;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponType", meta = (AllowPrivateAccess = "true"))
+		EWeaponType WeaponType = EWeaponType::NONE;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* WeaponMesh;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Additive", meta = (AllowPrivateAccess = "true"))
+		TArray<USkeletalMeshComponent*> AdditiveWeaponMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		TMap<FName, UStaticMeshComponent*> AttachmentMesh;
 

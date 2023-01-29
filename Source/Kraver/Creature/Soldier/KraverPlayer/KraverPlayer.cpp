@@ -2,6 +2,7 @@
 
 
 #include "KraverPlayer.h"
+#include "Kraver/Weapon/Gun/Gun.h"
 #include "DrawDebugHelpers.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
@@ -10,13 +11,16 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	ArmMesh->SetupAttachment(Camera);
 	ArmMesh->SetCastShadow(false);
 	ArmMesh->SetOnlyOwnerSee(true);
+	ShowOnlyFirstPerson.Push(ArmMesh);
 
 	InteractionWidget = CreateDefaultSubobject<UInteractionWidget>(TEXT("InteractionWidget"));
 
 	ArmWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmWeaponMesh"));
 	ArmWeaponMesh->SetCastShadow(false);
 	ArmWeaponMesh->SetOnlyOwnerSee(true);
+	ShowOnlyFirstPerson.Push(ArmWeaponMesh);
 
+	ShowOnlyThirdPerson.Push(GetMesh());
 }
 
 void AKraverPlayer::BeginPlay()
@@ -89,7 +93,7 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 		if (IsValid(HitResult.GetActor()))
 		{
 			auto weapon = Cast<AWeapon>(HitResult.GetActor());
-			if(weapon && weapon->GetCanInteract())
+			if(weapon && weapon->GetCanInteracted() && CombatComponent->GetCanEquipWeapon())
 			{ 
 				CanInteractWeapon = weapon;
 				bCheckedInterctionObject = true;
@@ -112,22 +116,32 @@ void AKraverPlayer::ChangeView()
 		SpringArm->TargetArmLength = 300.f;
 		SpringArmBasicLocation = FVector(-80.0, 0.f, 150.0);
 		RefreshSpringArm();
-		GetMesh()->SetOwnerNoSee(false);
-		ArmMesh->SetOwnerNoSee(true);
-		ArmWeaponMesh->SetOwnerNoSee(true);
-		if (CurWeapon)
-			CurWeapon->GetWeaponMesh()->SetOwnerNoSee(false);
+		for (auto& TempMesh : ShowOnlyFirstPerson)
+		{
+			if(TempMesh != nullptr)
+				TempMesh->SetOwnerNoSee(true);
+		}
+		for (auto& TempMesh : ShowOnlyThirdPerson)
+		{
+			if (TempMesh != nullptr)
+				TempMesh->SetOwnerNoSee(false);
+		}
 		break;
 	case EViewType::THIRD_PERSON:
 		ViewType = EViewType::FIRST_PERSON;
 		SpringArm->TargetArmLength = 0.f;
 		SpringArmBasicLocation = FVector(0.f, 0.f, 165.f);
 		RefreshSpringArm();
-		GetMesh()->SetOwnerNoSee(true);
-		ArmMesh->SetOwnerNoSee(false);
-		ArmWeaponMesh->SetOwnerNoSee(false);
-		if(CurWeapon)
-			CurWeapon->GetWeaponMesh()->SetOwnerNoSee(true);
+		for (auto TempMesh : ShowOnlyFirstPerson)
+		{
+			if (TempMesh != nullptr)
+				TempMesh->SetOwnerNoSee(false);
+		}
+		for (auto TempMesh : ShowOnlyThirdPerson)
+		{
+			if (TempMesh != nullptr)
+				TempMesh->SetOwnerNoSee(true);
+		}
 		break;
 	default:
 		break;
@@ -145,13 +159,31 @@ void AKraverPlayer::RefreshCurViewType()
 		ChangeView();
 }
 
-void AKraverPlayer::EquipWeapon(AWeapon* Weapon)
+void AKraverPlayer::OnEquipWeaponSuccess(AWeapon* Weapon)
 {	
 	if(!Weapon)
 		return;
+	ASoldier::OnEquipWeaponSuccess(Weapon);
 
-	ASoldier::EquipWeapon(Weapon);
-	ArmWeaponMesh->SetSkeletalMesh(CurWeapon->GetWeaponMesh()->GetSkeletalMeshAsset());
-	ArmWeaponMesh->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, CurWeapon->GetAttachSocketName());
+	ArmWeaponMesh->SetSkeletalMesh(CombatComponent->GetCurWeapon()->GetWeaponMesh()->GetSkeletalMeshAsset());
+	ArmWeaponMesh->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
+	ShowOnlyThirdPerson.Push(CombatComponent->GetCurWeapon()->GetWeaponMesh());
+
+	int32 Index = CombatComponent->GetCurWeapon()->AddAdditiveWeaponMesh(ArmWeaponMesh);
+	switch (CombatComponent->GetCurWeapon()->GetWeaponType())
+	{
+	case EWeaponType::GUN:
+	{
+		AGun* Gun = Cast<AGun>(Weapon);
+		ShowOnlyThirdPerson.Push(Gun->GetFireEffect());
+		auto FireEffect = Gun->GetAdditiveFireEffect()[Index];
+		Gun->GetAdditiveFireEffect()[Index]->SetOnlyOwnerSee(true);
+		ShowOnlyFirstPerson.Push(FireEffect);
+	}
+		break;
+	default:
+		UE_LOG(LogTemp, Fatal, TEXT("Need to support more EWeaponType"));
+		break;
+	}
 	RefreshCurViewType();
 }

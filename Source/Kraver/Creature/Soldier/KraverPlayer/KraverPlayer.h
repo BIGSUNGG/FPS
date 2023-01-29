@@ -10,6 +10,14 @@
 /**
  * 
  */
+
+UENUM(BlueprintType)
+enum class EViewType : uint8
+{
+	FIRST_PERSON   UMETA(DisplayName = "FIRST_PERSON"),
+	THIRD_PERSON   UMETA(DisplayName = "THIRD_PERSON"),
+};
+
 UCLASS()
 class KRAVER_API AKraverPlayer : public ASoldier
 {
@@ -31,7 +39,8 @@ protected:
 	virtual void ChangeView();
 	virtual void RefreshSpringArm();
 	virtual void RefreshCurViewType();
-	virtual void EquipWeapon(AWeapon* Weapon) override;
+
+	virtual void OnEquipWeaponSuccess(AWeapon* Weapon) override;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))
 		EViewType ViewType = EViewType::FIRST_PERSON;
@@ -50,6 +59,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 		UInteractionWidget* InteractionWidget;
 
+	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson;
+	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson;
 	FVector SpringArmBasicLocation;
 	FVector SpringArmAdditiveLocation;
 };

@@ -26,6 +26,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
+	DOREPLIFETIME(AWeapon, AdditiveWeaponMesh);
 }
 
 // Called when the game starts or when spawned
@@ -42,13 +43,29 @@ void AWeapon::Tick(float DeltaTime)
 
 }
 
-void AWeapon::Equipped(ACreature* Character)
+int32 AWeapon::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 {
+	int32 Index = AdditiveWeaponMesh.Add(Mesh);
+	return Index;
+}
+
+void AWeapon::Server_AddAdditiveWeaponMesh_Implementation(USkeletalMeshComponent* Mesh)
+{
+	AdditiveWeaponMesh.Add(Mesh);
+}
+
+bool AWeapon::Equipped(ACreature* Character)
+{
+	if(GetCanInteracted() == false)
+		return false;
+
 	OwnerCharacter = Character;
 	Character->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
 	Character->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
 
 	Server_Equipped(Character);
+
+	return true;
 }
 
 void AWeapon::Server_Equipped_Implementation(ACreature* Character)
@@ -56,7 +73,7 @@ void AWeapon::Server_Equipped_Implementation(ACreature* Character)
 	WeaponState = EWeaponState::EQUIPPED;
 }
 
-bool AWeapon::GetCanInteract()
+bool AWeapon::GetCanInteracted()
 {
 	switch (WeaponState)
 	{

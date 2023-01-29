@@ -7,6 +7,9 @@
 ASoldier::ASoldier()
 	: ACreature()
 {
+	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
+	CombatComponent->OnEquipWeaponSuccess.AddDynamic(this, &ASoldier::OnEquipWeaponSuccess);
+	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ASoldier::Server_OnEquipWeaponSuccess);
 }
 
 void ASoldier::BeginPlay()
@@ -30,27 +33,23 @@ void ASoldier::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ASoldier, CurWeapon);
-}
-
-void ASoldier::Server_EquipWeapon_Implementation(AWeapon* Weapon)
-{
-	CurWeapon = Weapon;
-	CurWeapon->SetOwner(this);
-
-	CurWeapon->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CurWeapon->GetAttachSocketName());
+	DOREPLIFETIME(ASoldier, CombatComponent);
 }
 
 void ASoldier::EquipWeapon(AWeapon* Weapon)
 {
-	if(!Weapon)
-	 return;
+	CombatComponent->EquipWeapon(Weapon);
+}
 
-	CurWeapon = Weapon;
-	Server_EquipWeapon(Weapon);
+void ASoldier::OnEquipWeaponSuccess(AWeapon* Weapon)
+{
+	if(Weapon == nullptr)
+		return;
 
-	CurWeapon->SetOwner(this);
-	CurWeapon->Equipped(this);
+	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
+}
 
-	CurWeapon->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CurWeapon->GetAttachSocketName());
+void ASoldier::Server_OnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
+{	
+	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
 }
