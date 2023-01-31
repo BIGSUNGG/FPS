@@ -10,6 +10,8 @@ ASoldier::ASoldier()
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->OnEquipWeaponSuccess.AddDynamic(this, &ASoldier::OnEquipWeaponSuccess);
 	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ASoldier::Server_OnEquipWeaponSuccess);
+	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ASoldier::OnUnEquipWeaponSuccess);
+	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ASoldier::Server_OnUnEquipWeaponSuccess);
 }
 
 void ASoldier::BeginPlay()
@@ -47,6 +49,14 @@ void ASoldier::OnEquipWeaponSuccess(AWeapon* Weapon)
 		return;
 
 	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
+}
+
+void ASoldier::OnUnEquipWeaponSuccess(AWeapon* Weapon)
+{
+}
+
+void ASoldier::Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
+{
 }
 
 void ASoldier::Server_OnEquipWeaponSuccess_Implementation(AWeapon* Weapon)

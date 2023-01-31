@@ -42,13 +42,25 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual int32 AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh);
+
+	virtual bool Equipped(ACreature* Character);
+	virtual bool UnEquipped();
+
+protected:
 	UFUNCTION(Server, Reliable)
 		virtual void Server_AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh);
 
-	virtual bool Equipped(ACreature* Character);
 	UFUNCTION(Server, Reliable)
 		void Server_Equipped(ACreature* Character);
-protected:
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_Equipped(ACreature* Character);
+	
+	UFUNCTION(Server, Reliable)
+		void Server_UnEquipped();
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_UnEquipped();
+
+public:
 	UFUNCTION()
 		virtual void AttackStartEvent();
 	UFUNCTION()
@@ -82,7 +94,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim", meta = (AllowPrivateAccess = "true"))
 		UAnimationAsset* IdleAnim;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Owner", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Owner", meta = (AllowPrivateAccess = "true"))
 		ACreature* OwnerCharacter = nullptr;
 
 	bool IsAttacking = false;
@@ -92,8 +104,5 @@ protected:
 		float AttackDelay = 0.2f;
 
 	FTimerHandle AutomaticAttackHandle;
-	
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	//	UProjectileMovementComponent* ProjectileMovement;
 
 };

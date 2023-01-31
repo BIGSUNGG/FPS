@@ -10,15 +10,14 @@ AWeapon::AWeapon()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	SetReplicateMovement(true);
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
 	WeaponMesh->SetCollisionProfileName(FName("WeaponMesh"));
+	WeaponMesh->SetSimulatePhysics(true);
+	WeaponMesh->bReplicatePhysicsToAutonomousProxy = false;
 	SetRootComponent(WeaponMesh);
 
-	//ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-	//ProjectileMovement->bShouldBounce = true;
-	//ProjectileMovement->bBounceAngleAffectsFriction = true;
-	//ProjectileMovement->Bounciness = 0.3f;
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -27,6 +26,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AWeapon, WeaponState);
 	DOREPLIFETIME(AWeapon, AdditiveWeaponMesh);
+	DOREPLIFETIME(AWeapon, OwnerCharacter);
 }
 
 // Called when the game starts or when spawned
@@ -59,18 +59,25 @@ bool AWeapon::Equipped(ACreature* Character)
 	if(GetCanInteracted() == false)
 		return false;
 
+	WeaponMesh->SetSimulatePhysics(false);
 	OwnerCharacter = Character;
-	Character->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
-	Character->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
+	OwnerCharacter->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
+	OwnerCharacter->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
 
-	Server_Equipped(Character);
-
+	Server_Equipped(OwnerCharacter);
 	return true;
 }
 
 void AWeapon::Server_Equipped_Implementation(ACreature* Character)
 {
 	WeaponState = EWeaponState::EQUIPPED;
+	WeaponMesh->SetSimulatePhysics(false);
+	Multicast_Equipped(Character);
+}
+
+void AWeapon::Multicast_Equipped_Implementation(ACreature* Character)
+{
+	WeaponMesh->SetSimulatePhysics(false);
 }
 
 bool AWeapon::GetCanInteracted()
@@ -84,6 +91,32 @@ bool AWeapon::GetCanInteracted()
 		default:
 			return false;
 	}
+}
+
+bool AWeapon::UnEquipped()
+{	
+	WeaponMesh->SetSimulatePhysics(true);
+	OwnerCharacter->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
+	OwnerCharacter->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
+	OwnerCharacter = nullptr;
+
+	UE_LOG(LogTemp,Warning, TEXT("H"));
+	Server_UnEquipped();
+	return true;
+}
+
+void AWeapon::Server_UnEquipped_Implementation()
+{
+	WeaponState = EWeaponState::NONE;
+
+	WeaponMesh->SetSimulatePhysics(true);
+	OwnerCharacter = nullptr;
+	Multicast_UnEquipped();
+}
+
+void AWeapon::Multicast_UnEquipped_Implementation()
+{
+	WeaponMesh->SetSimulatePhysics(true);
 }
 
 void AWeapon::AttackStartEvent()

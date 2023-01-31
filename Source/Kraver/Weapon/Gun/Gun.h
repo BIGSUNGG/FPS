@@ -26,6 +26,8 @@ public:
 protected:
 	virtual void Attack() override;
 	virtual void ShowFireEffect();
+
+protected:
 	UFUNCTION(Server, Reliable)
 		virtual void Server_ShowFireEffect();
 	UFUNCTION(NetMulticast, Reliable)

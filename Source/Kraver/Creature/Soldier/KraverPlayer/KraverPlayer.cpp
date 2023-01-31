@@ -4,6 +4,7 @@
 #include "KraverPlayer.h"
 #include "Kraver/Weapon/Gun/Gun.h"
 #include "DrawDebugHelpers.h"
+#include "Net/UnrealNetwork.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
@@ -11,13 +12,20 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	ArmMesh->SetupAttachment(Camera);
 	ArmMesh->SetCastShadow(false);
 	ArmMesh->SetOnlyOwnerSee(true);
+	ArmMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ShowOnlyFirstPerson.Push(ArmMesh);
 
 	InteractionWidget = CreateDefaultSubobject<UInteractionWidget>(TEXT("InteractionWidget"));
+	static ConstructorHelpers::FClassFinder<UInteractionWidget> WBP_INTERACTION(TEXT("/Game/ProjectFile/HUD/WBP_InteractionWidget.WBP_InteractionWidget_C"));
+	if (WBP_INTERACTION.Succeeded())
+	{
+		InteractionWidget = WBP_INTERACTION.Class.GetDefaultObject();
+	}
 
 	ArmWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmWeaponMesh"));
 	ArmWeaponMesh->SetCastShadow(false);
 	ArmWeaponMesh->SetOnlyOwnerSee(true);
+	ArmWeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ShowOnlyFirstPerson.Push(ArmWeaponMesh);
 
 	ShowOnlyThirdPerson.Push(GetMesh());
@@ -27,7 +35,7 @@ void AKraverPlayer::BeginPlay()
 {
 	ASoldier::BeginPlay();
 
-	ChangeView();
+	RefreshCurViewType();
 }
 
 void AKraverPlayer::Tick(float DeltaTime)
@@ -45,35 +53,58 @@ void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction(TEXT("Equip"), EInputEvent::IE_Pressed, this, &AKraverPlayer::EquipButtonPressed);
 }
 
+void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	ASoldier::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AKraverPlayer, ViewType);
+}
+
+void AKraverPlayer::Server_SetViewType_Implementation(EViewType Type)
+{
+	ViewType = Type;
+}
+
+void AKraverPlayer::SetViewType(EViewType Type)
+{
+	ViewType = Type;
+	Server_SetViewType(ViewType);
+}
+
 void AKraverPlayer::CrouchButtonPressed()
 {
 	ASoldier::CrouchButtonPressed();
 
 	if (bIsCrouched)
 	{
-		SpringArmAdditiveLocation += FVector(0.f, 0.f, 20.f);
+		SpringArmAdditiveLocation = (FVector(0.f, 0.f, 20.f));
 		RefreshSpringArm();
 	}
 	else
 	{
-		SpringArmAdditiveLocation += FVector(0.f, 0.f, -20.f);
+		SpringArmAdditiveLocation = (FVector(0.f, 0.f, -20.f));
 		RefreshSpringArm();
 	}
 }
 
 void AKraverPlayer::EquipButtonPressed()
 {
-	if(CanInteractWeapon == nullptr) 
-		return;	
-
-	EquipWeapon(CanInteractWeapon);
+	if (CombatComponent->GetCurWeapon() == nullptr)
+	{
+		if(CanInteractWeapon != nullptr)
+			EquipWeapon(CanInteractWeapon);
+	}
+	else
+	{
+		CombatComponent->UnEquipWeapon(CombatComponent->GetCurWeapon());
+	}
 }
 
 void AKraverPlayer::CheckCanInteractionWeapon()
 {
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
-	float Radius = 5.f;
+	float Radius = InteractionRadius;
 	float Distance = InteractionDistance + SpringArm->TargetArmLength;
 	bool bResult = GetWorld()->SweepSingleByChannel(
 		HitResult,
@@ -112,7 +143,7 @@ void AKraverPlayer::ChangeView()
 	switch (ViewType)
 	{
 	case EViewType::FIRST_PERSON:
-		ViewType = EViewType::THIRD_PERSON;
+		SetViewType(EViewType::THIRD_PERSON);
 		SpringArm->TargetArmLength = 300.f;
 		SpringArmBasicLocation = FVector(-80.0, 0.f, 150.0);
 		RefreshSpringArm();
@@ -128,9 +159,9 @@ void AKraverPlayer::ChangeView()
 		}
 		break;
 	case EViewType::THIRD_PERSON:
-		ViewType = EViewType::FIRST_PERSON;
+		SetViewType(EViewType::FIRST_PERSON);
 		SpringArm->TargetArmLength = 0.f;
-		SpringArmBasicLocation = FVector(0.f, 0.f, 165.f);
+		SpringArmBasicLocation = FVector(0.f, 0.f, 164.f);
 		RefreshSpringArm();
 		for (auto TempMesh : ShowOnlyFirstPerson)
 		{
@@ -165,6 +196,7 @@ void AKraverPlayer::OnEquipWeaponSuccess(AWeapon* Weapon)
 		return;
 	ASoldier::OnEquipWeaponSuccess(Weapon);
 
+	ArmWeaponMesh->SetHiddenInGame(false);
 	ArmWeaponMesh->SetSkeletalMesh(CombatComponent->GetCurWeapon()->GetWeaponMesh()->GetSkeletalMeshAsset());
 	ArmWeaponMesh->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
 	ShowOnlyThirdPerson.Push(CombatComponent->GetCurWeapon()->GetWeaponMesh());
@@ -186,4 +218,57 @@ void AKraverPlayer::OnEquipWeaponSuccess(AWeapon* Weapon)
 		break;
 	}
 	RefreshCurViewType();
+}
+
+void AKraverPlayer::Server_OnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
+{
+	ASoldier::Server_OnEquipWeaponSuccess_Implementation(Weapon);
+
+	ArmWeaponMesh->SetSkeletalMesh(CombatComponent->GetCurWeapon()->GetWeaponMesh()->GetSkeletalMeshAsset());
+	ArmWeaponMesh->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
+}
+
+void AKraverPlayer::OnUnEquipWeaponSuccess(AWeapon* Weapon)
+{
+	ASoldier::OnUnEquipWeaponSuccess(Weapon);
+	ArmWeaponMesh->SetHiddenInGame(true);
+	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
+
+	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
+	if (!HasAuthority())
+	{
+		Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
+		Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	}
+}
+
+void AKraverPlayer::Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
+{
+	ASoldier::Server_OnUnEquipWeaponSuccess_Implementation(Weapon);
+
+	switch (ViewType)
+	{
+	case EViewType::FIRST_PERSON:
+		if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == true)
+		{
+			Server_SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
+			GetWorldTimerManager().SetTimer(
+				UnEquipWeaponTimerHandle,
+				[=]() {
+					Server_SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
+					Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
+					Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, false);
+				},
+				0.000001f,
+				false);
+		}
+		Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
+		break;
+	case EViewType::THIRD_PERSON:
+		Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, false);
+		break;
+	default:
+		UE_LOG(LogTemp, Fatal, TEXT("Need to support more EViewType"));
+		break;
+	}
 }

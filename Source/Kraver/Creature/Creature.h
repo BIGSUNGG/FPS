@@ -19,10 +19,17 @@ public:
 	ACreature();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void OwningOtherActor(AActor* Actor);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
+
+	UFUNCTION(Server, Reliable)
+		void Server_OwningOtherActor(AActor* Actor);
+	UFUNCTION(Server, reliable)
+		void Server_SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated);
 
 public:	
 	// Called every frame

@@ -10,6 +10,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEquipWeaponSuccess, AWeapon*, Weapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FServerEquipWeaponSuccess, AWeapon*, Weapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUnEquipWeaponSuccess, AWeapon*, Weapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FServerUnEquipWeaponSuccess, AWeapon*, Weapon);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class KRAVER_API UCombatComponent : public UActorComponent
@@ -33,13 +35,19 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void EquipWeapon(AWeapon* Weapon);
+	virtual void UnEquipWeapon(AWeapon* Weapon);
+
 protected:
 	UFUNCTION(Server, reliable)
 		void Server_EquipWeapon(AWeapon* Weapon);
+	UFUNCTION(Server, reliable)
+		void Server_UnEquipWeapon(AWeapon* Weapon);
 
 public:
 	FEquipWeaponSuccess OnEquipWeaponSuccess;
 	FEquipWeaponSuccess OnServerEquipWeaponSuccess;
+	FUnEquipWeaponSuccess OnUnEquipWeaponSuccess;
+	FServerUnEquipWeaponSuccess OnServerUnEquipWeaponSuccess;
 
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))

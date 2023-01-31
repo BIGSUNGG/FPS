@@ -30,8 +30,13 @@ protected:
 
 	UFUNCTION()
 		virtual void OnEquipWeaponSuccess(AWeapon* Weapon);
+	UFUNCTION()
+		virtual void OnUnEquipWeaponSuccess(AWeapon* Weapon);
+protected:
 	UFUNCTION(Server, reliable)
 		virtual void Server_OnEquipWeaponSuccess(AWeapon* Weapon);
+	UFUNCTION(Server, reliable)
+		virtual void Server_OnUnEquipWeaponSuccess(AWeapon* Weapon);
 
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))

@@ -49,8 +49,7 @@ void UCombatComponent::EquipWeapon(AWeapon* Weapon)
 		return;
 
 	CurWeapon = Weapon;
-
-	CurWeapon->SetOwner(OwnerCreature);
+	OwnerCreature->OwningOtherActor(CurWeapon);
 	CurWeapon->Equipped(OwnerCreature);
 	
 	OnEquipWeaponSuccess.Broadcast(Weapon);
@@ -60,7 +59,26 @@ void UCombatComponent::EquipWeapon(AWeapon* Weapon)
 void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
 {
 	CurWeapon = Weapon;
-	CurWeapon->SetOwner(OwnerCreature);
-
 	OnServerEquipWeaponSuccess.Broadcast(Weapon);
+}
+
+void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
+{
+	if (CurWeapon == Weapon)
+	{
+		CurWeapon = nullptr;
+	}
+
+	Weapon->UnEquipped();
+	OnUnEquipWeaponSuccess.Broadcast(Weapon);
+	Server_UnEquipWeapon(Weapon);
+}
+
+void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
+{
+	if (CurWeapon == Weapon)
+	{
+		CurWeapon = nullptr;
+	}
+	OnServerUnEquipWeaponSuccess.Broadcast(Weapon);
 }

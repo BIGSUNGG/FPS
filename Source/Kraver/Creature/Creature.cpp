@@ -52,6 +52,22 @@ void ACreature::PostInitializeComponents()
 
 }
 
+void ACreature::Server_SetSimulatedPhysics_Implementation(UPrimitiveComponent* Component, bool bSimulated)
+{
+	Component->SetSimulatePhysics(bSimulated);
+}
+
+void ACreature::OwningOtherActor(AActor* Actor)
+{
+	Actor->SetOwner(this);
+	Server_OwningOtherActor(Actor);
+}
+
+void ACreature::Server_OwningOtherActor_Implementation(AActor* Actor)
+{
+	Actor->SetOwner(this);
+}
+
 // Called every frame
 void ACreature::Tick(float DeltaTime)
 {

@@ -28,21 +28,33 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	virtual FRotator GetCreatureAngle() override { return Camera->GetComponentRotation() - GetMesh()->GetComponentRotation(); }
+
+protected:
+	void SetViewType(EViewType Type);
+	UFUNCTION(Server, reliable)
+		void Server_SetViewType(EViewType Type);
+
 
 protected:
 	virtual void CrouchButtonPressed() override;
 	virtual void EquipButtonPressed();
 	virtual void CheckCanInteractionWeapon();
 	virtual void ChangeView();
+
 	virtual void RefreshSpringArm();
 	virtual void RefreshCurViewType();
 
 	virtual void OnEquipWeaponSuccess(AWeapon* Weapon) override;
+	virtual void Server_OnEquipWeaponSuccess_Implementation(AWeapon* Weapon) override;
+	virtual void OnUnEquipWeaponSuccess(AWeapon* Weapon) override;
+	virtual void Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon) override;
+
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))
 		EViewType ViewType = EViewType::FIRST_PERSON;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Arm, meta = (AllowPrivateAccess = "true"))
@@ -55,6 +67,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 		float InteractionDistance = 225.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
+		float InteractionRadius = 25.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 		UInteractionWidget* InteractionWidget;
@@ -63,4 +77,7 @@ protected:
 	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson;
 	FVector SpringArmBasicLocation;
 	FVector SpringArmAdditiveLocation;
+
+	FTimerHandle UnEquipWeaponTimerHandle;
+	float UnEquipWeaponThrowPower = 50000.f;
 };
