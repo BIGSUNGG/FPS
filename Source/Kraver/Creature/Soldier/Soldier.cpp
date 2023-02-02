@@ -49,6 +49,7 @@ void ASoldier::OnEquipWeaponSuccess(AWeapon* Weapon)
 		return;
 
 	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
+	ServerComponent->AttachComponentToComponent(CombatComponent->GetCurWeapon()->GetWeaponMesh(), GetMesh(), CombatComponent->GetCurWeapon()->GetAttachSocketName());
 }
 
 void ASoldier::OnUnEquipWeaponSuccess(AWeapon* Weapon)

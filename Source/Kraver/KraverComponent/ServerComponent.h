@@ -27,7 +27,7 @@ public:
 public:
 	void OwningOtherActor(AActor* Actor);
 	void SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated);
-	void AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent);
+	void AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent, FName BoneName = NAME_None);
 	void DetachComponentFromComponent(USceneComponent* Child);
 	void SetPhysicsLinearVelocity(UPrimitiveComponent* Component, FVector Velocity);
 	void AddImpulse(UPrimitiveComponent* Component, FVector Direction, FName BoneName = NAME_None, bool bVelChange = false);
@@ -40,7 +40,7 @@ private:
 	UFUNCTION(Server, reliable)
 		void Server_SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated);
 	UFUNCTION(Server, Reliable)
-		void Server_AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent);
+		void Server_AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent, FName BoneName = NAME_None);
 	UFUNCTION(Server, Reliable)
 		void Server_DetachComponentFromComponent(USceneComponent* Child);
 	UFUNCTION(Server, Reliable)
@@ -51,4 +51,10 @@ private:
 		void Server_SetLocation(UPrimitiveComponent* Component, FVector Location);
 	UFUNCTION(Server, Reliable)
 		void Server_SetRotation(UPrimitiveComponent* Component, FRotator Rotation);
+	
+private:
+	UFUNCTION(NetMulticast, reliable)
+		void Multicast_AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent, FName BoneName = NAME_None);
+	UFUNCTION(NetMulticast, reliable)
+		void Multicast_SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated);
 };

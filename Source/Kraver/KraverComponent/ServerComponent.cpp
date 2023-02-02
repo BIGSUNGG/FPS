@@ -44,10 +44,10 @@ void UServerComponent::SetSimulatedPhysics(UPrimitiveComponent* Component, bool 
 	Server_SetSimulatedPhysics(Component,bSimulated);
 }
 
-void UServerComponent::AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent)
+void UServerComponent::AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent, FName BoneName)
 {
-	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale);
-	Server_AttachComponentToComponent(Child,Parent);
+	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
+	Server_AttachComponentToComponent(Child,Parent, BoneName);
 }
 
 void UServerComponent::DetachComponentFromComponent(USceneComponent* Child)
@@ -93,6 +93,7 @@ void UServerComponent::Server_AddImpulse_Implementation(UPrimitiveComponent* Com
 void UServerComponent::Server_SetSimulatedPhysics_Implementation(UPrimitiveComponent* Component, bool bSimulated)
 {
 	Component->SetSimulatePhysics(bSimulated);
+	Multicast_SetSimulatedPhysics(Component,bSimulated);
 }
 
 void UServerComponent::Server_OwningOtherActor_Implementation(AActor* Actor)
@@ -100,9 +101,10 @@ void UServerComponent::Server_OwningOtherActor_Implementation(AActor* Actor)
 	Actor->SetOwner(GetOwner());
 }
 
-void UServerComponent::Server_AttachComponentToComponent_Implementation(USceneComponent* Child, USceneComponent* Parent)
+void UServerComponent::Server_AttachComponentToComponent_Implementation(USceneComponent* Child, USceneComponent* Parent, FName BoneName)
 {
-	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
+	Multicast_AttachComponentToComponent(Child,Parent, BoneName);
 }
 
 void UServerComponent::Server_SetLocation_Implementation(UPrimitiveComponent* Component, FVector Location)
@@ -118,4 +120,14 @@ void UServerComponent::Server_SetRotation_Implementation(UPrimitiveComponent* Co
 void UServerComponent::Server_DetachComponentFromComponent_Implementation(USceneComponent* Child)
 {
 	Child->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+}
+
+void UServerComponent::Multicast_AttachComponentToComponent_Implementation(USceneComponent* Child, USceneComponent* Parent, FName BoneName)
+{
+	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
+}
+
+void UServerComponent::Multicast_SetSimulatedPhysics_Implementation(UPrimitiveComponent* Component, bool bSimulated)
+{
+	Component->SetSimulatePhysics(bSimulated);
 }

@@ -205,7 +205,7 @@ void AKraverPlayer::OnEquipWeaponSuccess(AWeapon* Weapon)
 
 	ArmWeaponMesh->SetHiddenInGame(false);
 	ArmWeaponMesh->SetSkeletalMesh(CombatComponent->GetCurWeapon()->GetWeaponMesh()->GetSkeletalMeshAsset());
-	ArmWeaponMesh->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
+	ServerComponent->AttachComponentToComponent(ArmWeaponMesh,ArmMesh, CombatComponent->GetCurWeapon()->GetAttachSocketName());
 	ShowOnlyThirdPerson.Push(CombatComponent->GetCurWeapon()->GetWeaponMesh());
 
 	int32 Index = CombatComponent->GetCurWeapon()->AddAdditiveWeaponMesh(ArmWeaponMesh);
@@ -232,7 +232,6 @@ void AKraverPlayer::Server_OnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
 	ASoldier::Server_OnEquipWeaponSuccess_Implementation(Weapon);
 
 	ArmWeaponMesh->SetSkeletalMesh(CombatComponent->GetCurWeapon()->GetWeaponMesh()->GetSkeletalMeshAsset());
-	ArmWeaponMesh->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
 }
 
 void AKraverPlayer::OnUnEquipWeaponSuccess(AWeapon* Weapon)
@@ -246,7 +245,6 @@ void AKraverPlayer::OnUnEquipWeaponSuccess(AWeapon* Weapon)
 	{
 		Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
 		Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
-		UE_LOG(LogTemp, Log, TEXT("Need to support more EViewType"));
 	}
 }
 

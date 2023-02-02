@@ -7,7 +7,7 @@
 // Sets default values
 AWeapon::AWeapon()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	SetReplicateMovement(true);
@@ -56,9 +56,10 @@ void AWeapon::Server_AddAdditiveWeaponMesh_Implementation(USkeletalMeshComponent
 
 bool AWeapon::Equipped(ACreature* Character)
 {
-	if(GetCanInteracted() == false)
+	if (GetCanInteracted() == false)
 		return false;
 
+	Character->ServerComponent->SetSimulatedPhysics(WeaponMesh, false);
 	OwnerCharacter = Character;
 	OwnerCharacter->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
 	OwnerCharacter->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
@@ -70,24 +71,24 @@ bool AWeapon::Equipped(ACreature* Character)
 void AWeapon::Server_Equipped_Implementation(ACreature* Character)
 {
 	WeaponState = EWeaponState::EQUIPPED;
-	WeaponMesh->SetSimulatePhysics(false);
 }
 
 bool AWeapon::GetCanInteracted()
 {
 	switch (WeaponState)
 	{
-		case EWeaponState::NONE:
-			return true;
-		case EWeaponState::EQUIPPED:
-			return false;
-		default:
-			return false;
+	case EWeaponState::NONE:
+		return true;
+	case EWeaponState::EQUIPPED:
+		return false;
+	default:
+		return false;
 	}
 }
 
 bool AWeapon::UnEquipped()
-{	
+{
+	WeaponMesh->SetSimulatePhysics(true);
 	OwnerCharacter->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
 	OwnerCharacter->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
 	OwnerCharacter = nullptr;
@@ -109,7 +110,7 @@ void AWeapon::AttackStartEvent()
 	UE_LOG(LogTemp, Log, TEXT("AttackStart"));
 	IsAttacking = true;
 	Attack();
-	if(IsAutomaticAttack)
+	if (IsAutomaticAttack)
 		GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, true);
 }
 
@@ -123,4 +124,3 @@ void AWeapon::AttackEndEvent()
 void AWeapon::Attack()
 {
 }
-
