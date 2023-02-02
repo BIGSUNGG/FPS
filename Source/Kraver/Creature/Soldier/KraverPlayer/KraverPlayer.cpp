@@ -60,15 +60,15 @@ void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(AKraverPlayer, ViewType);
 }
 
-void AKraverPlayer::Server_SetViewType_Implementation(EViewType Type)
-{
-	ViewType = Type;
-}
-
 void AKraverPlayer::SetViewType(EViewType Type)
 {
 	ViewType = Type;
-	Server_SetViewType(ViewType);
+	Server_SetViewType(Type);
+}
+
+void AKraverPlayer::Server_SetViewType_Implementation(EViewType Type)
+{
+	ViewType = Type;
 }
 
 void AKraverPlayer::CrouchButtonPressed()
@@ -77,7 +77,7 @@ void AKraverPlayer::CrouchButtonPressed()
 
 	if (bIsCrouched)
 	{
-		SpringArmAdditiveLocation = (FVector(0.f, 0.f, 20.f));
+		SpringArmAdditiveLocation = (FVector(0.f, 0.f, 0.f));
 		RefreshSpringArm();
 	}
 	else
@@ -182,6 +182,13 @@ void AKraverPlayer::ChangeView()
 void AKraverPlayer::RefreshSpringArm()
 {
 	SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmAdditiveLocation);
+	Server_RefreshSpringArm(SpringArmBasicLocation + SpringArmAdditiveLocation, SpringArm->TargetArmLength);
+}
+
+void AKraverPlayer::Server_RefreshSpringArm_Implementation(FVector Vector, float Length)
+{
+	SpringArm->SetRelativeLocation(Vector);
+	SpringArm->TargetArmLength = Length;
 }
 
 void AKraverPlayer::RefreshCurViewType()
@@ -239,6 +246,7 @@ void AKraverPlayer::OnUnEquipWeaponSuccess(AWeapon* Weapon)
 	{
 		Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
 		Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
+		UE_LOG(LogTemp, Log, TEXT("Need to support more EViewType"));
 	}
 }
 
@@ -251,24 +259,25 @@ void AKraverPlayer::Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon
 	case EViewType::FIRST_PERSON:
 		if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == true)
 		{
-			Server_SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
+			Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
+			Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
 			GetWorldTimerManager().SetTimer(
 				UnEquipWeaponTimerHandle,
 				[=]() {
-					Server_SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
-					Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
-					Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, false);
+					Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+					Weapon->GetWeaponMesh()->SetSimulatePhysics(true);
+					Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, true);
 				},
 				0.000001f,
-				false);
+					false);
 		}
-		Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
 		break;
 	case EViewType::THIRD_PERSON:
-		Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, false);
+		Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, true);
 		break;
 	default:
 		UE_LOG(LogTemp, Fatal, TEXT("Need to support more EViewType"));
 		break;
 	}
 }
+

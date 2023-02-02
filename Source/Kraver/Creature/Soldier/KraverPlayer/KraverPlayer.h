@@ -46,6 +46,8 @@ protected:
 	virtual void ChangeView();
 
 	virtual void RefreshSpringArm();
+	UFUNCTION(Server, reliable)
+		void Server_RefreshSpringArm(FVector Vector, float Length);
 	virtual void RefreshCurViewType();
 
 	virtual void OnEquipWeaponSuccess(AWeapon* Weapon) override;
@@ -79,5 +81,5 @@ protected:
 	FVector SpringArmAdditiveLocation;
 
 	FTimerHandle UnEquipWeaponTimerHandle;
-	float UnEquipWeaponThrowPower = 50000.f;
+	float UnEquipWeaponThrowPower = 500.f;
 };

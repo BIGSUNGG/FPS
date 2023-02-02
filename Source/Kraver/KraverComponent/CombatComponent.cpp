@@ -49,7 +49,7 @@ void UCombatComponent::EquipWeapon(AWeapon* Weapon)
 		return;
 
 	CurWeapon = Weapon;
-	OwnerCreature->OwningOtherActor(CurWeapon);
+	OwnerCreature->ServerComponent->OwningOtherActor(CurWeapon);
 	CurWeapon->Equipped(OwnerCreature);
 	
 	OnEquipWeaponSuccess.Broadcast(Weapon);

@@ -4,6 +4,7 @@
 
 #include "EngineMinimal.h"
 #include "GameFramework/Character.h"
+#include "Kraver/KraverComponent/ServerComponent.h"
 #include "Creature.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackStartDele);
@@ -25,11 +26,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
-
-	UFUNCTION(Server, Reliable)
-		void Server_OwningOtherActor(AActor* Actor);
-	UFUNCTION(Server, reliable)
-		void Server_SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated);
 
 public:	
 	// Called every frame
@@ -70,6 +66,7 @@ public:
 	FAttackStartDele OnAttackStartDelegate;
 	FAttackEndDele OnAttackEndDelegate;
 
+	UServerComponent* ServerComponent;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))
 		UCameraComponent* Camera;

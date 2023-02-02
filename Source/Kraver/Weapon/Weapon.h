@@ -52,13 +52,8 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 		void Server_Equipped(ACreature* Character);
-	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_Equipped(ACreature* Character);
-	
 	UFUNCTION(Server, Reliable)
 		void Server_UnEquipped();
-	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_UnEquipped();
 
 public:
 	UFUNCTION()
