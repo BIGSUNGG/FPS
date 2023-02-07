@@ -4,11 +4,9 @@
 
 #include "EngineMinimal.h"
 #include "GameFramework/Character.h"
+#include "Kraver/KraverComponent/CombatComponent.h"
 #include "Kraver/KraverComponent/ServerComponent.h"
 #include "Creature.generated.h"
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackStartDele);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackEndDele);
 
 UCLASS()
 class KRAVER_API ACreature : public ACharacter
@@ -37,6 +35,7 @@ public:
 public:
 	virtual FRotator GetCreatureAngle() { return FRotator::ZeroRotator; }
 
+	FORCEINLINE bool GetCanAttack();
 	FORCEINLINE bool GetIsRunning() { return IsRunning; }
 	FORCEINLINE bool GetIsSprint() {return IsSprint;}
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
@@ -59,14 +58,19 @@ protected:
 	virtual void AimOffset(float DeltaTime);
 
 protected:
+	UFUNCTION()
+		virtual void OnEquipWeaponSuccess(AWeapon* Weapon);
+	UFUNCTION()
+		virtual void OnUnEquipWeaponSuccess(AWeapon* Weapon);
 	UFUNCTION(Server, reliable)
-		void OnServer_SetIsSprint(bool value);
+		virtual void Server_OnEquipWeaponSuccess(AWeapon* Weapon);
+	UFUNCTION(Server, reliable)
+		virtual void Server_OnUnEquipWeaponSuccess(AWeapon* Weapon);
 
 public:
-	FAttackStartDele OnAttackStartDelegate;
-	FAttackEndDele OnAttackEndDelegate;
-
 	UServerComponent* ServerComponent;
+	UCombatComponent* CombatComponent;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))
 		UCameraComponent* Camera;
@@ -83,6 +87,8 @@ protected:
 		bool IsRunning = false;
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		bool IsSprint = false;
+	UFUNCTION(Server, reliable)
+		void OnServer_SetIsSprint(bool value);
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float RunSpeed = 1200.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))

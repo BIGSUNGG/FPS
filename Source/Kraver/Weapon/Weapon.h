@@ -5,8 +5,9 @@
 #include "EngineMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "Kraver/Creature/Creature.h"
 #include "Weapon.generated.h"
+
+class ACreature;
 
 UENUM(BlueprintType)
 enum class EWeaponState : uint8
@@ -94,7 +95,9 @@ protected:
 
 	bool IsAttacking = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-		bool IsAutomaticAttack = false;
+		bool bAutomaticAttack = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		bool bFirstAttackDelay = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack" , meta = (AllowPrivateAccess = "true"))
 		float AttackDelay = 0.2f;
 

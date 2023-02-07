@@ -102,39 +102,58 @@ void AKraverPlayer::EquipButtonPressed()
 
 void AKraverPlayer::CheckCanInteractionWeapon()
 {
-	FHitResult HitResult;
-	FCollisionQueryParams Params(NAME_None, false, this);
+	CanInteractWeapon = nullptr;
+
 	float Radius = InteractionRadius;
 	float Distance = InteractionDistance + SpringArm->TargetArmLength;
-	bool bResult = GetWorld()->SweepSingleByChannel(
-		HitResult,
+
+	TArray<FHitResult> WeaponHitResults;
+	FCollisionQueryParams WeaponParams(NAME_None, false, this);
+	bool bResult = GetWorld()->SweepMultiByChannel(
+		WeaponHitResults,
 		Camera->GetComponentLocation(),
 		Camera->GetComponentLocation() + Camera->GetForwardVector() * Distance,
 		FQuat::Identity,
 		ECollisionChannel::ECC_GameTraceChannel1,
 		FCollisionShape::MakeSphere(Radius),
-		Params
+		WeaponParams
 	);
 
-	CanInteractWeapon = nullptr;
-
-	bool bCheckedInterctionObject = false;
 	if (bResult)
 	{
-		if (IsValid(HitResult.GetActor()))
-		{
-			auto weapon = Cast<AWeapon>(HitResult.GetActor());
-			if(weapon && weapon->GetCanInteracted() && CombatComponent->GetCanEquipWeapon())
-			{ 
-				CanInteractWeapon = weapon;
-				bCheckedInterctionObject = true;
-				if(InteractionWidget && !InteractionWidget->IsVisible())
-					InteractionWidget->AddToViewport();
+		for(auto& Result : WeaponHitResults)
+		{ 
+			if (IsValid(Result.GetActor()))
+			{
+				auto Weapon = Cast<AWeapon>(Result.GetActor());
+				if(Weapon && Weapon->GetCanInteracted() && CombatComponent->GetCanEquipWeapon())
+				{ 
+					FHitResult ObjectHitResult;
+					FCollisionQueryParams ObjectParams(NAME_None, false, this);
+					bool bObjectResult = GetWorld()->SweepSingleByChannel(
+						ObjectHitResult,
+						Camera->GetComponentLocation(),
+						Result.ImpactPoint,
+						FQuat::Identity,
+						ECollisionChannel::ECC_GameTraceChannel2,
+						FCollisionShape::MakeSphere(0.f),
+						ObjectParams
+					);
+					if (bObjectResult == false || IsValid(ObjectHitResult.GetActor()) == false)
+					{
+						CanInteractWeapon = Weapon;
+					}
+				}
 			}
 		}
 	}
 
-	if(InteractionWidget && !bCheckedInterctionObject && InteractionWidget->IsVisible())
+	if (CanInteractWeapon != nullptr)
+	{
+		if (InteractionWidget && !InteractionWidget->IsVisible())
+			InteractionWidget->AddToViewport();
+	}
+	else if(InteractionWidget && InteractionWidget->IsVisible())
 		InteractionWidget->RemoveFromParent();
 }
 
@@ -241,7 +260,7 @@ void AKraverPlayer::OnUnEquipWeaponSuccess(AWeapon* Weapon)
 	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
 
 	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
-	if (!HasAuthority())
+	if (!HasAuthority() && ViewType == EViewType::FIRST_PERSON)
 	{
 		Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
 		Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
@@ -264,6 +283,7 @@ void AKraverPlayer::Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon
 				[=]() {
 					Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 					Weapon->GetWeaponMesh()->SetSimulatePhysics(true);
+					Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);			
 					Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, true);
 				},
 				0.000001f,
@@ -271,6 +291,7 @@ void AKraverPlayer::Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon
 		}
 		break;
 	case EViewType::THIRD_PERSON:
+		Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
 		Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, true);
 		break;
 	default:

@@ -4,8 +4,6 @@
 
 #include "EngineMinimal.h"
 #include "Kraver/Creature/Creature.h"
-#include "Kraver/Weapon/Weapon.h"
-#include "Kraver/KraverComponent/CombatComponent.h"
 #include "Soldier.generated.h"
 
 /**
@@ -28,17 +26,6 @@ public:
 protected:
 	virtual void EquipWeapon(AWeapon* Weapon);
 
-	UFUNCTION()
-		virtual void OnEquipWeaponSuccess(AWeapon* Weapon);
-	UFUNCTION()
-		virtual void OnUnEquipWeaponSuccess(AWeapon* Weapon);
 protected:
-	UFUNCTION(Server, reliable)
-		virtual void Server_OnEquipWeaponSuccess(AWeapon* Weapon);
-	UFUNCTION(Server, reliable)
-		virtual void Server_OnUnEquipWeaponSuccess(AWeapon* Weapon);
 
-protected:
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
-		UCombatComponent* CombatComponent;
 };

@@ -15,6 +15,12 @@ ACreature::ACreature()
 
 	ServerComponent = CreateDefaultSubobject<UServerComponent>("ServerComponent");
 
+	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
+	CombatComponent->OnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnEquipWeaponSuccess);
+	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnEquipWeaponSuccess);
+	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnUnEquipWeaponSuccess);
+	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnUnEquipWeaponSuccess);
+
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 
@@ -80,6 +86,11 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
+bool ACreature::GetCanAttack()
+{
+	return !(IsRunning || IsSprint);
+}
+
 void ACreature::SetIsSprint(bool value)
 {
 	IsSprint = value;
@@ -130,16 +141,19 @@ void ACreature::Turn(float NewAxisValue)
 
 void ACreature::AttackButtonPressed()
 {
-	OnAttackStartDelegate.Broadcast();
+	if(GetCanAttack())
+		CombatComponent->SetIsAttacking(true);
 }
 
 void ACreature::AttackButtonReleased()
 {
-	OnAttackEndDelegate.Broadcast();
+	CombatComponent->SetIsAttacking(false);
 }
 
 void ACreature::RunButtonPressed()
 {
+	CombatComponent->SetIsAttacking(false);
+
 	if (IsRunning)
 	{
 		IsRunning = false;
@@ -201,4 +215,26 @@ void ACreature::OnServer_SetIsSprint_Implementation(bool value)
 {
 	IsSprint = value;
 
+}
+
+void ACreature::OnEquipWeaponSuccess(AWeapon* Weapon)
+{
+	if (Weapon == nullptr)
+		return;
+
+	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
+	ServerComponent->AttachComponentToComponent(CombatComponent->GetCurWeapon()->GetWeaponMesh(), GetMesh(), CombatComponent->GetCurWeapon()->GetAttachSocketName());
+}
+
+void ACreature::OnUnEquipWeaponSuccess(AWeapon* Weapon)
+{
+}
+
+void ACreature::Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
+{
+}
+
+void ACreature::Server_OnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
+{
+	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
 }

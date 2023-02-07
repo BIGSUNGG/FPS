@@ -3,6 +3,7 @@
 
 #include "Weapon.h"
 #include "Net/UnrealNetwork.h"
+#include "Kraver/Creature/Creature.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -61,9 +62,9 @@ bool AWeapon::Equipped(ACreature* Character)
 
 	Character->ServerComponent->SetSimulatedPhysics(WeaponMesh, false);
 	OwnerCharacter = Character;
-	OwnerCharacter->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
-	OwnerCharacter->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
-
+	OwnerCharacter->CombatComponent->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
+	OwnerCharacter->CombatComponent->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
+	 
 	Server_Equipped(OwnerCharacter);
 	return true;
 }
@@ -89,9 +90,11 @@ bool AWeapon::GetCanInteracted()
 bool AWeapon::UnEquipped()
 {
 	WeaponMesh->SetSimulatePhysics(true);
-	OwnerCharacter->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
-	OwnerCharacter->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
+	OwnerCharacter->CombatComponent->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
+	OwnerCharacter->CombatComponent->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
 	OwnerCharacter = nullptr;
+	if(IsAttacking)
+		AttackEndEvent();
 
 	Server_UnEquipped();
 	return true;
@@ -109,8 +112,9 @@ void AWeapon::AttackStartEvent()
 {
 	UE_LOG(LogTemp, Log, TEXT("AttackStart"));
 	IsAttacking = true;
-	Attack();
-	if (IsAutomaticAttack)
+	if(bFirstAttackDelay == false)
+		Attack();
+	if (bAutomaticAttack)
 		GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, true);
 }
 

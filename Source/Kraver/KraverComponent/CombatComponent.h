@@ -5,8 +5,12 @@
 #include "EngineMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Kraver/Weapon/Weapon.h"
-#include "Kraver/Creature/Creature.h"
 #include "CombatComponent.generated.h"
+
+class ACreature;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackStartDele);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackEndDele);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEquipWeaponSuccess, AWeapon*, Weapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FServerEquipWeaponSuccess, AWeapon*, Weapon);
@@ -44,15 +48,22 @@ protected:
 		void Server_UnEquipWeapon(AWeapon* Weapon);
 
 public:
+	FAttackStartDele OnAttackStartDelegate;
+	FAttackEndDele OnAttackEndDelegate;
+
 	FEquipWeaponSuccess OnEquipWeaponSuccess;
 	FEquipWeaponSuccess OnServerEquipWeaponSuccess;
 	FUnEquipWeaponSuccess OnUnEquipWeaponSuccess;
 	FServerUnEquipWeaponSuccess OnServerUnEquipWeaponSuccess;
 
+public:
+	void SetIsAttacking(bool bAttack);
+
 protected:
+	ACreature* OwnerCreature;
+
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 		AWeapon* CurWeapon;
 	
-	ACreature* OwnerCreature;
-	
+	bool IsAttacking = false;
 };

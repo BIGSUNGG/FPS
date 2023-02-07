@@ -3,6 +3,7 @@
 
 #include "CombatComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Kraver/Creature/Creature.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -69,9 +70,27 @@ void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
 		CurWeapon = nullptr;
 	}
 
+	SetIsAttacking(false);
 	Weapon->UnEquipped();
 	OnUnEquipWeaponSuccess.Broadcast(Weapon);
 	Server_UnEquipWeapon(Weapon);
+}
+
+void UCombatComponent::SetIsAttacking(bool bAttack)
+{
+	if(IsAttacking == bAttack)
+		return;
+
+	if (bAttack)
+	{
+		OnAttackStartDelegate.Broadcast();
+	}
+	else
+	{
+		OnAttackEndDelegate.Broadcast();
+	}
+
+	IsAttacking = bAttack;
 }
 
 void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
