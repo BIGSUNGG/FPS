@@ -33,11 +33,6 @@ public:
 public:
 	virtual FRotator GetCreatureAngle() override { return Camera->GetComponentRotation() - GetMesh()->GetComponentRotation(); }
 
-protected:
-	void SetViewType(EViewType Type);
-	UFUNCTION(Server, reliable)
-		void Server_SetViewType(EViewType Type);
-
 
 protected:
 	virtual void CrouchButtonPressed() override;
@@ -58,6 +53,9 @@ protected:
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))
 		EViewType ViewType = EViewType::FIRST_PERSON;
+	void SetViewType(EViewType Type);
+	UFUNCTION(Server, reliable)
+		void Server_SetViewType(EViewType Type);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Arm, meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* ArmMesh;

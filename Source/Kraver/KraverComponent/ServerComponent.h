@@ -33,6 +33,7 @@ public:
 	void AddImpulse(UPrimitiveComponent* Component, FVector Direction, FName BoneName = NAME_None, bool bVelChange = false);
 	void SetLocation(UPrimitiveComponent* Component, FVector Location);
 	void SetRotation(UPrimitiveComponent* Component, FRotator Location);
+	void SetCharacterWalkSpeed(ACharacter* Character, float Speed);
 
 private:
 	UFUNCTION(Server, Reliable)
@@ -51,7 +52,9 @@ private:
 		void Server_SetLocation(UPrimitiveComponent* Component, FVector Location);
 	UFUNCTION(Server, Reliable)
 		void Server_SetRotation(UPrimitiveComponent* Component, FRotator Rotation);
-	
+	UFUNCTION(Server, Reliable)
+		void Server_SetCharacterWalkSpeed(ACharacter* Character, float Speed);
+
 private:
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent, FName BoneName = NAME_None);

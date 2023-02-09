@@ -43,7 +43,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual int32 AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh);
+	virtual int32 RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh);
 
+	virtual bool Reload();
 	virtual bool Equipped(ACreature* Character);
 	virtual bool UnEquipped();
 
@@ -85,7 +87,7 @@ protected:
 		TMap<FName, UStaticMeshComponent*> AttachmentMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
-		FName AttachSocketName = "SOCKET_Weapon_L";
+		FName AttachSocketName = "RightHandWeapon";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim", meta = (AllowPrivateAccess = "true"))
 		UAnimationAsset* IdleAnim;

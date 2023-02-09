@@ -44,6 +44,15 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
+void UCombatComponent::Reload()
+{
+	if(!CurWeapon)
+		return;
+
+	CurWeapon->Reload();
+	SetIsAttacking(false);
+}
+
 void UCombatComponent::EquipWeapon(AWeapon* Weapon)
 {
 	if (!Weapon)

@@ -276,18 +276,18 @@ void AKraverPlayer::Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon
 	case EViewType::FIRST_PERSON:
 		if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == true)
 		{
-			Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
-			Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
+			ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
+			ServerComponent->AttachComponentToComponent(Weapon->GetWeaponMesh(), ArmWeaponMesh);
 			GetWorldTimerManager().SetTimer(
 				UnEquipWeaponTimerHandle,
 				[=]() {
 					Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-					Weapon->GetWeaponMesh()->SetSimulatePhysics(true);
-					Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);			
-					Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, true);
+					ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(),true);
+					ServerComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
+					ServerComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower, NAME_None, true);
 				},
 				0.000001f,
-					false);
+				false);
 		}
 		break;
 	case EViewType::THIRD_PERSON:

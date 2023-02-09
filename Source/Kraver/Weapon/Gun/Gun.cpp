@@ -10,9 +10,8 @@ AGun::AGun() : AWeapon()
 	WeaponType = EWeaponType::GUN;
 
 	FireEffect = CreateDefaultSubobject<UNiagaraComponent>("FireEffect");
-	FireEffect->AttachToComponent(WeaponMesh,FAttachmentTransformRules::SnapToTargetIncludingScale, FireEffectSocketName);
-	FireEffect->SetRelativeRotation(FRotator(0,0,90));
-	FireEffect->bAutoActivate =false;
+	FireEffect->SetupAttachment(WeaponMesh, FireEffectSocketName);
+	FireEffect->bAutoActivate = false;
 }
 
 void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -20,6 +19,15 @@ void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProp
 	AWeapon::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AGun, AdditiveFireEffect);
+	DOREPLIFETIME(AGun, MaxAmmo);
+	DOREPLIFETIME(AGun, CurAmmo);
+	DOREPLIFETIME(AGun, TotalAmmo);
+}
+
+void AGun::PostInitializeComponents()
+{
+	AWeapon::PostInitializeComponents();
+
 }
 
 int32 AGun::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
@@ -30,21 +38,81 @@ int32 AGun::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 	TempFireEffect->RegisterComponent();
 	TempFireEffect->SetAsset(FireEffect->GetAsset());
 	TempFireEffect->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FireEffectSocketName);
-	TempFireEffect->SetRelativeRotation(FRotator(0, 90, 0));
+	TempFireEffect->SetRelativeRotation(FireEffect->GetRelativeRotation());
 	AdditiveFireEffect.Push(TempFireEffect);
 	return Index;
 }
 
+int32 AGun::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
+{
+	int32 Index = AWeapon::RemoveAdditiveWeaponMesh(Mesh);
+	AdditiveFireEffect[Index]->DestroyComponent();
+	AdditiveFireEffect.RemoveAt(Index);
+	return Index;
+}
+
+bool AGun::Reload()
+{
+	if(CurAmmo == MaxAmmo)
+		return false;
+
+	int32 NeedAmmo = MaxAmmo - CurAmmo;
+	if (TotalAmmo >= NeedAmmo)
+	{
+		TotalAmmo -= NeedAmmo;
+		CurAmmo = MaxAmmo;
+	}
+	else
+	{
+		CurAmmo += TotalAmmo;
+		TotalAmmo = 0;
+	}
+	if (!HasAuthority())
+	{
+		Server_SetCurAmmo(CurAmmo);
+		Server_SetTotalAmmo(TotalAmmo);
+	}
+	AttackEndEvent();
+	return true;
+}
+
 void AGun::Attack()
 {
-	AWeapon::Attack();
+	if(CurAmmo > 0)
+	{ 
+		AWeapon::Attack();
 
-	ShowFireEffect();
+		--CurAmmo;		
+		if(!HasAuthority())
+			Server_SetCurAmmo(CurAmmo);
+
+		ShowFireEffect();
+	}
+	else
+		AttackEndEvent();
 }
 
 void AGun::ShowFireEffect()
 {
-	Server_ShowFireEffect();
+	if(HasAuthority())
+		Multicast_ShowFireEffect();
+	else
+		Server_ShowFireEffect();
+}
+
+void AGun::Server_SetTotalAmmo_Implementation(int32 Ammo)
+{
+	TotalAmmo = Ammo;
+}
+
+void AGun::Server_SetCurAmmo_Implementation(int32 Ammo)
+{
+	CurAmmo = Ammo;
+}
+
+void AGun::Server_SetMaxAmmo_Implementation(int32 Ammo)
+{
+	MaxAmmo = Ammo;
 }
 
 void AGun::Server_ShowFireEffect_Implementation()

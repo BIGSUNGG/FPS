@@ -76,6 +76,7 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis(TEXT("LookUp")	, this, &ACreature::LookUp);
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ACreature::Turn);
 
+	PlayerInputComponent->BindAction(TEXT("Reload"), EInputEvent::IE_Pressed, this, &ACreature::ReloadButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &ACreature::AttackButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Released, this, &ACreature::AttackButtonReleased);
 	PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &ACreature::RunButtonPressed);
@@ -102,15 +103,20 @@ void ACreature::MoveForward(float NewAxisValue)
 	if(!GetMovementComponent()->IsFalling())
 	{ 
 		SetIsSprint(false);
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		ServerComponent->SetCharacterWalkSpeed(this, WalkSpeed);
 
-		if(NewAxisValue == 0 || Controller == nullptr || NewAxisValue == 0)
+		if(NewAxisValue == 0 || Controller == nullptr)
 			return;
 
-		if (NewAxisValue >= 0.5f && IsRunning)
-		{
-			SetIsSprint(true);
-			GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+		if(IsRunning)
+		{ 
+			if (NewAxisValue >= 0.5f)
+			{
+				SetIsSprint(true);
+				ServerComponent->SetCharacterWalkSpeed(this, SprintSpeed);
+			}
+			else
+				ServerComponent->SetCharacterWalkSpeed(this, RunSpeed);
 		}
 	}
 
@@ -137,6 +143,11 @@ void ACreature::LookUp(float NewAxisValue)
 void ACreature::Turn(float NewAxisValue)
 {
 	AddControllerYawInput(NewAxisValue);
+}
+
+void ACreature::ReloadButtonPressed()
+{
+	CombatComponent->Reload();
 }
 
 void ACreature::AttackButtonPressed()

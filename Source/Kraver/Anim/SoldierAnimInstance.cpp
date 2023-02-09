@@ -15,4 +15,13 @@ void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if(Soldier == nullptr)
 		return;
 
+	if (Soldier->CombatComponent->GetCurWeapon() && Soldier->GetMesh())
+	{
+		LeftHandTransform = Soldier->CombatComponent->GetCurWeapon()->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
+		FVector OutPosition;
+		FRotator OutRotation;
+		Soldier->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
+		LeftHandTransform.SetLocation(OutPosition);
+		LeftHandTransform.SetRotation(FQuat(OutRotation));
+	}
 }

@@ -50,9 +50,20 @@ int32 AWeapon::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 	return Index;
 }
 
+int32 AWeapon::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
+{
+	int32 Index = AdditiveWeaponMesh.Remove(Mesh);
+	return Index;
+}
+
 void AWeapon::Server_AddAdditiveWeaponMesh_Implementation(USkeletalMeshComponent* Mesh)
 {
 	AdditiveWeaponMesh.Add(Mesh);
+}
+
+bool AWeapon::Reload()
+{
+	return false;
 }
 
 bool AWeapon::Equipped(ACreature* Character)
@@ -110,6 +121,9 @@ void AWeapon::Server_UnEquipped_Implementation()
 
 void AWeapon::AttackStartEvent()
 {
+	if(IsAttacking == true)
+		return;
+
 	UE_LOG(LogTemp, Log, TEXT("AttackStart"));
 	IsAttacking = true;
 	if(bFirstAttackDelay == false)
@@ -120,6 +134,9 @@ void AWeapon::AttackStartEvent()
 
 void AWeapon::AttackEndEvent()
 {
+	if(IsAttacking == false)
+		return;
+
 	UE_LOG(LogTemp, Log, TEXT("AttackEnd"));
 	IsAttacking = false;
 	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle);

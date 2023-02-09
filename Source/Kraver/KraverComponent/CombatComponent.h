@@ -38,6 +38,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	virtual void Reload();
 	virtual void EquipWeapon(AWeapon* Weapon);
 	virtual void UnEquipWeapon(AWeapon* Weapon);
 
@@ -63,7 +64,7 @@ protected:
 	ACreature* OwnerCreature;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-		AWeapon* CurWeapon;
+		AWeapon* CurWeapon = nullptr;
 	
 	bool IsAttacking = false;
 };

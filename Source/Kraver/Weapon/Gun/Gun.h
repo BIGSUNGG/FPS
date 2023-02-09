@@ -21,8 +21,12 @@ public:
 	AGun();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void PostInitializeComponents() override;
 
 	virtual int32 AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh) override;
+	virtual int32 RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh) override;
+
+	virtual bool Reload();
 protected:
 	virtual void Attack() override;
 	virtual void ShowFireEffect();
@@ -37,12 +41,24 @@ public:
 	UNiagaraComponent* GetFireEffect() { return FireEffect; }
 	TArray<UNiagaraComponent*> GetAdditiveFireEffect() { return AdditiveFireEffect; }
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
-		UNiagaraComponent* FireEffect;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Additive", meta = (AllowPrivateAccess = "true"))
 		TArray<UNiagaraComponent*> AdditiveFireEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
+		UNiagaraComponent* FireEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
 		FName FireEffectSocketName = "SOCKET_Muzzle";
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		int32 MaxAmmo = 10.f;
+	UFUNCTION(Server, Reliable)
+		void Server_SetMaxAmmo(int32 Ammo);
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		int32 CurAmmo = 10.f;
+	UFUNCTION(Server, Reliable)
+		void Server_SetCurAmmo(int32 Ammo);
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		int32 TotalAmmo = 30.f;
+	UFUNCTION(Server, Reliable)
+		void Server_SetTotalAmmo(int32 Ammo);
 };

@@ -2,6 +2,7 @@
 
 
 #include "ServerComponent.h"
+#include "GameFramework/Character.h"
 
 // Sets default values for this component's properties
 UServerComponent::UServerComponent()
@@ -35,49 +36,69 @@ void UServerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 void UServerComponent::OwningOtherActor(AActor* Actor)
 {
 	Actor->SetOwner(GetOwner());
-	Server_OwningOtherActor(Actor);
+	if (GetOwner()->HasAuthority() == false)
+		Server_OwningOtherActor(Actor);
 }
 
 void UServerComponent::SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated)
 {
 	Component->SetSimulatePhysics(bSimulated);
-	Server_SetSimulatedPhysics(Component,bSimulated);
+	if (GetOwner()->HasAuthority() == false)
+		Server_SetSimulatedPhysics(Component,bSimulated);
+	else
+		Multicast_SetSimulatedPhysics(Component, bSimulated);
 }
 
 void UServerComponent::AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent, FName BoneName)
 {
 	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
-	Server_AttachComponentToComponent(Child,Parent, BoneName);
+	if (GetOwner()->HasAuthority() == false)
+		Server_AttachComponentToComponent(Child,Parent, BoneName);
+	else
+		Multicast_AttachComponentToComponent(Child,Parent,BoneName);
 }
 
 void UServerComponent::DetachComponentFromComponent(USceneComponent* Child)
 {
 	Child->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	Server_DetachComponentFromComponent(Child);
+	if (GetOwner()->HasAuthority() == false)
+		Server_DetachComponentFromComponent(Child);
 }
 
 void UServerComponent::SetPhysicsLinearVelocity(UPrimitiveComponent* Component, FVector Velocity)
 {
 	Component->SetPhysicsLinearVelocity(Velocity);
-	Server_SetPhysicsLinearVelocity(Component,Velocity);
+	if (GetOwner()->HasAuthority() == false)
+		Server_SetPhysicsLinearVelocity(Component,Velocity);
 }
 
 void UServerComponent::AddImpulse(UPrimitiveComponent* Component, FVector Direction, FName BoneName, bool bVelChange)
 {
 	Component->AddImpulse(Direction, BoneName, bVelChange);
-	Server_AddImpulse(Component,Direction,BoneName,bVelChange);
+
+	if(GetOwner()->HasAuthority() == false)
+		Server_AddImpulse(Component,Direction,BoneName,bVelChange);
 }
 
 void UServerComponent::SetLocation(UPrimitiveComponent* Component, FVector Location)
 {
 	Component->SetWorldLocation(Location);
-	Server_SetLocation(Component,Location);
+	if (GetOwner()->HasAuthority() == false)
+		Server_SetLocation(Component,Location);
 }
 
 void UServerComponent::SetRotation(UPrimitiveComponent* Component, FRotator Rotation)
 {
 	Component->SetWorldRotation(Rotation);
-	Server_SetRotation(Component, Rotation);
+	if (GetOwner()->HasAuthority() == false)
+		Server_SetRotation(Component, Rotation);
+}
+
+void UServerComponent::SetCharacterWalkSpeed(ACharacter* Character, float Speed)
+{
+	Character->GetCharacterMovement()->MaxWalkSpeed = Speed;
+	if (GetOwner()->HasAuthority() == false)
+		Server_SetCharacterWalkSpeed(Character, Speed);
 }
 
 void UServerComponent::Server_SetPhysicsLinearVelocity_Implementation(UPrimitiveComponent* Component, FVector Velocity)
@@ -120,6 +141,11 @@ void UServerComponent::Server_SetRotation_Implementation(UPrimitiveComponent* Co
 void UServerComponent::Server_DetachComponentFromComponent_Implementation(USceneComponent* Child)
 {
 	Child->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+}
+
+void UServerComponent::Server_SetCharacterWalkSpeed_Implementation(ACharacter* Character, float Speed)
+{
+	Character->GetCharacterMovement()->MaxWalkSpeed = Speed;
 }
 
 void UServerComponent::Multicast_AttachComponentToComponent_Implementation(USceneComponent* Child, USceneComponent* Parent, FName BoneName)

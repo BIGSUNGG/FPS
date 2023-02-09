@@ -48,6 +48,7 @@ protected:
 	virtual void LookUp(float NewAxisValue);
 	virtual void Turn(float NewAxisValue);
 
+	virtual void ReloadButtonPressed();
 	virtual void AttackButtonPressed();
 	virtual void AttackButtonReleased();
 	virtual void RunButtonPressed();
@@ -90,7 +91,9 @@ protected:
 	UFUNCTION(Server, reliable)
 		void OnServer_SetIsSprint(bool value);
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		float RunSpeed = 1200.f;
+		float SprintSpeed = 1200.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
+		float RunSpeed = 800.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float WalkSpeed = 800.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
