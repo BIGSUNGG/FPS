@@ -25,7 +25,7 @@ UCLASS()
 class KRAVER_API AWeapon : public AActor
 {
 	GENERATED_BODY()
-	
+
 public:	
 	// Sets default values for this actor's properties
 	AWeapon();
@@ -71,6 +71,18 @@ public:
 	const FName& GetAttachSocketName() { return AttachSocketName; }
 	USkeletalMeshComponent* GetWeaponMesh() {return WeaponMesh;}
 
+public:
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+		class UTexture2D* CrosshairsCenter;
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+		UTexture2D* CrosshairsLeft;
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+		UTexture2D* CrosshairsRight;
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+		UTexture2D* CrosshairsTop;
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+		UTexture2D* CrosshairsBottom;
+
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Owner", meta = (AllowPrivateAccess = "true"))
 		class ACreature* OwnerCreature = nullptr;
@@ -105,5 +117,4 @@ protected:
 		float AttackDamage = 10.f;
 
 	FTimerHandle AutomaticAttackHandle;
-
 };

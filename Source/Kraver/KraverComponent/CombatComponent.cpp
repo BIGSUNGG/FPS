@@ -4,6 +4,8 @@
 #include "CombatComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kraver/Creature/Creature.h"
+#include "Kraver/PlayerController/KraverPlayerController.h"
+#include "Kraver/HUD/KraverHUD.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -42,6 +44,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+	SetHUDCrosshairs(DeltaTime);
 }
 
 void UCombatComponent::Reload()
@@ -49,7 +52,6 @@ void UCombatComponent::Reload()
 	if(!CurWeapon)
 		return;
 
-	SetIsAttacking(false);
 	CurWeapon->Reload();
 }
 
@@ -97,6 +99,39 @@ void UCombatComponent::SetIsAttacking(bool bAttack)
 	else
 	{
 		OnAttackEndDelegate.Broadcast();
+	}
+}
+
+void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+	if (OwnerCreature == nullptr || OwnerCreature->Controller == nullptr)
+		return;
+
+	Controller = Controller == nullptr ? Cast<AKraverPlayerController>(OwnerCreature->Controller) :  Controller;
+	if (Controller)
+	{
+		HUD = HUD == nullptr ? Cast<AKraverHUD>(Controller->GetHUD()) : HUD;
+		if (HUD)
+		{
+			FHUDPackage HUDPackage;
+			if (CurWeapon)
+			{
+				HUDPackage.CrosshairCenter	= CurWeapon->CrosshairsCenter;
+				HUDPackage.CrosshairLeft	= CurWeapon->CrosshairsLeft;
+				HUDPackage.CrosshairRight	= CurWeapon->CrosshairsRight;
+				HUDPackage.CrosshairTop		= CurWeapon->CrosshairsTop;
+				HUDPackage.CrosshairBottom = CurWeapon->CrosshairsBottom;
+			}
+			else
+			{
+				HUDPackage.CrosshairCenter	= nullptr;
+				HUDPackage.CrosshairLeft	= nullptr;
+				HUDPackage.CrosshairRight	= nullptr;
+				HUDPackage.CrosshairTop		= nullptr;
+				HUDPackage.CrosshairBottom = nullptr;
+			}
+			HUD->SetHUDPackage(HUDPackage);
+		}
 	}
 }
 

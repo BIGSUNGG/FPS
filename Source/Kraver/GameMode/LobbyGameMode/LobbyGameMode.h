@@ -4,13 +4,14 @@
 
 #include "EngineMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "Kraver/GameMode/KraverGameMode.h"
 #include "LobbyGameMode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class KRAVER_API ALobbyGameMode : public AGameMode
+class KRAVER_API ALobbyGameMode : public AKraverGameMode
 {
 	GENERATED_BODY()
 

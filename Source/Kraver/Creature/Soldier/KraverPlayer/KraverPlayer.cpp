@@ -285,7 +285,7 @@ void AKraverPlayer::Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon
 					Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 					ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(),true);
 					ServerComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
-					ServerComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower, NAME_None, true);
+					ServerComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
 				},
 				0.000001f,
 				false);

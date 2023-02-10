@@ -75,11 +75,15 @@ bool AGun::Reload()
 		Server_SetCurAmmo(CurAmmo);
 		Server_SetTotalAmmo(TotalAmmo);
 	}
+	AttackEndEvent();
 	return true;
 }
 
 void AGun::Attack()
 {
+	if(IsAttacking == false)
+		return;
+
 	if(CurAmmo > 0)
 	{ 
 		AWeapon::Attack();
@@ -96,7 +100,7 @@ void AGun::Attack()
 			OwnerCreature->GetCamera()->GetComponentLocation() + OwnerCreature->GetCamera()->GetForwardVector() * BulletDistance,
 			FQuat::Identity,
 			ECollisionChannel::ECC_GameTraceChannel3,
-			FCollisionShape::MakeSphere(10.f),
+			FCollisionShape::MakeSphere(BulletRadius),
 			BulletParams
 		);
 

@@ -41,7 +41,7 @@ float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 		AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
 		if(Weapon)
 		{ 
-			Weapon->GetOwnerCreature()->ServerComponent->AddImpulseAtLocation(WeaponMesh, PointDamageEvent->ShotDirection * 10000.f, PointDamageEvent->HitInfo.ImpactPoint);
+			Weapon->GetOwnerCreature()->ServerComponent->AddImpulseAtLocation(WeaponMesh, PointDamageEvent->ShotDirection * 150.f * WeaponMesh->GetMass(), PointDamageEvent->HitInfo.ImpactPoint);
 		}
 	}
 	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
@@ -176,5 +176,7 @@ void AWeapon::AttackEndEvent()
 
 void AWeapon::Attack()
 {
+	if(IsAttacking == false)
+		return;
 	UE_LOG(LogTemp, Log, TEXT("Fire"));
 }

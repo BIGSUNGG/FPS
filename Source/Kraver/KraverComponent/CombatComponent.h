@@ -8,6 +8,8 @@
 #include "CombatComponent.generated.h"
 
 class ACreature;
+class AKraverPlayerController;
+class AKraverHUD;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackStartDele);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackEndDele);
@@ -59,9 +61,12 @@ public:
 
 public:
 	void SetIsAttacking(bool bAttack);
+	void SetHUDCrosshairs(float DeltaTime);
 
 protected:
 	ACreature* OwnerCreature;
+	AKraverPlayerController* Controller;
+	AKraverHUD* HUD;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 		AWeapon* CurWeapon = nullptr;
