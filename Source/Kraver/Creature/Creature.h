@@ -33,7 +33,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	virtual FRotator GetCreatureAngle() { return FRotator::ZeroRotator; }
+	FORCEINLINE FRotator GetCreatureAngle() { return Camera->GetComponentRotation() - GetMesh()->GetComponentRotation(); }
+	FORCEINLINE UCameraComponent* GetCamera() { return Camera; }
 
 	FORCEINLINE bool GetCanAttack();
 	FORCEINLINE bool GetIsRunning() { return IsRunning; }

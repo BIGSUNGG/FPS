@@ -265,6 +265,7 @@ void AKraverPlayer::OnUnEquipWeaponSuccess(AWeapon* Weapon)
 		Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
 		Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	}
+	Weapon->RemoveAdditiveWeaponMesh(ArmWeaponMesh);
 }
 
 void AKraverPlayer::Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon)

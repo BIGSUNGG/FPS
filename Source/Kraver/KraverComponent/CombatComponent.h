@@ -65,6 +65,4 @@ protected:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 		AWeapon* CurWeapon = nullptr;
-	
-	bool IsAttacking = false;
-};
+	};

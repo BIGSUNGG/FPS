@@ -7,8 +7,6 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Weapon.generated.h"
 
-class ACreature;
-
 UENUM(BlueprintType)
 enum class EWeaponState : uint8
 {
@@ -33,6 +31,7 @@ public:
 	AWeapon();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 protected:
 	// Called when the game starts or when spawned
@@ -48,7 +47,6 @@ public:
 	virtual bool Reload();
 	virtual bool Equipped(ACreature* Character);
 	virtual bool UnEquipped();
-
 protected:
 	UFUNCTION(Server, Reliable)
 		virtual void Server_AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh);
@@ -58,22 +56,25 @@ protected:
 	UFUNCTION(Server, Reliable)
 		void Server_UnEquipped();
 
-public:
 	UFUNCTION()
 		virtual void AttackStartEvent();
 	UFUNCTION()
 		virtual void AttackEndEvent();	
 
 	virtual void Attack();
-
 public:
 	bool GetCanInteracted();
+	bool GetIsAttacking() {return IsAttacking;}
+	ACreature* GetOwnerCreature() { return OwnerCreature; }
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
 	const FName& GetAttachSocketName() { return AttachSocketName; }
 	USkeletalMeshComponent* GetWeaponMesh() {return WeaponMesh;}
 
 protected:
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Owner", meta = (AllowPrivateAccess = "true"))
+		class ACreature* OwnerCreature = nullptr;
+
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "WeaponState", meta = (AllowPrivateAccess = "true"))
 		EWeaponState WeaponState = EWeaponState::NONE;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponType", meta = (AllowPrivateAccess = "true"))
@@ -91,17 +92,17 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim", meta = (AllowPrivateAccess = "true"))
 		UAnimationAsset* IdleAnim;
-	
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Owner", meta = (AllowPrivateAccess = "true"))
-		ACreature* OwnerCharacter = nullptr;
 
-	bool IsAttacking = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		bool IsAttacking = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		bool bAutomaticAttack = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		bool bFirstAttackDelay = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack" , meta = (AllowPrivateAccess = "true"))
 		float AttackDelay = 0.2f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		float AttackDamage = 10.f;
 
 	FTimerHandle AutomaticAttackHandle;
 

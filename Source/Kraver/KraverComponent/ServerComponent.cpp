@@ -80,6 +80,13 @@ void UServerComponent::AddImpulse(UPrimitiveComponent* Component, FVector Direct
 		Server_AddImpulse(Component,Direction,BoneName,bVelChange);
 }
 
+void UServerComponent::AddImpulseAtLocation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName /*= NAME_None*/)
+{
+	Component->AddImpulseAtLocation(Direction, Location, BoneName);
+	if(GetOwner()->HasAuthority() == false)
+		Server_AddImpulseAtLocation(Component, Direction, Location, BoneName);
+}
+
 void UServerComponent::SetLocation(UPrimitiveComponent* Component, FVector Location)
 {
 	Component->SetWorldLocation(Location);
@@ -109,6 +116,11 @@ void UServerComponent::Server_SetPhysicsLinearVelocity_Implementation(UPrimitive
 void UServerComponent::Server_AddImpulse_Implementation(UPrimitiveComponent* Component, FVector Direction, FName BoneName, bool bVelChange)
 {
 	Component->AddImpulse(Direction, BoneName, bVelChange);
+}
+
+void UServerComponent::Server_AddImpulseAtLocation_Implementation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName /*= NAME_None*/)
+{
+	Component->AddImpulseAtLocation(Direction, Location, BoneName);
 }
 
 void UServerComponent::Server_SetSimulatedPhysics_Implementation(UPrimitiveComponent* Component, bool bSimulated)

@@ -31,6 +31,7 @@ public:
 	void DetachComponentFromComponent(USceneComponent* Child);
 	void SetPhysicsLinearVelocity(UPrimitiveComponent* Component, FVector Velocity);
 	void AddImpulse(UPrimitiveComponent* Component, FVector Direction, FName BoneName = NAME_None, bool bVelChange = false);
+	void AddImpulseAtLocation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName = NAME_None);
 	void SetLocation(UPrimitiveComponent* Component, FVector Location);
 	void SetRotation(UPrimitiveComponent* Component, FRotator Location);
 	void SetCharacterWalkSpeed(ACharacter* Character, float Speed);
@@ -38,7 +39,7 @@ public:
 private:
 	UFUNCTION(Server, Reliable)
 		void Server_OwningOtherActor(AActor* Actor);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated);
 	UFUNCTION(Server, Reliable)
 		void Server_AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent, FName BoneName = NAME_None);
@@ -49,6 +50,8 @@ private:
 	UFUNCTION(Server, Reliable)
 		void Server_AddImpulse(UPrimitiveComponent* Component, FVector Direction, FName BoneName = NAME_None, bool bVelChange = false);
 	UFUNCTION(Server, Reliable)
+		void Server_AddImpulseAtLocation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName = NAME_None);
+	UFUNCTION(Server, Reliable)
 		void Server_SetLocation(UPrimitiveComponent* Component, FVector Location);
 	UFUNCTION(Server, Reliable)
 		void Server_SetRotation(UPrimitiveComponent* Component, FRotator Rotation);
@@ -56,8 +59,8 @@ private:
 		void Server_SetCharacterWalkSpeed(ACharacter* Character, float Speed);
 
 private:
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent, FName BoneName = NAME_None);
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated);
 };

@@ -4,6 +4,8 @@
 #include "Weapon.h"
 #include "Net/UnrealNetwork.h"
 #include "Kraver/Creature/Creature.h"
+#include "Engine/EngineTypes.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -27,7 +29,27 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AWeapon, WeaponState);
 	DOREPLIFETIME(AWeapon, AdditiveWeaponMesh);
-	DOREPLIFETIME(AWeapon, OwnerCharacter);
+	DOREPLIFETIME(AWeapon, OwnerCreature);
+}
+
+float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+		AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
+		if(Weapon)
+		{ 
+			Weapon->GetOwnerCreature()->ServerComponent->AddImpulseAtLocation(WeaponMesh, PointDamageEvent->ShotDirection * 10000.f, PointDamageEvent->HitInfo.ImpactPoint);
+		}
+	}
+	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	{
+		const FRadialDamageEvent* RadialDamageEvent = static_cast<const FRadialDamageEvent*>(&DamageEvent);
+	}
+
+	return DamageAmount;
 }
 
 // Called when the game starts or when spawned
@@ -52,7 +74,17 @@ int32 AWeapon::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 
 int32 AWeapon::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 {
-	int32 Index = AdditiveWeaponMesh.Remove(Mesh);
+	int32 Index = 0;
+	for (int i = 0; i < AdditiveWeaponMesh.Num(); i++)
+	{
+		if (AdditiveWeaponMesh[i] == Mesh)
+		{
+			Index = i;
+			break;
+		}
+	}
+	AdditiveWeaponMesh[Index]->SetHiddenInGame(true);
+	AdditiveWeaponMesh.RemoveAt(Index);
 	return Index;
 }
 
@@ -71,12 +103,12 @@ bool AWeapon::Equipped(ACreature* Character)
 	if (GetCanInteracted() == false)
 		return false;
 
-	Character->ServerComponent->SetSimulatedPhysics(WeaponMesh, false);
-	OwnerCharacter = Character;
-	OwnerCharacter->CombatComponent->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
-	OwnerCharacter->CombatComponent->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
+	OwnerCreature = Character;
+	OwnerCreature->ServerComponent->SetSimulatedPhysics(WeaponMesh, false);
+	OwnerCreature->CombatComponent->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
+	OwnerCreature->CombatComponent->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
 	 
-	Server_Equipped(OwnerCharacter);
+	Server_Equipped(OwnerCreature);
 	return true;
 }
 
@@ -101,9 +133,9 @@ bool AWeapon::GetCanInteracted()
 bool AWeapon::UnEquipped()
 {
 	WeaponMesh->SetSimulatePhysics(true);
-	OwnerCharacter->CombatComponent->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
-	OwnerCharacter->CombatComponent->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
-	OwnerCharacter = nullptr;
+	OwnerCreature->CombatComponent->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
+	OwnerCreature->CombatComponent->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
+	OwnerCreature = nullptr;
 	if(IsAttacking)
 		AttackEndEvent();
 
@@ -116,7 +148,7 @@ void AWeapon::Server_UnEquipped_Implementation()
 	WeaponState = EWeaponState::NONE;
 
 	WeaponMesh->SetSimulatePhysics(true);
-	OwnerCharacter = nullptr;
+	OwnerCreature = nullptr;
 }
 
 void AWeapon::AttackStartEvent()
@@ -144,4 +176,5 @@ void AWeapon::AttackEndEvent()
 
 void AWeapon::Attack()
 {
+	UE_LOG(LogTemp, Log, TEXT("Fire"));
 }

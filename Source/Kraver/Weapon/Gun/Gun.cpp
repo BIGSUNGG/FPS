@@ -4,6 +4,9 @@
 #include "Gun.h"
 #include "Components/DecalComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Kraver/Creature/Creature.h"
+#include "Engine/EngineTypes.h"
+#include "Engine/DamageEvents.h"
 
 AGun::AGun() : AWeapon()
 {
@@ -46,7 +49,7 @@ int32 AGun::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 int32 AGun::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 {
 	int32 Index = AWeapon::RemoveAdditiveWeaponMesh(Mesh);
-	AdditiveFireEffect[Index]->DestroyComponent();
+	AdditiveFireEffect[Index]->SetHiddenInGame(true);
 	AdditiveFireEffect.RemoveAt(Index);
 	return Index;
 }
@@ -72,7 +75,6 @@ bool AGun::Reload()
 		Server_SetCurAmmo(CurAmmo);
 		Server_SetTotalAmmo(TotalAmmo);
 	}
-	AttackEndEvent();
 	return true;
 }
 
@@ -86,6 +88,25 @@ void AGun::Attack()
 		if(!HasAuthority())
 			Server_SetCurAmmo(CurAmmo);
 
+		FHitResult BulletHitResult;
+		FCollisionQueryParams BulletParams(NAME_None, false, this);
+		bool bResult = GetWorld()->SweepSingleByChannel(
+			BulletHitResult,
+			OwnerCreature->GetCamera()->GetComponentLocation(),
+			OwnerCreature->GetCamera()->GetComponentLocation() + OwnerCreature->GetCamera()->GetForwardVector() * BulletDistance,
+			FQuat::Identity,
+			ECollisionChannel::ECC_GameTraceChannel3,
+			FCollisionShape::MakeSphere(10.f),
+			BulletParams
+		);
+
+		if (bResult && IsValid(BulletHitResult.GetActor()))
+		{
+			FPointDamageEvent damageEvent;
+			damageEvent.HitInfo = BulletHitResult;
+			damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
+			BulletHitResult.GetActor()->TakeDamage(0.f, damageEvent, OwnerCreature->GetController(), this);
+		}
 		ShowFireEffect();
 	}
 	else

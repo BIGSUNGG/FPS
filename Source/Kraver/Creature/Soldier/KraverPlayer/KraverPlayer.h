@@ -30,10 +30,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-public:
-	virtual FRotator GetCreatureAngle() override { return Camera->GetComponentRotation() - GetMesh()->GetComponentRotation(); }
-
-
 protected:
 	virtual void CrouchButtonPressed() override;
 	virtual void EquipButtonPressed();

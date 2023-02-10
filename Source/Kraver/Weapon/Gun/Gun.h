@@ -61,4 +61,8 @@ protected:
 		int32 TotalAmmo = 30.f;
 	UFUNCTION(Server, Reliable)
 		void Server_SetTotalAmmo(int32 Ammo);
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		float BulletDistance = 10000.f;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		float BulletRadius = 0.f;
 };

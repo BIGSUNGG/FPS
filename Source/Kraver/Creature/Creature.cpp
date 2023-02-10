@@ -16,6 +16,7 @@ ACreature::ACreature()
 	ServerComponent = CreateDefaultSubobject<UServerComponent>("ServerComponent");
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
+	CombatComponent->SetIsReplicated(true);
 	CombatComponent->OnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnEquipWeaponSuccess);
 	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnEquipWeaponSuccess);
 	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnUnEquipWeaponSuccess);
@@ -147,22 +148,30 @@ void ACreature::Turn(float NewAxisValue)
 
 void ACreature::ReloadButtonPressed()
 {
+	UE_LOG(LogTemp, Log, TEXT("Reload"));
 	CombatComponent->Reload();
 }
 
 void ACreature::AttackButtonPressed()
 {
-	if(GetCanAttack())
+	UE_LOG(LogTemp, Log, TEXT("AttackStartPress"));
+	if (GetCanAttack())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Cant Attack"));
 		CombatComponent->SetIsAttacking(true);
+	}
+
 }
 
 void ACreature::AttackButtonReleased()
 {
+	UE_LOG(LogTemp, Log, TEXT("AttackEndPress"));
 	CombatComponent->SetIsAttacking(false);
 }
 
 void ACreature::RunButtonPressed()
 {
+	UE_LOG(LogTemp, Log, TEXT("Run"));
 	CombatComponent->SetIsAttacking(false);
 
 	if (IsRunning)
@@ -177,6 +186,7 @@ void ACreature::RunButtonPressed()
 
 void ACreature::CrouchButtonPressed()
 {
+	UE_LOG(LogTemp, Log, TEXT("Crouch"));
 	if(GetCharacterMovement()->IsFalling())
 		return;
 
@@ -188,6 +198,7 @@ void ACreature::CrouchButtonPressed()
 
 void ACreature::JumpingButtonPressed()
 {
+	UE_LOG(LogTemp, Log, TEXT("Jump"));
 	if(GetMovementComponent()->IsCrouching())
 		UnCrouch();
 

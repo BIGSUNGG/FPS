@@ -11,7 +11,7 @@ UCombatComponent::UCombatComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
+	SetIsReplicated(true);
 	// ...
 }
 
@@ -49,8 +49,8 @@ void UCombatComponent::Reload()
 	if(!CurWeapon)
 		return;
 
-	CurWeapon->Reload();
 	SetIsAttacking(false);
+	CurWeapon->Reload();
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* Weapon)
@@ -87,7 +87,7 @@ void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
 
 void UCombatComponent::SetIsAttacking(bool bAttack)
 {
-	if(IsAttacking == bAttack)
+	if(CurWeapon == nullptr)
 		return;
 
 	if (bAttack)
@@ -98,8 +98,6 @@ void UCombatComponent::SetIsAttacking(bool bAttack)
 	{
 		OnAttackEndDelegate.Broadcast();
 	}
-
-	IsAttacking = bAttack;
 }
 
 void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
