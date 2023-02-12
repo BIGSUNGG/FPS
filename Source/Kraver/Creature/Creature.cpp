@@ -13,6 +13,8 @@ ACreature::ACreature()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	ServerComponent = CreateDefaultSubobject<UServerComponent>("ServerComponent");
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
@@ -22,24 +24,26 @@ ACreature::ACreature()
 	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnUnEquipWeaponSuccess);
 	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnUnEquipWeaponSuccess);
 
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-
 	SpringArm->SetupAttachment(GetMesh());
-	Camera->SetupAttachment(SpringArm);
-	Camera->bUsePawnControlRotation = true;
-
 	SpringArm->bUsePawnControlRotation = true;
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritRoll = true;
 	SpringArm->bInheritYaw = true;
 	SpringArm->bDoCollisionTest = true;
+	bUseControllerRotationYaw = false;
 
+	Camera->SetupAttachment(SpringArm);
+	Camera->bUsePawnControlRotation = true;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.f, 0.0f);
 	GetCharacterMovement()->AirControl = 0.25f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
-}
+}	
+
 
 void ACreature::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -53,6 +57,7 @@ void ACreature::BeginPlay()
 {
 	Super::BeginPlay();
 
+	GetController()->SetControlRotation(GetActorRotation());
 }
 
 void ACreature::PostInitializeComponents()
@@ -200,7 +205,7 @@ void ACreature::JumpingButtonPressed()
 {
 	UE_LOG(LogTemp, Log, TEXT("Jump"));
 	if(GetMovementComponent()->IsCrouching())
-		UnCrouch();
+		CrouchButtonPressed();
 
 	IsJumping = true;
 	Jump();
@@ -244,8 +249,19 @@ void ACreature::OnEquipWeaponSuccess(AWeapon* Weapon)
 	if (Weapon == nullptr)
 		return;
 
-	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
-	ServerComponent->AttachComponentToComponent(CombatComponent->GetCurWeapon()->GetWeaponMesh(), GetMesh(), CombatComponent->GetCurWeapon()->GetAttachSocketName());
+	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent
+	(
+		GetMesh(), 
+		FAttachmentTransformRules::SnapToTargetIncludingScale, 
+		CombatComponent->GetCurWeapon()->GetAttachSocketName()
+	);
+
+	ServerComponent->AttachComponentToComponent
+	(
+		CombatComponent->GetCurWeapon()->GetWeaponMesh(), 
+		GetMesh(), 
+		CombatComponent->GetCurWeapon()->GetAttachSocketName()
+	);
 }
 
 void ACreature::OnUnEquipWeaponSuccess(AWeapon* Weapon)
@@ -258,5 +274,10 @@ void ACreature::Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
 
 void ACreature::Server_OnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
 {
-	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->GetAttachSocketName());
+	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent
+	(
+		GetMesh(), 
+		FAttachmentTransformRules::SnapToTargetIncludingScale, 
+		CombatComponent->GetCurWeapon()->GetAttachSocketName()
+	);
 }

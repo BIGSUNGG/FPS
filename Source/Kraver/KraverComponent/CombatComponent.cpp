@@ -3,7 +3,7 @@
 
 #include "CombatComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Kraver/Creature/Creature.h"
+#include "Kraver/Creature/Soldier/KraverPlayer/KraverPlayer.h"
 #include "Kraver/PlayerController/KraverPlayerController.h"
 #include "Kraver/HUD/KraverHUD.h"
 
@@ -25,6 +25,7 @@ void UCombatComponent::BeginPlay()
 
 	// ...
 	OwnerCreature = Cast<ACreature>(GetOwner());
+	OwnerPlayer = Cast<AKraverPlayer>(GetOwner());
 	if(OwnerCreature == nullptr)
 		UE_LOG(LogTemp, Fatal, TEXT("Owner Actor is not Creature class"));
 	
@@ -122,13 +123,21 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.CrosshairTop		= CurWeapon->CrosshairsTop;
 				HUDPackage.CrosshairBottom = CurWeapon->CrosshairsBottom;
 			}
-			else
+			else if (OwnerPlayer)
 			{
+				HUDPackage.CrosshairCenter	= OwnerPlayer->CrosshairsCenter;
+				HUDPackage.CrosshairLeft	= OwnerPlayer->CrosshairsLeft;
+				HUDPackage.CrosshairRight	= OwnerPlayer->CrosshairsRight;
+				HUDPackage.CrosshairTop		= OwnerPlayer->CrosshairsTop;
+				HUDPackage.CrosshairBottom	= OwnerPlayer->CrosshairsBottom;
+			}
+			else
+			{	
 				HUDPackage.CrosshairCenter	= nullptr;
 				HUDPackage.CrosshairLeft	= nullptr;
 				HUDPackage.CrosshairRight	= nullptr;
 				HUDPackage.CrosshairTop		= nullptr;
-				HUDPackage.CrosshairBottom = nullptr;
+				HUDPackage.CrosshairBottom	= nullptr;
 			}
 			HUD->SetHUDPackage(HUDPackage);
 		}

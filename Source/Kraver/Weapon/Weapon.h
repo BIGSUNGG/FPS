@@ -65,6 +65,7 @@ protected:
 public:
 	bool GetCanInteracted();
 	bool GetIsAttacking() {return IsAttacking;}
+	float GetAttackImpulse() { return AttackImpulse; }
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
@@ -111,10 +112,16 @@ protected:
 		bool bAutomaticAttack = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		bool bFirstAttackDelay = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		bool bFirstInputAttack = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack" , meta = (AllowPrivateAccess = "true"))
 		float AttackDelay = 0.2f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack" , meta = (AllowPrivateAccess = "true"))
+		float CurAttackDelay = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		float AttackDamage = 10.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		float AttackImpulse = 150.f;
 
 	FTimerHandle AutomaticAttackHandle;
 };

@@ -15,7 +15,6 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	ArmMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ShowOnlyFirstPerson.Push(ArmMesh);
 
-	InteractionWidget = CreateDefaultSubobject<UInteractionWidget>(TEXT("InteractionWidget"));
 	static ConstructorHelpers::FClassFinder<UInteractionWidget> WBP_INTERACTION(TEXT("/Game/ProjectFile/HUD/WBP_InteractionWidget.WBP_InteractionWidget_C"));
 	if (WBP_INTERACTION.Succeeded())
 	{
@@ -80,7 +79,7 @@ void AKraverPlayer::CrouchButtonPressed()
 		SpringArmAdditiveLocation = (FVector(0.f, 0.f, 0.f));
 		RefreshSpringArm();
 	}
-	else
+	else if(CanCrouch())
 	{
 		SpringArmAdditiveLocation = (FVector(0.f, 0.f, -20.f));
 		RefreshSpringArm();

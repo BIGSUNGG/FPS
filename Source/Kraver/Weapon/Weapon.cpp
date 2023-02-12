@@ -41,7 +41,12 @@ float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 		AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
 		if(Weapon)
 		{ 
-			Weapon->GetOwnerCreature()->ServerComponent->AddImpulseAtLocation(WeaponMesh, PointDamageEvent->ShotDirection * 150.f * WeaponMesh->GetMass(), PointDamageEvent->HitInfo.ImpactPoint);
+			Weapon->GetOwnerCreature()->ServerComponent->AddImpulseAtLocation
+			(
+				WeaponMesh, 
+				PointDamageEvent->ShotDirection * Weapon->GetAttackImpulse() * WeaponMesh->GetMass(),
+				PointDamageEvent->HitInfo.ImpactPoint
+			);
 		}
 	}
 	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
@@ -64,6 +69,19 @@ void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (CurAttackDelay > 0.f)
+	{
+		CurAttackDelay -= DeltaTime;
+		if (CurAttackDelay < 0.f)
+		{
+			CurAttackDelay = 0.f;
+			if (bFirstInputAttack && bAutomaticAttack)
+			{
+				bFirstInputAttack = false;
+				AttackStartEvent();
+			}
+		}
+	}
 }
 
 int32 AWeapon::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
@@ -156,6 +174,12 @@ void AWeapon::AttackStartEvent()
 	if(IsAttacking == true)
 		return;
 
+	if (CurAttackDelay > 0 && bAutomaticAttack)
+	{	
+		bFirstInputAttack = true;
+		return;
+	}
+
 	UE_LOG(LogTemp, Log, TEXT("AttackStart"));
 	IsAttacking = true;
 	if(bFirstAttackDelay == false)
@@ -166,6 +190,7 @@ void AWeapon::AttackStartEvent()
 
 void AWeapon::AttackEndEvent()
 {
+	bFirstInputAttack = false;
 	if(IsAttacking == false)
 		return;
 
@@ -179,4 +204,5 @@ void AWeapon::Attack()
 	if(IsAttacking == false)
 		return;
 	UE_LOG(LogTemp, Log, TEXT("Fire"));
+	CurAttackDelay = AttackDelay;
 }

@@ -8,6 +8,7 @@
 #include "CombatComponent.generated.h"
 
 class ACreature;
+class AKraverPlayer;
 class AKraverPlayerController;
 class AKraverHUD;
 
@@ -65,6 +66,7 @@ public:
 
 protected:
 	ACreature* OwnerCreature;
+	AKraverPlayer* OwnerPlayer;
 	AKraverPlayerController* Controller;
 	AKraverHUD* HUD;
 
