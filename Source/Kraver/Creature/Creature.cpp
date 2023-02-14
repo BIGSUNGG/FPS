@@ -13,6 +13,7 @@ ACreature::ACreature()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
+	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	ServerComponent = CreateDefaultSubobject<UServerComponent>("ServerComponent");
@@ -30,14 +31,10 @@ ACreature::ACreature()
 	SpringArm->bInheritRoll = true;
 	SpringArm->bInheritYaw = true;
 	SpringArm->bDoCollisionTest = true;
-	bUseControllerRotationYaw = false;
 
 	Camera->SetupAttachment(SpringArm);
 	Camera->bUsePawnControlRotation = true;
 
-	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->bUseControllerDesiredRotation = false;
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.f, 0.0f);
 	GetCharacterMovement()->AirControl = 0.25f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
@@ -52,12 +49,18 @@ void ACreature::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	DOREPLIFETIME(ACreature, IsSprint);
 }
 
+float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	float Damage = CombatComponent->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	return Damage;
+}
+
 // Called when the game starts or when spawned
 void ACreature::BeginPlay()
 {
 	Super::BeginPlay();
-
-	GetController()->SetControlRotation(GetActorRotation());
 }
 
 void ACreature::PostInitializeComponents()
@@ -276,8 +279,8 @@ void ACreature::Server_OnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
 {
 	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent
 	(
-		GetMesh(), 
-		FAttachmentTransformRules::SnapToTargetIncludingScale, 
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetIncludingScale,
 		CombatComponent->GetCurWeapon()->GetAttachSocketName()
 	);
 }

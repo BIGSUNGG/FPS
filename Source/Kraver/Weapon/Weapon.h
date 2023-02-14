@@ -49,9 +49,6 @@ public:
 	virtual bool UnEquipped();
 protected:
 	UFUNCTION(Server, Reliable)
-		virtual void Server_AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh);
-
-	UFUNCTION(Server, Reliable)
 		void Server_Equipped(ACreature* Character);
 	UFUNCTION(Server, Reliable)
 		void Server_UnEquipped();
@@ -63,6 +60,7 @@ protected:
 
 	virtual void Attack();
 public:
+	// Getter Setter
 	bool GetCanInteracted();
 	bool GetIsAttacking() {return IsAttacking;}
 	float GetAttackImpulse() { return AttackImpulse; }
@@ -87,6 +85,8 @@ public:
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Owner", meta = (AllowPrivateAccess = "true"))
 		class ACreature* OwnerCreature = nullptr;
+	UFUNCTION(Server, Reliable)
+		void Server_SetOwnerCreature(ACreature* pointer);
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "WeaponState", meta = (AllowPrivateAccess = "true"))
 		EWeaponState WeaponState = EWeaponState::NONE;
@@ -95,10 +95,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* WeaponMesh;
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Additive", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Additive", meta = (AllowPrivateAccess = "true"))
 		TArray<USkeletalMeshComponent*> AdditiveWeaponMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
-		TMap<FName, UStaticMeshComponent*> AttachmentMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		FName AttachSocketName = "RightHandWeapon";

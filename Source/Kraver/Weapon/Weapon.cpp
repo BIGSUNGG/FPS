@@ -28,7 +28,6 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
-	DOREPLIFETIME(AWeapon, AdditiveWeaponMesh);
 	DOREPLIFETIME(AWeapon, OwnerCreature);
 }
 
@@ -37,13 +36,14 @@ float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
+		UE_LOG(LogTemp,Log,TEXT("H"));
 		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
 		if(Weapon)
 		{ 
 			Weapon->GetOwnerCreature()->ServerComponent->AddImpulseAtLocation
-			(
-				WeaponMesh, 
+			( 
+				WeaponMesh,
 				PointDamageEvent->ShotDirection * Weapon->GetAttackImpulse() * WeaponMesh->GetMass(),
 				PointDamageEvent->HitInfo.ImpactPoint
 			);
@@ -106,11 +106,6 @@ int32 AWeapon::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 	return Index;
 }
 
-void AWeapon::Server_AddAdditiveWeaponMesh_Implementation(USkeletalMeshComponent* Mesh)
-{
-	AdditiveWeaponMesh.Add(Mesh);
-}
-
 bool AWeapon::Reload()
 {
 	return false;
@@ -122,17 +117,22 @@ bool AWeapon::Equipped(ACreature* Character)
 		return false;
 
 	OwnerCreature = Character;
+	Server_SetOwnerCreature(Character);
 	OwnerCreature->ServerComponent->SetSimulatedPhysics(WeaponMesh, false);
 	OwnerCreature->CombatComponent->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
 	OwnerCreature->CombatComponent->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
-	 
+	
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Server_Equipped(OwnerCreature);
 	return true;
 }
 
 void AWeapon::Server_Equipped_Implementation(ACreature* Character)
 {
+	OwnerCreature = Character;
+	Server_SetOwnerCreature(Character);
 	WeaponState = EWeaponState::EQUIPPED;
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 bool AWeapon::GetCanInteracted()
@@ -148,15 +148,22 @@ bool AWeapon::GetCanInteracted()
 	}
 }
 
+void AWeapon::Server_SetOwnerCreature_Implementation(ACreature* pointer)
+{
+	OwnerCreature = pointer;
+}
+
 bool AWeapon::UnEquipped()
 {
 	WeaponMesh->SetSimulatePhysics(true);
 	OwnerCreature->CombatComponent->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
 	OwnerCreature->CombatComponent->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
 	OwnerCreature = nullptr;
+	Server_SetOwnerCreature(nullptr);
 	if(IsAttacking)
 		AttackEndEvent();
 
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	Server_UnEquipped();
 	return true;
 }
@@ -167,6 +174,8 @@ void AWeapon::Server_UnEquipped_Implementation()
 
 	WeaponMesh->SetSimulatePhysics(true);
 	OwnerCreature = nullptr;
+	Server_SetOwnerCreature(nullptr);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AWeapon::AttackStartEvent()

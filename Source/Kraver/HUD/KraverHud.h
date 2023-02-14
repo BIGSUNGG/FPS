@@ -31,6 +31,7 @@ private:
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter);
 
 public:
+	// Getter Setter
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 private:
 	FHUDPackage HUDPackage;

@@ -72,6 +72,9 @@ void AKraverPlayer::Server_SetViewType_Implementation(EViewType Type)
 
 void AKraverPlayer::CrouchButtonPressed()
 {
+	if (GetCharacterMovement()->IsFalling())
+		return;
+
 	ASoldier::CrouchButtonPressed();
 
 	if (bIsCrouched)
@@ -79,7 +82,7 @@ void AKraverPlayer::CrouchButtonPressed()
 		SpringArmAdditiveLocation = (FVector(0.f, 0.f, 0.f));
 		RefreshSpringArm();
 	}
-	else if(CanCrouch())
+	else 
 	{
 		SpringArmAdditiveLocation = (FVector(0.f, 0.f, -20.f));
 		RefreshSpringArm();

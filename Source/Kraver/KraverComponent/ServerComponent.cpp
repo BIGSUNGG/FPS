@@ -74,10 +74,7 @@ void UServerComponent::SetPhysicsLinearVelocity(UPrimitiveComponent* Component, 
 
 void UServerComponent::AddImpulse(UPrimitiveComponent* Component, FVector Direction, FName BoneName, bool bVelChange)
 {
-	Component->AddImpulse(Direction, BoneName, bVelChange);
-
-	if(GetOwner()->HasAuthority() == false)
-		Server_AddImpulse(Component,Direction,BoneName,bVelChange);
+	Server_AddImpulse(Component,Direction,BoneName,bVelChange);
 }
 
 void UServerComponent::AddImpulseAtLocation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName /*= NAME_None*/)

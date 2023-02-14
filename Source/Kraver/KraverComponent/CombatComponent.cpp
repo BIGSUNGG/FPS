@@ -18,6 +18,27 @@ UCombatComponent::UCombatComponent()
 }
 
 
+float UCombatComponent::CalculateDamage(float DamageAmount)
+{
+	return DamageAmount;
+}
+
+float UCombatComponent::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	UE_LOG(LogTemp, Log, TEXT("Damaged"));
+	float Damage = CalculateDamage(DamageAmount);
+	Server_TakeDamage(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
+
+	return Damage;
+}
+
+float UCombatComponent::GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{	
+	const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+	Server_GivePointDamage(DamagedActor,DamageAmount,*PointDamageEvent,EventInstigator,DamageCauser);
+	return 0.f;
+}
+
 // Called when the game starts
 void UCombatComponent::BeginPlay()
 {
@@ -36,8 +57,19 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UCombatComponent, CurWeapon);
+	DOREPLIFETIME(UCombatComponent, CurHp);
+	DOREPLIFETIME(UCombatComponent,	MaxHp);
 }
 
+
+void UCombatComponent::Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	UE_LOG(LogTemp, Log, TEXT("Death"));
+	if(CurWeapon != nullptr)
+		UnEquipWeapon(CurWeapon);
+
+	OnDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
 
 // Called every frame
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -144,6 +176,16 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	}
 }
 
+void UCombatComponent::Server_CurHp_Implementation(int32 value)
+{
+	CurHp = value;
+}
+
+void UCombatComponent::Server_MaxHp_Implementation(int32 value)
+{
+	MaxHp = value;
+}
+
 void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 {
 	if (CurWeapon == Weapon)
@@ -151,4 +193,28 @@ void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 		CurWeapon = nullptr;
 	}
 	OnServerUnEquipWeaponSuccess.Broadcast(Weapon);
+}
+
+void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Client_TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void UCombatComponent::Client_TakeDamage_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float Damage = CalculateDamage(DamageAmount);
+	CurHp -= Damage;
+	if (CurHp <= 0)
+	{
+		CurHp = 0;
+		Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	}
+
+	OnTakeDamaged.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Server_CurHp(CurHp);
+}
+
+void UCombatComponent::Server_GivePointDamage_Implementation(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float Damage = DamagedActor->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }

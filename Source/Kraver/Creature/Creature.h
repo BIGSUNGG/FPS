@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Kraver/KraverComponent/CombatComponent.h"
 #include "Kraver/KraverComponent/ServerComponent.h"
+#include "Engine/DamageEvents.h"
 #include "Creature.generated.h"
 
 UCLASS()
@@ -18,6 +19,7 @@ public:
 	ACreature();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 	void OwningOtherActor(AActor* Actor);
 protected:
@@ -33,11 +35,13 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
+	// Getter Setter
 	FORCEINLINE FRotator GetCreatureAngle() { return Camera->GetComponentRotation() - GetMesh()->GetComponentRotation(); }
 	FORCEINLINE UCameraComponent* GetCamera() { return Camera; }
 
 	FORCEINLINE bool GetCanAttack();
 	FORCEINLINE bool GetIsRunning() { return IsRunning; }
+	FORCEINLINE bool GetIsJumping() { return IsJumping; }
 	FORCEINLINE bool GetIsSprint() {return IsSprint;}
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
@@ -64,10 +68,11 @@ protected:
 		virtual void OnEquipWeaponSuccess(AWeapon* Weapon);
 	UFUNCTION()
 		virtual void OnUnEquipWeaponSuccess(AWeapon* Weapon);
+
 	UFUNCTION(Server, reliable)
-		virtual void Server_OnEquipWeaponSuccess(AWeapon* Weapon);
+		void Server_OnEquipWeaponSuccess(AWeapon* Weapon);
 	UFUNCTION(Server, reliable)
-		virtual void Server_OnUnEquipWeaponSuccess(AWeapon* Weapon);
+		void Server_OnUnEquipWeaponSuccess(AWeapon* Weapon);
 
 public:
 	UServerComponent* ServerComponent;

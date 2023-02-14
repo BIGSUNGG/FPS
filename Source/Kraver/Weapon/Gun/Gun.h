@@ -38,11 +38,13 @@ protected:
 		virtual void Multicast_ShowFireEffect();
 
 public:
+	// Getter Setter
 	UNiagaraComponent* GetFireEffect() { return FireEffect; }
 	TArray<UNiagaraComponent*> GetAdditiveFireEffect() { return AdditiveFireEffect; }
 protected:
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Additive", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Additive", meta = (AllowPrivateAccess = "true"))
 		TArray<UNiagaraComponent*> AdditiveFireEffect;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
 		UNiagaraComponent* FireEffect;
 

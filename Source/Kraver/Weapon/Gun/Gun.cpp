@@ -21,7 +21,6 @@ void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProp
 {
 	AWeapon::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AGun, AdditiveFireEffect);
 	DOREPLIFETIME(AGun, MaxAmmo);
 	DOREPLIFETIME(AGun, CurAmmo);
 	DOREPLIFETIME(AGun, TotalAmmo);
@@ -93,7 +92,7 @@ void AGun::Attack()
 			Server_SetCurAmmo(CurAmmo);
 
 		FHitResult BulletHitResult;
-		FCollisionQueryParams BulletParams(NAME_None, false, this);
+		FCollisionQueryParams BulletParams(NAME_None, false, OwnerCreature);
 		bool bResult = GetWorld()->SweepSingleByChannel(
 			BulletHitResult,
 			OwnerCreature->GetCamera()->GetComponentLocation(),
@@ -109,7 +108,7 @@ void AGun::Attack()
 			FPointDamageEvent damageEvent;
 			damageEvent.HitInfo = BulletHitResult;
 			damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
-			BulletHitResult.GetActor()->TakeDamage(0.f, damageEvent, OwnerCreature->GetController(), this);
+			OwnerCreature->CombatComponent->GiveDamage(BulletHitResult.GetActor(), 10.f, damageEvent, OwnerCreature->GetController(), this);
 		}
 		ShowFireEffect();
 	}

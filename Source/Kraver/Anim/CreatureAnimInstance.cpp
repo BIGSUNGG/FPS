@@ -45,6 +45,7 @@ void UCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	IsFalling = Creature->GetMovementComponent()->IsFalling();
 	IsRunning = Creature->GetIsRunning();
 	IsSprint = Creature->GetIsSprint();
+	IsJumping = Creature->GetIsJumping();
 
 	FRotator CreatureRotation = Creature->GetCreatureAngle();
 	AO_Yaw = Creature->GetAO_Yaw();
