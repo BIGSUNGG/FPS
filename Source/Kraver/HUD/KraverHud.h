@@ -4,10 +4,11 @@
 
 #include "EngineMinimal.h"
 #include "GameFramework/HUD.h"
+#include "Kraver/HUD/InteractionWidget.h"
 #include "KraverHUD.generated.h"
 
 USTRUCT(BlueprintType)
-struct FHUDPackage
+struct FCrosshairsPackage
 {
 	GENERATED_BODY()
 public:
@@ -25,15 +26,22 @@ class KRAVER_API AKraverHUD : public AHUD
 {
 	GENERATED_BODY()
 public:
+	AKraverHUD();
 	virtual void DrawHUD() override;
+	virtual void BeginPlay() override;
 
 private:
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter);
 
 public:
 	// Getter Setter
-	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
+	FORCEINLINE void SetCrosshairsPackage(const FCrosshairsPackage& Package) { HUDPackage = Package; }
+	void SetInteractWidget(bool value);
 private:
-	FHUDPackage HUDPackage;
-	
+	FCrosshairsPackage HUDPackage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<class UUserWidget> InteractionWidgetClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
+		UUserWidget* InteractionWidget;
 };

@@ -49,7 +49,7 @@ void UCombatComponent::BeginPlay()
 	OwnerPlayer = Cast<AKraverPlayer>(GetOwner());
 	if(OwnerCreature == nullptr)
 		UE_LOG(LogTemp, Fatal, TEXT("Owner Actor is not Creature class"));
-	
+
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -77,7 +77,8 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
-	SetHUDCrosshairs(DeltaTime);
+	if(OwnerPlayer)
+		SetHUDCrosshairs(DeltaTime);
 }
 
 void UCombatComponent::Reload()
@@ -140,13 +141,13 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	if (OwnerCreature == nullptr || OwnerCreature->Controller == nullptr)
 		return;
 
-	Controller = Controller == nullptr ? Cast<AKraverPlayerController>(OwnerCreature->Controller) :  Controller;
+	Controller = Controller == nullptr ? Cast<AKraverPlayerController>(OwnerCreature->Controller) : Controller;
 	if (Controller)
 	{
 		HUD = HUD == nullptr ? Cast<AKraverHUD>(Controller->GetHUD()) : HUD;
 		if (HUD)
 		{
-			FHUDPackage HUDPackage;
+			FCrosshairsPackage HUDPackage;
 			if (CurWeapon)
 			{
 				HUDPackage.CrosshairCenter	= CurWeapon->CrosshairsCenter;
@@ -171,7 +172,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.CrosshairTop		= nullptr;
 				HUDPackage.CrosshairBottom	= nullptr;
 			}
-			HUD->SetHUDPackage(HUDPackage);
+			HUD->SetCrosshairsPackage(HUDPackage);
 		}
 	}
 }

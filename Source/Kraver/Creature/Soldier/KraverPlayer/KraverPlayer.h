@@ -59,6 +59,9 @@ public:
 		UTexture2D* CrosshairsBottom;
 
 protected:
+	class AKraverPlayerController* KraverController;
+	class AKraverHUD* HUD;
+
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))
 		EViewType ViewType = EViewType::FIRST_PERSON;
 	void SetViewType(EViewType Type);
@@ -70,16 +73,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Arm, meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* ArmWeaponMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-		AWeapon* CanInteractWeapon;
+	AWeapon* CanInteractWeapon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 		float InteractionDistance = 225.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 		float InteractionRadius = 25.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-		UInteractionWidget* InteractionWidget;
 
 	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson;
 	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson;

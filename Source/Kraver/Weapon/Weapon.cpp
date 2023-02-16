@@ -87,12 +87,18 @@ void AWeapon::Tick(float DeltaTime)
 int32 AWeapon::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 {
 	int32 Index = AdditiveWeaponMesh.Add(Mesh);
+	Mesh->SetSkeletalMesh(GetWeaponMesh()->GetSkeletalMeshAsset());
+	TArray<UMaterialInterface*> MaterialArray = GetWeaponMesh()->GetMaterials();
+	for (int i = 0; i < MaterialArray.Num(); i++)
+	{
+		Mesh->SetMaterial(i, MaterialArray[i]);
+	}
 	return Index;
 }
 
 int32 AWeapon::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 {
-	int32 Index = 0;
+	int32 Index = -1;
 	for (int i = 0; i < AdditiveWeaponMesh.Num(); i++)
 	{
 		if (AdditiveWeaponMesh[i] == Mesh)
@@ -103,6 +109,20 @@ int32 AWeapon::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 	}
 	AdditiveWeaponMesh[Index]->SetHiddenInGame(true);
 	AdditiveWeaponMesh.RemoveAt(Index);
+	return Index;
+}
+
+int32 AWeapon::FindAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
+{
+	int32 Index = -1;
+	for (int i = 0; i < AdditiveWeaponMesh.Num(); i++)
+	{
+		if (AdditiveWeaponMesh[i] == Mesh)
+		{
+			Index = i;
+			break;
+		}
+	}
 	return Index;
 }
 

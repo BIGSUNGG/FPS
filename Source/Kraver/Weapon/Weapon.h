@@ -43,6 +43,7 @@ public:
 
 	virtual int32 AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh);
 	virtual int32 RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh);
+	virtual int32 FindAdditiveWeaponMesh(USkeletalMeshComponent* Mesh);
 
 	virtual bool Reload();
 	virtual bool Equipped(ACreature* Character);

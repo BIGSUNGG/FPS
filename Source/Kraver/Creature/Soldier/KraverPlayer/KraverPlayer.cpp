@@ -5,6 +5,9 @@
 #include "Kraver/Weapon/Gun/Gun.h"
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
+#include "Kraver/HUD/KraverHud.h"
+#include "Kraver/PlayerController/KraverPlayerController.h"
+#include "Kraver/GameMode/KraverGameMode.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
@@ -14,12 +17,6 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	ArmMesh->SetOnlyOwnerSee(true);
 	ArmMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ShowOnlyFirstPerson.Push(ArmMesh);
-
-	static ConstructorHelpers::FClassFinder<UInteractionWidget> WBP_INTERACTION(TEXT("/Game/ProjectFile/HUD/WBP_InteractionWidget.WBP_InteractionWidget_C"));
-	if (WBP_INTERACTION.Succeeded())
-	{
-		InteractionWidget = WBP_INTERACTION.Class.GetDefaultObject();
-	}
 
 	ArmWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmWeaponMesh"));
 	ArmWeaponMesh->SetCastShadow(false);
@@ -104,6 +101,9 @@ void AKraverPlayer::EquipButtonPressed()
 
 void AKraverPlayer::CheckCanInteractionWeapon()
 {
+	if(IsLocallyControlled() == false)
+		return;
+
 	CanInteractWeapon = nullptr;
 
 	float Radius = InteractionRadius;
@@ -150,13 +150,18 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 		}
 	}
 
-	if (CanInteractWeapon != nullptr)
-	{
-		if (InteractionWidget && !InteractionWidget->IsVisible())
-			InteractionWidget->AddToViewport();
+	KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
+	if(KraverController)
+	{ 
+		HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
+		if(HUD)
+		{
+			if (CanInteractWeapon != nullptr)
+				HUD->SetInteractWidget(true);
+			else
+				HUD->SetInteractWidget(false);
+		}
 	}
-	else if(InteractionWidget && InteractionWidget->IsVisible())
-		InteractionWidget->RemoveFromParent();
 }
 
 void AKraverPlayer::ChangeView()
@@ -224,12 +229,12 @@ void AKraverPlayer::OnEquipWeaponSuccess(AWeapon* Weapon)
 		return;
 	ASoldier::OnEquipWeaponSuccess(Weapon);
 
-	ArmWeaponMesh->SetHiddenInGame(false);
-	ArmWeaponMesh->SetSkeletalMesh(CombatComponent->GetCurWeapon()->GetWeaponMesh()->GetSkeletalMeshAsset());
-	ServerComponent->AttachComponentToComponent(ArmWeaponMesh,ArmMesh, CombatComponent->GetCurWeapon()->GetAttachSocketName());
-	ShowOnlyThirdPerson.Push(CombatComponent->GetCurWeapon()->GetWeaponMesh());
-
 	int32 Index = CombatComponent->GetCurWeapon()->AddAdditiveWeaponMesh(ArmWeaponMesh);
+
+	ArmWeaponMesh->SetHiddenInGame(false);
+	ShowOnlyThirdPerson.Push(CombatComponent->GetCurWeapon()->GetWeaponMesh());
+	ServerComponent->AttachComponentToComponent(ArmWeaponMesh,ArmMesh, CombatComponent->GetCurWeapon()->GetAttachSocketName());
+
 	switch (CombatComponent->GetCurWeapon()->GetWeaponType())
 	{
 	case EWeaponType::GUN:
@@ -266,6 +271,23 @@ void AKraverPlayer::OnUnEquipWeaponSuccess(AWeapon* Weapon)
 	{
 		Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
 		Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	}
+
+	int32 Index = Weapon->FindAdditiveWeaponMesh(ArmWeaponMesh);
+	switch (Weapon->GetWeaponType())
+	{
+	case EWeaponType::GUN:
+	{
+		AGun* Gun = Cast<AGun>(Weapon);
+		ShowOnlyThirdPerson.Remove(Gun->GetFireEffect());
+		auto FireEffect = Gun->GetAdditiveFireEffect()[Index];
+		Gun->GetAdditiveFireEffect()[Index]->SetOnlyOwnerSee(false);
+		ShowOnlyFirstPerson.Remove(FireEffect);
+	}
+	break;
+	default:
+		UE_LOG(LogTemp, Fatal, TEXT("Need to support more EWeaponType"));
+		break;
 	}
 	Weapon->RemoveAdditiveWeaponMesh(ArmWeaponMesh);
 }
