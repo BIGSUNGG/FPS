@@ -57,3 +57,8 @@ void UCreatureAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
+void UCreatureAnimInstance::PlayDeathMontage()
+{
+	Montage_Play(DeadMontage);
+}
+

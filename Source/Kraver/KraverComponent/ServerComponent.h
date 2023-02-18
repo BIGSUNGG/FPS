@@ -35,8 +35,10 @@ public:
 	void SetLocation(UPrimitiveComponent* Component, FVector Location);
 	void SetRotation(UPrimitiveComponent* Component, FRotator Location);
 	void SetCharacterWalkSpeed(ACharacter* Character, float Speed);
+	void PlayMontage(UAnimInstance* Anim, UAnimMontage* Montage, float Speed = 1.f);
 
 private:
+	// Server
 	UFUNCTION(Server, Reliable)
 		void Server_OwningOtherActor(AActor* Actor);
 	UFUNCTION(Server, Reliable)
@@ -57,10 +59,18 @@ private:
 		void Server_SetRotation(UPrimitiveComponent* Component, FRotator Rotation);
 	UFUNCTION(Server, Reliable)
 		void Server_SetCharacterWalkSpeed(ACharacter* Character, float Speed);
+	UFUNCTION(Server, Reliable)
+		void Server_PlayMontage(UAnimInstance* Anim, UAnimMontage* Montage, float Speed = 1.f);
 
 private:
+	// Multicast
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent, FName BoneName = NAME_None);
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated);
+
+private:
+	// Client
+	UFUNCTION(Client, Reliable)
+		void Client_PlayMontage(UAnimInstance* Anim, UAnimMontage* Montage, float Speed = 1.f);
 };

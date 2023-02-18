@@ -5,6 +5,7 @@
 #include "Components/WidgetComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Kraver/Anim/CreatureAnimInstance.h"
 
 // Sets default values
 ACreature::ACreature()
@@ -20,12 +21,13 @@ ACreature::ACreature()
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
-	CombatComponent->OnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnEquipWeaponSuccess);
-	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnEquipWeaponSuccess);
-	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnUnEquipWeaponSuccess);
-	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnUnEquipWeaponSuccess);
+	CombatComponent->OnDeath.AddDynamic(this, &ACreature::OnDeathEvent);
+	CombatComponent->OnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnEquipWeaponSuccessEvent);
+	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnEquipWeaponSuccessEvent);
+	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnUnEquipWeaponSuccessEvent);
+	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnUnEquipWeaponSuccessEvent);
 
-	SpringArm->SetupAttachment(GetMesh());
+	SpringArm->SetupAttachment(GetCapsuleComponent());
 	SpringArm->bUsePawnControlRotation = true;
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritRoll = true;
@@ -247,7 +249,7 @@ void ACreature::OnServer_SetIsSprint_Implementation(bool value)
 
 }
 
-void ACreature::OnEquipWeaponSuccess(AWeapon* Weapon)
+void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	if (Weapon == nullptr)
 		return;
@@ -267,15 +269,33 @@ void ACreature::OnEquipWeaponSuccess(AWeapon* Weapon)
 	);
 }
 
-void ACreature::OnUnEquipWeaponSuccess(AWeapon* Weapon)
+void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 }
 
-void ACreature::Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
+void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
+	CreatureAnim->PlayDeathMontage();
+	Server_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void ACreature::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
 }
 
-void ACreature::Server_OnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
+void ACreature::Server_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Multicast_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
+	CreatureAnim->PlayDeathMontage();
+}
+
+void ACreature::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
 	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent
 	(

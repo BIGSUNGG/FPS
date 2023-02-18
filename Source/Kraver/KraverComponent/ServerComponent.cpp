@@ -105,6 +105,15 @@ void UServerComponent::SetCharacterWalkSpeed(ACharacter* Character, float Speed)
 		Server_SetCharacterWalkSpeed(Character, Speed);
 }
 
+void UServerComponent::PlayMontage(UAnimInstance* Anim, UAnimMontage* Montage, float Speed /*= 1.f*/)
+{
+	Anim->Montage_Play(Montage,Speed);
+	if(GetOwner()->HasAuthority() == false)
+		Server_PlayMontage(Anim, Montage, Speed);
+	else
+		Client_PlayMontage(Anim, Montage, Speed);
+}
+
 void UServerComponent::Server_SetPhysicsLinearVelocity_Implementation(UPrimitiveComponent* Component, FVector Velocity)
 {
 	Component->SetPhysicsLinearVelocity(Velocity);
@@ -157,6 +166,11 @@ void UServerComponent::Server_SetCharacterWalkSpeed_Implementation(ACharacter* C
 	Character->GetCharacterMovement()->MaxWalkSpeed = Speed;
 }
 
+void UServerComponent::Server_PlayMontage_Implementation(UAnimInstance* Anim, UAnimMontage* Montage, float Speed /*= 1.f*/)
+{
+	Client_PlayMontage(Anim,Montage,Speed);
+}
+
 void UServerComponent::Multicast_AttachComponentToComponent_Implementation(USceneComponent* Child, USceneComponent* Parent, FName BoneName)
 {
 	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
@@ -165,4 +179,9 @@ void UServerComponent::Multicast_AttachComponentToComponent_Implementation(UScen
 void UServerComponent::Multicast_SetSimulatedPhysics_Implementation(UPrimitiveComponent* Component, bool bSimulated)
 {
 	Component->SetSimulatePhysics(bSimulated);
+}
+
+void UServerComponent::Client_PlayMontage_Implementation(UAnimInstance* Anim, UAnimMontage* Montage, float Speed /*= 1.f*/)
+{
+	Anim->Montage_Play(Montage, Speed);
 }

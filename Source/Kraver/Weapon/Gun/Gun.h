@@ -66,5 +66,5 @@ protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		float BulletDistance = 10000.f;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-		float BulletRadius = 1.f;
+		float BulletRadius = 0.f;
 };

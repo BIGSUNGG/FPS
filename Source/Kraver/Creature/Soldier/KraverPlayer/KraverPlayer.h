@@ -31,7 +31,6 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-	virtual void CrouchButtonPressed() override;
 	virtual void EquipButtonPressed();
 	virtual void CheckCanInteractionWeapon();
 	virtual void ChangeView();
@@ -41,10 +40,10 @@ protected:
 		void Server_RefreshSpringArm(FVector Vector, float Length);
 	virtual void RefreshCurViewType();
 
-	virtual void OnEquipWeaponSuccess(AWeapon* Weapon) override;
-	virtual void Server_OnEquipWeaponSuccess_Implementation(AWeapon* Weapon) override;
-	virtual void OnUnEquipWeaponSuccess(AWeapon* Weapon) override;
-	virtual void Server_OnUnEquipWeaponSuccess_Implementation(AWeapon* Weapon) override;
+	virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
+	virtual void Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
+	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
+	virtual void Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
 
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)

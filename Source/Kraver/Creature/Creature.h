@@ -48,11 +48,13 @@ public:
 
 	void SetIsSprint(bool value);
 protected:
+	// Axis Input
 	virtual void MoveForward(float NewAxisValue);
 	virtual void MoveRight(float NewAxisValue);
 	virtual void LookUp(float NewAxisValue);
 	virtual void Turn(float NewAxisValue);
 
+	// Button Input
 	virtual void ReloadButtonPressed();
 	virtual void AttackButtonPressed();
 	virtual void AttackButtonReleased();
@@ -64,17 +66,26 @@ protected:
 	virtual void AimOffset(float DeltaTime);
 
 protected:
+	// Delegate Event
 	UFUNCTION()
-		virtual void OnEquipWeaponSuccess(AWeapon* Weapon);
+		virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon);
 	UFUNCTION()
-		virtual void OnUnEquipWeaponSuccess(AWeapon* Weapon);
+		virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon);
+	UFUNCTION()
+		virtual void OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
+	// RPC
 	UFUNCTION(Server, reliable)
-		void Server_OnEquipWeaponSuccess(AWeapon* Weapon);
+		void Server_OnEquipWeaponSuccessEvent(AWeapon* Weapon);
 	UFUNCTION(Server, reliable)
-		void Server_OnUnEquipWeaponSuccess(AWeapon* Weapon);
+		void Server_OnUnEquipWeaponSuccessEvent(AWeapon* Weapon);
+	UFUNCTION(Server, reliable)
+		void Server_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(NetMulticast, reliable)
+		void Multicast_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 public:
+	// Component
 	UServerComponent* ServerComponent;
 	UCombatComponent* CombatComponent;
 
