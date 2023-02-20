@@ -20,7 +20,9 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	// Play Montage functions
 	virtual void PlayDeathMontage();
+	virtual void PlayLandedMontage();
 protected:
 	ACreature* Creature;
 	
@@ -37,11 +39,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
 		bool IsCrouching;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
-		bool IsRunning;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
 		bool IsJumping;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
-		bool IsSprint = false;
+		bool IsRunning;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
+		EMovementState MovementState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Angle, Meta = (AllowPrivateAccess = true))
 		float AO_Pitch;
@@ -50,4 +52,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montage, Meta = (AllowPrivateAccess = true))
 		UAnimMontage* DeadMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montage, Meta = (AllowPrivateAccess = true))
+		UAnimMontage* LandedMontage;
 };

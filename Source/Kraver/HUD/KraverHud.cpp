@@ -74,13 +74,24 @@ void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter)
 
 void AKraverHUD::SetInteractWidget(bool value)
 {
-	//if (true  && InteractionWidget && !InteractionWidget->IsVisible())
-	//{
-	//	InteractionWidget->AddToViewport();
-	//}
-	//else if(InteractionWidget && InteractionWidget->IsVisible())
-	//{
-	//	InteractionWidget->RemoveFromParent();
-	//}
+	if (value == true && InteractionWidget && !InteractionWidget->IsVisible())
+	{
+		FVector2D ViewportSize;
+		if (GEngine)
+		{
+			GEngine->GameViewport->GetViewportSize(ViewportSize);
+			const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+			const FVector2D WidgetHalfSize(165,30);
+			float Y = ViewportCenter.Y * 0.6f;
+			FVector2D WidgetPosition = ViewportCenter - WidgetHalfSize;
+			WidgetPosition.Y += Y;
+			InteractionWidget->SetPositionInViewport(WidgetPosition);
+		}
+		InteractionWidget->AddToViewport();
+	}
+	else if(value == false && InteractionWidget && InteractionWidget->IsVisible())
+	{
+		InteractionWidget->RemoveFromParent();
+	}
 }
 	

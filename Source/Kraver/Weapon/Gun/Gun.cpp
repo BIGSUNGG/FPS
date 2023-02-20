@@ -108,7 +108,7 @@ void AGun::Attack()
 			FPointDamageEvent damageEvent;
 			damageEvent.HitInfo = BulletHitResult;
 			damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
-			OwnerCreature->CombatComponent->GiveDamage(BulletHitResult.GetActor(), 10.f, damageEvent, OwnerCreature->GetController(), this);
+			OwnerCreature->CombatComponent->GiveDamage(BulletHitResult.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);
 		}
 		ShowFireEffect();
 	}

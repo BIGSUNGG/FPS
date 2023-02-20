@@ -15,6 +15,7 @@ void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if(Soldier == nullptr)
 		return;
 
+	IsEquippingWeapon = Soldier->CombatComponent->GetCurWeapon() != nullptr;
 	if (Soldier->CombatComponent->GetCurWeapon() && Soldier->GetMesh())
 	{
 		LeftHandTransform = Soldier->CombatComponent->GetCurWeapon()->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);

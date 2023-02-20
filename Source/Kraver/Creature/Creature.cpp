@@ -41,6 +41,8 @@ ACreature::ACreature()
 	GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
+
 }	
 
 
@@ -48,7 +50,7 @@ void ACreature::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ACreature, IsSprint);
+	DOREPLIFETIME(ACreature, MovementState);
 }
 
 float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -76,6 +78,9 @@ void ACreature::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (IsJumping && GetCharacterMovement()->IsFalling() == false)
+		IsJumping = false;
+	
 	AimOffset(DeltaTime);
 }
 
@@ -100,21 +105,14 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 bool ACreature::GetCanAttack()
 {
-	return !(IsRunning || IsSprint);
-}
-
-void ACreature::SetIsSprint(bool value)
-{
-	IsSprint = value;
-	OnServer_SetIsSprint(value);
+	return !(MovementState == EMovementState::SPRINT);
 }
 
 void ACreature::MoveForward(float NewAxisValue)
 {
 	if(!GetMovementComponent()->IsFalling())
 	{ 
-		SetIsSprint(false);
-		ServerComponent->SetCharacterWalkSpeed(this, WalkSpeed);
+		SetMovementState(EMovementState::WALK);
 
 		if(NewAxisValue == 0 || Controller == nullptr)
 			return;
@@ -122,12 +120,9 @@ void ACreature::MoveForward(float NewAxisValue)
 		if(IsRunning)
 		{ 
 			if (NewAxisValue >= 0.5f)
-			{
-				SetIsSprint(true);
-				ServerComponent->SetCharacterWalkSpeed(this, SprintSpeed);
-			}
+				SetMovementState(EMovementState::SPRINT);
 			else
-				ServerComponent->SetCharacterWalkSpeed(this, RunSpeed);
+				SetMovementState(EMovementState::RUN);
 		}
 	}
 
@@ -182,7 +177,6 @@ void ACreature::AttackButtonReleased()
 void ACreature::RunButtonPressed()
 {
 	UE_LOG(LogTemp, Log, TEXT("Run"));
-	CombatComponent->SetIsAttacking(false);
 
 	if (IsRunning)
 	{
@@ -200,7 +194,7 @@ void ACreature::CrouchButtonPressed()
 	if(GetCharacterMovement()->IsFalling())
 		return;
 
-	if(bIsCrouched)
+	if (bIsCrouched)
 		UnCrouch();
 	else
 		Crouch();
@@ -220,7 +214,6 @@ void ACreature::JumpingButtonReleased()
 {
 	if (IsJumping)
 	{
-		IsJumping = false;
 		StopJumping();
 	}
 }
@@ -243,10 +236,43 @@ void ACreature::AimOffset(float DeltaTime)
 	}
 }
 
-void ACreature::OnServer_SetIsSprint_Implementation(bool value)
+void ACreature::SetMovementState(EMovementState value)
 {
-	IsSprint = value;
+	MovementState = value;
+	switch (value)
+	{
+		case EMovementState::WALK:
+			GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+			break;
+		case EMovementState::RUN:
+			GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+			break;
+		case EMovementState::SPRINT:
+			GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+			break;
+		default:
+			break;
+	}
+	Server_SetMovementState(value);
+}
 
+void ACreature::Server_SetMovementState_Implementation(EMovementState value)
+{
+	MovementState = value;
+	switch (value)
+	{
+	case EMovementState::WALK:
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		break;
+	case EMovementState::RUN:
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+		break;
+	case EMovementState::SPRINT:
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		break;
+	default:
+		break;
+	}
 }
 
 void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -280,6 +306,21 @@ void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent
 	Server_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
+void ACreature::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
+	CreatureAnim->PlayLandedMontage();
+
+	Server_Landed(Hit);
+}
+
+void ACreature::OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust)
+{
+	Super::OnEndCrouch(HeightAdjust,ScaledHeightAdjust);
+
+}
+ 
 void ACreature::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
 }
@@ -293,6 +334,17 @@ void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamag
 {
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
 	CreatureAnim->PlayDeathMontage();
+}
+
+void ACreature::Server_Landed_Implementation(const FHitResult& Hit)
+{
+	Multicast_Landed(Hit);
+}
+
+void ACreature::Multicast_Landed_Implementation(const FHitResult& Hit)
+{
+	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
+	CreatureAnim->PlayLandedMontage();
 }
 
 void ACreature::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)

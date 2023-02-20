@@ -40,11 +40,10 @@ void UCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			MovementDirection = TempRotation.Yaw;
 	}
 
-
+	MovementState = Creature->GetMovementState();
 	IsCrouching = Creature->GetMovementComponent()->IsCrouching();
 	IsFalling = Creature->GetMovementComponent()->IsFalling();
 	IsRunning = Creature->GetIsRunning();
-	IsSprint = Creature->GetIsSprint();
 	IsJumping = Creature->GetIsJumping();
 
 	FRotator CreatureRotation = Creature->GetCreatureAngle();
@@ -62,3 +61,7 @@ void UCreatureAnimInstance::PlayDeathMontage()
 	Montage_Play(DeadMontage);
 }
 
+void UCreatureAnimInstance::PlayLandedMontage()
+{
+	Montage_Play(LandedMontage);
+}

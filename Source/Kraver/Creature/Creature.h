@@ -9,6 +9,14 @@
 #include "Engine/DamageEvents.h"
 #include "Creature.generated.h"
 
+UENUM(BlueprintType)
+enum class EMovementState : uint8
+{
+	WALK		UMETA(DisplayName = "WALK"),
+	RUN			UMETA(DisplayName = "RUN"),
+	SPRINT		UMETA(DisplayName = "SPRINT"),
+};
+
 UCLASS()
 class KRAVER_API ACreature : public ACharacter
 {
@@ -42,9 +50,9 @@ public:
 	FORCEINLINE bool GetCanAttack();
 	FORCEINLINE bool GetIsRunning() { return IsRunning; }
 	FORCEINLINE bool GetIsJumping() { return IsJumping; }
-	FORCEINLINE bool GetIsSprint() {return IsSprint;}
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
+	FORCEINLINE EMovementState GetMovementState() { return MovementState; }
 
 	void SetIsSprint(bool value);
 protected:
@@ -73,6 +81,9 @@ protected:
 		virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon);
 	UFUNCTION()
 		virtual void OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION()
+		void Landed(const FHitResult& Hit) override;
+	void OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust) override;
 
 	// RPC
 	UFUNCTION(Server, reliable)
@@ -83,7 +94,10 @@ protected:
 		void Server_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-
+	UFUNCTION(Server, reliable)
+		void Server_Landed(const FHitResult& Hit);
+	UFUNCTION(NetMulticast, reliable)
+		void Multicast_Landed(const FHitResult& Hit);
 public:
 	// Component
 	UServerComponent* ServerComponent;
@@ -99,14 +113,18 @@ protected:
 	float AO_Pitch;
 	FRotator StartingAimRotation;
 
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
+		EMovementState MovementState = EMovementState::WALK;
+	virtual void SetMovementState(EMovementState value);
+	UFUNCTION(Server, reliable)
+		void Server_SetMovementState(EMovementState value);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		bool IsJumping = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		bool IsRunning = false;
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		bool IsSprint = false;
-	UFUNCTION(Server, reliable)
-		void OnServer_SetIsSprint(bool value);
+	bool IsCrouching = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float SprintSpeed = 1200.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))

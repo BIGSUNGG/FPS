@@ -135,10 +135,14 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 		HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
 		if(HUD)
 		{
-			if (CanInteractWeapon != nullptr)
-				HUD->SetInteractWidget(true);
-			else
+			if (CanInteractWeapon == nullptr)
+			{
 				HUD->SetInteractWidget(false);
+			}
+			else
+			{
+				HUD->SetInteractWidget(true);
+			}
 		}
 	}
 }
@@ -269,6 +273,20 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 		break;
 	}
 	Weapon->RemoveAdditiveWeaponMesh(ArmWeaponMesh);
+}
+
+void AKraverPlayer::SetMovementState(EMovementState value)
+{
+	ASoldier::SetMovementState(value);
+
+	switch (value)
+	{
+		case EMovementState::SPRINT:
+			CombatComponent->SetIsAttacking(false);
+			break;
+		default:
+			break;
+	}
 }
 
 void AKraverPlayer::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)

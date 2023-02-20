@@ -45,6 +45,7 @@ protected:
 	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
 
+	virtual void SetMovementState(EMovementState value) override;
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 		class UTexture2D* CrosshairsCenter;
