@@ -27,6 +27,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FServerUnEquipWeaponSuccessDele, AWe
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakeDamageDele, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FDeathDele, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
 
+// 무기와 전투에 관련된 컴포넌트
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class KRAVER_API UCombatComponent : public UActorComponent
 {
@@ -35,28 +36,31 @@ class KRAVER_API UCombatComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UCombatComponent();
-	float CalculateDamage(float DamageAmount);
+	float CalculateDamage(float DamageAmount); // 해당 컴포넌트가 받을 데미지를 계산
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	void Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을경우 호출
 
 public:
+	// Getter Setter
 	AWeapon* GetCurWeapon() { return CurWeapon; }
+	float GetCurHp() { return CurHp; }
 	bool GetCanEquipWeapon() { return CurWeapon == nullptr; }
+	bool IsDead();
 
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void SetHUDCrosshairs(float DeltaTime);
 
-	virtual void Reload();
-	virtual void EquipWeapon(AWeapon* Weapon);
-	virtual void UnEquipWeapon(AWeapon* Weapon);
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	virtual float GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	virtual void RefillAmmo(); // 재장전하는 함수
+	virtual void EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
+	virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수
+	virtual float GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 주는 함수
 
 protected:
 	UFUNCTION(Server, reliable)
@@ -88,16 +92,16 @@ public:
 	void SetIsAttacking(bool bAttack);
 
 public:
-	FAttackStartDele OnAttackStartDelegate;
-	FAttackEndDele OnAttackEndDelegate;
+	FAttackStartDele OnAttackStartDelegate; // 공격을 시작할때 호출
+	FAttackEndDele OnAttackEndDelegate; // 공격을 멈출때 호출
 
-	FEquipWeaponSuccessDele OnEquipWeaponSuccess;
-	FEquipWeaponSuccessDele OnServerEquipWeaponSuccess;
-	FUnEquipWeaponSuccessDele OnUnEquipWeaponSuccess;
+	FEquipWeaponSuccessDele OnEquipWeaponSuccess; // 무기를 장착했을때 호출
+	FServerEquipWeaponSuccessDele OnServerEquipWeaponSuccess;
+	FUnEquipWeaponSuccessDele OnUnEquipWeaponSuccess; // 무기를 해제했을때 호출
 	FServerUnEquipWeaponSuccessDele OnServerUnEquipWeaponSuccess;
 
-	FTakeDamageDele OnTakeDamaged;
-	FDeathDele OnDeath;
+	FTakeDamageDele OnTakeDamaged; // 데미지를 받았을때 호출
+	FDeathDele OnDeath; // 죽었을때 호출
 
 protected:
 	ACreature* OwnerCreature;
@@ -106,13 +110,13 @@ protected:
 	AKraverHUD* HUD;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-		AWeapon* CurWeapon = nullptr;
+		AWeapon* CurWeapon = nullptr; // 현재 무기
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-		int32 CurHp = 100.f;
+		int32 CurHp = 100.f; // 현재 Hp
 	UFUNCTION(Server, reliable)
 		void Server_CurHp(int32 value);
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-		int32 MaxHp = 100.f;
+		int32 MaxHp = 100.f; // 최대 Hp
 	UFUNCTION(Server, reliable)
 		void Server_MaxHp(int32 value);
 

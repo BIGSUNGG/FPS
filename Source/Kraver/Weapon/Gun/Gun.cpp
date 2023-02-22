@@ -53,8 +53,10 @@ int32 AGun::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 	return Index;
 }
 
-bool AGun::Reload()
+bool AGun::RefillAmmo()
 {
+	AWeapon::RefillAmmo();
+
 	if(CurAmmo == MaxAmmo)
 		return false;
 

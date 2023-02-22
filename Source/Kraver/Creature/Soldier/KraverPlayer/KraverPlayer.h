@@ -11,6 +11,7 @@
  * 
  */
 
+// 카메라 시점 종류를 가지는 enum class
 UENUM(BlueprintType)
 enum class EViewType : uint8
 {
@@ -32,13 +33,15 @@ public:
 
 protected:
 	virtual void EquipButtonPressed();
-	virtual void CheckCanInteractionWeapon();
-	virtual void ChangeView();
+	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
+	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
 
-	virtual void RefreshSpringArm();
+ 	virtual void OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	virtual void RefreshSpringArm(); // SpringArm의 RelativeLocation을 새로고침하는 함수
 	UFUNCTION(Server, reliable)
-		void Server_RefreshSpringArm(FVector Vector, float Length);
-	virtual void RefreshCurViewType();
+		void Server_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
+	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
 
 	virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
@@ -76,15 +79,18 @@ protected:
 	AWeapon* CanInteractWeapon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-		float InteractionDistance = 225.f;
+		float InteractionDistance = 225.f; // 장착가능한 무기를 찾는 거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-		float InteractionRadius = 25.f;
+		float InteractionRadius = 25.f; // 장착가능한 무기를 찾는 범위의 반지름
 
-	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson;
-	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson;
-	FVector SpringArmBasicLocation;
-	FVector SpringArmAdditiveLocation;
+	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
+	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트
+	FVector SpringArmBasicLocation; // 기본적으로 적용할 SprintArm의 RelativeLocation
+	FVector SpringArmAdditiveLocation; // 추가적으로 적용할 SprintArm의 RelativeLocation
 
 	FTimerHandle UnEquipWeaponTimerHandle;
-	float UnEquipWeaponThrowPower = 500.f;
+	float UnEquipWeaponThrowPower = 500.f; // 장착해제된 무기를 던지는 힘
+		void SetUnEquipWeaponThrowPower(float Value);
+	UFUNCTION(Server, reliable)
+		void Server_SetUnEquipWeaponThrowPower(float Value);
 };

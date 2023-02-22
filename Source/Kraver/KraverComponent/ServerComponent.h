@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "ServerComponent.generated.h"
 
-
+// 서버에서 호출되는 함수를 가지는 컴포넌트
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class KRAVER_API UServerComponent : public UActorComponent
 {

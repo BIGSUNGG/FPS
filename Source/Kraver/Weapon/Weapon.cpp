@@ -18,7 +18,7 @@ AWeapon::AWeapon()
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
 	WeaponMesh->SetCollisionProfileName(FName("WeaponMesh"));
 	WeaponMesh->SetSimulatePhysics(true);
-	WeaponMesh->bReplicatePhysicsToAutonomousProxy = false;
+	WeaponMesh->bReplicatePhysicsToAutonomousProxy = true;
 	SetRootComponent(WeaponMesh);
 
 }
@@ -36,7 +36,6 @@ float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
-		UE_LOG(LogTemp,Log,TEXT("H"));
 		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
 		if(Weapon)
@@ -126,7 +125,7 @@ int32 AWeapon::FindAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 	return Index;
 }
 
-bool AWeapon::Reload()
+bool AWeapon::RefillAmmo()
 {
 	return false;
 }

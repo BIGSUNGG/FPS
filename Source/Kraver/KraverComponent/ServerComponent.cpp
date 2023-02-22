@@ -80,7 +80,7 @@ void UServerComponent::AddImpulse(UPrimitiveComponent* Component, FVector Direct
 void UServerComponent::AddImpulseAtLocation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName /*= NAME_None*/)
 {
 	Component->AddImpulseAtLocation(Direction, Location, BoneName);
-	if(GetOwner()->HasAuthority() == false)
+	if (GetOwner()->HasAuthority() == false)
 		Server_AddImpulseAtLocation(Component, Direction, Location, BoneName);
 }
 

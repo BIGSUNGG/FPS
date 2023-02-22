@@ -9,6 +9,7 @@
 #include "Engine/DamageEvents.h"
 #include "Creature.generated.h"
 
+// 캐릭터의 움직임 상태를 가지는 enum class
 UENUM(BlueprintType)
 enum class EMovementState : uint8
 {
@@ -71,33 +72,34 @@ protected:
 	virtual void JumpingButtonPressed();
 	virtual void JumpingButtonReleased();
 
+	// Tick함수에서 호출될 함수
 	virtual void AimOffset(float DeltaTime);
 
 protected:
 	// Delegate Event
 	UFUNCTION()
-		virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon);
+		virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 호출되는 함수
 	UFUNCTION()
-		virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon);
+		virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 호출되는 함수
 	UFUNCTION()
-		virtual void OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+		virtual void OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 호출되는 함수
 	UFUNCTION()
-		void Landed(const FHitResult& Hit) override;
-	void OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust) override;
+		void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
+	void OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust) override; // 일어났을때 호출되는 함수
 
 	// RPC
 	UFUNCTION(Server, reliable)
-		void Server_OnEquipWeaponSuccessEvent(AWeapon* Weapon);
+		void Server_OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 서버에서 호출되는 함수
 	UFUNCTION(Server, reliable)
-		void Server_OnUnEquipWeaponSuccessEvent(AWeapon* Weapon);
+		void Server_OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
 	UFUNCTION(Server, reliable)
-		void Server_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+		void Server_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
 	UFUNCTION(NetMulticast, reliable)
-		void Multicast_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+		void Multicast_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 모든 클라이언트에서 호출되는 함수
 	UFUNCTION(Server, reliable)
-		void Server_Landed(const FHitResult& Hit);
+		void Server_Landed(const FHitResult& Hit); // 착지했을때 서버에서 호출되는 함수 
 	UFUNCTION(NetMulticast, reliable)
-		void Multicast_Landed(const FHitResult& Hit);
+		void Multicast_Landed(const FHitResult& Hit); // 착지했을때 모든 클라이언트에서 호출되는 함수
 public:
 	// Component
 	UServerComponent* ServerComponent;
@@ -126,12 +128,12 @@ protected:
 	bool IsCrouching = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		float SprintSpeed = 1200.f;
+		float SprintSpeed = 1200.f; // EMovementState가 SPRINT가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		float RunSpeed = 800.f;
+		float RunSpeed = 800.f; // EMovementState가 RUN가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		float WalkSpeed = 800.f;
+		float WalkSpeed = 800.f; // EMovementState가 WALK가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		float CrouchSpeed = 200.f;
+		float CrouchSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
 
 }; 

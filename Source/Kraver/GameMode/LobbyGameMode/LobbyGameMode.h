@@ -16,6 +16,6 @@ class KRAVER_API ALobbyGameMode : public AKraverGameMode
 	GENERATED_BODY()
 
 public:
-	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void PostLogin(APlayerController* NewPlayer) override; // 플레이어가 들어오면 호출되는 함수
 	
 };

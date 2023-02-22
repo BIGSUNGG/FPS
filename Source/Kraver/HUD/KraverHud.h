@@ -7,6 +7,7 @@
 #include "Kraver/HUD/InteractionWidget.h"
 #include "KraverHUD.generated.h"
 
+// 크로스헤어의 이미지를 가지는 구조체
 USTRUCT(BlueprintType)
 struct FCrosshairsPackage
 {
@@ -31,17 +32,17 @@ public:
 	virtual void BeginPlay() override;
 
 private:
-	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter);
+	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter); // 크로스헤어 이미지 하나를 렌더링
 
 public:
 	// Getter Setter
-	FORCEINLINE void SetCrosshairsPackage(const FCrosshairsPackage& Package) { HUDPackage = Package; }
-	void SetInteractWidget(bool value);
+	FORCEINLINE void SetCrosshairsPackage(const FCrosshairsPackage& Package) { HUDPackage = Package; } // HUDPackage를 설정하는 함수
+	void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
 private:
 	FCrosshairsPackage HUDPackage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<class UUserWidget> InteractionWidgetClass;
+		TSubclassOf<class UUserWidget> InteractionWidgetClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-		UUserWidget* InteractionWidget;
+		UUserWidget* InteractionWidget; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
 };

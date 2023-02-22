@@ -58,6 +58,24 @@ float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	float Damage = CombatComponent->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+		AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
+		if (Weapon && CombatComponent->IsDead())
+		{
+			ServerComponent->AddImpulseAtLocation
+			(
+				GetMesh(),
+				PointDamageEvent->ShotDirection * Weapon->GetAttackImpulse() * GetMesh()->GetMass(),
+				PointDamageEvent->HitInfo.ImpactPoint
+			);
+		}
+	}
+	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	{
+		const FRadialDamageEvent* RadialDamageEvent = static_cast<const FRadialDamageEvent*>(&DamageEvent);
+	}
 	return Damage;
 }
 
@@ -154,7 +172,7 @@ void ACreature::Turn(float NewAxisValue)
 void ACreature::ReloadButtonPressed()
 {
 	UE_LOG(LogTemp, Log, TEXT("Reload"));
-	CombatComponent->Reload();
+	CombatComponent->RefillAmmo();
 }
 
 void ACreature::AttackButtonPressed()
@@ -301,8 +319,10 @@ void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-	CreatureAnim->PlayDeathMontage();
+	ServerComponent->SetSimulatedPhysics(GetMesh(), true);
+	DisableInput(GetController<APlayerController>());
+	if (CombatComponent->GetCurWeapon() != nullptr)
+		CombatComponent->UnEquipWeapon(CombatComponent->GetCurWeapon());
 	Server_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
@@ -332,8 +352,6 @@ void ACreature::Server_OnDeathEvent_Implementation(float DamageAmount, FDamageEv
 
 void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-	CreatureAnim->PlayDeathMontage();
 }
 
 void ACreature::Server_Landed_Implementation(const FHitResult& Hit)

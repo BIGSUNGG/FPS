@@ -23,8 +23,8 @@ protected:
 	ASoldier* Soldier;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = true))
-		bool IsEquippingWeapon;
+		bool IsEquippingWeapon; // 캐릭터가 무기를 장착하고 있는지 여부
 
 	UPROPERTY(BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
-		FTransform LeftHandTransform;
+		FTransform LeftHandTransform; // 왼쪽손에 적용할 트랜스폼
 };

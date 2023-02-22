@@ -67,6 +67,17 @@ void AKraverPlayer::Server_SetViewType_Implementation(EViewType Type)
 	ViewType = Type;
 }
 
+void AKraverPlayer::SetUnEquipWeaponThrowPower(float Value)
+{
+	UnEquipWeaponThrowPower = Value;
+	Server_SetUnEquipWeaponThrowPower(Value);
+}
+
+void AKraverPlayer::Server_SetUnEquipWeaponThrowPower_Implementation(float Value)
+{
+	UnEquipWeaponThrowPower = Value;
+}
+
 void AKraverPlayer::EquipButtonPressed()
 {
 	if (CombatComponent->GetCurWeapon() == nullptr)
@@ -111,6 +122,7 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 				auto Weapon = Cast<AWeapon>(Result.GetActor());
 				if(Weapon && Weapon->GetCanInteracted() && CombatComponent->GetCanEquipWeapon())
 				{ 
+					// 찾는 범위에 있는 오브젝트 사이에 다른 오브젝트가 있는지
 					FHitResult ObjectHitResult;
 					FCollisionQueryParams ObjectParams(NAME_None, false, this);
 					bool bObjectResult = GetWorld()->LineTraceSingleByChannel(
@@ -186,6 +198,11 @@ void AKraverPlayer::ChangeView()
 	default:
 		break;
 	}
+}
+
+void AKraverPlayer::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	ASoldier::OnDeathEvent(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
 }
 
 void AKraverPlayer::RefreshSpringArm()
@@ -292,33 +309,36 @@ void AKraverPlayer::SetMovementState(EMovementState value)
 void AKraverPlayer::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
 	ASoldier::Server_OnUnEquipWeaponSuccessEvent_Implementation(Weapon);
-
-	switch (ViewType)
+	
+	if (CombatComponent->IsDead() == false)
 	{
-	case EViewType::FIRST_PERSON:
-		if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == true)
+		switch (ViewType)
 		{
-			ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
-			ServerComponent->AttachComponentToComponent(Weapon->GetWeaponMesh(), ArmWeaponMesh);
-			GetWorldTimerManager().SetTimer(
-				UnEquipWeaponTimerHandle,
-				[=]() {
-					Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-					ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(),true);
-					ServerComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
-					ServerComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
-				},
-				0.000001f,
-				false);
+		case EViewType::FIRST_PERSON:
+			if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == true)
+			{
+				ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
+				ServerComponent->AttachComponentToComponent(Weapon->GetWeaponMesh(), ArmWeaponMesh);
+				GetWorldTimerManager().SetTimer(
+					UnEquipWeaponTimerHandle,
+					[=]() {
+						Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+				ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
+				ServerComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
+				ServerComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
+					},
+					0.000001f,
+						false);
+			}
+			break;
+		case EViewType::THIRD_PERSON:
+			Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
+			Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, true);
+			break;
+		default:
+			UE_LOG(LogTemp, Fatal, TEXT("Need to support more EViewType"));
+			break;
 		}
-		break;
-	case EViewType::THIRD_PERSON:
-		Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
-		Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, true);
-		break;
-	default:
-		UE_LOG(LogTemp, Fatal, TEXT("Need to support more EViewType"));
-		break;
 	}
 }
 

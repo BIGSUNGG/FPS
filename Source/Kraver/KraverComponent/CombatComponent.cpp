@@ -95,10 +95,17 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void UCombatComponent::Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	UE_LOG(LogTemp, Log, TEXT("Death"));
-	if(CurWeapon != nullptr)
-		UnEquipWeapon(CurWeapon);
 
+	Server_CurHp(CurHp);
 	OnDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+bool UCombatComponent::IsDead()
+{
+	if(CurHp <= 0.f)
+		return true;
+
+	return false;
 }
 
 // Called every frame
@@ -111,12 +118,12 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		SetHUDCrosshairs(DeltaTime);
 }
 
-void UCombatComponent::Reload()
+void UCombatComponent::RefillAmmo()
 {
 	if(!CurWeapon)
 		return;
 
-	CurWeapon->Reload();
+	CurWeapon->RefillAmmo();
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* Weapon)
@@ -243,8 +250,8 @@ void UCombatComponent::Client_TakeDamage_Implementation(float DamageAmount, FDam
 		Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	}
 
-	OnTakeDamaged.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	Server_CurHp(CurHp);
+	OnTakeDamaged.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void UCombatComponent::Server_TakePointDamage_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
