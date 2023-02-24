@@ -26,6 +26,7 @@ ACreature::ACreature()
 	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnEquipWeaponSuccessEvent);
 	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnUnEquipWeaponSuccessEvent);
 	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnUnEquipWeaponSuccessEvent);
+	CombatComponent->OnAfterTakePointDamage.AddDynamic(this, &ACreature::OnAfterTakePointDamageEvent);
 
 	SpringArm->SetupAttachment(GetCapsuleComponent());
 	SpringArm->bUsePawnControlRotation = true;
@@ -58,24 +59,6 @@ float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	float Damage = CombatComponent->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
-	{
-		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
-		AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
-		if (Weapon && CombatComponent->IsDead())
-		{
-			ServerComponent->AddImpulseAtLocation
-			(
-				GetMesh(),
-				PointDamageEvent->ShotDirection * Weapon->GetAttackImpulse() * GetMesh()->GetMass(),
-				PointDamageEvent->HitInfo.ImpactPoint
-			);
-		}
-	}
-	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
-	{
-		const FRadialDamageEvent* RadialDamageEvent = static_cast<const FRadialDamageEvent*>(&DamageEvent);
-	}
 	return Damage;
 }
 
@@ -171,16 +154,13 @@ void ACreature::Turn(float NewAxisValue)
 
 void ACreature::ReloadButtonPressed()
 {
-	UE_LOG(LogTemp, Log, TEXT("Reload"));
 	CombatComponent->RefillAmmo();
 }
 
 void ACreature::AttackButtonPressed()
 {
-	UE_LOG(LogTemp, Log, TEXT("AttackStartPress"));
 	if (GetCanAttack())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Cant Attack"));
 		CombatComponent->SetIsAttacking(true);
 	}
 
@@ -188,14 +168,11 @@ void ACreature::AttackButtonPressed()
 
 void ACreature::AttackButtonReleased()
 {
-	UE_LOG(LogTemp, Log, TEXT("AttackEndPress"));
 	CombatComponent->SetIsAttacking(false);
 }
 
 void ACreature::RunButtonPressed()
 {
-	UE_LOG(LogTemp, Log, TEXT("Run"));
-
 	if (IsRunning)
 	{
 		IsRunning = false;
@@ -208,7 +185,6 @@ void ACreature::RunButtonPressed()
 
 void ACreature::CrouchButtonPressed()
 {
-	UE_LOG(LogTemp, Log, TEXT("Crouch"));
 	if(GetCharacterMovement()->IsFalling())
 		return;
 
@@ -220,7 +196,6 @@ void ACreature::CrouchButtonPressed()
 
 void ACreature::JumpingButtonPressed()
 {
-	UE_LOG(LogTemp, Log, TEXT("Jump"));
 	if(GetMovementComponent()->IsCrouching())
 		CrouchButtonPressed();
 
@@ -333,6 +308,20 @@ void ACreature::Landed(const FHitResult& Hit)
 	CreatureAnim->PlayLandedMontage();
 
 	Server_Landed(Hit);
+}
+
+void ACreature::OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
+	if (Weapon && CombatComponent->IsDead())
+	{
+		ServerComponent->AddImpulseAtLocation
+		(
+			GetMesh(),
+			DamageEvent.ShotDirection * Weapon->GetAttackImpulse() * GetMesh()->GetMass(),
+			DamageEvent.HitInfo.ImpactPoint
+		);
+	}
 }
 
 void ACreature::OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust)

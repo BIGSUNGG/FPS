@@ -93,10 +93,10 @@ void AGun::Attack()
 		if(!HasAuthority())
 			Server_SetCurAmmo(CurAmmo);
 
-		FHitResult BulletHitResult;
+		TArray<FHitResult> BulletHitResults;
 		FCollisionQueryParams BulletParams(NAME_None, false, OwnerCreature);
-		bool bResult = GetWorld()->SweepSingleByChannel(
-			BulletHitResult,
+		bool bResult = GetWorld()->SweepMultiByChannel(
+			BulletHitResults,
 			OwnerCreature->GetCamera()->GetComponentLocation(),
 			OwnerCreature->GetCamera()->GetComponentLocation() + OwnerCreature->GetCamera()->GetForwardVector() * BulletDistance,
 			FQuat::Identity,
@@ -105,12 +105,24 @@ void AGun::Attack()
 			BulletParams
 		);
 
-		if (bResult && IsValid(BulletHitResult.GetActor()))
+		if (bResult)
 		{
-			FPointDamageEvent damageEvent;
-			damageEvent.HitInfo = BulletHitResult;
-			damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
-			OwnerCreature->CombatComponent->GiveDamage(BulletHitResult.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);
+			for (auto& Result : BulletHitResults)
+			{
+				auto Creature = Cast<ACreature>(Result.GetActor());
+				if(IsValid(Result.GetActor()))
+				{
+					if(Creature == nullptr || (Creature != nullptr && Creature->CombatComponent->IsDead() == false))
+					{ 
+						FPointDamageEvent damageEvent;
+						damageEvent.HitInfo = Result;
+						damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
+						OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);
+						break;
+					}
+				}
+			}
+	
 		}
 		ShowFireEffect();
 	}

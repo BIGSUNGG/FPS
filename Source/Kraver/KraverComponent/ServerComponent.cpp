@@ -79,9 +79,10 @@ void UServerComponent::AddImpulse(UPrimitiveComponent* Component, FVector Direct
 
 void UServerComponent::AddImpulseAtLocation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName /*= NAME_None*/)
 {
-	Component->AddImpulseAtLocation(Direction, Location, BoneName);
 	if (GetOwner()->HasAuthority() == false)
 		Server_AddImpulseAtLocation(Component, Direction, Location, BoneName);
+	else
+		Multicast_AddImpulseAtLocation(Component, Direction, Location, BoneName);
 }
 
 void UServerComponent::SetLocation(UPrimitiveComponent* Component, FVector Location)
@@ -126,7 +127,7 @@ void UServerComponent::Server_AddImpulse_Implementation(UPrimitiveComponent* Com
 
 void UServerComponent::Server_AddImpulseAtLocation_Implementation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName /*= NAME_None*/)
 {
-	Component->AddImpulseAtLocation(Direction, Location, BoneName);
+	Multicast_AddImpulseAtLocation(Component, Direction, Location, BoneName);
 }
 
 void UServerComponent::Server_SetSimulatedPhysics_Implementation(UPrimitiveComponent* Component, bool bSimulated)
@@ -179,6 +180,11 @@ void UServerComponent::Multicast_AttachComponentToComponent_Implementation(UScen
 void UServerComponent::Multicast_SetSimulatedPhysics_Implementation(UPrimitiveComponent* Component, bool bSimulated)
 {
 	Component->SetSimulatePhysics(bSimulated);
+}
+
+void UServerComponent::Multicast_AddImpulseAtLocation_Implementation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName /*= NAME_None*/)
+{
+	Component->AddImpulseAtLocation(Direction,Location,BoneName);
 }
 
 void UServerComponent::Client_PlayMontage_Implementation(UAnimInstance* Anim, UAnimMontage* Montage, float Speed /*= 1.f*/)

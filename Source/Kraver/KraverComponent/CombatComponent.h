@@ -25,6 +25,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FServerUnEquipWeaponSuccessDele, AWe
 
 // Damaged Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakeDamageDele, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakePointDamageDele, float, DamageAmount, FPointDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakeRadialDamageDele, float, DamageAmount, FRadialDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FDeathDele, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
 
 // 무기와 전투에 관련된 컴포넌트
@@ -36,7 +38,7 @@ class KRAVER_API UCombatComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UCombatComponent();
-	float CalculateDamage(float DamageAmount); // 해당 컴포넌트가 받을 데미지를 계산
+	float CalculateDamage(float DamageAmount, FDamageEvent const& DamageEvent); // 해당 컴포넌트가 받을 데미지를 계산
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -59,8 +61,8 @@ public:
 	virtual void RefillAmmo(); // 재장전하는 함수
 	virtual void EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
 	virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수
-	virtual float GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 주는 함수
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
+	virtual float GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 주는 함수 (클라이언트에서 서버로 GiveDamage이벤트 호출)
 
 protected:
 	UFUNCTION(Server, reliable)
@@ -68,19 +70,22 @@ protected:
 	UFUNCTION(Server, reliable)
 		void Server_UnEquipWeapon(AWeapon* Weapon);
 
+	// Take Damage
 	UFUNCTION(Server, reliable)
 		void Server_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Client, reliable)
-		void Client_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 	UFUNCTION(Server, reliable)
 		void Server_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Client, reliable)
-		void Client_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 	UFUNCTION(Server, reliable)
 		void Server_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+
+	UFUNCTION(Client, reliable)
+		void Client_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 	UFUNCTION(Client, reliable)
 		void Client_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(Client, reliable)
+		void Client_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
+	// Give Damage
 	UFUNCTION(Server, reliable)
 		void Server_GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 	UFUNCTION(Server, reliable)
@@ -100,7 +105,9 @@ public:
 	FUnEquipWeaponSuccessDele OnUnEquipWeaponSuccess; // 무기를 해제했을때 호출
 	FServerUnEquipWeaponSuccessDele OnServerUnEquipWeaponSuccess;
 
-	FTakeDamageDele OnTakeDamaged; // 데미지를 받았을때 호출
+	FTakeDamageDele OnAfterTakeDamage; // 데미지를 받았을때 호출
+	FTakePointDamageDele OnAfterTakePointDamage;
+	FTakeRadialDamageDele OnAfterTakeRadialDamge;
 	FDeathDele OnDeath; // 죽었을때 호출
 
 protected:

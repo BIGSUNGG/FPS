@@ -208,7 +208,6 @@ void AWeapon::AttackStartEvent()
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("AttackStart"));
 	IsAttacking = true;
 	if(bFirstAttackDelay == false)
 		Attack();
@@ -222,7 +221,6 @@ void AWeapon::AttackEndEvent()
 	if(IsAttacking == false)
 		return;
 
-	UE_LOG(LogTemp, Log, TEXT("AttackEnd"));
 	IsAttacking = false;
 	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle);
 }

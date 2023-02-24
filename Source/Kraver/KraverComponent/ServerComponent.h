@@ -68,6 +68,8 @@ private:
 		void Multicast_AttachComponentToComponent(USceneComponent* Child, USceneComponent* Parent, FName BoneName = NAME_None);
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_AddImpulseAtLocation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName = NAME_None);
 
 private:
 	// Client
