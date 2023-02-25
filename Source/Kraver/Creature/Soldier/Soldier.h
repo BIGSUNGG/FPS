@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "EngineMinimal.h"
 #include "Kraver/Creature/Creature.h"
 #include "Soldier.generated.h"
 

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "EngineMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "Kraver/GameMode/KraverGameMode.h"
 #include "LobbyGameMode.generated.h"

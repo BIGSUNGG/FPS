@@ -15,17 +15,17 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		if (World)
 		{
 			bUseSeamlessTravel = false;
-			UE_LOG(LogTemp, Log, TEXT("Try to change Map"));
+			KR_LOG(Log, TEXT("Try to change Map"));
 			bool Success = World->ServerTravel(FString("/Game/ProjectFile/Maps/GameStartMap?listen")); // 맵 변경
 			if(Success)
 			{ 
-				UE_LOG(LogTemp, Log, TEXT("Success to change Map"));
+				KR_LOG(Log, TEXT("Success to change Map"));
 			}
 			else
 			{
-				UE_LOG(LogTemp, Log, TEXT("Failed to change Map"));				
+				KR_LOG(Log, TEXT("Failed to change Map"));
 			}
 		}
 	}
-	UE_LOG(LogTemp, Log, TEXT("Enter Player %s"),*NewPlayer->GetName());
+	KR_LOG(Log, TEXT("Enter Player %s"), *NewPlayer->GetName());
 }

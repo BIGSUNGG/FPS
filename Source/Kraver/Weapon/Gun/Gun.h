@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "EngineMinimal.h"
 #include "Kraver/Weapon/Weapon.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"

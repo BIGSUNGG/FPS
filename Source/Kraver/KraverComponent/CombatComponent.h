@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "EngineMinimal.h"
+#include "Kraver/Kraver.h"
 #include "Components/ActorComponent.h"
 #include "Kraver/Weapon/Weapon.h"
 #include "Engine/DamageEvents.h"
@@ -28,6 +28,11 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakeDamageDele, float, DamageAmou
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakePointDamageDele, float, DamageAmount, FPointDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakeRadialDamageDele, float, DamageAmount, FRadialDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FDeathDele, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
+
+// GiveDamage Delegate
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FGiveDamageDele, AActor*, DamagedActor, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FGivePointDamageDele, AActor*, DamagedActor, float, DamageAmount, FPointDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FGiveRadialDamageDele, AActor*, DamagedActor, float, DamageAmount, FRadialDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
 
 // 무기와 전투에 관련된 컴포넌트
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -92,6 +97,13 @@ protected:
 		void Server_GivePointDamage(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 	UFUNCTION(Server, reliable)
 		void Server_GiveRadialDamage(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+
+	// Death
+	UFUNCTION(Server, reliable)
+		void Server_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을경우 호출
+	UFUNCTION(Client, reliable)
+		void Client_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을경우 호출
+
 public:
 	// Getter Setter
 	void SetIsAttacking(bool bAttack);
@@ -110,6 +122,10 @@ public:
 	FTakeRadialDamageDele OnAfterTakeRadialDamge;
 	FDeathDele OnDeath; // 죽었을때 호출
 
+	FGiveDamageDele OnGiveDamage;
+	FGivePointDamageDele OnGivePointDamage;
+	FGiveRadialDamageDele OnGiveRadialDamage;
+
 protected:
 	ACreature* OwnerCreature;
 	AKraverPlayer* OwnerPlayer;
@@ -121,10 +137,12 @@ protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 		int32 CurHp = 100.f; // 현재 Hp
 	UFUNCTION(Server, reliable)
-		void Server_CurHp(int32 value);
+		void Server_SetCurHp(int32 value);
+	UFUNCTION(NetMulticast, reliable)
+		void Multicast_SetCurHp(int32 value);
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 		int32 MaxHp = 100.f; // 최대 Hp
 	UFUNCTION(Server, reliable)
-		void Server_MaxHp(int32 value);
+		void Server_SetMaxHp(int32 value);
 
 };

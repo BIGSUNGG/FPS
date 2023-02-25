@@ -318,7 +318,7 @@ void ACreature::OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEven
 		ServerComponent->AddImpulseAtLocation
 		(
 			GetMesh(),
-			DamageEvent.ShotDirection * Weapon->GetAttackImpulse() * GetMesh()->GetMass(),
+			DamageEvent.ShotDirection * Weapon->GetAttackImpulse() * GetMesh()->GetMass() * ImpulseResistanceRatio,
 			DamageEvent.HitInfo.ImpactPoint
 		);
 	}

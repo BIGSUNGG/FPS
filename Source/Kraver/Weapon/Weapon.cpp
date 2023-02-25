@@ -229,6 +229,5 @@ void AWeapon::Attack()
 {
 	if(IsAttacking == false)
 		return;
-	UE_LOG(LogTemp, Log, TEXT("Fire"));
 	CurAttackDelay = AttackDelay;
 }

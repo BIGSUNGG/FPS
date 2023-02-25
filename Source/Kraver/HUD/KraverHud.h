@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "EngineMinimal.h"
+#include "Kraver/Kraver.h"
 #include "GameFramework/HUD.h"
 #include "Kraver/HUD/InteractionWidget.h"
 #include "KraverHUD.generated.h"

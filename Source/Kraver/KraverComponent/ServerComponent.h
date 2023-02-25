@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "EngineMinimal.h"
+#include "Kraver/Kraver.h"
 #include "Components/ActorComponent.h"
 #include "ServerComponent.generated.h"
 

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "EngineMinimal.h"
+#include "Kraver/Kraver.h"
 #include "Animation/AnimInstance.h"
 #include "Kraver/Creature/Creature.h"
 #include "CreatureAnimInstance.generated.h"

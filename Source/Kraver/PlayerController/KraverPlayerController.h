@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Kraver/Kraver.h"
 #include "GameFramework/PlayerController.h"
 #include "KraverPlayerController.generated.h"
 

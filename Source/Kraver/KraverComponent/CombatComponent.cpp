@@ -65,20 +65,23 @@ float UCombatComponent::GiveDamage(AActor* DamagedActor, float DamageAmount, FDa
 	else
 		Damage = DamageAmount;
 
-	UE_LOG(LogTemp, Log, TEXT("Give %f Damge to %s"),Damage,*DamagedActor->GetName());
+	KR_LOG(Log, TEXT("Give %f Damge to %s"), Damage, *DamagedActor->GetName());
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		Server_GivePointDamage(DamagedActor, DamageAmount, *PointDamageEvent, EventInstigator, DamageCauser);
+		OnGivePointDamage.Broadcast(DamagedActor, DamageAmount, *PointDamageEvent, EventInstigator, DamageCauser);
 	}
 	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
 	{
 		const FRadialDamageEvent* RadialDamageEvent = static_cast<const FRadialDamageEvent*>(&DamageEvent);
 		Server_GiveRadialDamage(DamagedActor, DamageAmount, *RadialDamageEvent, EventInstigator, DamageCauser);
+		OnGiveRadialDamage.Broadcast(DamagedActor, DamageAmount, *RadialDamageEvent, EventInstigator, DamageCauser);
 	}
 	else
 	{
 		Server_GiveDamage(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+		OnGiveDamage.Broadcast(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	}
 	return Damage;
 }
@@ -108,10 +111,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 void UCombatComponent::Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	UE_LOG(LogTemp, Log, TEXT("Dead By %s"),*DamageCauser->GetName());
-
-	Server_CurHp(CurHp);
-	OnDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Server_Death(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
 }
 
 bool UCombatComponent::IsDead()
@@ -228,12 +228,18 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	}
 }
 
-void UCombatComponent::Server_CurHp_Implementation(int32 value)
+void UCombatComponent::Server_SetCurHp_Implementation(int32 value)
+{
+	CurHp = value;
+	Multicast_SetCurHp(value);
+}
+
+void UCombatComponent::Multicast_SetCurHp_Implementation(int32 value)
 {
 	CurHp = value;
 }
 
-void UCombatComponent::Server_MaxHp_Implementation(int32 value)
+void UCombatComponent::Server_SetMaxHp_Implementation(int32 value)
 {
 	MaxHp = value;
 }
@@ -249,61 +255,62 @@ void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 
 void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	float Damage = CalculateDamage(DamageAmount, DamageEvent);
+	KR_LOG(Log, TEXT("Take %f Damage by %s"), Damage, *DamageCauser->GetName());
+	CurHp -= Damage;
+	if (CurHp <= 0)
+	{
+		CurHp = 0;
+		Server_SetCurHp(CurHp);
+		Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	}
+	Server_SetCurHp(CurHp);
 	Client_TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
-void UCombatComponent::Client_TakeDamage_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	float Damage = CalculateDamage(DamageAmount, DamageEvent);
-	UE_LOG(LogTemp, Log, TEXT("Take %f Damage by %s"), Damage,*DamageCauser->GetName());
-	CurHp -= Damage;
-	if (CurHp <= 0)
-	{
-		CurHp = 0;
-		Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	}
-
-	Server_CurHp(CurHp);
-	OnAfterTakeDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-}
 
 void UCombatComponent::Server_TakePointDamage_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	Client_TakePointDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-}
-
-void UCombatComponent::Client_TakePointDamage_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
 	float Damage = CalculateDamage(DamageAmount, DamageEvent);
-	UE_LOG(LogTemp, Log, TEXT("Take %f Damage by %s"), Damage, *DamageCauser->GetName());
+	KR_LOG(Log, TEXT("Take %f Damage by %s"), Damage, *DamageCauser->GetName());
 	CurHp -= Damage;
 	if (CurHp <= 0)
 	{
 		CurHp = 0;
+		Server_SetCurHp(CurHp);
 		Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	}
-
-	Server_CurHp(CurHp);
-	OnAfterTakePointDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Server_SetCurHp(CurHp);
+	Client_TakePointDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void UCombatComponent::Server_TakeRadialDamage_Implementation(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	Client_TakeRadialDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-}
-
-void UCombatComponent::Client_TakeRadialDamage_Implementation(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
 	float Damage = CalculateDamage(DamageAmount, DamageEvent);
-	UE_LOG(LogTemp, Log, TEXT("Take %f Damage by %s"), Damage, *DamageCauser->GetName());
+	KR_LOG(Log, TEXT("Take %f Damage by %s"), Damage, *DamageCauser->GetName());
 	CurHp -= Damage;
 	if (CurHp <= 0)
 	{
 		CurHp = 0;
+		Server_SetCurHp(CurHp);
 		Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	}
+	Server_SetCurHp(CurHp);
+	Client_TakeRadialDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
 
-	Server_CurHp(CurHp);
+void UCombatComponent::Client_TakeDamage_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	OnAfterTakeDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void UCombatComponent::Client_TakePointDamage_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	OnAfterTakePointDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void UCombatComponent::Client_TakeRadialDamage_Implementation(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
 	OnAfterTakeRadialDamge.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
@@ -320,4 +327,16 @@ void UCombatComponent::Server_GivePointDamage_Implementation(AActor* DamagedActo
 void UCombatComponent::Server_GiveRadialDamage_Implementation(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float Damage = DamagedActor->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void UCombatComponent::Server_Death_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Client_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void UCombatComponent::Client_Death_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	KR_LOG(Log, TEXT("Dead By %s"), *DamageCauser->GetName());
+	Server_SetCurHp(CurHp);
+	OnDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }

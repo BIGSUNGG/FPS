@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "EngineMinimal.h"
+#include "Kraver/Kraver.h"
 #include "GameFramework/Character.h"
 #include "Kraver/KraverComponent/CombatComponent.h"
 #include "Kraver/KraverComponent/ServerComponent.h"
@@ -138,5 +138,6 @@ protected:
 		float WalkSpeed = 800.f; // EMovementState가 WALK가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float CrouchSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
+		float ImpulseResistanceRatio = 0.5f;
 }; 
