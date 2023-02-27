@@ -55,7 +55,6 @@ public:
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 	FORCEINLINE EMovementState GetMovementState() { return MovementState; }
 
-	void SetIsSprint(bool value);
 protected:
 	// Axis Input
 	virtual void MoveForward(float NewAxisValue);
@@ -114,8 +113,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CAMERA, meta = (AllowPrivateAccess = "true"))
 		USpringArmComponent* SpringArm;
 
-	float AO_Yaw;
-	float AO_Pitch;
+	UPROPERTY(Replicated)
+		float AO_Yaw;
+	void SetAO_Yaw(float value);
+	UFUNCTION(Server, reliable)
+		void Server_SetAO_Yaw(float value);
+	UPROPERTY(Replicated)
+		float AO_Pitch;
+	void SetAO_Pitch(float value);
+	UFUNCTION(Server, reliable)
+		void Server_SetAO_Pitch(float value);
 	FRotator StartingAimRotation;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
@@ -124,8 +131,11 @@ protected:
 	UFUNCTION(Server, reliable)
 		void Server_SetMovementState(EMovementState value);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated , VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		bool IsJumping = false;
+	void SetIsJumping(bool value);
+	UFUNCTION(Server, reliable)
+		void Server_SetIsJumping(bool value);
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		bool IsRunning = false;
 	bool IsCrouching = false;
@@ -139,5 +149,5 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float CrouchSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		float ImpulseResistanceRatio = 0.5f;
+		float ImpulseResistanceRatio = 1.f;
 }; 

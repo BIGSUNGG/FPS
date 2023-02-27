@@ -52,6 +52,9 @@ void ACreature::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACreature, MovementState);
+	DOREPLIFETIME(ACreature, IsJumping);
+	DOREPLIFETIME(ACreature, AO_Pitch);
+	DOREPLIFETIME(ACreature, AO_Yaw);
 }
 
 float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -78,9 +81,6 @@ void ACreature::PostInitializeComponents()
 void ACreature::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (IsJumping && GetCharacterMovement()->IsFalling() == false)
-		IsJumping = false;
 	
 	AimOffset(DeltaTime);
 }
@@ -199,7 +199,7 @@ void ACreature::JumpingButtonPressed()
 	if(GetMovementComponent()->IsCrouching())
 		CrouchButtonPressed();
 
-	IsJumping = true;
+	SetIsJumping(true);
 	Jump();
 }
 
@@ -213,20 +213,34 @@ void ACreature::JumpingButtonReleased()
 
 void ACreature::AimOffset(float DeltaTime)
 {
-	{
-		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		AO_Yaw = 0.f;
-		bUseControllerRotationYaw = true;
-	}
+	if(!IsLocallyControlled())
+		return;
 
-	AO_Pitch = GetBaseAimRotation().Pitch;
-	if (AO_Pitch > 90.f && !IsLocallyControlled())
-	{
-		// map pitch from [270, 360) to [-90, 0)
-		FVector2D InRange(270.f, 360.f);
-		FVector2D OutRange(-90.f, 0.f);
-		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
-	}
+	FRotator Rotator = Camera->GetComponentRotation() - GetMesh()->GetComponentRotation();
+	SetAO_Pitch(Rotator.Pitch);
+	SetAO_Yaw(Rotator.Yaw - 90.f);
+}
+
+void ACreature::SetAO_Yaw(float value)
+{
+	AO_Yaw = value;
+	Server_SetAO_Yaw(value);
+}
+
+void ACreature::Server_SetAO_Yaw_Implementation(float value)
+{
+	AO_Yaw = value;
+}
+
+void ACreature::SetAO_Pitch(float value)
+{
+	AO_Pitch = value;
+	Server_SetAO_Pitch(value);
+}
+
+void ACreature::Server_SetAO_Pitch_Implementation(float value)
+{
+	AO_Pitch = value;
 }
 
 void ACreature::SetMovementState(EMovementState value)
@@ -268,6 +282,17 @@ void ACreature::Server_SetMovementState_Implementation(EMovementState value)
 	}
 }
 
+void ACreature::SetIsJumping(bool value)
+{
+	IsJumping = value;
+	Server_SetIsJumping(value);
+}
+
+void ACreature::Server_SetIsJumping_Implementation(bool value)
+{
+	IsJumping = value;
+}
+
 void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	if (Weapon == nullptr)
@@ -298,6 +323,9 @@ void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent
 	DisableInput(GetController<APlayerController>());
 	if (CombatComponent->GetCurWeapon() != nullptr)
 		CombatComponent->UnEquipWeapon(CombatComponent->GetCurWeapon());
+	ServerComponent->SetCollisionProfileName(GetCapsuleComponent(), FName("DeadPawn"));
+	ServerComponent->SetCollisionProfileName(GetMesh(), FName("Ragdoll"));
+
 	Server_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
@@ -307,6 +335,7 @@ void ACreature::Landed(const FHitResult& Hit)
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
 	CreatureAnim->PlayLandedMontage();
 
+	SetIsJumping(false);
 	Server_Landed(Hit);
 }
 

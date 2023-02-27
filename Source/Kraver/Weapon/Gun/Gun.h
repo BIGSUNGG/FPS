@@ -46,6 +46,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
 		UNiagaraComponent* FireEffect; // 공격하였을때 실행되는 이펙트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
+		UNiagaraComponent* ImpactEffect; // Bullet이 Block되었을때 실행되는 이펙트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
 		FName FireEffectSocketName = "SOCKET_Muzzle"; // FireEffect가 붙을 WeaponMesh의 소켓이름

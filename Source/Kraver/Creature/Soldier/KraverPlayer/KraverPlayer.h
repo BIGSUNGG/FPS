@@ -78,7 +78,7 @@ protected:
 	AWeapon* CanInteractWeapon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-		float InteractionDistance = 225.f; // 장착가능한 무기를 찾는 거리
+		float InteractionDistance = 300.f; // 장착가능한 무기를 찾는 거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 		float InteractionRadius = 25.f; // 장착가능한 무기를 찾는 범위의 반지름
 

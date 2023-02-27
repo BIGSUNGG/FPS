@@ -31,7 +31,8 @@ void AKraverPlayer::BeginPlay()
 {
 	ASoldier::BeginPlay();
 
-	RefreshCurViewType();
+	if(IsLocallyControlled())
+		RefreshCurViewType();
 }
 
 void AKraverPlayer::Tick(float DeltaTime)
@@ -103,13 +104,12 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 
 	TArray<FHitResult> WeaponHitResults;
 	FCollisionQueryParams WeaponParams(NAME_None, false, this);
-	bool bResult = GetWorld()->SweepMultiByChannel(
+
+	bool bResult = GetWorld()->LineTraceMultiByChannel(
 		WeaponHitResults,
 		Camera->GetComponentLocation(),
 		Camera->GetComponentLocation() + Camera->GetForwardVector() * Distance,
-		FQuat::Identity,
 		ECollisionChannel::ECC_GameTraceChannel1,
-		FCollisionShape::MakeSphere(Radius),
 		WeaponParams
 	);
 
@@ -117,11 +117,11 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 	{
 		for(auto& Result : WeaponHitResults)
 		{ 
-			if (IsValid(Result.GetActor()))
+			if (Result.bBlockingHit && IsValid(Result.GetActor()))
 			{
 				auto Weapon = Cast<AWeapon>(Result.GetActor());
 				if(Weapon && Weapon->GetCanInteracted() && CombatComponent->GetCanEquipWeapon())
-				{ 
+				{
 					// 찾는 범위에 있는 오브젝트 사이에 다른 오브젝트가 있는지
 					FHitResult ObjectHitResult;
 					FCollisionQueryParams ObjectParams(NAME_None, false, this);
@@ -139,6 +139,54 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 				}
 			}
 		}
+	}
+
+	if (CanInteractWeapon == nullptr)
+	{
+		WeaponHitResults.Empty();
+		bResult = GetWorld()->SweepMultiByChannel(
+			WeaponHitResults,
+			Camera->GetComponentLocation(),
+			Camera->GetComponentLocation() + Camera->GetForwardVector() * Distance,
+			FQuat::Identity,
+			ECollisionChannel::ECC_GameTraceChannel1,
+			FCollisionShape::MakeSphere(Radius),
+			WeaponParams
+		);
+
+		if (bResult)
+		{
+			for (auto& Result : WeaponHitResults)
+			{
+				if (Result.bBlockingHit && IsValid(Result.GetActor()))
+				{
+					auto Weapon = Cast<AWeapon>(Result.GetActor());
+					if (Weapon && Weapon->GetCanInteracted() && CombatComponent->GetCanEquipWeapon())
+					{
+						// 찾는 범위에 있는 오브젝트 사이에 다른 오브젝트가 있는지
+						FHitResult ObjectHitResult;
+						FCollisionQueryParams ObjectParams(NAME_None, false, this);
+						bool bObjectResult = GetWorld()->LineTraceSingleByChannel(
+							ObjectHitResult,
+							Camera->GetComponentLocation(),
+							Result.ImpactPoint,
+							ECollisionChannel::ECC_GameTraceChannel2,
+							ObjectParams
+						);
+						if (bObjectResult == false || IsValid(ObjectHitResult.GetActor()) == false)
+						{
+							CanInteractWeapon = Weapon;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (CanInteractWeapon != nullptr && GEngine)
+	{
+		FString Text = "CanInteractWeapon : " + CanInteractWeapon->GetName();
+		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::White, Text);
 	}
 
 	KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
@@ -318,7 +366,7 @@ void AKraverPlayer::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* W
 			if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == true)
 			{
 				ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
-				ServerComponent->AttachComponentToComponent(Weapon->GetWeaponMesh(), ArmWeaponMesh);
+				Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh,FAttachmentTransformRules::SnapToTargetIncludingScale);
 				GetWorldTimerManager().SetTimer(
 					UnEquipWeaponTimerHandle,
 					[=]() {

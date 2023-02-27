@@ -15,6 +15,9 @@ AGun::AGun() : AWeapon()
 	FireEffect = CreateDefaultSubobject<UNiagaraComponent>("FireEffect");
 	FireEffect->SetupAttachment(WeaponMesh, FireEffectSocketName);
 	FireEffect->bAutoActivate = false;
+	
+	ImpactEffect = CreateDefaultSubobject<UNiagaraComponent>("ImpactEffect");
+	ImpactEffect->bAutoActivate = false;
 }
 
 void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -24,6 +27,8 @@ void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProp
 	DOREPLIFETIME(AGun, MaxAmmo);
 	DOREPLIFETIME(AGun, CurAmmo);
 	DOREPLIFETIME(AGun, TotalAmmo);
+	DOREPLIFETIME(AGun, BulletDistance);
+	DOREPLIFETIME(AGun, BulletRadius);
 }
 
 void AGun::PostInitializeComponents()
@@ -112,13 +117,13 @@ void AGun::Attack()
 				auto Creature = Cast<ACreature>(Result.GetActor());
 				if(IsValid(Result.GetActor()))
 				{
-					if(Creature == nullptr || (Creature != nullptr && Creature->CombatComponent->IsDead() == false))
-					{ 
-						FPointDamageEvent damageEvent;
-						damageEvent.HitInfo = Result;
-						damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
-						OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);
-						break;
+					FPointDamageEvent damageEvent;
+					damageEvent.HitInfo = Result;
+					damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
+					OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);	
+					if (Result.bBlockingHit)
+					{
+						UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), Result.ImpactPoint, OwnerCreature->GetCamera()->GetComponentRotation());
 					}
 				}
 			}

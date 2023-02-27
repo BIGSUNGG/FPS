@@ -36,6 +36,7 @@ public:
 	void SetRotation(UPrimitiveComponent* Component, FRotator Location);
 	void SetCharacterWalkSpeed(ACharacter* Character, float Speed);
 	void PlayMontage(UAnimInstance* Anim, UAnimMontage* Montage, float Speed = 1.f);
+	void SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
 
 private:
 	// Server
@@ -61,6 +62,8 @@ private:
 		void Server_SetCharacterWalkSpeed(ACharacter* Character, float Speed);
 	UFUNCTION(Server, Reliable)
 		void Server_PlayMontage(UAnimInstance* Anim, UAnimMontage* Montage, float Speed = 1.f);
+	UFUNCTION(Server, Reliable)
+		void Server_SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
 
 private:
 	// Multicast
@@ -70,6 +73,8 @@ private:
 		void Multicast_SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated);
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_AddImpulseAtLocation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName = NAME_None);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
 
 private:
 	// Client

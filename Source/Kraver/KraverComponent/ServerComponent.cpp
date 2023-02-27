@@ -115,6 +115,14 @@ void UServerComponent::PlayMontage(UAnimInstance* Anim, UAnimMontage* Montage, f
 		Client_PlayMontage(Anim, Montage, Speed);
 }
 
+void UServerComponent::SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName)
+{
+	if(GetOwner()->HasAuthority())
+		Multicast_SetCollisionProfileName(Component,ProfileName);
+	else
+		Server_SetCollisionProfileName(Component,ProfileName);
+}	
+
 void UServerComponent::Server_SetPhysicsLinearVelocity_Implementation(UPrimitiveComponent* Component, FVector Velocity)
 {
 	Component->SetPhysicsLinearVelocity(Velocity);
@@ -172,6 +180,11 @@ void UServerComponent::Server_PlayMontage_Implementation(UAnimInstance* Anim, UA
 	Client_PlayMontage(Anim,Montage,Speed);
 }
 
+void UServerComponent::Server_SetCollisionProfileName_Implementation(UPrimitiveComponent* Component, FName ProfileName)
+{
+	Multicast_SetCollisionProfileName(Component, ProfileName);
+}
+
 void UServerComponent::Multicast_AttachComponentToComponent_Implementation(USceneComponent* Child, USceneComponent* Parent, FName BoneName)
 {
 	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
@@ -185,6 +198,11 @@ void UServerComponent::Multicast_SetSimulatedPhysics_Implementation(UPrimitiveCo
 void UServerComponent::Multicast_AddImpulseAtLocation_Implementation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName /*= NAME_None*/)
 {
 	Component->AddImpulseAtLocation(Direction,Location,BoneName);
+}
+
+void UServerComponent::Multicast_SetCollisionProfileName_Implementation(UPrimitiveComponent* Component, FName ProfileName)
+{
+	Component->SetCollisionProfileName(ProfileName);
 }
 
 void UServerComponent::Client_PlayMontage_Implementation(UAnimInstance* Anim, UAnimMontage* Montage, float Speed /*= 1.f*/)
