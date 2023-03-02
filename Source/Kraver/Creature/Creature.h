@@ -47,13 +47,13 @@ public:
 	// Getter Setter
 	FORCEINLINE FRotator GetCreatureAngle() { return Camera->GetComponentRotation() - GetMesh()->GetComponentRotation(); }
 	FORCEINLINE UCameraComponent* GetCamera() { return Camera; }
-
 	FORCEINLINE bool GetCanAttack();
 	FORCEINLINE bool GetIsRunning() { return IsRunning; }
 	FORCEINLINE bool GetIsJumping() { return IsJumping; }
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 	FORCEINLINE EMovementState GetMovementState() { return MovementState; }
+	FORCEINLINE FName GetWeaponAttachSocketName() { return WeaponAttachSocketName; }
 
 protected:
 	// Axis Input
@@ -150,4 +150,6 @@ protected:
 		float CrouchSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float ImpulseResistanceRatio = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+		FName WeaponAttachSocketName = "RightHandWeapon"; // Weapon을 Attach할 스켈레탈 본 이름
 }; 

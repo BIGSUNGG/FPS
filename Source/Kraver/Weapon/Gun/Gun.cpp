@@ -123,7 +123,7 @@ void AGun::Attack()
 					OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);	
 					if (Result.bBlockingHit)
 					{
-						UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), Result.ImpactPoint, OwnerCreature->GetCamera()->GetComponentRotation());
+						UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), Result.ImpactPoint);
 					}
 				}
 			}

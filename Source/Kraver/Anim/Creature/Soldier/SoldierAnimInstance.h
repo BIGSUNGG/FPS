@@ -2,13 +2,15 @@
 
 #pragma once
 
-#include "Kraver/Anim/CreatureAnimInstance.h"
-#include "Kraver/Creature/Soldier/Soldier.h"
+#include "Kraver/Anim/Creature/CreatureAnimInstance.h"
 #include "SoldierAnimInstance.generated.h"
 
 /**
  * 
  */
+
+class ASoldier;
+
 UCLASS()
 class KRAVER_API USoldierAnimInstance : public UCreatureAnimInstance
 {
@@ -18,12 +20,14 @@ public:
 	USoldierAnimInstance();
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+	virtual void FabrikLeftHand(USkeletalMeshComponent* HandMesh, USkeletalMeshComponent* WeaponMesh, FTransform& Transform);
+
 protected:
 	ASoldier* Soldier;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = true))
 		bool IsEquippingWeapon; // 캐릭터가 무기를 장착하고 있는지 여부
 
-	UPROPERTY(BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
-		FTransform LeftHandTransform; // 왼쪽손에 적용할 트랜스폼
+	UPROPERTY(BlueprintReadOnly, Category = Fabrik, meta = (AllowPrivateAccess = "true"))
+		FTransform LeftHandFabrikTransform; // 왼쪽손에 적용할 트랜스폼
 };

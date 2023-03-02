@@ -2,6 +2,7 @@
 
 
 #include "CreatureAnimInstance.h"
+#include "Kraver/Creature/Creature.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/KismetMathLibrary.h"
 

@@ -8,6 +8,7 @@
 #include "Kraver/HUD/KraverHud.h"
 #include "Kraver/PlayerController/KraverPlayerController.h"
 #include "Kraver/GameMode/KraverGameMode.h"
+#include "Kraver/Anim/Creature/CreatureAnimInstance.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
@@ -48,6 +49,7 @@ void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAction(TEXT("ChangeView"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeView);
 	PlayerInputComponent->BindAction(TEXT("Equip"), EInputEvent::IE_Pressed, this, &AKraverPlayer::EquipButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("UnEquip"), EInputEvent::IE_Pressed, this, &AKraverPlayer::UnEquipButtonPressed);
 }
 
 void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -86,10 +88,13 @@ void AKraverPlayer::EquipButtonPressed()
 		if(CanInteractWeapon != nullptr)
 			EquipWeapon(CanInteractWeapon);
 	}
-	else
-	{
+}
+
+void AKraverPlayer::UnEquipButtonPressed()
+{
+	if (CombatComponent->GetCurWeapon() != nullptr)
 		CombatComponent->UnEquipWeapon(CombatComponent->GetCurWeapon());
-	}
+
 }
 
 void AKraverPlayer::CheckCanInteractionWeapon()
@@ -271,6 +276,13 @@ void AKraverPlayer::RefreshCurViewType()
 		ChangeView();
 }
 
+void AKraverPlayer::Landed(const FHitResult& Hit)
+{
+	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(ArmMesh->GetAnimInstance());
+	CreatureAnim->PlayLandedMontage();
+	ASoldier::Landed(Hit);
+}
+
 void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {	
 	if(!Weapon)
@@ -281,7 +293,7 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	ArmWeaponMesh->SetHiddenInGame(false);
 	ShowOnlyThirdPerson.Push(CombatComponent->GetCurWeapon()->GetWeaponMesh());
-	ServerComponent->AttachComponentToComponent(ArmWeaponMesh,ArmMesh, CombatComponent->GetCurWeapon()->GetAttachSocketName());
+	ServerComponent->AttachComponentToComponent(ArmWeaponMesh,ArmMesh, WeaponAttachSocketName);
 
 	switch (CombatComponent->GetCurWeapon()->GetWeaponType())
 	{

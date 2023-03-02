@@ -2,10 +2,10 @@
 
 
 #include "Creature.h"
+#include "Kraver/Anim/Creature/CreatureAnimInstance.h"
 #include "Components/WidgetComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
-#include "Kraver/Anim/CreatureAnimInstance.h"
 
 // Sets default values
 ACreature::ACreature()
@@ -302,14 +302,14 @@ void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	(
 		GetMesh(), 
 		FAttachmentTransformRules::SnapToTargetIncludingScale, 
-		CombatComponent->GetCurWeapon()->GetAttachSocketName()
+		WeaponAttachSocketName
 	);
 
 	ServerComponent->AttachComponentToComponent
 	(
 		CombatComponent->GetCurWeapon()->GetWeaponMesh(), 
 		GetMesh(), 
-		CombatComponent->GetCurWeapon()->GetAttachSocketName()
+		WeaponAttachSocketName
 	);
 }
 
@@ -389,6 +389,6 @@ void ACreature::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 	(
 		GetMesh(),
 		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		CombatComponent->GetCurWeapon()->GetAttachSocketName()
+		WeaponAttachSocketName
 	);
 }

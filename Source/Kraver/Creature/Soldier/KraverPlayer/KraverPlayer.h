@@ -30,8 +30,16 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+public:
+	// Getter Setter
+	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
+	FORCEINLINE USkeletalMeshComponent* GetArmWeaponMesh() { return ArmWeaponMesh; }
+
 protected:
+	// input event
 	virtual void EquipButtonPressed();
+	virtual void UnEquipButtonPressed();
+
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
 
@@ -41,6 +49,7 @@ protected:
 	UFUNCTION(Server, reliable)
 		void Server_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
 	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
+	void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
 
 	virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;

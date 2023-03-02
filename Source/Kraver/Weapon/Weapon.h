@@ -68,7 +68,6 @@ public:
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
-	const FName& GetAttachSocketName() { return AttachSocketName; }
 	USkeletalMeshComponent* GetWeaponMesh() {return WeaponMesh;}
 
 public:
@@ -98,9 +97,6 @@ protected:
 		USkeletalMeshComponent* WeaponMesh; // 기본적으로 보이는 메쉬
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Additive", meta = (AllowPrivateAccess = "true"))
 		TArray<USkeletalMeshComponent*> AdditiveWeaponMesh; // 추가적인 WeaponMesh를 가지는 배열
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
-		FName AttachSocketName = "RightHandWeapon"; // WeaponMesh가 캐릭터에게 Attach될때 캐릭터 메쉬에 장착될 소켓이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		bool IsAttacking = false; // 공격중인지
