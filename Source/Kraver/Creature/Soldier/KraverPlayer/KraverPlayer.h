@@ -39,6 +39,7 @@ protected:
 	// input event
 	virtual void EquipButtonPressed();
 	virtual void UnEquipButtonPressed();
+	virtual void ReloadButtonPressed() override;
 
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수

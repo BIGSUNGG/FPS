@@ -106,7 +106,12 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 bool ACreature::GetCanAttack()
 {
-	return !(MovementState == EMovementState::SPRINT);
+	if (MovementState == EMovementState::SPRINT)
+		return false;
+	if (CombatComponent->GetCurWeapon() && GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageTpp()))
+		return false;
+
+	return true;
 }
 
 void ACreature::MoveForward(float NewAxisValue)
@@ -154,7 +159,10 @@ void ACreature::Turn(float NewAxisValue)
 
 void ACreature::ReloadButtonPressed()
 {
-	CombatComponent->RefillAmmo();
+	if (CombatComponent->GetCurWeapon() == nullptr || CombatComponent->GetCurWeapon()->GetCanReload() == false)
+		return;
+
+	GetMesh()->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetReloadMontageTpp());
 }
 
 void ACreature::AttackButtonPressed()

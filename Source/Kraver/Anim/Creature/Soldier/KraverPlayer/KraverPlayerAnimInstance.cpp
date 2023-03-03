@@ -12,8 +12,4 @@ void UKraverPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (KraverPlayer == nullptr)
 		return;
 
-	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->GetArmWeaponMesh() && KraverPlayer->GetArmMesh())
-	{
-		FabrikLeftHand(KraverPlayer->GetArmMesh(), KraverPlayer->GetArmWeaponMesh(), LeftHandFppFabrikTransform);
-	}
 }

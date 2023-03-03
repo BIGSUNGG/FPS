@@ -174,3 +174,14 @@ void AGun::Multicast_ShowFireEffect_Implementation()
 		}
 	}
 }
+
+bool AGun::GetCanReload()
+{
+	if (CurAmmo == MaxAmmo)
+		return false;
+
+	if (TotalAmmo == 0)
+		return false;
+
+	return true;
+}

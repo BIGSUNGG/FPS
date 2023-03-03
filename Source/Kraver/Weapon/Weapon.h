@@ -64,12 +64,15 @@ public:
 	// Getter Setter
 	bool GetCanInteracted();
 	bool GetIsAttacking() {return IsAttacking;}
+	virtual bool GetCanReload() { return false; }
 	float GetAttackImpulse() { return AttackImpulse; }
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
 	USkeletalMeshComponent* GetWeaponMesh() {return WeaponMesh;}
 
+	UAnimMontage* GetReloadMontageTpp() { return ReloadMontageTpp; }
+	UAnimMontage* GetReloadMontageFpp() { return ReloadMontageFpp; }
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 		class UTexture2D* CrosshairsCenter;
@@ -92,6 +95,11 @@ protected:
 		EWeaponState WeaponState = EWeaponState::NONE; // 무기 상태
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponType", meta = (AllowPrivateAccess = "true"))
 		EWeaponType WeaponType = EWeaponType::NONE; // 무기 종류
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+		UAnimMontage* ReloadMontageTpp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+		UAnimMontage* ReloadMontageFpp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* WeaponMesh; // 기본적으로 보이는 메쉬

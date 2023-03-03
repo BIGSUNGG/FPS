@@ -38,6 +38,7 @@ protected:
 
 public:
 	// Getter Setter
+	virtual bool GetCanReload() override;
 	UNiagaraComponent* GetFireEffect() { return FireEffect; }
 	TArray<UNiagaraComponent*> GetAdditiveFireEffect() { return AdditiveFireEffect; }
 protected:

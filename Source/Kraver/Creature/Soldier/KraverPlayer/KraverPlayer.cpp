@@ -97,6 +97,16 @@ void AKraverPlayer::UnEquipButtonPressed()
 
 }
 
+void AKraverPlayer::ReloadButtonPressed()
+{
+	ASoldier::ReloadButtonPressed();
+
+	if (CombatComponent->GetCurWeapon() == nullptr || CombatComponent->GetCurWeapon()->GetCanReload() == false)
+		return;
+
+	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetReloadMontageFpp());
+}
+
 void AKraverPlayer::CheckCanInteractionWeapon()
 {
 	if(IsLocallyControlled() == false)
