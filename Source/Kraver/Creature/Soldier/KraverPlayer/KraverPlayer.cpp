@@ -101,8 +101,12 @@ void AKraverPlayer::ReloadButtonPressed()
 {
 	ASoldier::ReloadButtonPressed();
 
-	if (CombatComponent->GetCurWeapon() == nullptr || CombatComponent->GetCurWeapon()->GetCanReload() == false)
+	if (CombatComponent->GetCurWeapon() == nullptr ||
+		CombatComponent->GetCurWeapon()->GetCanReload() == false ||
+		ArmMesh->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageFpp()) == true)
+	{
 		return;
+	}
 
 	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetReloadMontageFpp());
 }

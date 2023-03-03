@@ -159,8 +159,12 @@ void ACreature::Turn(float NewAxisValue)
 
 void ACreature::ReloadButtonPressed()
 {
-	if (CombatComponent->GetCurWeapon() == nullptr || CombatComponent->GetCurWeapon()->GetCanReload() == false)
+	if (CombatComponent->GetCurWeapon() == nullptr ||
+		CombatComponent->GetCurWeapon()->GetCanReload() == false ||
+		GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageTpp()) == true)
+	{
 		return;
+	}
 
 	GetMesh()->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetReloadMontageTpp());
 }
