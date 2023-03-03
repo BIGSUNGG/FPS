@@ -106,13 +106,13 @@ void UServerComponent::SetCharacterWalkSpeed(ACharacter* Character, float Speed)
 		Server_SetCharacterWalkSpeed(Character, Speed);
 }
 
-void UServerComponent::PlayMontage(UAnimInstance* Anim, UAnimMontage* Montage, float Speed /*= 1.f*/)
+void UServerComponent::PlayMontage(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed /*= 1.f*/)
 {
-	Anim->Montage_Play(Montage,Speed);
+	Mesh->GetAnimInstance()->Montage_Play(Montage, Speed);
 	if(GetOwner()->HasAuthority() == false)
-		Server_PlayMontage(Anim, Montage, Speed);
+		Server_PlayMontage(Mesh, Montage, Speed);
 	else
-		Client_PlayMontage(Anim, Montage, Speed);
+		Multicast_PlayMontage(Mesh, Montage, Speed);
 }
 
 void UServerComponent::SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName)
@@ -175,9 +175,9 @@ void UServerComponent::Server_SetCharacterWalkSpeed_Implementation(ACharacter* C
 	Character->GetCharacterMovement()->MaxWalkSpeed = Speed;
 }
 
-void UServerComponent::Server_PlayMontage_Implementation(UAnimInstance* Anim, UAnimMontage* Montage, float Speed /*= 1.f*/)
+void UServerComponent::Server_PlayMontage_Implementation(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed /*= 1.f*/)
 {
-	Client_PlayMontage(Anim,Montage,Speed);
+	Multicast_PlayMontage(Mesh,Montage,Speed);
 }
 
 void UServerComponent::Server_SetCollisionProfileName_Implementation(UPrimitiveComponent* Component, FName ProfileName)
@@ -205,7 +205,7 @@ void UServerComponent::Multicast_SetCollisionProfileName_Implementation(UPrimiti
 	Component->SetCollisionProfileName(ProfileName);
 }
 
-void UServerComponent::Client_PlayMontage_Implementation(UAnimInstance* Anim, UAnimMontage* Montage, float Speed /*= 1.f*/)
+void UServerComponent::Multicast_PlayMontage_Implementation(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed /*= 1.f*/)
 {
-	Anim->Montage_Play(Montage, Speed);
+	Mesh->GetAnimInstance()->Montage_Play(Montage,Speed);
 }

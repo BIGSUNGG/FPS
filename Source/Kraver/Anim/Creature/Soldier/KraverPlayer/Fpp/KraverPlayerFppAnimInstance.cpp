@@ -20,5 +20,4 @@ void UKraverPlayerFppAnimInstance::AnimNotify_RefillAmmo()
 		return;
 
 	KraverPlayer->CombatComponent->GetCurWeapon()->RefillAmmo();
-	KR_LOG(Log, TEXT("Refill"));
 }

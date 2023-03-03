@@ -25,6 +25,11 @@ public:
 
 	// 몽타주 실행 함수
 	virtual void PlayLandedMontage();
+
+public:
+	// Getter Setter
+	UAnimMontage* GetLandedMontage() { return LandedMontage; }
+
 protected:
 	ACreature* Creature;
 	
@@ -52,6 +57,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Angle, Meta = (AllowPrivateAccess = true))
 		float AO_Yaw; // 캐릭터가 바라보는 방향기준으로 카메라 Yaw의 차이
 
+	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montage, Meta = (AllowPrivateAccess = true))
 		UAnimMontage* LandedMontage;
 };

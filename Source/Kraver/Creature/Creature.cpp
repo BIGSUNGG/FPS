@@ -166,7 +166,7 @@ void ACreature::ReloadButtonPressed()
 		return;
 	}
 
-	GetMesh()->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetReloadMontageTpp());
+	ServerComponent->PlayMontage(GetMesh(), CombatComponent->GetCurWeapon()->GetReloadMontageTpp());
 }
 
 void ACreature::AttackButtonPressed()
@@ -345,10 +345,9 @@ void ACreature::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-	CreatureAnim->PlayLandedMontage();
+	ServerComponent->PlayMontage(GetMesh(), CreatureAnim->GetLandedMontage());
 
 	SetIsJumping(false);
-	Server_Landed(Hit);
 }
 
 void ACreature::OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -382,17 +381,6 @@ void ACreature::Server_OnDeathEvent_Implementation(float DamageAmount, FDamageEv
 
 void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-}
-
-void ACreature::Server_Landed_Implementation(const FHitResult& Hit)
-{
-	Multicast_Landed(Hit);
-}
-
-void ACreature::Multicast_Landed_Implementation(const FHitResult& Hit)
-{
-	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-	CreatureAnim->PlayLandedMontage();
 }
 
 void ACreature::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)

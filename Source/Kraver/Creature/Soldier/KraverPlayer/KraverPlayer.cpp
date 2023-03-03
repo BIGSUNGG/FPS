@@ -295,6 +295,7 @@ void AKraverPlayer::Landed(const FHitResult& Hit)
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(ArmMesh->GetAnimInstance());
 	CreatureAnim->PlayLandedMontage();
 	ASoldier::Landed(Hit);
+	KR_LOG(Log,TEXT("H"));
 }
 
 void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)

@@ -97,10 +97,6 @@ protected:
 		void Server_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 모든 클라이언트에서 호출되는 함수
-	UFUNCTION(Server, reliable)
-		void Server_Landed(const FHitResult& Hit); // 착지했을때 서버에서 호출되는 함수 
-	UFUNCTION(NetMulticast, reliable)
-		void Multicast_Landed(const FHitResult& Hit); // 착지했을때 모든 클라이언트에서 호출되는 함수
 
 public:
 	// Component
