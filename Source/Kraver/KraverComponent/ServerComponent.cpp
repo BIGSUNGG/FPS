@@ -67,14 +67,18 @@ void UServerComponent::DetachComponentFromComponent(USceneComponent* Child)
 
 void UServerComponent::SetPhysicsLinearVelocity(UPrimitiveComponent* Component, FVector Velocity)
 {
-	Component->SetPhysicsLinearVelocity(Velocity);
 	if (GetOwner()->HasAuthority() == false)
 		Server_SetPhysicsLinearVelocity(Component,Velocity);
+	else
+		Multicast_SetPhysicsLinearVelocity(Component,Velocity);
 }
 
 void UServerComponent::AddImpulse(UPrimitiveComponent* Component, FVector Direction, FName BoneName, bool bVelChange)
 {
-	Server_AddImpulse(Component,Direction,BoneName,bVelChange);
+	if (GetOwner()->HasAuthority() == false)
+		Server_AddImpulse(Component, Direction, BoneName, bVelChange);
+	else
+		Multicast_AddImpulse(Component, Direction, BoneName, bVelChange);
 }
 
 void UServerComponent::AddImpulseAtLocation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName /*= NAME_None*/)
@@ -123,14 +127,22 @@ void UServerComponent::SetCollisionProfileName(UPrimitiveComponent* Component, F
 		Server_SetCollisionProfileName(Component,ProfileName);
 }	
 
+void UServerComponent::SpawnNiagaraAtLocation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation /*= FRotator::ZeroRotator*/, FVector Scale /*= FVector(1.f)*/, bool bAutoDestroyNiagara /*= true*/, bool bAutoActivateNiagara /*= true*/, ENCPoolMethod PoolingMethod /*= ENCPoolMethod::None*/, bool bPreCullCheck /*= true*/)
+{
+	if(GetOwner()->HasAuthority())
+		Multicast_SpawnNiagaraAtLocation(WorldContextObject, SystemTemplate, Location, Rotation, Scale, bAutoDestroyNiagara, bAutoActivateNiagara, PoolingMethod, bPreCullCheck);
+	else
+		Server_SpawnNiagaraAtLocation(WorldContextObject, SystemTemplate, Location, Rotation, Scale, bAutoDestroyNiagara, bAutoActivateNiagara, PoolingMethod, bPreCullCheck);
+}
+
 void UServerComponent::Server_SetPhysicsLinearVelocity_Implementation(UPrimitiveComponent* Component, FVector Velocity)
 {
-	Component->SetPhysicsLinearVelocity(Velocity);
+	Multicast_SetPhysicsLinearVelocity(Component,Velocity);
 }
 
 void UServerComponent::Server_AddImpulse_Implementation(UPrimitiveComponent* Component, FVector Direction, FName BoneName, bool bVelChange)
 {
-	Component->AddImpulse(Direction, BoneName, bVelChange);
+	Multicast_AddImpulse(Component,Direction,BoneName,bVelChange);
 }
 
 void UServerComponent::Server_AddImpulseAtLocation_Implementation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName /*= NAME_None*/)
@@ -185,6 +197,11 @@ void UServerComponent::Server_SetCollisionProfileName_Implementation(UPrimitiveC
 	Multicast_SetCollisionProfileName(Component, ProfileName);
 }
 
+void UServerComponent::Server_SpawnNiagaraAtLocation_Implementation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation /*= FRotator::ZeroRotator*/, FVector Scale /*= FVector(1.f)*/, bool bAutoDestroyNiagara /*= true*/, bool bAutoActivateNiagara /*= true*/, ENCPoolMethod PoolingMethod /*= ENCPoolMethod::None*/, bool bPreCullCheck /*= true*/)
+{
+	Multicast_SpawnNiagaraAtLocation(WorldContextObject, SystemTemplate, Location, Rotation, Scale, bAutoDestroyNiagara, bAutoActivateNiagara, PoolingMethod, bPreCullCheck);
+}
+
 void UServerComponent::Multicast_AttachComponentToComponent_Implementation(USceneComponent* Child, USceneComponent* Parent, FName BoneName)
 {
 	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
@@ -208,4 +225,19 @@ void UServerComponent::Multicast_SetCollisionProfileName_Implementation(UPrimiti
 void UServerComponent::Multicast_PlayMontage_Implementation(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed /*= 1.f*/)
 {
 	Mesh->GetAnimInstance()->Montage_Play(Montage,Speed);
+}
+
+void UServerComponent::Multicast_SpawnNiagaraAtLocation_Implementation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation /*= FRotator::ZeroRotator*/, FVector Scale /*= FVector(1.f)*/, bool bAutoDestroyNiagara /*= true*/, bool bAutoActivateNiagara /*= true*/, ENCPoolMethod PoolingMethod /*= ENCPoolMethod::None*/, bool bPreCullCheck /*= true*/)
+{
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(WorldContextObject, SystemTemplate, Location, Rotation, Scale, bAutoDestroyNiagara, bAutoActivateNiagara, PoolingMethod, bPreCullCheck);
+}
+
+void UServerComponent::Multicast_SetPhysicsLinearVelocity_Implementation(UPrimitiveComponent* Component, FVector Velocity)
+{
+	Component->SetPhysicsLinearVelocity(Velocity);
+}
+
+void UServerComponent::Multicast_AddImpulse_Implementation(UPrimitiveComponent* Component, FVector Direction, FName BoneName /*= NAME_None*/, bool bVelChange /*= false*/)
+{
+	Component->AddImpulse(Direction, BoneName, bVelChange);
 }

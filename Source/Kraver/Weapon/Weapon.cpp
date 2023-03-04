@@ -230,4 +230,6 @@ void AWeapon::Attack()
 	if(IsAttacking == false)
 		return;
 	CurAttackDelay = AttackDelay;
+
+	OnAttack.Broadcast();
 }

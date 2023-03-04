@@ -166,7 +166,7 @@ void ACreature::ReloadButtonPressed()
 		return;
 	}
 
-	ServerComponent->PlayMontage(GetMesh(), CombatComponent->GetCurWeapon()->GetReloadMontageTpp());
+	ServerComponent->PlayMontage(GetMesh(), CombatComponent->GetCurWeapon()->GetReloadMontageTpp(), 1.5f);
 }
 
 void ACreature::AttackButtonPressed()
@@ -312,8 +312,8 @@ void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent
 	(
-		GetMesh(), 
-		FAttachmentTransformRules::SnapToTargetIncludingScale, 
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetIncludingScale,
 		WeaponAttachSocketName
 	);
 
@@ -323,10 +323,13 @@ void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 		GetMesh(), 
 		WeaponAttachSocketName
 	);
+
+	CombatComponent->GetCurWeapon()->OnAttack.AddDynamic(this, &ACreature::OnCurWeaponAttackEvent);
 }
 
 void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
+	Weapon->OnAttack.RemoveDynamic(this, &ACreature::OnCurWeaponAttackEvent);
 }
 
 void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -339,6 +342,14 @@ void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent
 	ServerComponent->SetCollisionProfileName(GetMesh(), FName("Ragdoll"));
 
 	Server_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void ACreature::OnCurWeaponAttackEvent()
+{
+	if(CombatComponent->GetCurWeapon() == nullptr)
+		UE_LOG(LogTemp,Fatal,TEXT("Cur weapon is nullptr but it attacked"));
+
+	ServerComponent->PlayMontage(GetMesh(), CombatComponent->GetCurWeapon()->GetAttackMontageTpp());
 }
 
 void ACreature::Landed(const FHitResult& Hit)

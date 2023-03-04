@@ -8,9 +8,15 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	UKraverPlayerAnimInstance::NativeUpdateAnimation(DeltaSeconds);
 
-	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->GetArmWeaponMesh() && KraverPlayer->GetArmMesh())
-	{
-		FabrikLeftHand(KraverPlayer->GetArmMesh(), KraverPlayer->GetArmWeaponMesh(), LeftHandFppFabrikTransform);
+	if(KraverPlayer == nullptr)
+		return;
+
+	if(KraverPlayer->IsLocallyControlled() == true)
+	{ 
+		if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->GetArmWeaponMesh() && KraverPlayer->GetArmMesh())
+		{
+			FabrikLeftHand(KraverPlayer->GetArmMesh(), KraverPlayer->GetArmWeaponMesh(), LeftHandFppFabrikTransform);
+		}
 	}
 }
 

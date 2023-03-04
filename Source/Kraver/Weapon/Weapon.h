@@ -7,6 +7,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Weapon.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackDele);
+
 UENUM(BlueprintType)
 enum class EWeaponState : uint8
 {
@@ -73,7 +75,11 @@ public:
 
 	UAnimMontage* GetReloadMontageTpp() { return ReloadMontageTpp; }
 	UAnimMontage* GetReloadMontageFpp() { return ReloadMontageFpp; }
+	UAnimMontage* GetAttackMontageTpp() { return AttackMontageTpp; }
+	UAnimMontage* GetAttackMontageFpp() { return AttackMontageFpp; }
 public:
+	FAttackDele OnAttack;
+
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 		class UTexture2D* CrosshairsCenter;
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
@@ -96,10 +102,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponType", meta = (AllowPrivateAccess = "true"))
 		EWeaponType WeaponType = EWeaponType::NONE; // 무기 종류
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+	// Montage
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* ReloadMontageTpp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* ReloadMontageFpp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* AttackMontageTpp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* AttackMontageFpp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* WeaponMesh; // 기본적으로 보이는 메쉬

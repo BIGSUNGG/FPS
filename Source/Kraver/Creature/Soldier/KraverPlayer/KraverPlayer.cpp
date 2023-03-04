@@ -41,6 +41,11 @@ void AKraverPlayer::Tick(float DeltaTime)
 	ASoldier::Tick(DeltaTime);
 	
 	CheckCanInteractionWeapon();
+
+	if (IsLocallyControlled() == false)
+	{
+		Camera->SetRelativeRotation(FRotator(AO_Pitch,AO_Yaw,0.0f));
+	}
 }
 
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -108,12 +113,12 @@ void AKraverPlayer::ReloadButtonPressed()
 		return;
 	}
 
-	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetReloadMontageFpp());
+	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetReloadMontageFpp(), 1.5f);
 }
 
 void AKraverPlayer::CheckCanInteractionWeapon()
 {
-	if(IsLocallyControlled() == false)
+	if (IsLocallyControlled() == false)
 		return;
 
 	CanInteractWeapon = nullptr;
@@ -280,6 +285,11 @@ void AKraverPlayer::RefreshSpringArm()
 
 void AKraverPlayer::Server_RefreshSpringArm_Implementation(FVector Vector, float Length)
 {
+	Multicast_RefreshSpringArm(Vector,Length);
+}
+
+void AKraverPlayer::Multicast_RefreshSpringArm_Implementation(FVector Vector, float Length)
+{
 	SpringArm->SetRelativeLocation(Vector);
 	SpringArm->TargetArmLength = Length;
 }
@@ -295,7 +305,6 @@ void AKraverPlayer::Landed(const FHitResult& Hit)
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(ArmMesh->GetAnimInstance());
 	CreatureAnim->PlayLandedMontage();
 	ASoldier::Landed(Hit);
-	KR_LOG(Log,TEXT("H"));
 }
 
 void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -367,6 +376,13 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	Weapon->RemoveAdditiveWeaponMesh(ArmWeaponMesh);
 }
 
+void AKraverPlayer::OnCurWeaponAttackEvent()
+{
+	ASoldier::OnCurWeaponAttackEvent();
+
+	ServerComponent->PlayMontage(ArmMesh, CombatComponent->GetCurWeapon()->GetAttackMontageFpp());
+}
+
 void AKraverPlayer::SetMovementState(EMovementState value)
 {
 	ASoldier::SetMovementState(value);
@@ -398,9 +414,9 @@ void AKraverPlayer::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* W
 					UnEquipWeaponTimerHandle,
 					[=]() {
 						Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-				ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
-				ServerComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
-				ServerComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
+						ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
+						ServerComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
+						ServerComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
 					},
 					0.000001f,
 						false);

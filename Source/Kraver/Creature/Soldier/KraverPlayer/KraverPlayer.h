@@ -49,13 +49,18 @@ protected:
 	virtual void RefreshSpringArm(); // SpringArm의 RelativeLocation을 새로고침하는 함수
 	UFUNCTION(Server, reliable)
 		void Server_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
+	UFUNCTION(NetMulticast, reliable)
+		void Multicast_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
 	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
+
+	// Delegate Event
 	void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
 
 	virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
 	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
+	virtual void OnCurWeaponAttackEvent() override;
 
 	virtual void SetMovementState(EMovementState value) override;
 public:

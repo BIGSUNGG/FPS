@@ -123,11 +123,10 @@ void AGun::Attack()
 					OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);	
 					if (Result.bBlockingHit)
 					{
-						UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), Result.ImpactPoint);
+						OwnerCreature->ServerComponent->SpawnNiagaraAtLocation(GetWorld(), ImpactEffect->GetAsset(), Result.ImpactPoint);
 					}
 				}
-			}
-	
+			}	
 		}
 		ShowFireEffect();
 	}

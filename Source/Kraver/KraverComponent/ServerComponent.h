@@ -4,6 +4,8 @@
 
 #include "Kraver/Kraver.h"
 #include "Components/ActorComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "ServerComponent.generated.h"
 
 // 서버에서 호출되는 함수를 가지는 컴포넌트
@@ -37,6 +39,7 @@ public:
 	void SetCharacterWalkSpeed(ACharacter* Character, float Speed);
 	void PlayMontage(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
 	void SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
+	void SpawnNiagaraAtLocation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation = FRotator::ZeroRotator, FVector Scale = FVector(1.f), bool bAutoDestroyNiagara = true, bool bAutoActivateNiagara = true, ENCPoolMethod PoolingMethod = ENCPoolMethod::None, bool bPreCullCheck = true);
 
 private:
 	// Server
@@ -64,6 +67,8 @@ private:
 		void Server_PlayMontage(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
 	UFUNCTION(Server, Reliable)
 		void Server_SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
+	UFUNCTION(Server, Reliable)
+		void Server_SpawnNiagaraAtLocation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation = FRotator::ZeroRotator, FVector Scale = FVector(1.f), bool bAutoDestroyNiagara = true, bool bAutoActivateNiagara = true, ENCPoolMethod PoolingMethod = ENCPoolMethod::None, bool bPreCullCheck = true);
 
 private:
 	// Multicast
@@ -77,6 +82,12 @@ private:
 		void Multicast_SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_PlayMontage(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_SpawnNiagaraAtLocation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation = FRotator::ZeroRotator, FVector Scale = FVector(1.f), bool bAutoDestroyNiagara = true, bool bAutoActivateNiagara = true, ENCPoolMethod PoolingMethod = ENCPoolMethod::None, bool bPreCullCheck = true);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_SetPhysicsLinearVelocity(UPrimitiveComponent* Component, FVector Velocity);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_AddImpulse(UPrimitiveComponent* Component, FVector Direction, FName BoneName = NAME_None, bool bVelChange = false);
 
 private:
 	// Client
