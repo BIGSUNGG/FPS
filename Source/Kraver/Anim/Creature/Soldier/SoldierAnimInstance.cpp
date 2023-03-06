@@ -8,12 +8,18 @@ USoldierAnimInstance::USoldierAnimInstance() : UCreatureAnimInstance()
 {
 }
 
+void USoldierAnimInstance::NativeBeginPlay()
+{
+	UCreatureAnimInstance::NativeBeginPlay();
+
+	Soldier = Cast<ASoldier>(Creature);
+}
+
 void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds) 
 {
 	UCreatureAnimInstance::NativeUpdateAnimation(DeltaSeconds);
 
-	Soldier = Cast<ASoldier>(Creature);
-	if(Soldier == nullptr)
+	if (Soldier == nullptr)
 		return;
 
 	IsEquippingWeapon = Soldier->CombatComponent->GetCurWeapon() != nullptr;

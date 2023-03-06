@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Kraver/KraverComponent/CombatComponent.h"
 #include "Kraver/KraverComponent/ServerComponent.h"
+#include "Kraver/Weapon/Weapon.h"
 #include "Engine/DamageEvents.h"
 #include "Creature.generated.h"
 

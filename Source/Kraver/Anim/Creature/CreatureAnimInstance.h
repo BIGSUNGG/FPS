@@ -20,6 +20,7 @@ class KRAVER_API UCreatureAnimInstance : public UAnimInstance
 
 public:
 	UCreatureAnimInstance();
+	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 

@@ -11,15 +11,18 @@ UCreatureAnimInstance::UCreatureAnimInstance()
 	
 }
 
+void UCreatureAnimInstance::NativeBeginPlay()
+{
+	Super::NativeBeginPlay();
+
+	auto Pawn = TryGetPawnOwner();
+	Creature = Cast<ACreature>(Pawn);
+}
+
 void UCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	auto Pawn = TryGetPawnOwner();
-	if(!::IsValid(Pawn))
-		return;
-
-	Creature = Cast<ACreature>(Pawn);
 	if(!Creature)
 		return;
 

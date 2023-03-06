@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Kraver/Creature/Soldier/Soldier.h"
-#include "Kraver/Hud/InteractionWidget.h"
 #include "KraverPlayer.generated.h"
 
 /**
@@ -43,6 +42,7 @@ protected:
 
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
+	virtual void ThrowWeapon(AWeapon* Weapon);
 
  	virtual void OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 

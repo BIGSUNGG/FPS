@@ -60,8 +60,9 @@ void UServerComponent::AttachComponentToComponent(USceneComponent* Child, UScene
 
 void UServerComponent::DetachComponentFromComponent(USceneComponent* Child)
 {
-	Child->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	if (GetOwner()->HasAuthority() == false)
+	if (GetOwner()->HasAuthority())
+		Multicast_DetachComponentFromComponent(Child);
+	else
 		Server_DetachComponentFromComponent(Child);
 }
 
@@ -179,7 +180,7 @@ void UServerComponent::Server_SetRotation_Implementation(UPrimitiveComponent* Co
 
 void UServerComponent::Server_DetachComponentFromComponent_Implementation(USceneComponent* Child)
 {
-	Child->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	Multicast_DetachComponentFromComponent(Child);
 }
 
 void UServerComponent::Server_SetCharacterWalkSpeed_Implementation(ACharacter* Character, float Speed)
@@ -240,4 +241,9 @@ void UServerComponent::Multicast_SetPhysicsLinearVelocity_Implementation(UPrimit
 void UServerComponent::Multicast_AddImpulse_Implementation(UPrimitiveComponent* Component, FVector Direction, FName BoneName /*= NAME_None*/, bool bVelChange /*= false*/)
 {
 	Component->AddImpulse(Direction, BoneName, bVelChange);
+}
+
+void UServerComponent::Multicast_DetachComponentFromComponent_Implementation(USceneComponent* Child)
+{
+	Child->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }

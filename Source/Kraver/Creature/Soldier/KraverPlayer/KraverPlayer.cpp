@@ -12,6 +12,8 @@
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
+	NetUpdateFrequency = 300.f;
+
 	ArmMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmMesh"));
 	ArmMesh->SetupAttachment(Camera);
 	ArmMesh->SetCastShadow(false);
@@ -26,6 +28,8 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	ShowOnlyFirstPerson.Push(ArmWeaponMesh);
 
 	ShowOnlyThirdPerson.Push(GetMesh());
+
+	RefreshCurViewType();
 }
 
 void AKraverPlayer::BeginPlay()
@@ -42,9 +46,9 @@ void AKraverPlayer::Tick(float DeltaTime)
 	
 	CheckCanInteractionWeapon();
 
-	if (IsLocallyControlled() == false)
+	if (HasAuthority() == false && IsLocallyControlled() == false)
 	{
-		Camera->SetRelativeRotation(FRotator(AO_Pitch,AO_Yaw,0.0f));
+		Camera->SetRelativeRotation(FRotator(AO_Pitch, AO_Yaw, 0.0f));
 	}
 }
 
@@ -272,6 +276,44 @@ void AKraverPlayer::ChangeView()
 	}
 }
 
+void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
+{
+	if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == false)
+		return;
+
+	if (CombatComponent->IsDead() == false)
+	{
+		switch (ViewType)
+		{
+		case EViewType::FIRST_PERSON:
+			if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == true)
+			{
+				ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
+				ServerComponent->AttachComponentToComponent(Weapon->GetWeaponMesh(), ArmWeaponMesh);
+				GetWorldTimerManager().SetTimer(
+					UnEquipWeaponTimerHandle,
+					[=]() {					
+						ServerComponent->DetachComponentFromComponent(Weapon->GetWeaponMesh());
+						ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
+						ServerComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
+						ServerComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
+					},
+					0.000001f,
+						false);
+			}
+			break;
+		case EViewType::THIRD_PERSON:
+			Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
+			Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, true);
+			break;
+		default:
+			UE_LOG(LogTemp, Fatal, TEXT("Need to support more EViewType"));
+			break;
+		}
+	}
+
+}
+
 void AKraverPlayer::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	ASoldier::OnDeathEvent(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
@@ -351,11 +393,6 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
 
 	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
-	if (!HasAuthority() && ViewType == EViewType::FIRST_PERSON)
-	{
-		Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
-		Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
-	}
 
 	int32 Index = Weapon->FindAdditiveWeaponMesh(ArmWeaponMesh);
 	switch (Weapon->GetWeaponType())
@@ -374,6 +411,8 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 		break;
 	}
 	Weapon->RemoveAdditiveWeaponMesh(ArmWeaponMesh);
+
+	ThrowWeapon(Weapon);
 }
 
 void AKraverPlayer::OnCurWeaponAttackEvent()
@@ -401,35 +440,5 @@ void AKraverPlayer::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* W
 {
 	ASoldier::Server_OnUnEquipWeaponSuccessEvent_Implementation(Weapon);
 	
-	if (CombatComponent->IsDead() == false)
-	{
-		switch (ViewType)
-		{
-		case EViewType::FIRST_PERSON:
-			if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == true)
-			{
-				ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
-				Weapon->GetWeaponMesh()->AttachToComponent(ArmWeaponMesh,FAttachmentTransformRules::SnapToTargetIncludingScale);
-				GetWorldTimerManager().SetTimer(
-					UnEquipWeaponTimerHandle,
-					[=]() {
-						Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-						ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
-						ServerComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
-						ServerComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
-					},
-					0.000001f,
-						false);
-			}
-			break;
-		case EViewType::THIRD_PERSON:
-			Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
-			Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, true);
-			break;
-		default:
-			UE_LOG(LogTemp, Fatal, TEXT("Need to support more EViewType"));
-			break;
-		}
-	}
 }
 

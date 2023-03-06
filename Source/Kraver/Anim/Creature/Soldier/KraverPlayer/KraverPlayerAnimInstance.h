@@ -17,6 +17,7 @@ class KRAVER_API UKraverPlayerAnimInstance : public USoldierAnimInstance
 	GENERATED_BODY()
 	
 public:
+	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 protected:

@@ -88,6 +88,8 @@ private:
 		void Multicast_SetPhysicsLinearVelocity(UPrimitiveComponent* Component, FVector Velocity);
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_AddImpulse(UPrimitiveComponent* Component, FVector Direction, FName BoneName = NAME_None, bool bVelChange = false);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_DetachComponentFromComponent(USceneComponent* Child);
 
 private:
 	// Client

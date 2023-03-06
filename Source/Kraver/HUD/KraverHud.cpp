@@ -5,7 +5,8 @@
 
 AKraverHUD::AKraverHUD()
 {
-	InteractionWidget = CreateDefaultSubobject<UUserWidget>(TEXT("InteractionWidget"));
+	InteractionWidget = CreateDefaultSubobject<UInteractionWidget>(TEXT("InteractionWidget"));
+	CombatWidget = CreateDefaultSubobject<UCombatWidget>(TEXT("CombatWidget"));
 }
 
 void AKraverHUD::DrawHUD()
@@ -13,9 +14,10 @@ void AKraverHUD::DrawHUD()
 	Super::DrawHUD();
 
 	FVector2D ViewportSize;
+	GEngine->GameViewport->GetViewportSize(ViewportSize);
+
 	if (GEngine)
 	{
-		GEngine->GameViewport->GetViewportSize(ViewportSize);
 		const FVector2D ViewportCenter(ViewportSize.X / 2.f,ViewportSize.Y/2.f);
 
 		if (HUDPackage.CrosshairCenter)
@@ -48,6 +50,9 @@ void AKraverHUD::BeginPlay()
 
 	APlayerController* PlayerController = GetOwningPlayerController();
 	InteractionWidget = CreateWidget<UInteractionWidget>(PlayerController, InteractionWidgetClass);
+	CombatWidget = CreateWidget<UCombatWidget>(PlayerController, CombatWidgetClass);
+	if (CombatWidget)
+		CombatWidget->AddToViewport();
 }
 
 void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter)
@@ -74,7 +79,7 @@ void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter)
 
 void AKraverHUD::SetInteractWidget(bool value)
 {
-	if (value == true && InteractionWidget && !InteractionWidget->IsVisible())
+	if (value == true && InteractionWidget != nullptr && !InteractionWidget->IsVisible())
 	{
 		FVector2D ViewportSize;
 		if (GEngine)
@@ -89,7 +94,7 @@ void AKraverHUD::SetInteractWidget(bool value)
 		}
 		InteractionWidget->AddToViewport();
 	}
-	else if(value == false && InteractionWidget && InteractionWidget->IsVisible())
+	else if(value == false && InteractionWidget != nullptr && InteractionWidget->IsVisible())
 	{
 		InteractionWidget->RemoveFromParent();
 	}

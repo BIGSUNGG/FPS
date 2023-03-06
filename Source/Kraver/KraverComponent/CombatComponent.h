@@ -54,7 +54,8 @@ protected:
 public:
 	// Getter Setter
 	AWeapon* GetCurWeapon() { return CurWeapon; }
-	float GetCurHp() { return CurHp; }
+	int32 GetCurHp() { return CurHp; }
+	int32 GetMaxHp() { return MaxHp; }
 	bool GetCanEquipWeapon() { return CurWeapon == nullptr; }
 	bool IsDead();
 

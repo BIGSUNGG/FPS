@@ -4,7 +4,8 @@
 
 #include "Kraver/Kraver.h"
 #include "GameFramework/HUD.h"
-#include "Kraver/HUD/InteractionWidget.h"
+#include "Kraver/Widget/InteractionWidget.h"
+#include "Kraver/Widget/CombatWidget.h"
 #include "KraverHUD.generated.h"
 
 // 크로스헤어의 이미지를 가지는 구조체
@@ -41,8 +42,11 @@ public:
 private:
 	FCrosshairsPackage HUDPackage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<class UUserWidget> InteractionWidgetClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-		UUserWidget* InteractionWidget; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<UUserWidget> InteractionWidgetClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
+	UUserWidget* InteractionWidget; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<UUserWidget> CombatWidgetClass; // CombatWidget의 클래스 레퍼런스를 가지는 변수
+	UUserWidget* CombatWidget; // PlayerCharacter의 상태를 알려주는 위젯
 };

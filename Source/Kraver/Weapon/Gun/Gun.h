@@ -38,6 +38,9 @@ protected:
 
 public:
 	// Getter Setter
+	int32 GetCurAmmo() { return CurAmmo; }
+	int32 GetMaxAmmo() { return MaxAmmo; }
+	int32 GetTotalAmmo() { return TotalAmmo; }
 	virtual bool GetCanReload() override;
 	UNiagaraComponent* GetFireEffect() { return FireEffect; }
 	TArray<UNiagaraComponent*> GetAdditiveFireEffect() { return AdditiveFireEffect; }
