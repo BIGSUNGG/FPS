@@ -31,8 +31,3 @@ void ASoldier::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 }
-
-void ASoldier::EquipWeapon(AWeapon* Weapon)
-{
-	CombatComponent->EquipWeapon(Weapon);
-}

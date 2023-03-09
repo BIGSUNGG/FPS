@@ -36,14 +36,25 @@ void AKraverPlayer::BeginPlay()
 {
 	ASoldier::BeginPlay();
 
-	if(IsLocallyControlled())
+	if (IsLocallyControlled())
+	{ 
+		CombatComponent->SetMaxWeaponSlot(3);
+
+		KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
+		if (KraverController)
+			HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
 		RefreshCurViewType();
+	}
 }
 
 void AKraverPlayer::Tick(float DeltaTime)
 {
 	ASoldier::Tick(DeltaTime);
-	
+
+	KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
+	if (KraverController)
+		HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
+
 	CheckCanInteractionWeapon();
 
 	if (HasAuthority() == false && IsLocallyControlled() == false)
@@ -55,10 +66,13 @@ void AKraverPlayer::Tick(float DeltaTime)
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	ASoldier::SetupPlayerInputComponent(PlayerInputComponent);
-
+	
 	PlayerInputComponent->BindAction(TEXT("ChangeView"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeView);
 	PlayerInputComponent->BindAction(TEXT("Equip"), EInputEvent::IE_Pressed, this, &AKraverPlayer::EquipButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("UnEquip"), EInputEvent::IE_Pressed, this, &AKraverPlayer::UnEquipButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("ChangeWeapon1"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeWeapon1Pressed);
+	PlayerInputComponent->BindAction(TEXT("ChangeWeapon2"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeWeapon2Pressed);
+	PlayerInputComponent->BindAction(TEXT("ChangeWeapon3"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeWeapon3Pressed);
 }
 
 void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -92,11 +106,8 @@ void AKraverPlayer::Server_SetUnEquipWeaponThrowPower_Implementation(float Value
 
 void AKraverPlayer::EquipButtonPressed()
 {
-	if (CombatComponent->GetCurWeapon() == nullptr)
-	{
-		if(CanInteractWeapon != nullptr)
-			EquipWeapon(CanInteractWeapon);
-	}
+	if(CanInteractWeapon != nullptr)
+		CombatComponent->EquipWeapon(CanInteractWeapon);
 }
 
 void AKraverPlayer::UnEquipButtonPressed()
@@ -120,11 +131,32 @@ void AKraverPlayer::ReloadButtonPressed()
 	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetReloadMontageFpp(), 1.5f);
 }
 
+void AKraverPlayer::ChangeWeapon1Pressed()
+{
+	CombatComponent->HoldWeapon(0);
+}
+
+void AKraverPlayer::ChangeWeapon2Pressed()
+{
+	CombatComponent->HoldWeapon(1);
+}
+
+void AKraverPlayer::ChangeWeapon3Pressed()
+{
+	CombatComponent->HoldWeapon(2);
+}
+
 void AKraverPlayer::CheckCanInteractionWeapon()
 {
 	if (IsLocallyControlled() == false)
 		return;
 
+	if (CombatComponent->GetCanEquipWeapon() == false)
+	{
+		if(HUD)
+			HUD->SetInteractWidget(false);
+		return;
+	}
 	CanInteractWeapon = nullptr;
 
 	float Radius = InteractionRadius;
@@ -148,7 +180,7 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 			if (Result.bBlockingHit && IsValid(Result.GetActor()))
 			{
 				auto Weapon = Cast<AWeapon>(Result.GetActor());
-				if(Weapon && Weapon->GetCanInteracted() && CombatComponent->GetCanEquipWeapon())
+				if(Weapon && Weapon->GetCanInteracted())
 				{
 					// 찾는 범위에 있는 오브젝트 사이에 다른 오브젝트가 있는지
 					FHitResult ObjectHitResult;
@@ -167,6 +199,7 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 				}
 			}
 		}
+
 	}
 
 	if (CanInteractWeapon == nullptr)
@@ -189,7 +222,7 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 				if (Result.bBlockingHit && IsValid(Result.GetActor()))
 				{
 					auto Weapon = Cast<AWeapon>(Result.GetActor());
-					if (Weapon && Weapon->GetCanInteracted() && CombatComponent->GetCanEquipWeapon())
+					if (Weapon && Weapon->GetCanInteracted())
 					{
 						// 찾는 범위에 있는 오브젝트 사이에 다른 오브젝트가 있는지
 						FHitResult ObjectHitResult;
@@ -217,20 +250,15 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::White, Text);
 	}
 
-	KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
-	if(KraverController)
-	{ 
-		HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
-		if(HUD)
+	if (HUD)
+	{
+		if (CanInteractWeapon)
 		{
-			if (CanInteractWeapon == nullptr)
-			{
-				HUD->SetInteractWidget(false);
-			}
-			else
-			{
-				HUD->SetInteractWidget(true);
-			}
+			HUD->SetInteractWidget(true);
+		}
+		else
+		{
+			HUD->SetInteractWidget(false);
 		}
 	}
 }
@@ -281,7 +309,7 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 	if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == false)
 		return;
 
-	if (CombatComponent->IsDead() == false)
+	if (CombatComponent->GetIsDead() == false)
 	{
 		switch (ViewType)
 		{
@@ -353,30 +381,10 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {	
 	if(!Weapon)
 		return;
+
 	ASoldier::OnEquipWeaponSuccessEvent(Weapon);
 
-	int32 Index = CombatComponent->GetCurWeapon()->AddAdditiveWeaponMesh(ArmWeaponMesh);
-
-	ArmWeaponMesh->SetHiddenInGame(false);
-	ShowOnlyThirdPerson.Push(CombatComponent->GetCurWeapon()->GetWeaponMesh());
-	ServerComponent->AttachComponentToComponent(ArmWeaponMesh,ArmMesh, WeaponAttachSocketName);
-
-	switch (CombatComponent->GetCurWeapon()->GetWeaponType())
-	{
-	case EWeaponType::GUN:
-	{
-		AGun* Gun = Cast<AGun>(Weapon);
-		ShowOnlyThirdPerson.Push(Gun->GetFireEffect());
-		auto FireEffect = Gun->GetAdditiveFireEffect()[Index];
-		Gun->GetAdditiveFireEffect()[Index]->SetOnlyOwnerSee(true);
-		ShowOnlyFirstPerson.Push(FireEffect);
-	}
-		break;
-	default:
-		UE_LOG(LogTemp, Fatal, TEXT("Need to support more EWeaponType"));
-		break;
-	}
-	RefreshCurViewType();
+	ShowOnlyThirdPerson.Push(Weapon->GetWeaponMesh());
 }
 
 void AKraverPlayer::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
@@ -389,30 +397,62 @@ void AKraverPlayer::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Wea
 void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	ASoldier::OnUnEquipWeaponSuccessEvent(Weapon);
-	ArmWeaponMesh->SetHiddenInGame(true);
 	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
 
-	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
+	ThrowWeapon(Weapon);
+}
 
-	int32 Index = Weapon->FindAdditiveWeaponMesh(ArmWeaponMesh);
+void AKraverPlayer::OnHoldWeaponEvent(AWeapon* Weapon)
+{
+	ArmWeaponMesh->SetHiddenInGame(false);
+	ServerComponent->AttachComponentToComponent(ArmWeaponMesh, ArmMesh, WeaponAttachSocketName);
+
+	int32 Index = Weapon->AddAdditiveWeaponMesh(ArmWeaponMesh);
+
 	switch (Weapon->GetWeaponType())
 	{
 	case EWeaponType::GUN:
 	{
 		AGun* Gun = Cast<AGun>(Weapon);
-		ShowOnlyThirdPerson.Remove(Gun->GetFireEffect());
+		ShowOnlyThirdPerson.Push(Gun->GetFireEffect());
 		auto FireEffect = Gun->GetAdditiveFireEffect()[Index];
-		Gun->GetAdditiveFireEffect()[Index]->SetOnlyOwnerSee(false);
-		ShowOnlyFirstPerson.Remove(FireEffect);
+		Gun->GetAdditiveFireEffect()[Index]->SetOnlyOwnerSee(true);
+		ShowOnlyFirstPerson.Push(FireEffect);
 	}
 	break;
 	default:
 		UE_LOG(LogTemp, Fatal, TEXT("Need to support more EWeaponType"));
 		break;
 	}
-	Weapon->RemoveAdditiveWeaponMesh(ArmWeaponMesh);
+	RefreshCurViewType();
+}
 
-	ThrowWeapon(Weapon);
+void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
+{
+	ArmWeaponMesh->SetHiddenInGame(true);
+
+	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
+
+	int32 Index = Weapon->FindAdditiveWeaponMesh(ArmWeaponMesh);
+	if(Index != -1)
+	{ 
+		switch (Weapon->GetWeaponType())
+		{
+		case EWeaponType::GUN:
+		{
+			AGun* Gun = Cast<AGun>(Weapon);
+			ShowOnlyThirdPerson.Remove(Gun->GetFireEffect());
+			auto FireEffect = Gun->GetAdditiveFireEffect()[Index];
+			Gun->GetAdditiveFireEffect()[Index]->SetOnlyOwnerSee(false);
+			ShowOnlyFirstPerson.Remove(FireEffect);
+		}
+		break;
+		default:
+			UE_LOG(LogTemp, Fatal, TEXT("Need to support more EWeaponType"));
+			break;
+		}
+	}
+	Weapon->RemoveAdditiveWeaponMesh(ArmWeaponMesh);
 }
 
 void AKraverPlayer::OnCurWeaponAttackEvent()

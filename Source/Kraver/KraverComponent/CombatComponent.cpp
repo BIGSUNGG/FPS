@@ -114,12 +114,25 @@ void UCombatComponent::Death(float DamageAmount, FDamageEvent const& DamageEvent
 	Server_Death(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
 }
 
-bool UCombatComponent::IsDead()
+bool UCombatComponent::GetCanEquipWeapon()
+{
+	if (WeaponSlot.Num() < MaxWeaponSlotSize)
+		return true;
+
+	return false;
+}
+
+bool UCombatComponent::GetIsDead()
 {
 	if(CurHp <= 0.f)
 		return true;
 
 	return false;
+}
+
+void UCombatComponent::SetMaxWeaponSlot(int32 size)
+{
+	MaxWeaponSlotSize = size;
 }
 
 // Called every frame
@@ -145,38 +158,94 @@ void UCombatComponent::EquipWeapon(AWeapon* Weapon)
 	if (!Weapon)
 		return;
 
-	CurWeapon = Weapon;
+	HolsterCurWeapon();
+	SetCurWeapon(Weapon);
 	OwnerCreature->ServerComponent->OwningOtherActor(CurWeapon);
-	CurWeapon->Equipped(OwnerCreature);
+	bool Success = CurWeapon->Equipped(OwnerCreature);
 	
-	OnEquipWeaponSuccess.Broadcast(Weapon);
-	Server_EquipWeapon(Weapon);
-}
+	if(Success)
+	{ 
+		KR_LOG(Log,TEXT("Success to equip weapon %s"), *Weapon->GetName());
+		WeaponSlot.Add(Weapon);
+		if(WeaponSlot.Num() > MaxWeaponSlotSize)
+			KR_LOG(Error,TEXT("WeaponSlot size is bigger than MaxWeaponSlot"));
 
-void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
-{
-	CurWeapon = Weapon;
-	OnServerEquipWeaponSuccess.Broadcast(Weapon);
+		OnEquipWeaponSuccess.Broadcast(Weapon);
+		HoldWeapon(Weapon);
+	}
+	else
+		KR_LOG(Warning, TEXT("Failed to equip weapon"));
 }
 
 void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
 {
 	if (CurWeapon == Weapon)
 	{
-		CurWeapon = nullptr;
+		HolsterCurWeapon();
+		SetCurWeapon(nullptr);
 	}
 
 	SetIsAttacking(false);
-	Weapon->UnEquipped();
-	OnUnEquipWeaponSuccess.Broadcast(Weapon);
-	Server_UnEquipWeapon(Weapon);
+	bool Success = Weapon->UnEquipped();
+
+	if(Success)
+	{ 
+		WeaponSlot.Remove(Weapon);
+		OnUnEquipWeaponSuccess.Broadcast(Weapon);
+	}
+	else
+		KR_LOG(Warning, TEXT("Failed to unequip weapon"));
+}
+
+bool UCombatComponent::HoldWeapon(int32 WeaponIndex)
+{
+	if (WeaponIndex >= WeaponSlot.Num())
+	{
+		return false;
+	}
+
+	if (WeaponIndex >= MaxWeaponSlotSize)
+	{
+		KR_LOG(Error, TEXT("WeaponIndex is bigger than MaxWeaponSlotSize"));
+		return false;
+	}
+
+	if (WeaponSlot[WeaponIndex] == nullptr)
+	{
+		KR_LOG(Warning, TEXT("WeaponSlot[%d] is null"), WeaponIndex);
+		return false;
+	}
+
+	HolsterCurWeapon();
+	HoldWeapon(WeaponSlot[WeaponIndex]);
+	return true;
+}
+
+void UCombatComponent::HoldWeapon(AWeapon* Weapon)
+{
+	KR_LOG(Log,TEXT("Hold Weapon %s"),*Weapon->GetName());
+	SetCurWeapon(Weapon);
+	SetIsAttacking(false);
+	Weapon->Hold();
+	OnHoldWeapon.Broadcast(Weapon);
+}
+
+bool UCombatComponent::HolsterCurWeapon()
+{
+	if(CurWeapon == nullptr)
+		return false;
+
+	KR_LOG(Log, TEXT("Holster Weapon %s"), *CurWeapon->GetName());
+	AWeapon* WeaponPtr = CurWeapon;
+	SetCurWeapon(nullptr);
+	SetIsAttacking(false);
+	WeaponPtr->Holster();
+	OnHolsterWeapon.Broadcast(WeaponPtr);
+	return true;
 }
 
 void UCombatComponent::SetIsAttacking(bool bAttack)
 {
-	if(CurWeapon == nullptr)
-		return;
-
 	if (bAttack)
 	{
 		OnAttackStartDelegate.Broadcast();
@@ -228,6 +297,17 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	}
 }
 
+void UCombatComponent::SetCurWeapon(AWeapon* Weapon)
+{
+	CurWeapon = Weapon;
+	Server_SetCurWeapon(Weapon);
+}
+
+void UCombatComponent::Server_SetCurWeapon_Implementation(AWeapon* Weapon)
+{
+	CurWeapon = Weapon;
+}
+
 void UCombatComponent::Server_SetCurHp_Implementation(int32 value)
 {
 	CurHp = value;
@@ -242,15 +322,6 @@ void UCombatComponent::Multicast_SetCurHp_Implementation(int32 value)
 void UCombatComponent::Server_SetMaxHp_Implementation(int32 value)
 {
 	MaxHp = value;
-}
-
-void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
-{
-	if (CurWeapon == Weapon)
-	{
-		CurWeapon = nullptr;
-	}
-	OnServerUnEquipWeaponSuccess.Broadcast(Weapon);
 }
 
 void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

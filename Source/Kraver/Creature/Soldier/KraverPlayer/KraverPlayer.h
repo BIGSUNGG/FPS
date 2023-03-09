@@ -31,6 +31,7 @@ public:
 
 public:
 	// Getter Setter
+	FORCEINLINE AWeapon* GetCanInteractWeapon() { return CanInteractWeapon; }
 	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
 	FORCEINLINE USkeletalMeshComponent* GetArmWeaponMesh() { return ArmWeaponMesh; }
 
@@ -39,6 +40,9 @@ protected:
 	virtual void EquipButtonPressed();
 	virtual void UnEquipButtonPressed();
 	virtual void ReloadButtonPressed() override;
+	virtual void ChangeWeapon1Pressed();
+	virtual void ChangeWeapon2Pressed();
+	virtual void ChangeWeapon3Pressed();
 
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
@@ -60,6 +64,8 @@ protected:
 	virtual void Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
 	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
+	virtual void OnHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+	virtual void OnHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	virtual void OnCurWeaponAttackEvent() override;
 
 	virtual void SetMovementState(EMovementState value) override;

@@ -19,9 +19,11 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackEndDele);
 
 // Equip Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEquipWeaponSuccessDele, AWeapon*, Weapon);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FServerEquipWeaponSuccessDele, AWeapon*, Weapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUnEquipWeaponSuccessDele, AWeapon*, Weapon);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FServerUnEquipWeaponSuccessDele, AWeapon*, Weapon);
+
+// Hold Delegate
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHoldWeaponDele, AWeapon*, Weapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHolsterWeaponDele, AWeapon*, Weapon);
 
 // Damaged Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakeDamageDele, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
@@ -56,8 +58,10 @@ public:
 	AWeapon* GetCurWeapon() { return CurWeapon; }
 	int32 GetCurHp() { return CurHp; }
 	int32 GetMaxHp() { return MaxHp; }
-	bool GetCanEquipWeapon() { return CurWeapon == nullptr; }
-	bool IsDead();
+	bool GetCanEquipWeapon();
+	bool GetIsDead();
+
+	void SetMaxWeaponSlot(int32 size);
 
 public:	
 	// Called every frame
@@ -67,15 +71,13 @@ public:
 	virtual void RefillAmmo(); // 재장전하는 함수
 	virtual void EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
 	virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수
+	virtual bool HoldWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
+	virtual void HoldWeapon(AWeapon* Weapon); // WeaponSlot을 드는 함수
+	virtual bool HolsterCurWeapon(); // CurWeapon을 집어넣는 함수
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
 	virtual float GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 주는 함수 (클라이언트에서 서버로 GiveDamage이벤트 호출)
 
 protected:
-	UFUNCTION(Server, reliable)
-		void Server_EquipWeapon(AWeapon* Weapon);
-	UFUNCTION(Server, reliable)
-		void Server_UnEquipWeapon(AWeapon* Weapon);
-
 	// Take Damage
 	UFUNCTION(Server, reliable)
 		void Server_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
@@ -114,16 +116,17 @@ public:
 	FAttackEndDele OnAttackEndDelegate; // 공격을 멈출때 호출
 
 	FEquipWeaponSuccessDele OnEquipWeaponSuccess; // 무기를 장착했을때 호출
-	FServerEquipWeaponSuccessDele OnServerEquipWeaponSuccess;
 	FUnEquipWeaponSuccessDele OnUnEquipWeaponSuccess; // 무기를 해제했을때 호출
-	FServerUnEquipWeaponSuccessDele OnServerUnEquipWeaponSuccess;
+
+	FHoldWeaponDele OnHoldWeapon;
+	FHolsterWeaponDele OnHolsterWeapon;
 
 	FTakeDamageDele OnAfterTakeDamage; // 데미지를 받았을때 호출
 	FTakePointDamageDele OnAfterTakePointDamage;
 	FTakeRadialDamageDele OnAfterTakeRadialDamge;
 	FDeathDele OnDeath; // 죽었을때 호출
 
-	FGiveDamageDele OnGiveDamage;
+	FGiveDamageDele OnGiveDamage; // 데미지를 주었을때 호출
 	FGivePointDamageDele OnGivePointDamage;
 	FGiveRadialDamageDele OnGiveRadialDamage;
 
@@ -135,13 +138,22 @@ protected:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 		AWeapon* CurWeapon = nullptr; // 현재 무기
+	void SetCurWeapon(AWeapon* Weapon);
+	UFUNCTION(Server, reliable)
+		void Server_SetCurWeapon(AWeapon* Weapon);
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+		TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+		int32 MaxWeaponSlotSize = 1; // WeaponSlot 사이즈
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = State, meta = (AllowPrivateAccess = "true"))
 		int32 CurHp = 100.f; // 현재 Hp
 	UFUNCTION(Server, reliable)
 		void Server_SetCurHp(int32 value);
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_SetCurHp(int32 value);
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = State, meta = (AllowPrivateAccess = "true"))
 		int32 MaxHp = 100.f; // 최대 Hp
 	UFUNCTION(Server, reliable)
 		void Server_SetMaxHp(int32 value);

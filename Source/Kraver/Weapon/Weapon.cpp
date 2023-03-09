@@ -138,10 +138,8 @@ bool AWeapon::Equipped(ACreature* Character)
 	OwnerCreature = Character;
 	Server_SetOwnerCreature(Character);
 	OwnerCreature->ServerComponent->SetSimulatedPhysics(WeaponMesh, false);
-	OwnerCreature->CombatComponent->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
-	OwnerCreature->CombatComponent->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
 	
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Character->ServerComponent->SetCollisionEnabled(WeaponMesh, ECollisionEnabled::NoCollision);
 	Server_Equipped(OwnerCreature);
 	return true;
 }
@@ -151,7 +149,6 @@ void AWeapon::Server_Equipped_Implementation(ACreature* Character)
 	OwnerCreature = Character;
 	Server_SetOwnerCreature(Character);
 	WeaponState = EWeaponState::EQUIPPED;
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 bool AWeapon::GetCanInteracted()
@@ -174,6 +171,9 @@ void AWeapon::Server_SetOwnerCreature_Implementation(ACreature* pointer)
 
 bool AWeapon::UnEquipped()
 {
+	ACreature* CreaturePtr = OwnerCreature;
+
+	Hold();
 	WeaponMesh->SetSimulatePhysics(true);
 	OwnerCreature->CombatComponent->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
 	OwnerCreature->CombatComponent->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
@@ -182,8 +182,24 @@ bool AWeapon::UnEquipped()
 	if(IsAttacking)
 		AttackEndEvent();
 
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CreaturePtr->ServerComponent->SetCollisionEnabled(WeaponMesh, ECollisionEnabled::QueryAndPhysics);
 	Server_UnEquipped();
+	return true;
+}
+
+bool AWeapon::Hold()
+{
+	SetActorHiddenInGame(false);
+	OwnerCreature->CombatComponent->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
+	OwnerCreature->CombatComponent->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
+	return true;
+}
+
+bool AWeapon::Holster()
+{
+	SetActorHiddenInGame(true);
+	OwnerCreature->CombatComponent->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
+	OwnerCreature->CombatComponent->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
 	return true;
 }
 
@@ -194,7 +210,6 @@ void AWeapon::Server_UnEquipped_Implementation()
 	WeaponMesh->SetSimulatePhysics(true);
 	OwnerCreature = nullptr;
 	Server_SetOwnerCreature(nullptr);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AWeapon::AttackStartEvent()

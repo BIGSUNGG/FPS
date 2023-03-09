@@ -136,6 +136,14 @@ void UServerComponent::SpawnNiagaraAtLocation(UObject* WorldContextObject, class
 		Server_SpawnNiagaraAtLocation(WorldContextObject, SystemTemplate, Location, Rotation, Scale, bAutoDestroyNiagara, bAutoActivateNiagara, PoolingMethod, bPreCullCheck);
 }
 
+void UServerComponent::SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionEnabled::Type Value)
+{
+	if (GetOwner()->HasAuthority())
+		Multicast_SetCollisionEnabled(Object, Value);
+	else
+		Server_SetCollisionEnabled(Object, Value);
+}
+
 void UServerComponent::Server_SetPhysicsLinearVelocity_Implementation(UPrimitiveComponent* Component, FVector Velocity)
 {
 	Multicast_SetPhysicsLinearVelocity(Component,Velocity);
@@ -203,6 +211,11 @@ void UServerComponent::Server_SpawnNiagaraAtLocation_Implementation(UObject* Wor
 	Multicast_SpawnNiagaraAtLocation(WorldContextObject, SystemTemplate, Location, Rotation, Scale, bAutoDestroyNiagara, bAutoActivateNiagara, PoolingMethod, bPreCullCheck);
 }
 
+void UServerComponent::Server_SetCollisionEnabled_Implementation(UPrimitiveComponent* Object, ECollisionEnabled::Type Value)
+{
+	Multicast_SetCollisionEnabled(Object,Value);
+}
+
 void UServerComponent::Multicast_AttachComponentToComponent_Implementation(USceneComponent* Child, USceneComponent* Parent, FName BoneName)
 {
 	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
@@ -246,4 +259,9 @@ void UServerComponent::Multicast_AddImpulse_Implementation(UPrimitiveComponent* 
 void UServerComponent::Multicast_DetachComponentFromComponent_Implementation(USceneComponent* Child)
 {
 	Child->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+}
+
+void UServerComponent::Multicast_SetCollisionEnabled_Implementation(UPrimitiveComponent* Object, ECollisionEnabled::Type Value)
+{
+	Object->SetCollisionEnabled(Value);
 }

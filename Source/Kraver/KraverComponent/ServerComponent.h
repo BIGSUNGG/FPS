@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Engine/EngineTypes.h"
 #include "ServerComponent.generated.h"
 
 // 서버에서 호출되는 함수를 가지는 컴포넌트
@@ -40,6 +41,7 @@ public:
 	void PlayMontage(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
 	void SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
 	void SpawnNiagaraAtLocation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation = FRotator::ZeroRotator, FVector Scale = FVector(1.f), bool bAutoDestroyNiagara = true, bool bAutoActivateNiagara = true, ENCPoolMethod PoolingMethod = ENCPoolMethod::None, bool bPreCullCheck = true);
+	void SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionEnabled::Type Value);
 
 private:
 	// Server
@@ -69,6 +71,8 @@ private:
 		void Server_SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
 	UFUNCTION(Server, Reliable)
 		void Server_SpawnNiagaraAtLocation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation = FRotator::ZeroRotator, FVector Scale = FVector(1.f), bool bAutoDestroyNiagara = true, bool bAutoActivateNiagara = true, ENCPoolMethod PoolingMethod = ENCPoolMethod::None, bool bPreCullCheck = true);
+	UFUNCTION(Server, Reliable)
+		void Server_SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionEnabled::Type Value);
 
 private:
 	// Multicast
@@ -90,6 +94,8 @@ private:
 		void Multicast_AddImpulse(UPrimitiveComponent* Component, FVector Direction, FName BoneName = NAME_None, bool bVelChange = false);
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_DetachComponentFromComponent(USceneComponent* Child);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionEnabled::Type Value);
 
 private:
 	// Client

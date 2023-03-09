@@ -82,6 +82,10 @@ protected:
 	UFUNCTION()
 		virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 호출되는 함수
 	UFUNCTION()
+		virtual void OnHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+	UFUNCTION()
+		virtual void OnHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+	UFUNCTION()
 		virtual void OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 호출되는 함수
 	UFUNCTION()
 		virtual void OnCurWeaponAttackEvent();

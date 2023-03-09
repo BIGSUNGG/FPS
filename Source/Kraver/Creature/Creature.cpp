@@ -23,10 +23,10 @@ ACreature::ACreature()
 	CombatComponent->SetIsReplicated(true);
 	CombatComponent->OnDeath.AddDynamic(this, &ACreature::OnDeathEvent);
 	CombatComponent->OnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnEquipWeaponSuccessEvent);
-	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnEquipWeaponSuccessEvent);
 	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnUnEquipWeaponSuccessEvent);
-	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ACreature::Server_OnUnEquipWeaponSuccessEvent);
 	CombatComponent->OnAfterTakePointDamage.AddDynamic(this, &ACreature::OnAfterTakePointDamageEvent);
+	CombatComponent->OnHoldWeapon.AddDynamic(this, &ACreature::OnHoldWeaponEvent);
+	CombatComponent->OnHolsterWeapon.AddDynamic(this, &ACreature::OnHolsterWeaponEvent);
 
 	SpringArm->SetupAttachment(GetCapsuleComponent());
 	SpringArm->bUsePawnControlRotation = true;
@@ -310,26 +310,28 @@ void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	if (Weapon == nullptr)
 		return;
 
-	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent
-	(
-		GetMesh(),
-		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		WeaponAttachSocketName
-	);
-
-	ServerComponent->AttachComponentToComponent
-	(
-		CombatComponent->GetCurWeapon()->GetWeaponMesh(), 
-		GetMesh(), 
-		WeaponAttachSocketName
-	);
-
 	CombatComponent->GetCurWeapon()->OnAttack.AddDynamic(this, &ACreature::OnCurWeaponAttackEvent);
+	Server_OnEquipWeaponSuccessEvent(Weapon);
 }
 
 void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	Weapon->OnAttack.RemoveDynamic(this, &ACreature::OnCurWeaponAttackEvent);
+	Server_OnUnEquipWeaponSuccessEvent(Weapon);
+}
+
+void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
+{
+	ServerComponent->AttachComponentToComponent
+	(
+		CombatComponent->GetCurWeapon()->GetWeaponMesh(),
+		GetMesh(),
+		WeaponAttachSocketName
+	);
+}
+
+void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
+{
 }
 
 void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -364,7 +366,7 @@ void ACreature::Landed(const FHitResult& Hit)
 void ACreature::OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
-	if (Weapon && CombatComponent->IsDead())
+	if (Weapon && CombatComponent->GetIsDead())
 	{
 		ServerComponent->AddImpulseAtLocation
 		(

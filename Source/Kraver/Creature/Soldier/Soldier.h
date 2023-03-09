@@ -23,8 +23,5 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-	virtual void EquipWeapon(AWeapon* Weapon); // 매개변수 Weapon을 장착하는 함수
-
-protected:
 
 };

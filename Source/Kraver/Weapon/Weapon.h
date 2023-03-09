@@ -50,6 +50,8 @@ public:
 	virtual bool RefillAmmo(); // CurAmmo를 보충함
 	virtual bool Equipped(ACreature* Character); // Character에게 장착됨
 	virtual bool UnEquipped(); // 장착해제됨
+	virtual bool Hold();
+	virtual bool Holster();
 protected:
 	UFUNCTION(Server, Reliable)
 		void Server_Equipped(ACreature* Character);
