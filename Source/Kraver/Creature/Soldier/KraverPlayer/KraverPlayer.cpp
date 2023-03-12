@@ -316,15 +316,15 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 		case EViewType::FIRST_PERSON:
 			if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == true)
 			{
-				ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
-				ServerComponent->AttachComponentToComponent(Weapon->GetWeaponMesh(), ArmWeaponMesh);
+				RpcComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
+				RpcComponent->AttachComponentToComponent(Weapon->GetWeaponMesh(), ArmWeaponMesh);
 				GetWorldTimerManager().SetTimer(
 					UnEquipWeaponTimerHandle,
 					[=]() {					
-						ServerComponent->DetachComponentFromComponent(Weapon->GetWeaponMesh());
-						ServerComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
-						ServerComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
-						ServerComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
+						RpcComponent->DetachComponentFromComponent(Weapon->GetWeaponMesh());
+						RpcComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
+						RpcComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
+						RpcComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
 					},
 					0.000001f,
 						false);
@@ -405,7 +405,7 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 void AKraverPlayer::OnHoldWeaponEvent(AWeapon* Weapon)
 {
 	ArmWeaponMesh->SetHiddenInGame(false);
-	ServerComponent->AttachComponentToComponent(ArmWeaponMesh, ArmMesh, WeaponAttachSocketName);
+	RpcComponent->AttachComponentToComponent(ArmWeaponMesh, ArmMesh, WeaponAttachSocketName);
 
 	int32 Index = Weapon->AddAdditiveWeaponMesh(ArmWeaponMesh);
 
@@ -429,6 +429,9 @@ void AKraverPlayer::OnHoldWeaponEvent(AWeapon* Weapon)
 
 void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
 {
+	ASoldier::OnHolsterWeaponEvent(Weapon);
+	
+	RpcComponent->Montage_Stop(ArmMesh, Weapon->GetReloadMontageFpp());
 	ArmWeaponMesh->SetHiddenInGame(true);
 
 	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
@@ -459,7 +462,7 @@ void AKraverPlayer::OnCurWeaponAttackEvent()
 {
 	ASoldier::OnCurWeaponAttackEvent();
 
-	ServerComponent->PlayMontage(ArmMesh, CombatComponent->GetCurWeapon()->GetAttackMontageFpp());
+	RpcComponent->Montage_Play(ArmMesh, CombatComponent->GetCurWeapon()->GetAttackMontageFpp());
 }
 
 void AKraverPlayer::SetMovementState(EMovementState value)

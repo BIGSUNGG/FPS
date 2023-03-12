@@ -40,7 +40,7 @@ float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 		AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
 		if(Weapon)
 		{ 
-			Weapon->GetOwnerCreature()->ServerComponent->AddImpulseAtLocation
+			Weapon->GetOwnerCreature()->RpcComponent->AddImpulseAtLocation
 			( 
 				WeaponMesh,
 				PointDamageEvent->ShotDirection * Weapon->GetAttackImpulse() * WeaponMesh->GetMass(),
@@ -106,6 +106,13 @@ int32 AWeapon::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 			break;
 		}
 	}
+
+	if (Index == -1)
+	{
+		KR_LOG(Warning, TEXT("Failed to find AdditiveWeaponMesh"));
+		return Index;
+	}
+
 	AdditiveWeaponMesh[Index]->SetHiddenInGame(true);
 	AdditiveWeaponMesh.RemoveAt(Index);
 	return Index;
@@ -137,9 +144,9 @@ bool AWeapon::Equipped(ACreature* Character)
 
 	OwnerCreature = Character;
 	Server_SetOwnerCreature(Character);
-	OwnerCreature->ServerComponent->SetSimulatedPhysics(WeaponMesh, false);
+	OwnerCreature->RpcComponent->SetSimulatedPhysics(WeaponMesh, false);
 	
-	Character->ServerComponent->SetCollisionEnabled(WeaponMesh, ECollisionEnabled::NoCollision);
+	Character->RpcComponent->SetCollisionEnabled(WeaponMesh, ECollisionEnabled::NoCollision);
 	Server_Equipped(OwnerCreature);
 	return true;
 }
@@ -182,7 +189,7 @@ bool AWeapon::UnEquipped()
 	if(IsAttacking)
 		AttackEndEvent();
 
-	CreaturePtr->ServerComponent->SetCollisionEnabled(WeaponMesh, ECollisionEnabled::QueryAndPhysics);
+	CreaturePtr->RpcComponent->SetCollisionEnabled(WeaponMesh, ECollisionEnabled::QueryAndPhysics);
 	Server_UnEquipped();
 	return true;
 }

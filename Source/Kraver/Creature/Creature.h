@@ -5,7 +5,7 @@
 #include "Kraver/Kraver.h"
 #include "GameFramework/Character.h"
 #include "Kraver/KraverComponent/CombatComponent.h"
-#include "Kraver/KraverComponent/ServerComponent.h"
+#include "Kraver/KraverComponent/RpcComponent.h"
 #include "Kraver/Weapon/Weapon.h"
 #include "Engine/DamageEvents.h"
 #include "Creature.generated.h"
@@ -107,7 +107,7 @@ protected:
 
 public:
 	// Component
-	UServerComponent* ServerComponent;
+	URpcComponent* RpcComponent;
 	UCombatComponent* CombatComponent;
 
 protected:

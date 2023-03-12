@@ -17,7 +17,7 @@ ACreature::ACreature()
 	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	ServerComponent = CreateDefaultSubobject<UServerComponent>("ServerComponent");
+	RpcComponent = CreateDefaultSubobject<URpcComponent>("ServerComponent");
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
@@ -166,7 +166,8 @@ void ACreature::ReloadButtonPressed()
 		return;
 	}
 
-	ServerComponent->PlayMontage(GetMesh(), CombatComponent->GetCurWeapon()->GetReloadMontageTpp(), 1.5f);
+	CombatComponent->SetIsAttacking(false);
+	RpcComponent->Montage_Play(GetMesh(), CombatComponent->GetCurWeapon()->GetReloadMontageTpp(), 1.5f);
 }
 
 void ACreature::AttackButtonPressed()
@@ -322,7 +323,7 @@ void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
 {
-	ServerComponent->AttachComponentToComponent
+	RpcComponent->AttachComponentToComponent
 	(
 		CombatComponent->GetCurWeapon()->GetWeaponMesh(),
 		GetMesh(),
@@ -332,16 +333,20 @@ void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
 
 void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 {
+	if(!Weapon)
+		return;
+
+	RpcComponent->Montage_Stop(GetMesh(), Weapon->GetReloadMontageTpp());
 }
 
 void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	ServerComponent->SetSimulatedPhysics(GetMesh(), true);
+	RpcComponent->SetSimulatedPhysics(GetMesh(), true);
 	DisableInput(GetController<APlayerController>());
 	if (CombatComponent->GetCurWeapon() != nullptr)
 		CombatComponent->UnEquipWeapon(CombatComponent->GetCurWeapon());
-	ServerComponent->SetCollisionProfileName(GetCapsuleComponent(), FName("DeadPawn"));
-	ServerComponent->SetCollisionProfileName(GetMesh(), FName("Ragdoll"));
+	RpcComponent->SetCollisionProfileName(GetCapsuleComponent(), FName("DeadPawn"));
+	RpcComponent->SetCollisionProfileName(GetMesh(), FName("Ragdoll"));
 
 	Server_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
@@ -351,14 +356,14 @@ void ACreature::OnCurWeaponAttackEvent()
 	if(CombatComponent->GetCurWeapon() == nullptr)
 		UE_LOG(LogTemp,Fatal,TEXT("Cur weapon is nullptr but it attacked"));
 
-	ServerComponent->PlayMontage(GetMesh(), CombatComponent->GetCurWeapon()->GetAttackMontageTpp());
+	RpcComponent->Montage_Play(GetMesh(), CombatComponent->GetCurWeapon()->GetAttackMontageTpp());
 }
 
 void ACreature::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-	ServerComponent->PlayMontage(GetMesh(), CreatureAnim->GetLandedMontage());
+	RpcComponent->Montage_Play(GetMesh(), CreatureAnim->GetLandedMontage());
 
 	SetIsJumping(false);
 }
@@ -368,7 +373,7 @@ void ACreature::OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEven
 	AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
 	if (Weapon && CombatComponent->GetIsDead())
 	{
-		ServerComponent->AddImpulseAtLocation
+		RpcComponent->AddImpulseAtLocation
 		(
 			GetMesh(),
 			DamageEvent.ShotDirection * Weapon->GetAttackImpulse() * GetMesh()->GetMass() * ImpulseResistanceRatio,

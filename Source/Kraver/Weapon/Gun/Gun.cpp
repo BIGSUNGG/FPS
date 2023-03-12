@@ -53,6 +53,9 @@ int32 AGun::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 int32 AGun::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 {
 	int32 Index = AWeapon::RemoveAdditiveWeaponMesh(Mesh);
+	if (Index == -1)
+		return Index;
+
 	AdditiveFireEffect[Index]->SetHiddenInGame(true);
 	AdditiveFireEffect.RemoveAt(Index);
 	return Index;
@@ -123,7 +126,7 @@ void AGun::Attack()
 					OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);	
 					if (Result.bBlockingHit)
 					{
-						OwnerCreature->ServerComponent->SpawnNiagaraAtLocation(GetWorld(), ImpactEffect->GetAsset(), Result.ImpactPoint);
+						OwnerCreature->RpcComponent->SpawnNiagaraAtLocation(GetWorld(), ImpactEffect->GetAsset(), Result.ImpactPoint);
 					}
 				}
 			}	

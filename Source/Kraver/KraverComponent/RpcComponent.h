@@ -7,17 +7,17 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Engine/EngineTypes.h"
-#include "ServerComponent.generated.h"
+#include "RpcComponent.generated.h"
 
 // 서버에서 호출되는 함수를 가지는 컴포넌트
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class KRAVER_API UServerComponent : public UActorComponent
+class KRAVER_API URpcComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UServerComponent();
+	URpcComponent();
 
 protected:
 	// Called when the game starts
@@ -38,7 +38,8 @@ public:
 	void SetLocation(UPrimitiveComponent* Component, FVector Location);
 	void SetRotation(UPrimitiveComponent* Component, FRotator Location);
 	void SetCharacterWalkSpeed(ACharacter* Character, float Speed);
-	void PlayMontage(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
+	void Montage_Play(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
+	void Montage_Stop(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 0.f);
 	void SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
 	void SpawnNiagaraAtLocation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation = FRotator::ZeroRotator, FVector Scale = FVector(1.f), bool bAutoDestroyNiagara = true, bool bAutoActivateNiagara = true, ENCPoolMethod PoolingMethod = ENCPoolMethod::None, bool bPreCullCheck = true);
 	void SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionEnabled::Type Value);
@@ -66,7 +67,9 @@ private:
 	UFUNCTION(Server, Reliable)
 		void Server_SetCharacterWalkSpeed(ACharacter* Character, float Speed);
 	UFUNCTION(Server, Reliable)
-		void Server_PlayMontage(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
+		void Server_Montage_Play(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
+	UFUNCTION(Server, Reliable)
+		void Server_Montage_Stop(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
 	UFUNCTION(Server, Reliable)
 		void Server_SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
 	UFUNCTION(Server, Reliable)
@@ -85,7 +88,9 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_PlayMontage(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
+		void Multicast_Montage_Play(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_Montage_Stop(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_SpawnNiagaraAtLocation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation = FRotator::ZeroRotator, FVector Scale = FVector(1.f), bool bAutoDestroyNiagara = true, bool bAutoActivateNiagara = true, ENCPoolMethod PoolingMethod = ENCPoolMethod::None, bool bPreCullCheck = true);
 	UFUNCTION(NetMulticast, Reliable)
