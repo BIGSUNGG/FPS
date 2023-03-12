@@ -189,6 +189,7 @@ void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
 
 	if(Success)
 	{ 
+		KR_LOG(Log, TEXT("UnEquipWeapon %s"), *Weapon->GetName());
 		WeaponSlot.Remove(Weapon);
 		OnUnEquipWeaponSuccess.Broadcast(Weapon);
 	}

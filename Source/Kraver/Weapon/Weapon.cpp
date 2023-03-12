@@ -86,12 +86,6 @@ void AWeapon::Tick(float DeltaTime)
 int32 AWeapon::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 {
 	int32 Index = AdditiveWeaponMesh.Add(Mesh);
-	Mesh->SetSkeletalMesh(GetWeaponMesh()->GetSkeletalMeshAsset());
-	TArray<UMaterialInterface*> MaterialArray = GetWeaponMesh()->GetMaterials();
-	for (int i = 0; i < MaterialArray.Num(); i++)
-	{
-		Mesh->SetMaterial(i, MaterialArray[i]);
-	}
 	return Index;
 }
 

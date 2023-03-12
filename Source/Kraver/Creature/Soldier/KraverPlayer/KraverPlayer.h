@@ -103,6 +103,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 		float InteractionRadius = 25.f; // 장착가능한 무기를 찾는 범위의 반지름
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
+		float CrouchCameraHeight = -40.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
+		float UnCrouchCameraHeight = 0.f;
+
+
 	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
 	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트
 	FVector SpringArmBasicLocation; // 기본적으로 적용할 SprintArm의 RelativeLocation
