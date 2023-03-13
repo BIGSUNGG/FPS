@@ -43,7 +43,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual int32 AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh); // 추가적인 WeaponMesh를 추가 (Return 값은 추가된 WeaponMesh의 인덱스값)
+	virtual int32 MakeAdditiveWeaponMesh(); // 추가적인 WeaponMesh를 추가 (Return 값은 추가된 WeaponMesh의 인덱스값)
 	virtual int32 RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh); // 추가적인 WeaponMesh를 제거 (Return 값은 제거된 WeaponMesh의 인덱스값)
 	virtual int32 FindAdditiveWeaponMesh(USkeletalMeshComponent* Mesh); // 추가적인 WeaponMesh를 찾음 (Return 값은 찾은 WeaponMesh의 인덱스값 못찾았을 경우 -1)
 
@@ -74,6 +74,7 @@ public:
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
 	USkeletalMeshComponent* GetWeaponMesh() {return WeaponMesh;}
+	TArray<USkeletalMeshComponent*> GetAdditiveWeaponMesh() { return AdditiveWeaponMesh; }
 
 	UAnimMontage* GetReloadMontageTpp() { return ReloadMontageTpp; }
 	UAnimMontage* GetReloadMontageFpp() { return ReloadMontageFpp; }

@@ -216,6 +216,12 @@ bool UCombatComponent::HoldWeapon(int32 WeaponIndex)
 		return false;
 	}
 
+	if (WeaponSlot[WeaponIndex] == CurWeapon)
+	{
+		KR_LOG(Warning, TEXT("WeaponSlot[%d] is CurWeapon"), WeaponIndex);
+		return false;
+	}
+
 	HolsterCurWeapon();
 	HoldWeapon(WeaponSlot[WeaponIndex]);
 	return true;

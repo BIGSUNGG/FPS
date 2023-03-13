@@ -153,6 +153,11 @@ void URpcComponent::SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionE
 		Server_SetCollisionEnabled(Object, Value);
 }
 
+void URpcComponent::SetHiddenInGame(USceneComponent* Component, bool NewHidden)
+{
+	Server_SetHiddenInGame(Component, NewHidden);	
+}
+
 void URpcComponent::Server_SetPhysicsLinearVelocity_Implementation(UPrimitiveComponent* Component, FVector Velocity)
 {
 	Multicast_SetPhysicsLinearVelocity(Component,Velocity);
@@ -230,6 +235,11 @@ void URpcComponent::Server_SetCollisionEnabled_Implementation(UPrimitiveComponen
 	Multicast_SetCollisionEnabled(Object,Value);
 }
 
+void URpcComponent::Server_SetHiddenInGame_Implementation(USceneComponent* Component, bool NewHidden)
+{
+	Multicast_SetHiddenInGame(Component,NewHidden);
+}
+
 void URpcComponent::Multicast_AttachComponentToComponent_Implementation(USceneComponent* Child, USceneComponent* Parent, FName BoneName)
 {
 	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
@@ -283,4 +293,9 @@ void URpcComponent::Multicast_DetachComponentFromComponent_Implementation(UScene
 void URpcComponent::Multicast_SetCollisionEnabled_Implementation(UPrimitiveComponent* Object, ECollisionEnabled::Type Value)
 {
 	Object->SetCollisionEnabled(Value);
+}
+
+void URpcComponent::Multicast_SetHiddenInGame_Implementation(USceneComponent* Component, bool NewHidden)
+{	
+	Component->SetHiddenInGame(NewHidden);
 }

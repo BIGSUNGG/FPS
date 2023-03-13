@@ -83,9 +83,19 @@ void AWeapon::Tick(float DeltaTime)
 	}
 }
 
-int32 AWeapon::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
+int32 AWeapon::MakeAdditiveWeaponMesh()
 {
-	int32 Index = AdditiveWeaponMesh.Add(Mesh);
+	USkeletalMeshComponent* MakeMesh = NewObject<USkeletalMeshComponent>(this, USkeletalMeshComponent::StaticClass(), TEXT("Additive Mesh"));
+	MakeMesh->RegisterComponent();
+	MakeMesh->SetSkeletalMesh(WeaponMesh->GetSkeletalMeshAsset());
+	TArray<UMaterialInterface*> MaterialArray = WeaponMesh->GetMaterials();
+	for (int i = 0; i < MaterialArray.Num(); i++)
+	{
+		MakeMesh->SetMaterial(i, MaterialArray[i]);
+	}
+
+	int32 Index = AdditiveWeaponMesh.Add(MakeMesh);
+	KR_LOG(Log,TEXT("Add Mesh to AdditiveWeaponMesh[%d]"),Index);
 	return Index;
 }
 
@@ -190,7 +200,6 @@ bool AWeapon::UnEquipped()
 
 bool AWeapon::Hold()
 {
-	SetActorHiddenInGame(false);
 	OwnerCreature->CombatComponent->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
 	OwnerCreature->CombatComponent->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
 	return true;
@@ -198,7 +207,6 @@ bool AWeapon::Hold()
 
 bool AWeapon::Holster()
 {
-	SetActorHiddenInGame(true);
 	OwnerCreature->CombatComponent->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
 	OwnerCreature->CombatComponent->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
 	return true;

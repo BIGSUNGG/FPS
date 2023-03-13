@@ -33,7 +33,7 @@ public:
 	// Getter Setter
 	FORCEINLINE AWeapon* GetCanInteractWeapon() { return CanInteractWeapon; }
 	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
-	FORCEINLINE USkeletalMeshComponent* GetArmWeaponMesh() { return ArmWeaponMesh; }
+	FORCEINLINE TMap<AWeapon*, USkeletalMeshComponent*> GetArmWeaponMeshes() { return ArmWeaponMeshes; }
 
 protected:
 	// input event
@@ -94,7 +94,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Arm, meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* ArmMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Arm, meta = (AllowPrivateAccess = "true"))
-		USkeletalMeshComponent* ArmWeaponMesh;
+		TMap<AWeapon*, USkeletalMeshComponent*> ArmWeaponMeshes;
 
 	AWeapon* CanInteractWeapon;
 
@@ -112,7 +112,7 @@ protected:
 	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
 	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트
 	FVector SpringArmBasicLocation; // 기본적으로 적용할 SprintArm의 RelativeLocation
-	FVector SpringArmAdditiveLocation; // 추가적으로 적용할 SprintArm의 RelativeLocation
+	FVector SpringArmCrouchLocation; // 추가적으로 적용할 SprintArm의 RelativeLocation
 
 	FTimerHandle UnEquipWeaponTimerHandle;
 	float UnEquipWeaponThrowPower = 500.f; // 장착해제된 무기를 던지는 힘

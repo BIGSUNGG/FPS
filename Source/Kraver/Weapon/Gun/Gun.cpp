@@ -37,16 +37,16 @@ void AGun::PostInitializeComponents()
 
 }
 
-int32 AGun::AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
+int32 AGun::MakeAdditiveWeaponMesh()
 {
-	int32 Index = AWeapon::AddAdditiveWeaponMesh(Mesh);
-	UNiagaraComponent* TempFireEffect = NewObject<UNiagaraComponent>(this, UNiagaraComponent::StaticClass(), TEXT("Additive Fire Effect"));
-	TempFireEffect->bAutoActivate = false;
-	TempFireEffect->RegisterComponent();
-	TempFireEffect->SetAsset(FireEffect->GetAsset());
-	TempFireEffect->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FireEffectSocketName);
-	TempFireEffect->SetRelativeRotation(FireEffect->GetRelativeRotation());
-	AdditiveFireEffect.Push(TempFireEffect);
+	int32 Index = AWeapon::MakeAdditiveWeaponMesh();
+	UNiagaraComponent* MakeFireEffect = NewObject<UNiagaraComponent>(this, UNiagaraComponent::StaticClass(), TEXT("Additive Fire Effect"));
+	MakeFireEffect->bAutoActivate = false;
+	MakeFireEffect->RegisterComponent();
+	MakeFireEffect->SetAsset(FireEffect->GetAsset());
+	MakeFireEffect->AttachToComponent(AdditiveWeaponMesh[Index], FAttachmentTransformRules::SnapToTargetIncludingScale, FireEffectSocketName);
+	MakeFireEffect->SetRelativeRotation(FireEffect->GetRelativeRotation());
+	AdditiveFireEffect.Push(MakeFireEffect);
 	return Index;
 }
 
@@ -56,7 +56,7 @@ int32 AGun::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 	if (Index == -1)
 		return Index;
 
-	AdditiveFireEffect[Index]->SetHiddenInGame(true);
+	AdditiveFireEffect[Index]->DestroyComponent();
 	AdditiveFireEffect.RemoveAt(Index);
 	return Index;
 }

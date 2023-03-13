@@ -318,17 +318,14 @@ void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	Weapon->OnAttack.RemoveDynamic(this, &ACreature::OnCurWeaponAttackEvent);
+	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), false);
 	Server_OnUnEquipWeaponSuccessEvent(Weapon);
 }
 
 void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
 {
-	RpcComponent->AttachComponentToComponent
-	(
-		CombatComponent->GetCurWeapon()->GetWeaponMesh(),
-		GetMesh(),
-		WeaponAttachSocketName
-	);
+	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), false);
+
 }
 
 void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
@@ -336,6 +333,7 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 	if(!Weapon)
 		return;
 
+	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), true);
 	RpcComponent->Montage_Stop(GetMesh(), Weapon->GetReloadMontageTpp());
 }
 

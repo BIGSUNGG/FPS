@@ -43,6 +43,7 @@ public:
 	void SetCollisionProfileName(UPrimitiveComponent* Component, FName ProfileName);
 	void SpawnNiagaraAtLocation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation = FRotator::ZeroRotator, FVector Scale = FVector(1.f), bool bAutoDestroyNiagara = true, bool bAutoActivateNiagara = true, ENCPoolMethod PoolingMethod = ENCPoolMethod::None, bool bPreCullCheck = true);
 	void SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionEnabled::Type Value);
+	void SetHiddenInGame(USceneComponent* Component, bool NewHidden);
 
 private:
 	// Server
@@ -76,6 +77,8 @@ private:
 		void Server_SpawnNiagaraAtLocation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation = FRotator::ZeroRotator, FVector Scale = FVector(1.f), bool bAutoDestroyNiagara = true, bool bAutoActivateNiagara = true, ENCPoolMethod PoolingMethod = ENCPoolMethod::None, bool bPreCullCheck = true);
 	UFUNCTION(Server, Reliable)
 		void Server_SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionEnabled::Type Value);
+	UFUNCTION(Server, Reliable)
+		void Server_SetHiddenInGame(USceneComponent* Component, bool NewHidden);
 
 private:
 	// Multicast
@@ -101,6 +104,8 @@ private:
 		void Multicast_DetachComponentFromComponent(USceneComponent* Child);
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionEnabled::Type Value);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_SetHiddenInGame(USceneComponent* Component, bool NewHidden);
 
 private:
 	// Client

@@ -22,12 +22,6 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	ArmMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ShowOnlyFirstPerson.Push(ArmMesh);
 
-	ArmWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmWeaponMesh"));
-	ArmWeaponMesh->SetCastShadow(false);
-	ArmWeaponMesh->SetOnlyOwnerSee(true);
-	ArmWeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	ShowOnlyFirstPerson.Push(ArmWeaponMesh);
-
 	ShowOnlyThirdPerson.Push(GetMesh());
 
 	RefreshCurViewType();
@@ -63,14 +57,12 @@ void AKraverPlayer::Tick(float DeltaTime)
 		Camera->SetRelativeRotation(FRotator(AO_Pitch, AO_Yaw, 0.0f));
 	}
 
-
-	FVector CameraLocation = Camera->GetRelativeLocation();
 	if (GetMovementComponent()->IsCrouching())
-		CameraLocation.Z = FMath::FInterpTo(CameraLocation.Z,CrouchCameraHeight, DeltaTime, 20.f);
+		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z,CrouchCameraHeight, DeltaTime, 20.f);
 	else
-		CameraLocation.Z = FMath::FInterpTo(CameraLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
+		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
 
-	Camera->SetRelativeLocation(CameraLocation);
+	SpringArm->SetRelativeLocation(SpringArmCrouchLocation + SpringArmBasicLocation);
 }
 
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -161,13 +153,15 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 	if (IsLocallyControlled() == false)
 		return;
 
+	CanInteractWeapon = nullptr;
 	if (CombatComponent->GetCanEquipWeapon() == false)
 	{
-		if(HUD)
+		if (HUD)
+		{
 			HUD->SetInteractWidget(false);
+		}
 		return;
 	}
-	CanInteractWeapon = nullptr;
 
 	float Radius = InteractionRadius;
 	float Distance = InteractionDistance + SpringArm->TargetArmLength;
@@ -327,7 +321,8 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 			if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == true)
 			{
 				RpcComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
-				RpcComponent->AttachComponentToComponent(Weapon->GetWeaponMesh(), ArmWeaponMesh);
+				Weapon->GetWeaponMesh()->SetWorldLocation(ArmWeaponMeshes[Weapon]->GetComponentLocation());
+				Weapon->GetWeaponMesh()->SetWorldRotation(ArmWeaponMeshes[Weapon]->GetComponentRotation());
 				GetWorldTimerManager().SetTimer(
 					UnEquipWeaponTimerHandle,
 					[=]() {					
@@ -359,8 +354,8 @@ void AKraverPlayer::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageE
 
 void AKraverPlayer::RefreshSpringArm()
 {
-	SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmAdditiveLocation);
-	Server_RefreshSpringArm(SpringArmBasicLocation + SpringArmAdditiveLocation, SpringArm->TargetArmLength);
+	SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmCrouchLocation);
+	Server_RefreshSpringArm(SpringArmBasicLocation + SpringArmCrouchLocation, SpringArm->TargetArmLength);
 }
 
 void AKraverPlayer::Server_RefreshSpringArm_Implementation(FVector Vector, float Length)
@@ -394,7 +389,13 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	ASoldier::OnEquipWeaponSuccessEvent(Weapon);
 
-	int32 Index = Weapon->AddAdditiveWeaponMesh(ArmWeaponMesh);
+	int32 Index = Weapon->MakeAdditiveWeaponMesh();
+	ArmWeaponMeshes.Add(Weapon, Weapon->GetAdditiveWeaponMesh()[Index]);
+	Weapon->GetAdditiveWeaponMesh()[Index]->AttachToComponent(ArmMesh,FAttachmentTransformRules::SnapToTargetIncludingScale, WeaponAttachSocketName);
+	Weapon->GetAdditiveWeaponMesh()[Index]->SetCastShadow(false);	
+	Weapon->GetAdditiveWeaponMesh()[Index]->SetOnlyOwnerSee(true);
+	Weapon->GetAdditiveWeaponMesh()[Index]->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ShowOnlyFirstPerson.Push(Weapon->GetAdditiveWeaponMesh()[Index]);
 
 	switch (Weapon->GetWeaponType())
 	{
@@ -419,8 +420,6 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 void AKraverPlayer::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
 	ASoldier::Server_OnEquipWeaponSuccessEvent_Implementation(Weapon);
-
-	ArmWeaponMesh->SetSkeletalMesh(CombatComponent->GetCurWeapon()->GetWeaponMesh()->GetSkeletalMeshAsset());
 }
 
 void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -429,7 +428,7 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
 	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
 
-	int32 Index = Weapon->FindAdditiveWeaponMesh(ArmWeaponMesh);
+	int32 Index = Weapon->FindAdditiveWeaponMesh(ArmWeaponMeshes[Weapon]);
 	if (Index != -1)
 	{
 		switch (Weapon->GetWeaponType())
@@ -448,37 +447,28 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 			break;
 		}
 	}
-	Weapon->RemoveAdditiveWeaponMesh(ArmWeaponMesh);
+	ThrowWeapon(Weapon);
+	Weapon->RemoveAdditiveWeaponMesh(ArmWeaponMeshes[Weapon]);
+	ArmWeaponMeshes.Remove(Weapon);
 	RefreshCurViewType();
 
-	ThrowWeapon(Weapon);
 }
 
 void AKraverPlayer::OnHoldWeaponEvent(AWeapon* Weapon)
 {
-	ArmWeaponMesh->SetHiddenInGame(false);
+	ASoldier::OnHoldWeaponEvent(Weapon);
 
-	ArmWeaponMesh->SetSkeletalMesh(Weapon->GetWeaponMesh()->GetSkeletalMeshAsset());
-	TArray<UMaterialInterface*> MaterialArray = Weapon->GetWeaponMesh()->GetMaterials();
-	for (int i = 0; i < MaterialArray.Num(); i++)
-	{
-		ArmWeaponMesh->SetMaterial(i, MaterialArray[i]);
-	}
-
-	RpcComponent->AttachComponentToComponent(ArmWeaponMesh, ArmMesh, WeaponAttachSocketName);
+	ArmWeaponMeshes[Weapon]->SetHiddenInGame(false);
 	RefreshCurViewType();
-
 }
 
 void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
 {
 	ASoldier::OnHolsterWeaponEvent(Weapon);
 	
+	ArmWeaponMeshes[Weapon]->SetHiddenInGame(true);
 	RpcComponent->Montage_Stop(ArmMesh, Weapon->GetReloadMontageFpp());
-	ArmWeaponMesh->SetHiddenInGame(true);
-
 	RefreshCurViewType();
-
 }
 
 void AKraverPlayer::OnCurWeaponAttackEvent()

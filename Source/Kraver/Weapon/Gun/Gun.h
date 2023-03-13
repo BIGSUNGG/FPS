@@ -22,7 +22,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 
-	virtual int32 AddAdditiveWeaponMesh(USkeletalMeshComponent* Mesh) override;
+	virtual int32 MakeAdditiveWeaponMesh() override;
 	virtual int32 RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh) override;
 
 	virtual bool RefillAmmo();
