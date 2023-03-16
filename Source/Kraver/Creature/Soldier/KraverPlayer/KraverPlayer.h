@@ -115,8 +115,6 @@ protected:
 	FVector SpringArmCrouchLocation; // 추가적으로 적용할 SprintArm의 RelativeLocation
 
 	FTimerHandle UnEquipWeaponTimerHandle;
-	float UnEquipWeaponThrowPower = 500.f; // 장착해제된 무기를 던지는 힘
-		void SetUnEquipWeaponThrowPower(float Value);
-	UFUNCTION(Server, reliable)
-		void Server_SetUnEquipWeaponThrowPower(float Value);
+	float WeaponThrowPower = 700.f; // 장착해제된 무기를 던지는 힘
+	FVector WeaponThrowAngularPower = FVector(100, 100, 0); // 장착해제된 무기를 던지는 힘
 };

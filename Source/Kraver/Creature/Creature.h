@@ -54,7 +54,6 @@ public:
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 	FORCEINLINE EMovementState GetMovementState() { return MovementState; }
-	FORCEINLINE FName GetWeaponAttachSocketName() { return WeaponAttachSocketName; }
 
 protected:
 	// Axis Input
@@ -146,13 +145,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float SprintSpeed = 1200.f; // EMovementState가 SPRINT가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		float RunSpeed = 800.f; // EMovementState가 RUN가 되었을때 설정할 캐릭터 속도
+		float RunSpeed = 600.f; // EMovementState가 RUN가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		float WalkSpeed = 800.f; // EMovementState가 WALK가 되었을때 설정할 캐릭터 속도
+		float WalkSpeed = 600.f; // EMovementState가 WALK가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float CrouchSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float ImpulseResistanceRatio = 1.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
-		FName WeaponAttachSocketName = "RightHandWeapon"; // Weapon을 Attach할 스켈레탈 본 이름
 }; 

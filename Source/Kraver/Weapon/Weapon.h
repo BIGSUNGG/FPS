@@ -70,6 +70,7 @@ public:
 	bool GetIsAttacking() {return IsAttacking;}
 	virtual bool GetCanReload() { return false; }
 	float GetAttackImpulse() { return AttackImpulse; }
+	FName GetAttachSocketName() { return AttachSocketName; }
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
@@ -119,6 +120,8 @@ protected:
 		USkeletalMeshComponent* WeaponMesh; // 기본적으로 보이는 메쉬
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Additive", meta = (AllowPrivateAccess = "true"))
 		TArray<USkeletalMeshComponent*> AdditiveWeaponMesh; // 추가적인 WeaponMesh를 가지는 배열
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+		FName AttachSocketName = "SOCKET_Weapon_AR_01"; // Weapon을 Attach할 스켈레탈 본 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		bool IsAttacking = false; // 공격중인지

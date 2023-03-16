@@ -57,12 +57,15 @@ void AKraverPlayer::Tick(float DeltaTime)
 		Camera->SetRelativeRotation(FRotator(AO_Pitch, AO_Yaw, 0.0f));
 	}
 
-	if (GetMovementComponent()->IsCrouching())
-		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z,CrouchCameraHeight, DeltaTime, 20.f);
-	else
-		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
+	if(IsLocallyControlled())
+	{
+		if (GetMovementComponent()->IsCrouching())
+			SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, CrouchCameraHeight, DeltaTime, 20.f);
+		else
+			SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
 
-	SpringArm->SetRelativeLocation(SpringArmCrouchLocation + SpringArmBasicLocation);
+		SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmCrouchLocation);
+	}
 }
 
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -93,17 +96,6 @@ void AKraverPlayer::SetViewType(EViewType Type)
 void AKraverPlayer::Server_SetViewType_Implementation(EViewType Type)
 {
 	ViewType = Type;
-}
-
-void AKraverPlayer::SetUnEquipWeaponThrowPower(float Value)
-{
-	UnEquipWeaponThrowPower = Value;
-	Server_SetUnEquipWeaponThrowPower(Value);
-}
-
-void AKraverPlayer::Server_SetUnEquipWeaponThrowPower_Implementation(float Value)
-{
-	UnEquipWeaponThrowPower = Value;
 }
 
 void AKraverPlayer::EquipButtonPressed()
@@ -329,7 +321,8 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 						RpcComponent->DetachComponentFromComponent(Weapon->GetWeaponMesh());
 						RpcComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
 						RpcComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
-						RpcComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() + FVector(0, 0, 0.35f)) * UnEquipWeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
+						RpcComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() * WeaponThrowPower * Weapon->GetWeaponMesh()->GetMass()));
+						Weapon->GetWeaponMesh()->AddAngularImpulseInDegrees(Camera->GetForwardVector() * WeaponThrowAngularPower ,NAME_None,true);
 					},
 					0.000001f,
 						false);
@@ -337,7 +330,7 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 			break;
 		case EViewType::THIRD_PERSON:
 			Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
-			Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * UnEquipWeaponThrowPower, NAME_None, true);
+			Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * WeaponThrowPower, NAME_None, true);
 			break;
 		default:
 			UE_LOG(LogTemp, Fatal, TEXT("Need to support more EViewType"));
@@ -391,7 +384,7 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	int32 Index = Weapon->MakeAdditiveWeaponMesh();
 	ArmWeaponMeshes.Add(Weapon, Weapon->GetAdditiveWeaponMesh()[Index]);
-	Weapon->GetAdditiveWeaponMesh()[Index]->AttachToComponent(ArmMesh,FAttachmentTransformRules::SnapToTargetIncludingScale, WeaponAttachSocketName);
+	Weapon->GetAdditiveWeaponMesh()[Index]->AttachToComponent(ArmMesh,FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetAttachSocketName());
 	Weapon->GetAdditiveWeaponMesh()[Index]->SetCastShadow(false);	
 	Weapon->GetAdditiveWeaponMesh()[Index]->SetOnlyOwnerSee(true);
 	Weapon->GetAdditiveWeaponMesh()[Index]->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -401,7 +394,7 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	{
 	case EWeaponType::GUN:
 	{
-		AGun* Gun = Cast<AGun>(Weapon);
+		AGun* Gun = Cast<AGun>(Weapon);  
 		ShowOnlyThirdPerson.Push(Gun->GetFireEffect());
 		auto FireEffect = Gun->GetAdditiveFireEffect()[Index];
 		Gun->GetAdditiveFireEffect()[Index]->SetOnlyOwnerSee(true);

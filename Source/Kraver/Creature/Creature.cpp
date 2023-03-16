@@ -401,10 +401,11 @@ void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamag
 
 void ACreature::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
-	CombatComponent->GetCurWeapon()->GetWeaponMesh()->AttachToComponent
+	Weapon->GetWeaponMesh()->AttachToComponent
 	(
 		GetMesh(),
 		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		WeaponAttachSocketName
+		Weapon->GetAttachSocketName()
 	);
+
 }
