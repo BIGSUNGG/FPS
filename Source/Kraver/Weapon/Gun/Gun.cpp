@@ -93,6 +93,12 @@ void AGun::Attack()
 	if(IsAttacking == false)
 		return;
 
+	if (OwnerCreature == nullptr)
+	{
+		KR_LOG(Error, TEXT("OwnerCreature is nullptr"),*GetName());
+		return;
+	}
+
 	if(CurAmmo > 0)
 	{ 
 		AWeapon::Attack();

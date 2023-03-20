@@ -52,6 +52,9 @@ public:
 	virtual bool UnEquipped(); // 장착해제됨
 	virtual bool Hold();
 	virtual bool Holster();
+
+	virtual void AddOnAttackDelegate();
+	virtual void RemoveOnAttackDelegate();
 protected:
 	UFUNCTION(Server, Reliable)
 		void Server_Equipped(ACreature* Character);
@@ -63,11 +66,17 @@ protected:
 	UFUNCTION()
 		virtual void AttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
 
+	UFUNCTION()
+		virtual void SubAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
+	UFUNCTION()
+		virtual void SubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
+
 	virtual void Attack(); // 공격할때 호출되는 함수
 public:
 	// Getter Setter
 	bool GetCanInteracted();
-	bool GetIsAttacking() {return IsAttacking;}
+	bool GetIsAttacking() { return IsAttacking; }
+	bool GetIsSubAttacking() { return IsSubAttacking; }
 	virtual bool GetCanReload() { return false; }
 	float GetAttackImpulse() { return AttackImpulse; }
 	FName GetAttachSocketName() { return AttachSocketName; }
@@ -98,12 +107,13 @@ public:
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Owner", meta = (AllowPrivateAccess = "true"))
 		class ACreature* OwnerCreature = nullptr;
+		void SetOwnerCreature(ACreature* pointer);
 	UFUNCTION(Server, Reliable)
 		void Server_SetOwnerCreature(ACreature* pointer);
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "WeaponState", meta = (AllowPrivateAccess = "true"))
 		EWeaponState WeaponState = EWeaponState::NONE; // 무기 상태
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponType", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WeaponType", meta = (AllowPrivateAccess = "true"))
 		EWeaponType WeaponType = EWeaponType::NONE; // 무기 종류
 
 	// Montage
@@ -125,6 +135,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		bool IsAttacking = false; // 공격중인지
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		bool IsSubAttacking = false; // 보조 공격중인지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		bool bAutomaticAttack = false; // 연사공격이 가능한지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))

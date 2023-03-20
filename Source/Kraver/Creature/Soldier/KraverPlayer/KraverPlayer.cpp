@@ -10,6 +10,7 @@
 #include "Kraver/GameMode/KraverGameMode.h"
 #include "Kraver/Anim/Creature/CreatureAnimInstance.h"
 #include "Math/UnrealMathUtility.h"
+#include "Math/TransformNonVectorized.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
@@ -50,8 +51,6 @@ void AKraverPlayer::Tick(float DeltaTime)
 	if (KraverController)
 		HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
 
-	CheckCanInteractionWeapon();
-
 	if (HasAuthority() == false && IsLocallyControlled() == false)
 	{
 		Camera->SetRelativeRotation(FRotator(AO_Pitch, AO_Yaw, 0.0f));
@@ -59,6 +58,7 @@ void AKraverPlayer::Tick(float DeltaTime)
 
 	if(IsLocallyControlled())
 	{
+		CheckCanInteractionWeapon();
 		if (GetMovementComponent()->IsCrouching())
 			SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, CrouchCameraHeight, DeltaTime, 20.f);
 		else

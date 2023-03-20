@@ -69,6 +69,7 @@ protected:
 	virtual void OnCurWeaponAttackEvent() override;
 
 	virtual void SetMovementState(EMovementState value) override;
+
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 		class UTexture2D* CrosshairsCenter;
@@ -94,7 +95,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Arm, meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* ArmMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Arm, meta = (AllowPrivateAccess = "true"))
-		TMap<AWeapon*, USkeletalMeshComponent*> ArmWeaponMeshes;
+		TMap<AWeapon*, USkeletalMeshComponent*> ArmWeaponMeshes; // 각 Weapon들의 WeaponMesh를 1인칭 시점에 맞게 복사한 매쉬들의 맵
 
 	AWeapon* CanInteractWeapon;
 

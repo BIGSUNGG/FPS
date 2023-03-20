@@ -66,6 +66,8 @@ protected:
 	virtual void ReloadButtonPressed();
 	virtual void AttackButtonPressed();
 	virtual void AttackButtonReleased();
+	virtual void SubAttackButtonPressed();
+	virtual void SubAttackButtonReleased();
 	virtual void RunButtonPressed();
 	virtual void CrouchButtonPressed();
 	virtual void JumpingButtonPressed();

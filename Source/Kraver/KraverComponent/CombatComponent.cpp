@@ -178,13 +178,13 @@ void UCombatComponent::EquipWeapon(AWeapon* Weapon)
 
 void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
 {
+	SetIsAttacking(false);
 	if (CurWeapon == Weapon)
 	{
 		HolsterCurWeapon();
 		SetCurWeapon(nullptr);
 	}
 
-	SetIsAttacking(false);
 	bool Success = Weapon->UnEquipped();
 
 	if(Success)
@@ -232,6 +232,7 @@ void UCombatComponent::HoldWeapon(AWeapon* Weapon)
 	KR_LOG(Log,TEXT("Hold Weapon %s"),*Weapon->GetName());
 	SetCurWeapon(Weapon);
 	SetIsAttacking(false);
+	SetIsSubAttacking(false);
 	Weapon->Hold();
 	OnHoldWeapon.Broadcast(Weapon);
 }
@@ -243,8 +244,9 @@ bool UCombatComponent::HolsterCurWeapon()
 
 	KR_LOG(Log, TEXT("Holster Weapon %s"), *CurWeapon->GetName());
 	AWeapon* WeaponPtr = CurWeapon;
-	SetCurWeapon(nullptr);
 	SetIsAttacking(false);
+	SetIsSubAttacking(false);
+	SetCurWeapon(nullptr);
 	WeaponPtr->Holster();
 	OnHolsterWeapon.Broadcast(WeaponPtr);
 	return true;
@@ -252,13 +254,31 @@ bool UCombatComponent::HolsterCurWeapon()
 
 void UCombatComponent::SetIsAttacking(bool bAttack)
 {
-	if (bAttack)
+	if (!CurWeapon)
+		return;
+
+	if (bAttack && CurWeapon->GetIsAttacking() == false)
 	{
 		OnAttackStartDelegate.Broadcast();
 	}
-	else
+	else if(!bAttack && CurWeapon->GetIsAttacking())
 	{
 		OnAttackEndDelegate.Broadcast();
+	}
+}
+
+void UCombatComponent::SetIsSubAttacking(bool bAttack)
+{
+	if(!CurWeapon)
+		return;
+
+	if (bAttack && CurWeapon->GetIsSubAttacking() == false)
+	{
+		OnSubAttackStartDelegate.Broadcast();
+	}
+	else if (!bAttack && CurWeapon->GetIsSubAttacking())
+	{
+		OnSubAttackEndDelegate.Broadcast();
 	}
 }
 

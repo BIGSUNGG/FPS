@@ -23,6 +23,16 @@ void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		return;
 
 	IsEquippingWeapon = Soldier->CombatComponent->GetCurWeapon() != nullptr;
+	if (IsEquippingWeapon)
+	{
+		IsAttacking = Soldier->CombatComponent->GetCurWeapon()->GetIsAttacking();
+		IsSubAttacking = Soldier->CombatComponent->GetCurWeapon()->GetIsSubAttacking();
+	}
+	else
+	{
+		IsAttacking = false;
+		IsSubAttacking = false;
+	}
 	if (Soldier->CombatComponent->GetCurWeapon() && Soldier->GetMesh())
 	{
 		FabrikLeftHand(Soldier->GetMesh(), Soldier->CombatComponent->GetCurWeapon()->GetWeaponMesh(), LeftHandFabrikTransform);

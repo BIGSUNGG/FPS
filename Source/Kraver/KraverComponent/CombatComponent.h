@@ -68,12 +68,19 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void SetHUDCrosshairs(float DeltaTime);
 
+	// Ect
 	virtual void RefillAmmo(); // 재장전하는 함수
+
+	// Equip UnEquip
 	virtual void EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
 	virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수
+
+	// Hold Holster
 	virtual bool HoldWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
 	virtual void HoldWeapon(AWeapon* Weapon); // WeaponSlot을 드는 함수
 	virtual bool HolsterCurWeapon(); // CurWeapon을 집어넣는 함수
+
+	// Damage Event
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
 	virtual float GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 주는 함수 (클라이언트에서 서버로 GiveDamage이벤트 호출)
 
@@ -110,10 +117,13 @@ protected:
 public:
 	// Getter Setter
 	void SetIsAttacking(bool bAttack);
+	void SetIsSubAttacking(bool bAttack);
 
 public:
 	FAttackStartDele OnAttackStartDelegate; // 공격을 시작할때 호출
 	FAttackEndDele OnAttackEndDelegate; // 공격을 멈출때 호출
+	FAttackStartDele OnSubAttackStartDelegate; // 공격을 시작할때 호출
+	FAttackEndDele OnSubAttackEndDelegate; // 공격을 멈출때 호출
 
 	FEquipWeaponSuccessDele OnEquipWeaponSuccess; // 무기를 장착했을때 호출
 	FUnEquipWeaponSuccessDele OnUnEquipWeaponSuccess; // 무기를 해제했을때 호출

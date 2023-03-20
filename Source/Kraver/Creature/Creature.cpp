@@ -101,12 +101,14 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Pressed, this, &ACreature::CrouchButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACreature::JumpingButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACreature::JumpingButtonReleased);
+	PlayerInputComponent->BindAction(TEXT("SubAttack"), EInputEvent::IE_Pressed, this, &ACreature::SubAttackButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("SubAttack"), EInputEvent::IE_Released, this, &ACreature::SubAttackButtonReleased);
 
 }
 
 bool ACreature::GetCanAttack()
 {
-	if (MovementState == EMovementState::SPRINT)
+	if (MovementState == EMovementState::SPRINT && GetMovementComponent()->IsFalling() == false)
 		return false;
 	if (CombatComponent->GetCurWeapon() && GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageTpp()))
 		return false;
@@ -182,6 +184,16 @@ void ACreature::AttackButtonPressed()
 void ACreature::AttackButtonReleased()
 {
 	CombatComponent->SetIsAttacking(false);
+}
+
+void ACreature::SubAttackButtonPressed()
+{
+	CombatComponent->SetIsSubAttacking(true);
+}
+
+void ACreature::SubAttackButtonReleased()
+{
+	CombatComponent->SetIsSubAttacking(false);
 }
 
 void ACreature::RunButtonPressed()
