@@ -11,6 +11,7 @@
 #include "Kraver/Anim/Creature/CreatureAnimInstance.h"
 #include "Math/UnrealMathUtility.h"
 #include "Math/TransformNonVectorized.h"
+#include <cmath>
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
@@ -21,6 +22,9 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	ArmMesh->SetCastShadow(false);
 	ArmMesh->SetOnlyOwnerSee(true);
 	ArmMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ArmMesh->SetScalarParameterValueOnMaterials("Type",0);
+	ArmMesh->SetWorldScale3D(FVector(-1,1,1));
+
 	ShowOnlyFirstPerson.Push(ArmMesh);
 
 	ShowOnlyThirdPerson.Push(GetMesh());
@@ -56,16 +60,22 @@ void AKraverPlayer::Tick(float DeltaTime)
 		Camera->SetRelativeRotation(FRotator(AO_Pitch, AO_Yaw, 0.0f));
 	}
 
-	if(IsLocallyControlled())
-	{
-		CheckCanInteractionWeapon();
-		if (GetMovementComponent()->IsCrouching())
-			SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, CrouchCameraHeight, DeltaTime, 20.f);
-		else
-			SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
+	LocallyControlEvent(DeltaTime);
+}
 
-		SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmCrouchLocation);
-	}
+void AKraverPlayer::LocallyControlEvent(float DeltaTime)
+{
+	if(!IsLocallyControlled())
+		return;
+
+	CheckCanInteractionWeapon();
+	if (GetMovementComponent()->IsCrouching())
+		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, CrouchCameraHeight, DeltaTime, 20.f);
+	else
+		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
+
+	SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmCrouchLocation);
+
 }
 
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -96,6 +106,35 @@ void AKraverPlayer::SetViewType(EViewType Type)
 void AKraverPlayer::Server_SetViewType_Implementation(EViewType Type)
 {
 	ViewType = Type;
+}
+
+void AKraverPlayer::SubAttackButtonPressed()
+{
+	ASoldier::SubAttackButtonPressed();
+
+	if (CombatComponent->GetCurWeapon())
+	{
+		USkeletalMeshComponent* ArmWeaponMesh = GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()];
+
+
+		FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
+		FTransform CameraTransform = Camera->GetComponentTransform();
+		FTransform RelativeTransform = WeaponTransform.GetRelativeTransform(CameraTransform);
+		FRotator RelativeRotation = RelativeTransform.Rotator();
+
+		RightHandFppRotation.Pitch = -RelativeRotation.Pitch;
+		RightHandFppRotation.Roll = -RelativeRotation.Roll;
+		RightHandFppRotation.Yaw = -(90.f + RelativeRotation.Yaw);
+		KR_LOG(Log, TEXT("A %f %f %f"), RelativeRotation.Pitch, RelativeRotation.Roll, RelativeRotation.Yaw);
+		KR_LOG(Log, TEXT("B %f %f %f"), RightHandFppRotation.Pitch, RightHandFppRotation.Roll, RightHandFppRotation.Yaw);
+	}
+}
+
+void AKraverPlayer::SubAttackButtonReleased()
+{
+	ASoldier::SubAttackButtonReleased();
+
+	RightHandFppRotation = FRotator::ZeroRotator;
 }
 
 void AKraverPlayer::EquipButtonPressed()
