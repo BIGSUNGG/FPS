@@ -64,6 +64,8 @@ protected:
 	// Delegate Event
 	void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
 
+	UFUNCTION()
+		virtual void OnSubAttackEndEvent();
 	virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
 	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
@@ -124,4 +126,5 @@ protected:
 	FVector WeaponThrowAngularPower = FVector(100, 100, 0); // 장착해제된 무기를 던지는 힘
 
 	FRotator WeaponAdsRotation;
+	FVector WeaponAdsLocation;
 };
