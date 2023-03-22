@@ -25,6 +25,4 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = Fabrik, meta = (AllowPrivateAccess = "true"))
 		FTransform LeftHandFppFabrikTransform; // 왼쪽손에 적용할 트랜스폼
 
-	UPROPERTY(BlueprintReadWrite, Category = Fabrik, meta = (AllowPrivateAccess = "true"))
-		FRotator RightHandFppRotation;
 };

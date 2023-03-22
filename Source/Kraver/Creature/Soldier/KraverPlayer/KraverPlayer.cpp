@@ -23,7 +23,6 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	ArmMesh->SetOnlyOwnerSee(true);
 	ArmMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ArmMesh->SetScalarParameterValueOnMaterials("Type",0);
-	ArmMesh->SetWorldScale3D(FVector(-1,1,1));
 
 	ShowOnlyFirstPerson.Push(ArmMesh);
 
@@ -56,11 +55,24 @@ void AKraverPlayer::Tick(float DeltaTime)
 		HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
 
 	if (HasAuthority() == false && IsLocallyControlled() == false)
-	{
 		Camera->SetRelativeRotation(FRotator(AO_Pitch, AO_Yaw, 0.0f));
-	}
 
+	ClientEvent(DeltaTime);
+	ServerClientEvent(DeltaTime);
 	LocallyControlEvent(DeltaTime);
+}
+
+void AKraverPlayer::ClientEvent(float DeltaTime)
+{
+	if(IsLocallyControlled())
+		return;
+
+}
+
+void AKraverPlayer::ServerClientEvent(float DeltaTime)
+{
+	if(!HasAuthority())
+		return;
 }
 
 void AKraverPlayer::LocallyControlEvent(float DeltaTime)
@@ -75,6 +87,23 @@ void AKraverPlayer::LocallyControlEvent(float DeltaTime)
 		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
 
 	SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmCrouchLocation);
+
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking())
+	{
+		USkeletalMeshComponent* ArmWeaponMesh = GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()];
+		ArmWeaponMesh->AddRelativeRotation(WeaponAdsRotation * -1);
+
+		FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
+		FTransform CameraTransform = Camera->GetComponentTransform();
+		FTransform RelativeTransform = WeaponTransform.GetRelativeTransform(CameraTransform);
+		FRotator RelativeRotation = RelativeTransform.Rotator();
+
+		WeaponAdsRotation.Pitch = -RelativeRotation.Pitch;
+		WeaponAdsRotation.Roll = -RelativeRotation.Roll;
+		WeaponAdsRotation.Yaw = -(90.f + RelativeRotation.Yaw);
+
+		ArmWeaponMesh->AddRelativeRotation(WeaponAdsRotation);
+	}
 
 }
 
@@ -112,29 +141,14 @@ void AKraverPlayer::SubAttackButtonPressed()
 {
 	ASoldier::SubAttackButtonPressed();
 
-	if (CombatComponent->GetCurWeapon())
-	{
-		USkeletalMeshComponent* ArmWeaponMesh = GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()];
-
-
-		FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
-		FTransform CameraTransform = Camera->GetComponentTransform();
-		FTransform RelativeTransform = WeaponTransform.GetRelativeTransform(CameraTransform);
-		FRotator RelativeRotation = RelativeTransform.Rotator();
-
-		RightHandFppRotation.Pitch = -RelativeRotation.Pitch;
-		RightHandFppRotation.Roll = -RelativeRotation.Roll;
-		RightHandFppRotation.Yaw = -(90.f + RelativeRotation.Yaw);
-		KR_LOG(Log, TEXT("A %f %f %f"), RelativeRotation.Pitch, RelativeRotation.Roll, RelativeRotation.Yaw);
-		KR_LOG(Log, TEXT("B %f %f %f"), RightHandFppRotation.Pitch, RightHandFppRotation.Roll, RightHandFppRotation.Yaw);
-	}
 }
 
 void AKraverPlayer::SubAttackButtonReleased()
 {
 	ASoldier::SubAttackButtonReleased();
 
-	RightHandFppRotation = FRotator::ZeroRotator;
+	if (CombatComponent->GetCurWeapon())
+		GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()]->SetRelativeRotation(FRotator::ZeroRotator);
 }
 
 void AKraverPlayer::EquipButtonPressed()

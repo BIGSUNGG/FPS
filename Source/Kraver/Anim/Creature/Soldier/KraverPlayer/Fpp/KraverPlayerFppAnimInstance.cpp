@@ -14,15 +14,6 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if(!KraverPlayer->IsLocallyControlled())
 		return;
 
-	if (IsSubAttacking)
-	{
-		RightHandFppRotation = KraverPlayer->GetRightHandFppRotation();
-	}
-	else
-	{
-	
-	}
-
 	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()] && KraverPlayer->GetArmMesh())
 	{
 		FabrikLeftHand(KraverPlayer->GetArmMesh(), KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()], LeftHandFppFabrikTransform);

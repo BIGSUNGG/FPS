@@ -26,6 +26,8 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void ClientEvent(float DeltaTime);
+	virtual void ServerClientEvent(float DeltaTime);
 	virtual void LocallyControlEvent(float DeltaTime);
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -35,7 +37,6 @@ public:
 	FORCEINLINE AWeapon* GetCanInteractWeapon() { return CanInteractWeapon; }
 	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
 	FORCEINLINE TMap<AWeapon*, USkeletalMeshComponent*> GetArmWeaponMeshes() { return ArmWeaponMeshes; }
-	FORCEINLINE FRotator GetRightHandFppRotation() { return RightHandFppRotation; }
 protected:
 	// input event
 	virtual void SubAttackButtonPressed() override;
@@ -122,5 +123,5 @@ protected:
 	float WeaponThrowPower = 700.f; // 장착해제된 무기를 던지는 힘
 	FVector WeaponThrowAngularPower = FVector(100, 100, 0); // 장착해제된 무기를 던지는 힘
 
-	FRotator RightHandFppRotation;
+	FRotator WeaponAdsRotation;
 };
