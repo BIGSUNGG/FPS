@@ -54,6 +54,7 @@ protected:
 
  	virtual void OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	virtual void RefreshArm();
 	virtual void RefreshSpringArm(); // SpringArm의 RelativeLocation을 새로고침하는 함수
 	UFUNCTION(Server, reliable)
 		void Server_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
@@ -64,8 +65,6 @@ protected:
 	// Delegate Event
 	void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
 
-	UFUNCTION()
-		virtual void OnSubAttackEndEvent();
 	virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
 	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
@@ -125,6 +124,8 @@ protected:
 	float WeaponThrowPower = 700.f; // 장착해제된 무기를 던지는 힘
 	FVector WeaponThrowAngularPower = FVector(100, 100, 0); // 장착해제된 무기를 던지는 힘
 
+	FVector BasicArmLocation;
+	FRotator BasicArmRotation;
 	FRotator WeaponAdsRotation;
 	FVector WeaponAdsLocation;
 };

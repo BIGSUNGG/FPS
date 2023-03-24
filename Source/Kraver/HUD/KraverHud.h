@@ -38,7 +38,8 @@ private:
 public:
 	// Getter Setter
 	FORCEINLINE void SetCrosshairsPackage(const FCrosshairsPackage& Package) { HUDPackage = Package; } // HUDPackage를 설정하는 함수
-	void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
+	FORCEINLINE void SetbDrawCrosshair(bool value) { bDrawCrosshair = value; }
+	FORCEINLINE void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
 private:
 	FCrosshairsPackage HUDPackage;
 
@@ -51,4 +52,6 @@ private:
 		TSubclassOf<class UUserWidget> InteractionWidgetClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 		UUserWidget* InteractionWidget; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
+
+	bool bDrawCrosshair = true;
 };

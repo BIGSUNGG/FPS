@@ -29,13 +29,14 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	ShowOnlyThirdPerson.Push(GetMesh());
 
 	RefreshCurViewType();
-
-	CombatComponent->OnSubAttackEndDelegate.AddDynamic(this, &AKraverPlayer::OnSubAttackEndEvent);
 }
 
 void AKraverPlayer::BeginPlay()
 {
 	ASoldier::BeginPlay();
+
+	BasicArmLocation = ArmMesh->GetRelativeLocation();
+	BasicArmRotation = ArmMesh->GetRelativeRotation();
 
 	if (IsLocallyControlled())
 	{ 
@@ -102,18 +103,47 @@ void AKraverPlayer::LocallyControlEvent(float DeltaTime)
 		FRotator RelativeRotation = RelativeTransform.Rotator();
 		FVector RelativeLocation = RelativeTransform.GetLocation();
 
-		WeaponAdsRotation.Pitch = -RelativeRotation.Pitch;
-		WeaponAdsRotation.Roll = -RelativeRotation.Roll;
-		WeaponAdsRotation.Yaw = -(90.f + RelativeRotation.Yaw);
+		FRotator TargetRotation;
+		FVector TargetLocation;
 
-		WeaponAdsLocation.X = -RelativeLocation.X;
-		WeaponAdsLocation.Y = -RelativeLocation.Y;
-		WeaponAdsLocation.Z = -RelativeLocation.Z;
+		TargetRotation.Pitch = -RelativeRotation.Pitch;
+		TargetRotation.Roll = -RelativeRotation.Roll;
+		TargetRotation.Yaw = -(90.f + RelativeRotation.Yaw);
 
-		ArmMesh->AddRelativeRotation(WeaponAdsRotation);
-		ArmMesh->AddRelativeLocation(WeaponAdsLocation);
+		TargetLocation.X = -RelativeLocation.X;
+		TargetLocation.Y = -RelativeLocation.Y;
+		TargetLocation.Z = -RelativeLocation.Z;
 
-		KR_LOG(Log,TEXT("%f %f %f"), WeaponAdsLocation.X, WeaponAdsLocation.Y, WeaponAdsLocation.Z);
+		WeaponAdsRotation.Pitch = FMath::FInterpTo(WeaponAdsRotation.Pitch, TargetRotation.Pitch,DeltaTime,20.f);
+		WeaponAdsRotation.Roll = FMath::FInterpTo(WeaponAdsRotation.Roll, TargetRotation.Roll, DeltaTime, 20.f);
+		WeaponAdsRotation.Yaw = FMath::FInterpTo(WeaponAdsRotation.Yaw, TargetRotation.Yaw, DeltaTime, 20.f);
+
+		WeaponAdsLocation.X = FMath::FInterpTo(WeaponAdsLocation.X, TargetLocation.X, DeltaTime, 20.f);
+		WeaponAdsLocation.Y = FMath::FInterpTo(WeaponAdsLocation.Y, TargetLocation.Y, DeltaTime, 20.f);
+		WeaponAdsLocation.Z = FMath::FInterpTo(WeaponAdsLocation.Z, TargetLocation.Z, DeltaTime, 20.f);
+
+		RefreshArm();
+
+		if(HUD)
+			HUD->SetbDrawCrosshair(false);
+	}
+	else
+	{
+		FRotator TargetRotation = FRotator::ZeroRotator;
+		FVector TargetLocation = FVector::ZeroVector;
+
+		WeaponAdsRotation.Pitch = FMath::FInterpTo(WeaponAdsRotation.Pitch, TargetRotation.Pitch, DeltaTime, 20.f);
+		WeaponAdsRotation.Roll = FMath::FInterpTo(WeaponAdsRotation.Roll, TargetRotation.Roll, DeltaTime, 20.f);
+		WeaponAdsRotation.Yaw = FMath::FInterpTo(WeaponAdsRotation.Yaw, TargetRotation.Yaw, DeltaTime, 20.f);
+
+		WeaponAdsLocation.X = FMath::FInterpTo(WeaponAdsLocation.X, TargetLocation.X, DeltaTime, 20.f);
+		WeaponAdsLocation.Y = FMath::FInterpTo(WeaponAdsLocation.Y, TargetLocation.Y, DeltaTime, 20.f);
+		WeaponAdsLocation.Z = FMath::FInterpTo(WeaponAdsLocation.Z, TargetLocation.Z, DeltaTime, 20.f);
+
+		RefreshArm();
+
+		if (HUD)
+			HUD->SetbDrawCrosshair(true);
 	}
 }
 
@@ -410,6 +440,12 @@ void AKraverPlayer::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageE
 	ASoldier::OnDeathEvent(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
 }
 
+void AKraverPlayer::RefreshArm()
+{
+	ArmMesh->SetRelativeLocation(BasicArmLocation + WeaponAdsLocation, false);
+	ArmMesh->SetRelativeRotation(BasicArmRotation + WeaponAdsRotation, false);
+}
+
 void AKraverPlayer::RefreshSpringArm()
 {
 	SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmCrouchLocation);
@@ -438,12 +474,6 @@ void AKraverPlayer::Landed(const FHitResult& Hit)
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(ArmMesh->GetAnimInstance());
 	CreatureAnim->PlayLandedMontage();
 	ASoldier::Landed(Hit);
-}
-
-void AKraverPlayer::OnSubAttackEndEvent()
-{
-	ArmMesh->AddRelativeLocation(WeaponAdsLocation * -1);
-	WeaponAdsLocation = FVector::ZeroVector;
 }
 
 void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -539,8 +569,7 @@ void AKraverPlayer::OnCurWeaponAttackEvent()
 {
 	ASoldier::OnCurWeaponAttackEvent();
 
-	if(!CombatComponent->GetCurWeapon()->GetIsSubAttacking())
-		RpcComponent->Montage_Play(ArmMesh, CombatComponent->GetCurWeapon()->GetAttackMontageFpp());
+	RpcComponent->Montage_Play(ArmMesh, CombatComponent->GetCurWeapon()->GetAttackMontageFpp());
 }
 
 void AKraverPlayer::SetMovementState(EMovementState value)
