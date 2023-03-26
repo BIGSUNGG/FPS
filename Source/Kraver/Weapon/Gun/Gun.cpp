@@ -20,6 +20,18 @@ AGun::AGun() : AWeapon()
 	ImpactEffect->bAutoActivate = false;
 }
 
+void AGun::Tick(float DeltaTime)
+{
+	AWeapon::Tick(DeltaTime);
+
+	if (OwnerCreature && IsAttacking == false)
+	{
+		CurSpread -= SpreadForceBack * DeltaTime;
+		if(CurSpread < 0)
+			CurSpread = 0;
+	}
+}
+
 void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	AWeapon::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -107,40 +119,66 @@ void AGun::Attack()
 		if(!HasAuthority())
 			Server_SetCurAmmo(CurAmmo);
 
-		TArray<FHitResult> BulletHitResults;
-		FCollisionQueryParams BulletParams(NAME_None, false, OwnerCreature);
-		bool bResult = GetWorld()->SweepMultiByChannel(
-			BulletHitResults,
-			OwnerCreature->GetCamera()->GetComponentLocation(),
-			OwnerCreature->GetCamera()->GetComponentLocation() + OwnerCreature->GetCamera()->GetForwardVector() * BulletDistance,
-			FQuat::Identity,
-			ECollisionChannel::ECC_GameTraceChannel3,
-			FCollisionShape::MakeSphere(BulletRadius),
-			BulletParams
-		);
-
-		if (bResult)
+		float SpreadX;
+		float SpreadY;
+		float SpreadZ;
+		if (IsSubAttacking)
 		{
-			for (auto& Result : BulletHitResults)
-			{
-				auto Creature = Cast<ACreature>(Result.GetActor());
-				if(IsValid(Result.GetActor()))
-				{
-					FPointDamageEvent damageEvent;
-					damageEvent.HitInfo = Result;
-					damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
-					OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);	
-					if (Result.bBlockingHit)
-					{
-						OwnerCreature->RpcComponent->SpawnNiagaraAtLocation(GetWorld(), ImpactEffect->GetAsset(), Result.ImpactPoint);
-					}
-				}
-			}	
+			SpreadX = 0.f;
+			SpreadY = 0.f;
+			SpreadZ = 0.f;
 		}
+		else
+		{
+			SpreadX = FMath::RandRange(-CurSpread, CurSpread);
+			SpreadY = FMath::RandRange(-CurSpread, CurSpread);
+			SpreadZ = FMath::RandRange(-CurSpread, CurSpread);
+		}
+
+		TArray<FHitResult> BulletHitResults = CalculateFireHit(ECollisionChannel::ECC_GameTraceChannel3 ,FVector(SpreadX,SpreadY,SpreadZ));
+
+		for (auto& Result : BulletHitResults)
+		{
+			auto Creature = Cast<ACreature>(Result.GetActor());
+			if (IsValid(Result.GetActor()))
+			{
+				FPointDamageEvent damageEvent;
+				damageEvent.HitInfo = Result;
+				damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
+				OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);
+				if (Result.bBlockingHit)
+				{
+					OwnerCreature->RpcComponent->SpawnNiagaraAtLocation(GetWorld(), ImpactEffect->GetAsset(), Result.ImpactPoint);
+				}
+			}
+		}
+		AddSpread(SpreadPerFire);
 		ShowFireEffect();
 	}
 	else
 		AttackEndEvent();
+}
+
+TArray<FHitResult> AGun::CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread /*= FVector(0,0,0)*/)
+{
+	FVector EndPoint = OwnerCreature->GetCamera()->GetForwardVector() + Spread;
+	EndPoint.Normalize();
+	EndPoint *= BulletDistance;
+	EndPoint += OwnerCreature->GetCamera()->GetComponentLocation();
+
+	TArray<FHitResult> BulletHitResults;
+	FCollisionQueryParams BulletParams(NAME_None, false, OwnerCreature);
+	bool bResult = GetWorld()->SweepMultiByChannel(
+		BulletHitResults,
+		OwnerCreature->GetCamera()->GetComponentLocation(),
+		EndPoint,
+		FQuat::Identity,
+		BulletChannel,
+		FCollisionShape::MakeSphere(BulletRadius),
+		BulletParams
+	);
+
+	return BulletHitResults;
 }
 
 void AGun::ShowFireEffect()
@@ -192,4 +230,11 @@ bool AGun::GetCanReload()
 		return false;
 
 	return true;
+}
+
+void AGun::AddSpread(float Spread)
+{
+	CurSpread += Spread;
+	if(CurSpread > MaxSpread)
+		CurSpread = MaxSpread;
 }

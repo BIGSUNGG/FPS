@@ -19,25 +19,32 @@ void AKraverHUD::DrawHUD()
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 		const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
 
-		if (HUDPackage.CrosshairCenter)
+		float SpreadScaled = CrosshairSpreadMax * HUDPackage.CrosshairSpread;
+
+		if (HUDPackage.CrosshairsCenter)
 		{
-			DrawCrosshair(HUDPackage.CrosshairCenter, ViewportCenter);
+			FVector2D Spread(0.f, 0.f);
+			DrawCrosshair(HUDPackage.CrosshairsCenter, ViewportCenter, Spread);
 		}
-		if (HUDPackage.CrosshairLeft)
+		if (HUDPackage.CrosshairsLeft)
 		{
-			DrawCrosshair(HUDPackage.CrosshairLeft, ViewportCenter);
+			FVector2D Spread(-SpreadScaled, 0.f);
+			DrawCrosshair(HUDPackage.CrosshairsLeft, ViewportCenter, Spread);
 		}
-		if (HUDPackage.CrosshairRight)
+		if (HUDPackage.CrosshairsRight)
 		{
-			DrawCrosshair(HUDPackage.CrosshairRight, ViewportCenter);
+			FVector2D Spread(SpreadScaled, 0.f);
+			DrawCrosshair(HUDPackage.CrosshairsRight, ViewportCenter, Spread);
 		}
-		if (HUDPackage.CrosshairTop)
+		if (HUDPackage.CrosshairsTop)
 		{
-			DrawCrosshair(HUDPackage.CrosshairTop, ViewportCenter);
+			FVector2D Spread(0.f, -SpreadScaled);
+			DrawCrosshair(HUDPackage.CrosshairsTop, ViewportCenter, Spread);
 		}
-		if (HUDPackage.CrosshairBottom)
+		if (HUDPackage.CrosshairsBottom)
 		{
-			DrawCrosshair(HUDPackage.CrosshairBottom, ViewportCenter);
+			FVector2D Spread(0.f, SpreadScaled);
+			DrawCrosshair(HUDPackage.CrosshairsBottom, ViewportCenter, Spread);
 		}
 
 	}
@@ -56,13 +63,13 @@ void AKraverHUD::BeginPlay()
 		UE_LOG(LogTemp, Fatal, TEXT("CombatWidget is null"));
 }
 
-void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter)
+void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread)
 {
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();
 	const FVector2D TextureDrawPoint(
-		ViewportCenter.X - (TextureWidth / 2.f),
-		ViewportCenter.Y - (TextureHeight / 2.f)
+		ViewportCenter.X - (TextureWidth / 2.f) + Spread.X,
+		ViewportCenter.Y - (TextureHeight / 2.f) + Spread.Y
 	);
 	DrawTexture(
 		Texture,

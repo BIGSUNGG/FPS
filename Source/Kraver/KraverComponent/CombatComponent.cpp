@@ -6,6 +6,7 @@
 #include "Kraver/Creature/Soldier/KraverPlayer/KraverPlayer.h"
 #include "Kraver/PlayerController/KraverPlayerController.h"
 #include "Kraver/HUD/KraverHUD.h"
+#include "Kraver/Weapon/Gun/Gun.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -296,28 +297,52 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			FCrosshairsPackage HUDPackage;
 			if (CurWeapon)
 			{
-				HUDPackage.CrosshairCenter	= CurWeapon->CrosshairsCenter;
-				HUDPackage.CrosshairLeft	= CurWeapon->CrosshairsLeft;
-				HUDPackage.CrosshairRight	= CurWeapon->CrosshairsRight;
-				HUDPackage.CrosshairTop		= CurWeapon->CrosshairsTop;
-				HUDPackage.CrosshairBottom = CurWeapon->CrosshairsBottom;
+				HUDPackage.CrosshairsCenter = CurWeapon->CrosshairsCenter;
+				HUDPackage.CrosshairsLeft = CurWeapon->CrosshairsLeft;
+				HUDPackage.CrosshairsRight = CurWeapon->CrosshairsRight;
+				HUDPackage.CrosshairsTop = CurWeapon->CrosshairsTop;
+				HUDPackage.CrosshairsBottom = CurWeapon->CrosshairsBottom;
 			}
 			else if (OwnerPlayer)
 			{
-				HUDPackage.CrosshairCenter	= OwnerPlayer->CrosshairsCenter;
-				HUDPackage.CrosshairLeft	= OwnerPlayer->CrosshairsLeft;
-				HUDPackage.CrosshairRight	= OwnerPlayer->CrosshairsRight;
-				HUDPackage.CrosshairTop		= OwnerPlayer->CrosshairsTop;
-				HUDPackage.CrosshairBottom	= OwnerPlayer->CrosshairsBottom;
+				HUDPackage.CrosshairsCenter = OwnerPlayer->CrosshairsCenter;
+				HUDPackage.CrosshairsLeft = OwnerPlayer->CrosshairsLeft;
+				HUDPackage.CrosshairsRight = OwnerPlayer->CrosshairsRight;
+				HUDPackage.CrosshairsTop = OwnerPlayer->CrosshairsTop;
+				HUDPackage.CrosshairsBottom = OwnerPlayer->CrosshairsBottom;
 			}
 			else
 			{	
-				HUDPackage.CrosshairCenter	= nullptr;
-				HUDPackage.CrosshairLeft	= nullptr;
-				HUDPackage.CrosshairRight	= nullptr;
-				HUDPackage.CrosshairTop		= nullptr;
-				HUDPackage.CrosshairBottom	= nullptr;
+				HUDPackage.CrosshairsCenter = nullptr;
+				HUDPackage.CrosshairsLeft = nullptr;
+				HUDPackage.CrosshairsRight = nullptr;
+				HUDPackage.CrosshairsTop = nullptr;
+				HUDPackage.CrosshairsBottom = nullptr;
 			}
+
+			FVector2D WalkSpeedRange(0.f, OwnerCreature->GetCharacterMovement()->MaxWalkSpeed);
+			FVector2D VelocityMultiplierRange(0.f, 1.f);
+			FVector Velocity = OwnerCreature->GetVelocity();
+			Velocity.Z = 0.f;
+
+			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, Velocity.Size());
+
+			if (OwnerCreature->GetCharacterMovement()->IsFalling())
+			{
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 2.25f, DeltaTime, 2.25f);
+			}
+			else
+			{
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 0.f, DeltaTime, 30.f);
+			}
+
+			float TargetSpread = CrosshairVelocityFactor + CrosshairInAirFactor;
+			AGun* Gun = Cast<AGun>(CurWeapon);
+			if (Gun)
+			{
+				TargetSpread += Gun->GetCurSpread() * 50;
+			}
+			HUDPackage.CrosshairSpread = FMath::FInterpTo(TargetSpread, HUD->GetHUDPackage().CrosshairSpread,DeltaTime, 20.f);
 			HUD->SetCrosshairsPackage(HUDPackage);
 		}
 	}

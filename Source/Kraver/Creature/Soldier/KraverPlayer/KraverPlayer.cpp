@@ -569,7 +569,7 @@ void AKraverPlayer::OnCurWeaponAttackEvent()
 {
 	ASoldier::OnCurWeaponAttackEvent();
 
-	RpcComponent->Montage_Play(ArmMesh, CombatComponent->GetCurWeapon()->GetAttackMontageFpp());
+	RpcComponent->Montage_Play(ArmMesh, CombatComponent->GetCurWeapon()->GetAttackMontageFpp(), 1.5f);
 }
 
 void AKraverPlayer::SetMovementState(EMovementState value)

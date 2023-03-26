@@ -19,6 +19,7 @@ class KRAVER_API AGun : public AWeapon
 public:
 	AGun();
 
+	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 
@@ -28,6 +29,7 @@ public:
 	virtual bool RefillAmmo();
 protected:
 	virtual void Attack() override;
+	TArray<FHitResult>  CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread = FVector(0,0,0));
 	virtual void ShowFireEffect(); // FireEffect를 실행하는 함수
 
 protected:
@@ -41,10 +43,14 @@ public:
 	int32 GetCurAmmo() { return CurAmmo; }
 	int32 GetMaxAmmo() { return MaxAmmo; }
 	int32 GetTotalAmmo() { return TotalAmmo; }
+	float GetCurSpread() { return CurSpread; }
 	virtual bool GetCanReload() override;
 	UNiagaraComponent* GetFireEffect() { return FireEffect; }
 	TArray<UNiagaraComponent*> GetAdditiveFireEffect() { return AdditiveFireEffect; }
+
+	void AddSpread(float Spread);
 protected:
+	// Additive
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Additive", meta = (AllowPrivateAccess = "true"))
 		TArray<UNiagaraComponent*> AdditiveFireEffect;
 
@@ -56,20 +62,34 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireEffect", meta = (AllowPrivateAccess = "true"))
 		FName FireEffectSocketName = "SOCKET_Muzzle"; // FireEffect가 붙을 WeaponMesh의 소켓이름
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+
+	// Ammo
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Ammo", meta = (AllowPrivateAccess = "true"))
 		int32 MaxAmmo = 10.f; // 최대 총알 갯수
 	UFUNCTION(Server, Reliable)
 		void Server_SetMaxAmmo(int32 Ammo);
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Ammo", meta = (AllowPrivateAccess = "true"))
 		int32 CurAmmo = 10.f; // 현재 총알 갯수
 	UFUNCTION(Server, Reliable)
 		void Server_SetCurAmmo(int32 Ammo);
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Ammo", meta = (AllowPrivateAccess = "true"))
 		int32 TotalAmmo = 30.f; // 총 총알 갯수
 	UFUNCTION(Server, Reliable)
 		void Server_SetTotalAmmo(int32 Ammo);
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Ammo", meta = (AllowPrivateAccess = "true"))
 		float BulletDistance = 10000.f; // 총알 길이
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Ammo", meta = (AllowPrivateAccess = "true"))
 		float BulletRadius = 0.f; // 총알 범위
+
+	// Recoil
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float MinSpread;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float MaxSpread;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float CurSpread;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float SpreadPerFire;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float SpreadForceBack;		
 };

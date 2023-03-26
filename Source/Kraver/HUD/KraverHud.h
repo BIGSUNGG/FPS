@@ -14,11 +14,12 @@ struct FCrosshairsPackage
 {
 	GENERATED_BODY()
 public:
-	class UTexture2D* CrosshairCenter;
-	class UTexture2D* CrosshairLeft;
-	class UTexture2D* CrosshairRight;
-	class UTexture2D* CrosshairTop;
-	class UTexture2D* CrosshairBottom;
+	class UTexture2D* CrosshairsCenter;
+	class UTexture2D* CrosshairsLeft;
+	class UTexture2D* CrosshairsRight;
+	class UTexture2D* CrosshairsTop;
+	class UTexture2D* CrosshairsBottom;
+	float CrosshairSpread;
 };
 /**
  * 
@@ -33,10 +34,12 @@ public:
 	virtual void BeginPlay() override;
 
 private:
-	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter); // 크로스헤어 이미지 하나를 렌더링
+	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
 
 public:
 	// Getter Setter
+	FCrosshairsPackage GetHUDPackage() { return HUDPackage; }
+
 	FORCEINLINE void SetCrosshairsPackage(const FCrosshairsPackage& Package) { HUDPackage = Package; } // HUDPackage를 설정하는 함수
 	FORCEINLINE void SetbDrawCrosshair(bool value) { bDrawCrosshair = value; }
 	FORCEINLINE void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
@@ -54,4 +57,6 @@ private:
 		UUserWidget* InteractionWidget; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
 
 	bool bDrawCrosshair = true;
+	UPROPERTY(EditAnywhere)
+		float CrosshairSpreadMax = 16.f;
 };
