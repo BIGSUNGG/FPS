@@ -168,7 +168,4 @@ protected:
 	UFUNCTION(Server, reliable)
 		void Server_SetMaxHp(int32 value);
 
-	// Crosshairs
-	float CrosshairVelocityFactor;
-	float CrosshairInAirFactor;
 };

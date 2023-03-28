@@ -24,11 +24,32 @@ void AGun::Tick(float DeltaTime)
 {
 	AWeapon::Tick(DeltaTime);
 
-	if (OwnerCreature && IsAttacking == false)
+	if (OwnerCreature)
 	{
-		CurSpread -= SpreadForceBack * DeltaTime;
-		if(CurSpread < 0)
-			CurSpread = 0;
+		if (IsAttacking == false)
+		{
+			CurBulletSpread -= SpreadForceBack * DeltaTime;
+			if (CurBulletSpread < 0)
+				CurBulletSpread = 0;
+		}
+
+		if (AttackDelay > 0)
+		{
+			AddSpread(SpreadPerTime * DeltaTime);
+		}
+
+		if (OwnerCreature->GetMovementComponent()->IsFalling())
+			AdditiveSpreadInAir = FMath::FInterpTo(AdditiveSpreadInAir, SpreadInAir, DeltaTime, 10);
+		else
+			AdditiveSpreadInAir = FMath::FInterpTo(AdditiveSpreadInAir, 0, DeltaTime, 40);
+
+		FVector Velocity = OwnerCreature->GetVelocity();
+		Velocity.Z = 0.f;
+		float Speed =  Velocity.Size();
+		if(Speed > SpreadMaxSpeed)
+			Speed = SpreadMaxSpeed;
+
+		AdditiveSpreadPerSpeed = Speed * SpreadPerSpeed;
 	}
 }
 
@@ -130,9 +151,9 @@ void AGun::Attack()
 		}
 		else
 		{
-			SpreadX = FMath::RandRange(-CurSpread, CurSpread);
-			SpreadY = FMath::RandRange(-CurSpread, CurSpread);
-			SpreadZ = FMath::RandRange(-CurSpread, CurSpread);
+			SpreadX = FMath::RandRange(-CurBulletSpread, CurBulletSpread);
+			SpreadY = FMath::RandRange(-CurBulletSpread, CurBulletSpread);
+			SpreadZ = FMath::RandRange(-CurBulletSpread, CurBulletSpread);
 		}
 
 		TArray<FHitResult> BulletHitResults = CalculateFireHit(ECollisionChannel::ECC_GameTraceChannel3 ,FVector(SpreadX,SpreadY,SpreadZ));
@@ -152,7 +173,6 @@ void AGun::Attack()
 				}
 			}
 		}
-		AddSpread(SpreadPerFire);
 		ShowFireEffect();
 	}
 	else
@@ -234,7 +254,7 @@ bool AGun::GetCanReload()
 
 void AGun::AddSpread(float Spread)
 {
-	CurSpread += Spread;
-	if(CurSpread > MaxSpread)
-		CurSpread = MaxSpread;
+	CurBulletSpread += Spread;
+	if(CurBulletSpread > MaxSpread)
+		CurBulletSpread = MaxSpread;
 }

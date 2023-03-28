@@ -43,7 +43,7 @@ public:
 	int32 GetCurAmmo() { return CurAmmo; }
 	int32 GetMaxAmmo() { return MaxAmmo; }
 	int32 GetTotalAmmo() { return TotalAmmo; }
-	float GetCurSpread() { return CurSpread; }
+	float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; }
 	virtual bool GetCanReload() override;
 	UNiagaraComponent* GetFireEffect() { return FireEffect; }
 	TArray<UNiagaraComponent*> GetAdditiveFireEffect() { return AdditiveFireEffect; }
@@ -87,9 +87,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
 		float MaxSpread;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
-		float CurSpread;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
-		float SpreadPerFire;
+		float SpreadPerTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
 		float SpreadForceBack;		
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float SpreadInAir;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float SpreadPerSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float SpreadMaxSpeed;
+
+	float CurBulletSpread;
+	float AdditiveSpreadInAir;
+	float AdditiveSpreadPerSpeed;
 };
