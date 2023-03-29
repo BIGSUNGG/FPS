@@ -50,6 +50,18 @@ void AGun::Tick(float DeltaTime)
 			Speed = SpreadMaxSpeed;
 
 		AdditiveSpreadPerSpeed = Speed * SpreadPerSpeed;
+
+		float TempRecoilPitch = FMath::FInterpTo(TargetRecoilPitch, 0.f, DeltaTime, 15.f);
+		float TempRecoilYaw = FMath::FInterpTo(TargetRecoilYaw, 0.f, DeltaTime, 15.f);
+
+		float AddRecoilPitch = TargetRecoilPitch - TempRecoilPitch;
+		float AddRecoilYaw = TargetRecoilYaw - TempRecoilYaw;
+
+		OwnerCreature->AddControllerPitchInput(AddRecoilPitch);
+		OwnerCreature->AddControllerYawInput(AddRecoilYaw);
+
+		TargetRecoilPitch -= AddRecoilPitch;
+		TargetRecoilYaw -= AddRecoilYaw;
 	}
 }
 
@@ -174,6 +186,7 @@ void AGun::Attack()
 				}
 			}
 		}
+		AddRecoil();
 		ShowFireEffect();
 	}
 	else
@@ -208,6 +221,12 @@ void AGun::ShowFireEffect()
 		Multicast_ShowFireEffect();
 	else
 		Server_ShowFireEffect();
+}
+
+void AGun::AddRecoil()
+{
+	TargetRecoilPitch += FMath::RandRange(MinRecoilPitch,MaxRecoilPitch);
+	TargetRecoilYaw += FMath::RandRange(MinRecoilYaw, MaxRecoilYaw);
 }
 
 void AGun::Server_SetTotalAmmo_Implementation(int32 Ammo)

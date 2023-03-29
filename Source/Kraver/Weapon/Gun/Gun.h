@@ -31,6 +31,7 @@ protected:
 	virtual void Attack() override;
 	TArray<FHitResult>  CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread = FVector(0,0,0));
 	virtual void ShowFireEffect(); // FireEffect를 실행하는 함수
+	virtual void AddRecoil();
 
 protected:
 	UFUNCTION(Server, Reliable)
@@ -100,4 +101,16 @@ protected:
 	float CurBulletSpread;
 	float AdditiveSpreadInAir;
 	float AdditiveSpreadPerSpeed;
+
+	float TargetRecoilPitch;
+	float TargetRecoilYaw;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float MaxRecoilPitch;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float MinRecoilPitch;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float MaxRecoilYaw;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (AllowPrivateAccess = "true"))
+		float MinRecoilYaw;
 };
