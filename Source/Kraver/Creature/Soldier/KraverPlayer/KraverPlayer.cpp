@@ -157,6 +157,7 @@ void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon1"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeWeapon1Pressed);
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon2"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeWeapon2Pressed);
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon3"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeWeapon3Pressed);
+	PlayerInputComponent->BindAction(TEXT("HolsterWeapon"), EInputEvent::IE_Pressed, this, &AKraverPlayer::HolsterWeaponPressed);
 }
 
 void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -233,6 +234,11 @@ void AKraverPlayer::ChangeWeapon2Pressed()
 void AKraverPlayer::ChangeWeapon3Pressed()
 {
 	CombatComponent->HoldWeapon(2);
+}
+
+void AKraverPlayer::HolsterWeaponPressed()
+{
+	CombatComponent->HolsterCurWeapon();
 }
 
 void AKraverPlayer::CheckCanInteractionWeapon()
@@ -471,9 +477,12 @@ void AKraverPlayer::RefreshCurViewType()
 
 void AKraverPlayer::Landed(const FHitResult& Hit)
 {
+	ASoldier::Landed(Hit);
+
+	IsDoubleJumped = false;
+
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(ArmMesh->GetAnimInstance());
 	CreatureAnim->PlayLandedMontage();
-	ASoldier::Landed(Hit);
 }
 
 void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -583,6 +592,31 @@ void AKraverPlayer::SetMovementState(EMovementState value)
 			break;
 		default:
 			break;
+	}
+}
+
+void AKraverPlayer::Jump()
+{
+	if(GetMovementComponent()->IsFalling() == false)
+		ASoldier::Jump();
+	else if (IsDoubleJumped == false)
+	{
+		IsDoubleJumped = true;
+
+
+		FVector LaunchPower(0,0, 450.f);
+		{
+			FRotator Rotation = GetController()->GetControlRotation();
+			FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+			LaunchPower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X) * CurrentInputForward * 450.f;
+		}
+		{
+			FRotator Rotation = GetController()->GetControlRotation();
+			FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+			LaunchPower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y) * CurrentInputRight * 450.f;
+		}
+
+		LaunchCharacter(LaunchPower,true,true);
 	}
 }
 

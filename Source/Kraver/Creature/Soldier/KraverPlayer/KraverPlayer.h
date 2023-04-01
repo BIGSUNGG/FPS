@@ -47,6 +47,7 @@ protected:
 	virtual void ChangeWeapon1Pressed();
 	virtual void ChangeWeapon2Pressed();
 	virtual void ChangeWeapon3Pressed();
+	virtual void HolsterWeaponPressed();
 
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
@@ -74,6 +75,9 @@ protected:
 	virtual void OnCurWeaponAttackEvent() override;
 
 	virtual void SetMovementState(EMovementState value) override;
+
+	// Overide
+	virtual void Jump() override;
 
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
@@ -128,4 +132,6 @@ protected:
 	FRotator BasicArmRotation;
 	FRotator WeaponAdsRotation;
 	FVector WeaponAdsLocation;
+
+	bool IsDoubleJumped = false;
 };

@@ -118,6 +118,8 @@ bool ACreature::GetCanAttack()
 
 void ACreature::MoveForward(float NewAxisValue)
 {
+	CurrentInputForward =NewAxisValue;
+	
 	if(!GetMovementComponent()->IsFalling())
 	{ 
 		SetMovementState(EMovementState::WALK);
@@ -141,6 +143,8 @@ void ACreature::MoveForward(float NewAxisValue)
 
 void ACreature::MoveRight(float NewAxisValue)
 {
+	CurrentInputRight = NewAxisValue;
+
 	if(NewAxisValue == 0 || Controller == nullptr || NewAxisValue == 0)
 		return;
 
@@ -224,7 +228,9 @@ void ACreature::JumpingButtonPressed()
 	if(GetMovementComponent()->IsCrouching())
 		CrouchButtonPressed();
 
-	SetIsJumping(true);
+	if(GetMovementComponent()->IsFalling() == false)
+		SetIsJumping(true);
+
 	Jump();
 }
 

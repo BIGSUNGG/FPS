@@ -154,4 +154,7 @@ protected:
 		float CrouchSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float ImpulseResistanceRatio = 1.f;
+
+	float CurrentInputForward = 0.f;
+	float CurrentInputRight = 0.f;
 }; 
