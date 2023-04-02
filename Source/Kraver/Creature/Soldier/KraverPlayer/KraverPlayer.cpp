@@ -28,6 +28,9 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 
 	ShowOnlyThirdPerson.Push(GetMesh());
 
+	
+	GetCharacterMovement()->AirControl = 0.5f;
+
 	RefreshCurViewType();
 }
 
@@ -122,8 +125,6 @@ void AKraverPlayer::LocallyControlEvent(float DeltaTime)
 		WeaponAdsLocation.Y = FMath::FInterpTo(WeaponAdsLocation.Y, TargetLocation.Y, DeltaTime, 20.f);
 		WeaponAdsLocation.Z = FMath::FInterpTo(WeaponAdsLocation.Z, TargetLocation.Z, DeltaTime, 20.f);
 
-		RefreshArm();
-
 		if(HUD)
 			HUD->SetbDrawCrosshair(false);
 	}
@@ -140,11 +141,12 @@ void AKraverPlayer::LocallyControlEvent(float DeltaTime)
 		WeaponAdsLocation.Y = FMath::FInterpTo(WeaponAdsLocation.Y, TargetLocation.Y, DeltaTime, 20.f);
 		WeaponAdsLocation.Z = FMath::FInterpTo(WeaponAdsLocation.Z, TargetLocation.Z, DeltaTime, 20.f);
 
-		RefreshArm();
-
 		if (HUD)
 			HUD->SetbDrawCrosshair(true);
 	}
+
+	RefreshArm();
+
 }
 
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -600,24 +602,56 @@ void AKraverPlayer::Jump()
 	if(GetMovementComponent()->IsFalling() == false)
 		ASoldier::Jump();
 	else if (IsDoubleJumped == false)
+		DoubleJump();
+}
+
+void AKraverPlayer::DoubleJump()
+{
+	IsDoubleJumped = true;
+
+	FVector LaunchPower(0, 0, DobuleJumpPower.Z);
+
+	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
+
+	FVector Velocity = MovementComp->Velocity;
+
+	FVector Right = GetControlRotation().Vector().GetSafeNormal2D().RotateAngleAxis(-90.0f, FVector::UpVector);
+	float RightSpeed = -FVector::DotProduct(Velocity, Right) / Right.Size2D();
+
+	FVector Forward = GetControlRotation().Vector().GetSafeNormal2D();
+	float ForwardSpeed = FVector::DotProduct(Velocity, Forward) / Forward.Size2D();
+
+	float ForwardLaunchPower;
+	float RightLaunchPower;
+
+	if (CurrentInputForward > 0.f && ForwardSpeed > DobuleJumpPower.X * CurrentInputForward)
+		ForwardLaunchPower = ForwardSpeed;
+	else
+		ForwardLaunchPower = DobuleJumpPower.X * CurrentInputForward;
+
+	if (CurrentInputRight > 0.f && RightSpeed > DobuleJumpPower.Y * CurrentInputRight)
+		RightLaunchPower = RightSpeed;
+	else
+		RightLaunchPower = DobuleJumpPower.Y * CurrentInputRight;
+
+	bool bOverideXY = false;
+	if (CurrentInputForward != 0.f)
 	{
-		IsDoubleJumped = true;
-
-
-		FVector LaunchPower(0,0, 450.f);
-		{
-			FRotator Rotation = GetController()->GetControlRotation();
-			FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-			LaunchPower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X) * CurrentInputForward * 450.f;
-		}
-		{
-			FRotator Rotation = GetController()->GetControlRotation();
-			FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-			LaunchPower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y) * CurrentInputRight * 450.f;
-		}
-
-		LaunchCharacter(LaunchPower,true,true);
+		FRotator Rotation = GetController()->GetControlRotation();
+		FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+		LaunchPower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X) * ForwardLaunchPower;
+		bOverideXY = true;
 	}
+	if (CurrentInputRight != 0.f)
+	{
+		FRotator Rotation = GetController()->GetControlRotation();
+		FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+		LaunchPower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y) * RightLaunchPower;
+		bOverideXY = true;
+	}
+
+	LaunchCharacter(LaunchPower, bOverideXY, true);
+	KR_LOG(Log, TEXT("Dobule Jump Power : %f %f"), ForwardLaunchPower, RightLaunchPower);
 }
 
 void AKraverPlayer::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)

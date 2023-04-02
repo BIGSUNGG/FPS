@@ -76,8 +76,9 @@ protected:
 
 	virtual void SetMovementState(EMovementState value) override;
 
-	// Overide
+	// Function
 	virtual void Jump() override;
+	void DoubleJump();
 
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
@@ -117,6 +118,9 @@ protected:
 		float CrouchCameraHeight = -40.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 		float UnCrouchCameraHeight = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement, meta = (AllowPrivateAccess = "true"))
+		FVector DobuleJumpPower;
 
 
 	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
