@@ -25,10 +25,13 @@ public:
 	AKraverPlayer();
 
 	virtual void BeginPlay() override;
+
 	virtual void Tick(float DeltaTime) override;
-	virtual void ClientEvent(float DeltaTime);
-	virtual void ServerClientEvent(float DeltaTime);
-	virtual void LocallyControlEvent(float DeltaTime);
+	virtual void CameraTick();
+	virtual void CameraTilt(float TargetRoll);
+	virtual void ClientTick(float DeltaTime);
+	virtual void ServerClientTick(float DeltaTime);
+	virtual void LocallyControlTick(float DeltaTime);
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -43,11 +46,9 @@ protected:
 	virtual void SubAttackButtonReleased() override;
 	virtual void EquipButtonPressed();
 	virtual void UnEquipButtonPressed();
-	virtual void ReloadButtonPressed() override;
 	virtual void ChangeWeapon1Pressed();
 	virtual void ChangeWeapon2Pressed();
 	virtual void ChangeWeapon3Pressed();
-	virtual void HolsterWeaponPressed();
 
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
@@ -72,14 +73,29 @@ protected:
 	virtual void Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
 	virtual void OnHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	virtual void OnHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
-	virtual void OnCurWeaponAttackEvent() override;
 
 	virtual void SetMovementState(EMovementState value) override;
 
 	// Function
-	virtual void Jump() override;
-	void DoubleJump();
+	virtual void PlayReloadMontage() override;
+	virtual void PlayAttackMontage() override;
+	virtual void PlayLandedMontage() override;
 
+	virtual void StopReloadMontage() override;
+
+	virtual void Jump() override;
+	void WallRunJump();
+	void DoubleJump();
+	void WallRunUpdate();
+	bool WallRunMovement(FVector Start, FVector End, float WallRunDirection);
+	void WallRunStart();
+	void WallRunEnd(float RestTime);
+	void ResetWallRunSuppression();
+	void SuppressWallRun(float Delay);
+	FVector CalculateRightWallRunEndVector();
+	FVector CalculateLeftWallRunEndVector();
+	bool CalculateValidWallVector(FVector InVec);
+	FVector CalculatePlayerToWallVector();
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 		class UTexture2D* CrosshairsCenter;
@@ -119,9 +135,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 		float UnCrouchCameraHeight = 0.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		FVector DobuleJumpPower;
-
 
 	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
 	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트
@@ -137,5 +150,23 @@ protected:
 	FRotator WeaponAdsRotation;
 	FVector WeaponAdsLocation;
 
-	bool IsDoubleJumped = false;
+	// Advanced Movement / Double Jump
+	float DefaultGravity = 0.f;
+
+	bool bCanDoubleJump = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AdvancedMovement", meta = (AllowPrivateAccess = "true"))
+		FVector DobuleJumpPower;
+
+	// Advanced Movement / Wall Run
+	bool bWallRunSupressed = false;
+	bool bWallRunGravity = false;
+	bool IsWallRunning = false;
+	bool IsWallRunningR = false;
+	bool IsWallRunningL = false;
+	float WallRunSpeed = 900.f;
+	float WallRunJumpHeight = 400.f;
+	float WallRunJumpOffForce  = 400.f;
+	float WallRunTargetGravity = 0.f;
+	FVector WallRunNormal;
+	FTimerHandle SuppressWallRunTimer;
 };

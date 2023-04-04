@@ -97,20 +97,19 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &ACreature::AttackButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Released, this, &ACreature::AttackButtonReleased);
 	PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &ACreature::RunButtonPressed);
-	PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Released, this, &ACreature::RunButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Released, this, &ACreature::RunButtonReleased);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Pressed, this, &ACreature::CrouchButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACreature::JumpingButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACreature::JumpingButtonReleased);
 	PlayerInputComponent->BindAction(TEXT("SubAttack"), EInputEvent::IE_Pressed, this, &ACreature::SubAttackButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("SubAttack"), EInputEvent::IE_Released, this, &ACreature::SubAttackButtonReleased);
+	PlayerInputComponent->BindAction(TEXT("HolsterWeapon"), EInputEvent::IE_Pressed, this, &ACreature::HolsterWeaponPressed);
 
 }
 
 bool ACreature::GetCanAttack()
 {
 	if (MovementState == EMovementState::SPRINT && GetMovementComponent()->IsFalling() == false)
-		return false;
-	if (CombatComponent->GetCurWeapon() && GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageTpp()))
 		return false;
 
 	return true;
@@ -173,7 +172,7 @@ void ACreature::ReloadButtonPressed()
 	}
 
 	CombatComponent->SetIsAttacking(false);
-	RpcComponent->Montage_Play(GetMesh(), CombatComponent->GetCurWeapon()->GetReloadMontageTpp(), 1.5f);
+	PlayReloadMontage();
 }
 
 void ACreature::AttackButtonPressed()
@@ -181,6 +180,7 @@ void ACreature::AttackButtonPressed()
 	if (GetCanAttack())
 	{
 		CombatComponent->SetIsAttacking(true);
+		StopReloadMontage();
 	}
 
 }
@@ -202,14 +202,12 @@ void ACreature::SubAttackButtonReleased()
 
 void ACreature::RunButtonPressed()
 {
-	if (IsRunning)
-	{
-		IsRunning = false;
-	}
-	else
-	{
-		IsRunning = true;
-	}
+	IsRunning = true;
+}
+
+void ACreature::RunButtonReleased()
+{
+	IsRunning = false;
 }
 
 void ACreature::CrouchButtonPressed()
@@ -225,6 +223,8 @@ void ACreature::CrouchButtonPressed()
 
 void ACreature::JumpingButtonPressed()
 {
+	bJumpButtonPress = true;
+
 	if(GetMovementComponent()->IsCrouching())
 		CrouchButtonPressed();
 
@@ -236,10 +236,17 @@ void ACreature::JumpingButtonPressed()
 
 void ACreature::JumpingButtonReleased()
 {
+	bJumpButtonPress = false;
+
 	if (IsJumping)
 	{
 		StopJumping();
 	}
+}
+
+void ACreature::HolsterWeaponPressed()
+{
+	CombatComponent->HolsterCurWeapon();
 }
 
 void ACreature::AimOffset(float DeltaTime)
@@ -372,16 +379,15 @@ void ACreature::OnCurWeaponAttackEvent()
 	if(CombatComponent->GetCurWeapon() == nullptr)
 		UE_LOG(LogTemp,Fatal,TEXT("Cur weapon is nullptr but it attacked"));
 
-	RpcComponent->Montage_Play(GetMesh(), CombatComponent->GetCurWeapon()->GetAttackMontageTpp());
+	PlayAttackMontage();
 }
 
 void ACreature::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
-	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-	RpcComponent->Montage_Play(GetMesh(), CreatureAnim->GetLandedMontage());
 
 	SetIsJumping(false);
+	PlayLandedMontage();
 }
 
 void ACreature::OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -415,6 +421,30 @@ void ACreature::Server_OnDeathEvent_Implementation(float DamageAmount, FDamageEv
 
 void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+}
+
+void ACreature::PlayReloadMontage()
+{
+	RpcComponent->Montage_Play(GetMesh(), CombatComponent->GetCurWeapon()->GetReloadMontageTpp(), 1.5f);
+}
+
+void ACreature::PlayAttackMontage()
+{
+	RpcComponent->Montage_Play(GetMesh(), CombatComponent->GetCurWeapon()->GetAttackMontageTpp());
+}
+
+void ACreature::PlayLandedMontage()
+{
+	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
+	RpcComponent->Montage_Play(GetMesh(), CreatureAnim->GetLandedMontage());
+}
+
+void ACreature::StopReloadMontage()
+{
+	if(CombatComponent->GetCurWeapon() == nullptr)
+		return;
+
+	RpcComponent->Montage_Stop(GetMesh(), CombatComponent->GetCurWeapon()->GetReloadMontageTpp(), 0.f);
 }
 
 void ACreature::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)

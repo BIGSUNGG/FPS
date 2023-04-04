@@ -69,14 +69,15 @@ protected:
 	virtual void SubAttackButtonPressed();
 	virtual void SubAttackButtonReleased();
 	virtual void RunButtonPressed();
+	virtual void RunButtonReleased();
 	virtual void CrouchButtonPressed();
 	virtual void JumpingButtonPressed();
 	virtual void JumpingButtonReleased();
+	virtual void HolsterWeaponPressed();
 
 	// Tick함수에서 호출될 함수
 	virtual void AimOffset(float DeltaTime);
 
-protected:
 	// Delegate Event
 	UFUNCTION()
 		virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 호출되는 함수
@@ -105,6 +106,13 @@ protected:
 		void Server_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 모든 클라이언트에서 호출되는 함수
+
+	// Function
+	virtual void PlayReloadMontage();
+	virtual void PlayAttackMontage();
+	virtual void PlayLandedMontage();
+
+	virtual void StopReloadMontage();
 
 public:
 	// Component
@@ -155,6 +163,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float ImpulseResistanceRatio = 1.f;
 
+	// InputState
 	float CurrentInputForward = 0.f;
 	float CurrentInputRight = 0.f;
+	bool bJumpButtonPress = false;
 }; 
