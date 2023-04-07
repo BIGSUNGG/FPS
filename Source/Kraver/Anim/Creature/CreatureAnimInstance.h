@@ -41,7 +41,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
 		float UpDownSpeed; // 현재 캐릭터의 Z축 속도
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
-		float MovementDirection; // 현재 캐릭터가 바라보는 방향기준으로 움직이고 있는 방향
+		float ForwardSpeed; // 현재 캐릭터가 바라보는 방향기준으로 앞으로 움직이고 있는 속도
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
+		float RightSpeed; // 현재 캐릭터가 바라보는 방향기준으로 앞으로 움직이고 있는 속도
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
 		bool IsFalling; // 캐릭터가 떨어지고 있는지
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))

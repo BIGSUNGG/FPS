@@ -26,23 +26,20 @@ void UCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if(!Creature)
 		return;
 
-	FVector Velocity = Creature->GetVelocity();
+	UCharacterMovementComponent* MovementComp = Creature->GetCharacterMovement();
+
+	FVector Velocity = MovementComp->Velocity;
 	UpDownSpeed = Velocity.Z;
+
+	FVector Right = Creature->GetControlRotation().Vector().GetSafeNormal2D().RotateAngleAxis(-90.0f, FVector::UpVector);
+	RightSpeed = -FVector::DotProduct(Velocity, Right) / Right.Size2D();
+
+	FVector Forward = Creature->GetControlRotation().Vector().GetSafeNormal2D();
+	ForwardSpeed = FVector::DotProduct(Velocity, Forward) / Forward.Size2D();
+
 	Velocity.Z = 0;
 	Speed = Velocity.Size();
 	SpeedRatio = Speed / Creature->GetMovementComponent()->GetMaxSpeed();
-	
-	if (Creature->GetVelocity().Length() <= 0)
-		MovementDirection = 0.f;
-	else
-	{
-		FRotator RotFromX = UKismetMathLibrary::MakeRotFromX(Creature->GetVelocity());
-		FRotator TempRotation = UKismetMathLibrary::NormalizedDeltaRotator(RotFromX, Creature->GetActorRotation());
-		if(TempRotation.Yaw >= 180)
-			MovementDirection = TempRotation.Yaw - 360.f;
-		else
-			MovementDirection = TempRotation.Yaw;
-	}
 
 	MovementState = Creature->GetMovementState();
 	IsCrouching = Creature->GetMovementComponent()->IsCrouching();

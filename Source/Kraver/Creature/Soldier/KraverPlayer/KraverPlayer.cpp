@@ -71,17 +71,13 @@ void AKraverPlayer::Tick(float DeltaTime)
 
 void AKraverPlayer::CameraTick()
 {
-	if (IsWallRunningL)
-	{
+	if (CurWallRunState == EWallRunState::WALLRUN_LEFT)
 		CameraTilt(15.f);
-	}
+	else if(CurWallRunState == EWallRunState::WALLRUN_RIGHT)
+		CameraTilt(-15.f);		
 	else
-	{
-		if(IsWallRunningR)
-			CameraTilt(-15.f);
-		else
-			CameraTilt(0.f);
-	}
+		CameraTilt(0.f);
+	
 }
 
 void AKraverPlayer::CameraTilt(float TargetRoll)
@@ -109,61 +105,13 @@ void AKraverPlayer::LocallyControlTick(float DeltaTime)
 	if(!IsLocallyControlled())
 		return;
 
-	if(!bWallRunSupressed)
-		WallRunUpdate();
 	CheckCanInteractionWeapon();
-	if (GetMovementComponent()->IsCrouching())
-		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, CrouchCameraHeight, DeltaTime, 20.f);
-	else
-		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
+	
+	WeaponADS(DeltaTime);
+	WallRunUpdate();
 
-	SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmCrouchLocation);
-
-	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && ArmMesh->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageFpp()) == false)
-	{
-		USkeletalMeshComponent* ArmWeaponMesh = GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()];
-		ArmMesh->AddRelativeRotation(WeaponAdsRotation * -1);
-		ArmMesh->AddRelativeLocation(WeaponAdsLocation * -1);
-
-		FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
-		FTransform CameraTransform = Camera->GetComponentTransform();
-		FTransform RelativeTransform = WeaponTransform.GetRelativeTransform(CameraTransform);
-		FRotator RelativeRotation = RelativeTransform.Rotator();
-		FVector RelativeLocation = RelativeTransform.GetLocation();
-
-		FRotator TargetRotation;
-		FVector TargetLocation;
-
-		TargetRotation.Pitch = -RelativeRotation.Pitch;
-		TargetRotation.Roll = -RelativeRotation.Roll;
-		TargetRotation.Yaw = -(90.f + RelativeRotation.Yaw);
-
-		TargetLocation.X = -RelativeLocation.X;
-		TargetLocation.Y = -RelativeLocation.Y;
-		TargetLocation.Z = -RelativeLocation.Z;
-
-		WeaponAdsRotation = FMath::RInterpTo(WeaponAdsRotation, TargetRotation, DeltaTime, 20.f);
-		WeaponAdsLocation = FMath::VInterpTo(WeaponAdsLocation, TargetLocation, DeltaTime, 20.f);
-
-		if(HUD)
-			HUD->SetbDrawCrosshair(false);
-	}
-	else if((CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && ArmMesh->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageFpp())) == false)
-	{
-		FRotator TargetRotation = FRotator::ZeroRotator;
-		FVector TargetLocation = FVector::ZeroVector;
-
-		WeaponAdsRotation = FMath::RInterpTo(WeaponAdsRotation, TargetRotation, DeltaTime, 20.f);
-		WeaponAdsLocation = FMath::VInterpTo(WeaponAdsLocation, TargetLocation, DeltaTime, 20.f);
-
-		if (HUD)
-			HUD->SetbDrawCrosshair(true);
-
-	}
+	SpringArmTick(DeltaTime);
 	CameraTick();
-	RefreshArm();
-
-	KR_LOG(Log, TEXT("%f"), GetCharacterMovement()->GravityScale);
 }
 
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -479,7 +427,7 @@ void AKraverPlayer::Landed(const FHitResult& Hit)
 	ASoldier::Landed(Hit);
 
 	bCanDoubleJump = true;
-	WallRunEnd(0.f);
+	WallRunHorizonEnd(0.f);
 }
 
 void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -623,11 +571,68 @@ void AKraverPlayer::StopReloadMontage()
 	RpcComponent->Montage_Stop(ArmMesh, CombatComponent->GetCurWeapon()->GetReloadMontageFpp(), 0.f);
 }
 
+void AKraverPlayer::WeaponADS(float DeltaTime)
+{
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && ArmMesh->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageFpp()) == false)
+	{
+		USkeletalMeshComponent* ArmWeaponMesh = GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()];
+		ArmMesh->AddRelativeRotation(WeaponAdsRotation * -1);
+		ArmMesh->AddRelativeLocation(WeaponAdsLocation * -1);
+
+		FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
+		FTransform CameraTransform = Camera->GetComponentTransform();
+		FTransform RelativeTransform = WeaponTransform.GetRelativeTransform(CameraTransform);
+		FRotator RelativeRotation = RelativeTransform.Rotator();
+		FVector RelativeLocation = RelativeTransform.GetLocation();
+
+		FRotator TargetRotation;
+		FVector TargetLocation;
+
+		TargetRotation.Pitch = -RelativeRotation.Pitch;
+		TargetRotation.Roll = -RelativeRotation.Roll;
+		TargetRotation.Yaw = -(90.f + RelativeRotation.Yaw);
+
+		TargetLocation.X = -RelativeLocation.X;
+		TargetLocation.Y = -RelativeLocation.Y;
+		TargetLocation.Z = -RelativeLocation.Z;
+
+		WeaponAdsRotation = FMath::RInterpTo(WeaponAdsRotation, TargetRotation, DeltaTime, 20.f);
+		WeaponAdsLocation = FMath::VInterpTo(WeaponAdsLocation, TargetLocation, DeltaTime, 20.f);
+
+		if (HUD)
+			HUD->SetbDrawCrosshair(false);
+	}
+	else if ((CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && ArmMesh->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageFpp())) == false)
+	{
+		FRotator TargetRotation = FRotator::ZeroRotator;
+		FVector TargetLocation = FVector::ZeroVector;
+
+		WeaponAdsRotation = FMath::RInterpTo(WeaponAdsRotation, TargetRotation, DeltaTime, 20.f);
+		WeaponAdsLocation = FMath::VInterpTo(WeaponAdsLocation, TargetLocation, DeltaTime, 20.f);
+
+		if (HUD)
+			HUD->SetbDrawCrosshair(true);
+
+	}
+
+}
+
+void AKraverPlayer::SpringArmTick(float DeltaTime)
+{
+	if (GetMovementComponent()->IsCrouching())
+		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, CrouchCameraHeight, DeltaTime, 20.f);
+	else
+		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
+
+	SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmCrouchLocation);
+	RefreshArm();
+}
+
 void AKraverPlayer::Jump()
 {
 	if (GetMovementComponent()->IsFalling() == false)
 		ASoldier::Jump();
-	else if(IsWallRunning)
+	else if(GetIsWallRunning())
 		WallRunJump();
 	else if (bCanDoubleJump)
 		DoubleJump();
@@ -635,7 +640,7 @@ void AKraverPlayer::Jump()
 
 void AKraverPlayer::WallRunJump()
 {
-	if (IsWallRunning)
+	if (GetIsWallRunning())
 	{
 		WallRunEnd(0.35);
 		FVector LaunchVector;
@@ -703,43 +708,101 @@ void AKraverPlayer::DoubleJump()
 	KR_LOG(Log, TEXT("Dobule Jump Power : %f %f"), ForwardLaunchPower, RightLaunchPower);
 }
 
-void AKraverPlayer::WallRunUpdate()
+bool AKraverPlayer::WallRunUpdate()
 {
-	if (WallRunMovement(GetActorLocation(), CalculateRightWallRunEndVector(), -1.f))
+	if (bJumpButtonPress || GetIsWallRunning())
+	{	
+		bool WallRunVerticalSuccess = false;
+		bool WallRunHorizonSuccess = false;
+
+		if(!bWallRunVerticalSupressed)
+		{
+			WallRunVerticalSuccess = WallRunVerticalUpdate();
+			if (WallRunVerticalSuccess)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					0,
+					0.f,
+					FColor::White,
+					TEXT("WallRunVertical")
+				);
+				return true;
+			}
+		}
+
+		if(!bWallRunHorizonSupressed)
+		{
+			WallRunHorizonSuccess = WallRunHorizonUpdate();
+			if (WallRunHorizonSuccess)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					0,
+					0.f,
+					FColor::White,
+					TEXT("WallRunHorizon")
+				);
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool AKraverPlayer::WallRunHorizonUpdate()
+{
+	if (WallRunHorizonMovement(GetActorLocation(), CalculateRightWallRunEndVector(), -1.f))
 	{
-		if(!IsWallRunning)
+		if(!GetIsWallRunning())
 			WallRunStart();
 
-		IsWallRunningR = true;
-		IsWallRunningL = false;
+		CurWallRunState = EWallRunState::WALLRUN_RIGHT;
 		GetCharacterMovement()->GravityScale = FMath::FInterpTo(GetCharacterMovement()->GravityScale, WallRunTargetGravity, GetWorld()->GetDeltaSeconds(), 40.f);
+		return true;
+	}
+	else if(CurWallRunState == EWallRunState::WALLRUN_RIGHT)
+	{
+		WallRunHorizonEnd(1.f);
+		return false;
+	}
+	else if (WallRunHorizonMovement(GetActorLocation(), CalculateLeftWallRunEndVector(), 1.f))
+	{
+		if (!GetIsWallRunning())
+			WallRunStart();
+
+		CurWallRunState = EWallRunState::WALLRUN_LEFT;
+		GetCharacterMovement()->GravityScale = FMath::FInterpTo(GetCharacterMovement()->GravityScale, WallRunTargetGravity, GetWorld()->GetDeltaSeconds(), 40.f);
+		return true;
+	}
+	else if (CurWallRunState != EWallRunState::WALLRUN_VERTICAL)
+	{
+		WallRunHorizonEnd(1.f);
+		return false;
+
+	}
+
+	return false;
+}
+
+bool AKraverPlayer::WallRunVerticalUpdate()
+{
+	if (WallRunVerticalMovement(GetActorLocation(), CalculateVerticaltWallRunEndVector()))
+	{
+		if(!GetIsWallRunning())
+			WallRunStart();
+	
+		CurWallRunState = EWallRunState::WALLRUN_VERTICAL;
+		GetCharacterMovement()->GravityScale = 0.f;
+		return true;
 	}
 	else
 	{
-		if (IsWallRunningR)
-		{
-			WallRunEnd(1.f);
-		}
-		else
-		{
-			if (WallRunMovement(GetActorLocation(), CalculateLeftWallRunEndVector(), 1.f))
-			{
-				if (!IsWallRunning)
-					WallRunStart();
-
-				IsWallRunningR = false;
-				IsWallRunningL = true;
-				GetCharacterMovement()->GravityScale = FMath::FInterpTo(GetCharacterMovement()->GravityScale, WallRunTargetGravity, GetWorld()->GetDeltaSeconds(), 40.f);
-			}
-			else
-			{
-				WallRunEnd(1.f);
-			}
-		}
+		WallRunVerticalEnd(1.f);
+		return false;
 	}
 }
 
-bool AKraverPlayer::WallRunMovement(FVector Start, FVector End, float WallRunDirection)
+bool AKraverPlayer::WallRunHorizonMovement(FVector Start, FVector End, float WallRunDirection)
 {
 	FCollisionQueryParams ObjectParams(NAME_None, false, this);
 	FHitResult Result;
@@ -765,34 +828,92 @@ bool AKraverPlayer::WallRunMovement(FVector Start, FVector End, float WallRunDir
 	return false;
 }	
 
+bool AKraverPlayer::WallRunVerticalMovement(FVector Start, FVector End)
+{
+	FCollisionQueryParams ObjectParams(NAME_None, false, this);
+	FHitResult Result;
+	bool bSuccess = GetWorld()->LineTraceSingleByChannel(
+		Result,
+		Start,
+		End,
+		ECollisionChannel::ECC_GameTraceChannel2,
+		ObjectParams
+	);
+
+	if (bSuccess && Result.bBlockingHit)
+	{
+		if (GetMovementComponent()->IsFalling() && CalculateValidWallVector(Result.Normal))
+		{
+			WallRunNormal = Result.Normal;
+
+			LaunchCharacter(GetActorUpVector() * 400.f, true, true);
+			return true;
+		}
+	}
+	return false;
+}
+
 void AKraverPlayer::WallRunStart()
 {
-	IsWallRunning = true;
+	if(GetIsWallRunning())
+		return;
+
 	bCanDoubleJump = true;
 }
 
 void AKraverPlayer::WallRunEnd(float ResetTime)
 {
-	if(IsWallRunning == false)
+	if (GetIsWallRunning() == false)
 		return;
 
-	IsWallRunning = false;
-	IsWallRunningL = false;
-	IsWallRunningR = false;
+	CurWallRunState = EWallRunState::NONE;
+	GetCharacterMovement()->GravityScale = DefaultGravity;
+	SuppressWallRunHorizion(ResetTime);
+	SuppressWallRunVertical(ResetTime);
+}
+
+void AKraverPlayer::WallRunHorizonEnd(float ResetTime)
+{
+	if(GetIsWallRunning() == false)
+		return;
+
+	CurWallRunState = EWallRunState::NONE;
 	GetCharacterMovement()->GravityScale = DefaultGravity;	
-	SuppressWallRun(ResetTime);
+	SuppressWallRunHorizion(ResetTime);
 }
 
-void AKraverPlayer::ResetWallRunSuppression()
+void AKraverPlayer::WallRunVerticalEnd(float ResetTime)
 {
-	bWallRunSupressed = false;
-	GetWorldTimerManager().ClearTimer(SuppressWallRunTimer);
+	if (GetIsWallRunning() == false)
+		return;
+
+	CurWallRunState = EWallRunState::NONE;
+	GetCharacterMovement()->GravityScale = DefaultGravity;
+	SuppressWallRunVertical(ResetTime);
 }
 
-void AKraverPlayer::SuppressWallRun(float Delay)
+void AKraverPlayer::ResetWallRunHorizonSuppression()
 {
-	bWallRunSupressed = true;
-	GetWorldTimerManager().SetTimer(SuppressWallRunTimer, this, &AKraverPlayer::ResetWallRunSuppression, Delay, false);
+	bWallRunHorizonSupressed = false;
+	GetWorldTimerManager().ClearTimer(SuppressWallRunHorizonTimer);
+}
+
+void AKraverPlayer::ResetWallRunVerticalSuppression()
+{
+	bWallRunVerticalSupressed = false;
+	GetWorldTimerManager().ClearTimer(SuppressWallRunVerticalTimer);
+}
+
+void AKraverPlayer::SuppressWallRunHorizion(float Delay)
+{
+	bWallRunHorizonSupressed = true;
+	GetWorldTimerManager().SetTimer(SuppressWallRunHorizonTimer, this, &AKraverPlayer::ResetWallRunHorizonSuppression, Delay, false);
+}
+
+void AKraverPlayer::SuppressWallRunVertical(float Delay)
+{
+	bWallRunVerticalSupressed = true;
+	GetWorldTimerManager().SetTimer(SuppressWallRunVerticalTimer, this, &AKraverPlayer::ResetWallRunVerticalSuppression, Delay, false);
 }
 
 FVector AKraverPlayer::CalculateRightWallRunEndVector()
@@ -810,6 +931,14 @@ FVector AKraverPlayer::CalculateLeftWallRunEndVector()
 		GetActorLocation() +
 		GetActorRightVector() * -75.f +
 		GetActorForwardVector() * -35.f
+		);
+}
+
+FVector AKraverPlayer::CalculateVerticaltWallRunEndVector()
+{
+	return (
+		GetActorLocation() +
+		GetActorForwardVector() * 75.f
 		);
 }
 

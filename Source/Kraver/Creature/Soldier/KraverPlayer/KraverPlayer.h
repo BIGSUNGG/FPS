@@ -9,6 +9,16 @@
  * 
  */
 
+// 캐릭터의 AdvancedMovement 상태를 가지는 enum class
+UENUM(BlueprintType)
+enum class EWallRunState : uint8
+{
+	NONE		UMETA(DisplayName = "NONE"),
+	WALLRUN_RIGHT UMETA(DisplayName = "WALLRUN_RIGHT"),
+	WALLRUN_LEFT UMETA(DisplayName = "WALLRUN_LEFT"),
+	WALLRUN_VERTICAL UMETA(DisplayName = "WALLRUN_VERTICAL"),
+};
+
 // 카메라 시점 종류를 가지는 enum class
 UENUM(BlueprintType)
 enum class EViewType : uint8
@@ -40,6 +50,7 @@ public:
 	FORCEINLINE AWeapon* GetCanInteractWeapon() { return CanInteractWeapon; }
 	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
 	FORCEINLINE TMap<AWeapon*, USkeletalMeshComponent*> GetArmWeaponMeshes() { return ArmWeaponMeshes; }
+	const bool GetIsWallRunning() { return CurWallRunState != EWallRunState::NONE; }
 protected:
 	// input event
 	virtual void SubAttackButtonPressed() override;
@@ -83,17 +94,28 @@ protected:
 
 	virtual void StopReloadMontage() override;
 
+	void WeaponADS(float DeltaTime);
+	void SpringArmTick(float DeltaTime);
+
 	virtual void Jump() override;
 	void WallRunJump();
 	void DoubleJump();
-	void WallRunUpdate();
-	bool WallRunMovement(FVector Start, FVector End, float WallRunDirection);
+	bool WallRunUpdate();
+	bool WallRunHorizonUpdate();
+	bool WallRunVerticalUpdate();
+	bool WallRunHorizonMovement(FVector Start, FVector End, float WallRunDirection);
+	bool WallRunVerticalMovement(FVector Start, FVector End);
 	void WallRunStart();
-	void WallRunEnd(float RestTime);
-	void ResetWallRunSuppression();
-	void SuppressWallRun(float Delay);
+	void WallRunEnd(float ResetTime);
+	void WallRunHorizonEnd(float ResetTime);
+	void WallRunVerticalEnd(float ResetTime);
+	void ResetWallRunHorizonSuppression();
+	void ResetWallRunVerticalSuppression();
+	void SuppressWallRunHorizion(float Delay);
+	void SuppressWallRunVertical(float Delay);
 	FVector CalculateRightWallRunEndVector();
 	FVector CalculateLeftWallRunEndVector();
+	FVector CalculateVerticaltWallRunEndVector();
 	bool CalculateValidWallVector(FVector InVec);
 	FVector CalculatePlayerToWallVector();
 public:
@@ -158,15 +180,15 @@ protected:
 		FVector DobuleJumpPower;
 
 	// Advanced Movement / Wall Run
-	bool bWallRunSupressed = false;
+	EWallRunState CurWallRunState;
+	bool bWallRunHorizonSupressed = false;
+	bool bWallRunVerticalSupressed = false;
 	bool bWallRunGravity = false;
-	bool IsWallRunning = false;
-	bool IsWallRunningR = false;
-	bool IsWallRunningL = false;
 	float WallRunSpeed = 900.f;
 	float WallRunJumpHeight = 400.f;
 	float WallRunJumpOffForce  = 400.f;
 	float WallRunTargetGravity = 0.f;
 	FVector WallRunNormal;
-	FTimerHandle SuppressWallRunTimer;
+	FTimerHandle SuppressWallRunHorizonTimer;
+	FTimerHandle SuppressWallRunVerticalTimer;
 };

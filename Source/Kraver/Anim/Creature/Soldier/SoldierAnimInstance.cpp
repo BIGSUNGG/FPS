@@ -22,7 +22,7 @@ void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (Soldier == nullptr)
 		return;
 
-	IsEquippingWeapon = Soldier->CombatComponent->GetCurWeapon() != nullptr;
+	IsEquippingWeapon = (Soldier->CombatComponent->GetCurWeapon() != nullptr);
 	if (IsEquippingWeapon)
 	{
 		IsAttacking = Soldier->CombatComponent->GetCurWeapon()->GetIsAttacking();
