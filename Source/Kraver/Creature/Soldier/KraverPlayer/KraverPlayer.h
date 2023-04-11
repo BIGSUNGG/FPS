@@ -51,6 +51,8 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
 	FORCEINLINE TMap<AWeapon*, USkeletalMeshComponent*> GetArmWeaponMeshes() { return ArmWeaponMeshes; }
 	const bool GetIsWallRunning() { return CurWallRunState != EWallRunState::NONE; }
+	virtual bool GetCanAttack() override;
+
 protected:
 	// input event
 	virtual void SubAttackButtonPressed() override;
@@ -85,9 +87,10 @@ protected:
 	virtual void OnHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	virtual void OnHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 
-	virtual void SetMovementState(EMovementState value) override;
-
 	// Function
+	void Crouch(bool bClientSimulation = false) override;
+	void UnCrouch(bool bClientSimulation = false) override;
+
 	virtual void PlayReloadMontage() override;
 	virtual void PlayAttackMontage() override;
 	virtual void PlayLandedMontage() override;
@@ -98,8 +101,10 @@ protected:
 	void SpringArmTick(float DeltaTime);
 
 	virtual void Jump() override;
-	void WallRunJump();
 	void DoubleJump();
+
+	// Wall Run
+	void WallRunJump();
 	bool WallRunUpdate();
 	bool WallRunHorizonUpdate();
 	bool WallRunVerticalUpdate();
@@ -118,6 +123,12 @@ protected:
 	FVector CalculateVerticaltWallRunEndVector();
 	bool CalculateValidWallVector(FVector InVec);
 	FVector CalculatePlayerToWallVector();
+
+	// Slide
+	bool CanSlide();
+	void SlideUpdate();
+	void SlideStart();
+	void SlideEnd(bool DoUncrouch);
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 		class UTexture2D* CrosshairsCenter;
@@ -172,23 +183,40 @@ protected:
 	FRotator WeaponAdsRotation;
 	FVector WeaponAdsLocation;
 
+	// Movement
+	FTimerHandle JumpTimer;
+
 	// Advanced Movement / Double Jump
 	float DefaultGravity = 0.f;
+	float DefaultGroundFriction = 0.f;
+	float DefaultBrakingDecelerationWalking = 0.f;
 
 	bool bCanDoubleJump = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AdvancedMovement", meta = (AllowPrivateAccess = "true"))
 		FVector DobuleJumpPower;
+
+	// Movement
+	bool DoJump = false;
 
 	// Advanced Movement / Wall Run
 	EWallRunState CurWallRunState;
 	bool bWallRunHorizonSupressed = false;
 	bool bWallRunVerticalSupressed = false;
 	bool bWallRunGravity = false;
-	float WallRunSpeed = 900.f;
+	float WallRunHorizonSpeed = 900.f;
+	float WallRunVerticalSpeed = 400.f;
 	float WallRunJumpHeight = 400.f;
 	float WallRunJumpOffForce  = 400.f;
 	float WallRunTargetGravity = 0.f;
 	FVector WallRunNormal;
 	FTimerHandle SuppressWallRunHorizonTimer;
 	FTimerHandle SuppressWallRunVerticalTimer;
+
+	// Advanced Movement / Slide
+	bool IsSliding = false;
+	float MinSlideRequireSpeed = 600.f;
+	float SlideSpeed = 2000.f;
+	float SlideDuration = 2.f;
+	float SlideGroundFriction = 0.f;
+	float SlideBrakingDecelerationWalking = 1024.f;
 };

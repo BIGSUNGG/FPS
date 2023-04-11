@@ -99,6 +99,7 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &ACreature::RunButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Released, this, &ACreature::RunButtonReleased);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Pressed, this, &ACreature::CrouchButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Released, this, &ACreature::CrouchButtonReleased);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACreature::JumpingButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACreature::JumpingButtonReleased);
 	PlayerInputComponent->BindAction(TEXT("SubAttack"), EInputEvent::IE_Pressed, this, &ACreature::SubAttackButtonPressed);
@@ -117,7 +118,8 @@ bool ACreature::GetCanAttack()
 
 void ACreature::MoveForward(float NewAxisValue)
 {
-	CurrentInputForward =NewAxisValue;
+	NewAxisValue *= InputForwardRatio;
+	CurrentInputForward = NewAxisValue;
 	
 	if(!GetMovementComponent()->IsFalling())
 	{ 
@@ -142,6 +144,7 @@ void ACreature::MoveForward(float NewAxisValue)
 
 void ACreature::MoveRight(float NewAxisValue)
 {
+	NewAxisValue *= InputRightRatio;
 	CurrentInputRight = NewAxisValue;
 
 	if(NewAxisValue == 0 || Controller == nullptr || NewAxisValue == 0)
@@ -212,21 +215,20 @@ void ACreature::RunButtonReleased()
 
 void ACreature::CrouchButtonPressed()
 {
-	if(GetCharacterMovement()->IsFalling())
-		return;
-
-	if (bIsCrouched)
-		UnCrouch();
-	else
+	bCrouchButtonPress = true;
+	if (!GetCharacterMovement()->IsFalling())
 		Crouch();
+}
+
+void ACreature::CrouchButtonReleased()
+{
+	bCrouchButtonPress = false;
+	UnCrouch();
 }
 
 void ACreature::JumpingButtonPressed()
 {
 	bJumpButtonPress = true;
-
-	if(GetMovementComponent()->IsCrouching())
-		CrouchButtonPressed();
 
 	if(GetMovementComponent()->IsFalling() == false)
 		SetIsJumping(true);
@@ -239,9 +241,7 @@ void ACreature::JumpingButtonReleased()
 	bJumpButtonPress = false;
 
 	if (IsJumping)
-	{
 		StopJumping();
-	}
 }
 
 void ACreature::HolsterWeaponPressed()
@@ -385,6 +385,9 @@ void ACreature::OnCurWeaponAttackEvent()
 void ACreature::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
+
+	if(bCrouchButtonPress)
+		Crouch();
 
 	SetIsJumping(false);
 	PlayLandedMontage();

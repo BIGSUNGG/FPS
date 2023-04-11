@@ -48,7 +48,7 @@ public:
 	// Getter Setter
 	FORCEINLINE FRotator GetCreatureAngle() { return Camera->GetComponentRotation() - GetMesh()->GetComponentRotation(); }
 	FORCEINLINE UCameraComponent* GetCamera() { return Camera; }
-	FORCEINLINE bool GetCanAttack();
+	virtual bool GetCanAttack();
 	FORCEINLINE bool GetIsRunning() { return IsRunning; }
 	FORCEINLINE bool GetIsJumping() { return IsJumping; }
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
@@ -71,6 +71,7 @@ protected:
 	virtual void RunButtonPressed();
 	virtual void RunButtonReleased();
 	virtual void CrouchButtonPressed();
+	virtual void CrouchButtonReleased();
 	virtual void JumpingButtonPressed();
 	virtual void JumpingButtonReleased();
 	virtual void HolsterWeaponPressed();
@@ -137,9 +138,10 @@ protected:
 		void Server_SetAO_Pitch(float value);
 	FRotator StartingAimRotation;
 
+	// Movement
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		EMovementState MovementState = EMovementState::WALK;
-	virtual void SetMovementState(EMovementState value);
+	virtual void SetMovementState(EMovementState value) final;
 	UFUNCTION(Server, reliable)
 		void Server_SetMovementState(EMovementState value);
 
@@ -166,5 +168,8 @@ protected:
 	// InputState
 	float CurrentInputForward = 0.f;
 	float CurrentInputRight = 0.f;
+	float InputForwardRatio = 1.f;
+	float InputRightRatio = 1.f;
 	bool bJumpButtonPress = false;
+	bool bCrouchButtonPress = false;
 }; 
