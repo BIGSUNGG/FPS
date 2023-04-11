@@ -196,7 +196,7 @@ protected:
 		FVector DobuleJumpPower;
 
 	// Movement
-	bool DoJump = false;
+	bool bWantToJump = false;
 
 	// Advanced Movement / Wall Run
 	EWallRunState CurWallRunState;
@@ -214,7 +214,8 @@ protected:
 
 	// Advanced Movement / Slide
 	bool IsSliding = false;
-	float MinSlideRequireSpeed = 600.f;
+	float MinSlideRequireSpeed = 900.f;
+	float SlideSlopeSpeed = 20.f;
 	float SlideSpeed = 2000.f;
 	float SlideDuration = 2.f;
 	float SlideGroundFriction = 0.f;

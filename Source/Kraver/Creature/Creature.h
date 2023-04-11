@@ -54,6 +54,10 @@ public:
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 	FORCEINLINE EMovementState GetMovementState() { return MovementState; }
+	float CalculateForwardSpeed();
+	float CalculateRightSpeed();
+	float CalculateCurrentFloorSlope();
+	FVector CaclulateCurrentFllorSlopeVector();
 
 protected:
 	// Axis Input

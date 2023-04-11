@@ -116,6 +116,68 @@ bool ACreature::GetCanAttack()
 	return true;
 }
 
+float ACreature::CalculateForwardSpeed()
+{
+	FVector Velocity = GetCharacterMovement()->Velocity;
+
+	FVector Forward = GetControlRotation().Vector().GetSafeNormal2D();
+	return FVector::DotProduct(Velocity, Forward) / Forward.Size2D();
+}
+
+float ACreature::CalculateRightSpeed()
+{
+	FVector Velocity = GetCharacterMovement()->Velocity;
+
+	FVector Right = GetControlRotation().Vector().GetSafeNormal2D().RotateAngleAxis(-90.0f, FVector::UpVector);
+	return -FVector::DotProduct(Velocity, Right) / Right.Size2D();
+}
+
+float ACreature::CalculateCurrentFloorSlope()
+{
+	if(GetCharacterMovement()->IsFalling())
+		return 0.f;
+
+	FHitResult HitResult;
+	FVector StartLocation = GetActorLocation();
+	FVector EndLocation = StartLocation - FVector(0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 60.f);
+	FCollisionQueryParams QueryParams;
+	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_GameTraceChannel2, QueryParams);
+
+	// Calculate floor slope if hit result is valid
+	if (HitResult.IsValidBlockingHit())
+	{
+		FVector FloorNormal = HitResult.Normal;
+		float FloorSlope = FMath::Acos(FloorNormal.Z) * 180.0f / PI; // Convert to degrees
+		return FloorSlope;
+	}
+
+	return 0.0f;
+}
+
+FVector ACreature::CaclulateCurrentFllorSlopeVector()
+{
+	UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement();
+
+	if(CharacterMovementComp->IsFalling())
+		return FVector::ZeroVector;
+
+	if (CharacterMovementComp)
+	{
+		FHitResult HitResult;
+		FVector StartLocation = GetActorLocation();
+		FVector EndLocation = StartLocation - FVector(0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 60.f);
+		FCollisionQueryParams QueryParams;
+		QueryParams.bFindInitialOverlaps = true;
+
+		if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_GameTraceChannel2, QueryParams))
+		{
+			FVector FloorNormal = HitResult.ImpactNormal;
+			return FloorNormal;
+		}
+	}
+	return FVector::ZeroVector;
+}
+
 void ACreature::MoveForward(float NewAxisValue)
 {
 	NewAxisValue *= InputForwardRatio;
@@ -216,8 +278,7 @@ void ACreature::RunButtonReleased()
 void ACreature::CrouchButtonPressed()
 {
 	bCrouchButtonPress = true;
-	if (!GetCharacterMovement()->IsFalling())
-		Crouch();
+	Crouch();
 }
 
 void ACreature::CrouchButtonReleased()
@@ -385,9 +446,6 @@ void ACreature::OnCurWeaponAttackEvent()
 void ACreature::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
-
-	if(bCrouchButtonPress)
-		Crouch();
 
 	SetIsJumping(false);
 	PlayLandedMontage();
