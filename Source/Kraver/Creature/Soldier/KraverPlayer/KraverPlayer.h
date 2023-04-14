@@ -101,6 +101,8 @@ protected:
 	void SpringArmTick(float DeltaTime);
 
 	virtual void Jump() override;
+
+	// Double Jump
 	void DoubleJump();
 
 	// Wall Run
@@ -129,6 +131,8 @@ protected:
 	void SlideUpdate();
 	void SlideStart();
 	void SlideEnd(bool DoUncrouch);
+	void SuppressSlide(float Delay);
+	void ResetSlideSuppression();
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 		class UTexture2D* CrosshairsCenter;
@@ -184,35 +188,33 @@ protected:
 	FVector WeaponAdsLocation;
 
 	// Movement
-	FTimerHandle JumpTimer;
+	bool bWantToJump = false;
 
-	// Advanced Movement / Double Jump
 	float DefaultGravity = 0.f;
 	float DefaultGroundFriction = 0.f;
 	float DefaultBrakingDecelerationWalking = 0.f;
 
+	// Advanced Movement / Double Jump
 	bool bCanDoubleJump = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AdvancedMovement", meta = (AllowPrivateAccess = "true"))
 		FVector DobuleJumpPower;
-
-	// Movement
-	bool bWantToJump = false;
 
 	// Advanced Movement / Wall Run
 	EWallRunState CurWallRunState;
 	bool bWallRunHorizonSupressed = false;
 	bool bWallRunVerticalSupressed = false;
-	bool bWallRunGravity = false;
+	bool bWallRunGravity = true;
 	float WallRunHorizonSpeed = 900.f;
 	float WallRunVerticalSpeed = 400.f;
 	float WallRunJumpHeight = 400.f;
 	float WallRunJumpOffForce  = 400.f;
-	float WallRunTargetGravity = 0.f;
+	float WallRunTargetGravity = 0.75f;
 	FVector WallRunNormal;
 	FTimerHandle SuppressWallRunHorizonTimer;
 	FTimerHandle SuppressWallRunVerticalTimer;
 
 	// Advanced Movement / Slide
+	bool bSlideSupressed = false;
 	bool IsSliding = false;
 	float MinSlideRequireSpeed = 900.f;
 	float SlideSlopeSpeed = 20.f;
@@ -220,4 +222,5 @@ protected:
 	float SlideDuration = 2.f;
 	float SlideGroundFriction = 0.f;
 	float SlideBrakingDecelerationWalking = 1024.f;
+	FTimerHandle SuppressSlideTimer;
 };

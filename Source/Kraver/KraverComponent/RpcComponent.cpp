@@ -21,7 +21,9 @@ void URpcComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+	OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if(OwnerCharacter == nullptr)
+		KR_LOG(Fatal, TEXT("Owner is not character"));
 }
 
 
@@ -158,6 +160,36 @@ void URpcComponent::SetHiddenInGame(USceneComponent* Component, bool NewHidden)
 	Server_SetHiddenInGame(Component, NewHidden);	
 }
 
+void URpcComponent::SetVelocity(FVector Value)
+{
+	OwnerCharacter->GetCharacterMovement()->Velocity = Value;
+	Server_SetVelocity(Value);
+}
+
+void URpcComponent::SetPendingLaunchVelocity(FVector Value)
+{
+	OwnerCharacter->GetCharacterMovement()->PendingLaunchVelocity = Value;
+	Server_SetPendingLaunchVelocity(Value);
+}
+
+void URpcComponent::SetGroundFriction(float Value)
+{
+	OwnerCharacter->GetCharacterMovement()->GroundFriction = Value;
+	Server_SetGroundFriction(Value);
+}
+
+void URpcComponent::SetBrakingDecelerationWalking(float Value)
+{
+	OwnerCharacter->GetCharacterMovement()->BrakingDecelerationWalking = Value;
+	Server_SetBrakingDecelerationWalking(Value);
+}
+
+void URpcComponent::SetGravityScale(float Value)
+{
+	OwnerCharacter->GetCharacterMovement()->GravityScale = Value;
+	Server_SetGravityScale(Value);
+}
+
 void URpcComponent::Server_SetPhysicsLinearVelocity_Implementation(UPrimitiveComponent* Component, FVector Velocity)
 {
 	Multicast_SetPhysicsLinearVelocity(Component,Velocity);
@@ -238,6 +270,31 @@ void URpcComponent::Server_SetCollisionEnabled_Implementation(UPrimitiveComponen
 void URpcComponent::Server_SetHiddenInGame_Implementation(USceneComponent* Component, bool NewHidden)
 {
 	Multicast_SetHiddenInGame(Component,NewHidden);
+}
+
+void URpcComponent::Server_SetVelocity_Implementation(FVector Value)
+{
+	OwnerCharacter->GetCharacterMovement()->Velocity = Value;
+}
+
+void URpcComponent::Server_SetPendingLaunchVelocity_Implementation(FVector Value)
+{
+	OwnerCharacter->GetCharacterMovement()->PendingLaunchVelocity = Value;
+}
+
+void URpcComponent::Server_SetGroundFriction_Implementation(float Value)
+{
+	OwnerCharacter->GetCharacterMovement()->GroundFriction = Value;
+}
+
+void URpcComponent::Server_SetBrakingDecelerationWalking_Implementation(float Value)
+{
+	OwnerCharacter->GetCharacterMovement()->BrakingDecelerationWalking = Value;
+}
+
+void URpcComponent::Server_SetGravityScale_Implementation(float Value)
+{
+	OwnerCharacter->GetCharacterMovement()->GravityScale = Value;
 }
 
 void URpcComponent::Multicast_AttachComponentToComponent_Implementation(USceneComponent* Child, USceneComponent* Parent, FName BoneName)

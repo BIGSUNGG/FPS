@@ -182,7 +182,8 @@ void AGun::Attack()
 				OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);
 				if (Result.bBlockingHit)
 				{
-					OwnerCreature->RpcComponent->SpawnNiagaraAtLocation(GetWorld(), ImpactEffect->GetAsset(), Result.ImpactPoint);
+					FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
+					OwnerCreature->RpcComponent->SpawnNiagaraAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpaceEffectPos);
 				}
 			}
 		}

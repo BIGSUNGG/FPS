@@ -39,7 +39,7 @@ ACreature::ACreature()
 	Camera->bUsePawnControlRotation = true;
 
 	GetCharacterMovement()->AirControl = 0.25f;
-	GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed;
+	GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchWalkSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
@@ -349,12 +349,15 @@ void ACreature::SetMovementState(EMovementState value)
 	{
 		case EMovementState::WALK:
 			GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+			GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchWalkSpeed;
 			break;
 		case EMovementState::RUN:
 			GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+			GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchRunSpeed;
 			break;
 		case EMovementState::SPRINT:
 			GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+			GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSprintSpeed;
 			break;
 		default:
 			break;
@@ -369,12 +372,15 @@ void ACreature::Server_SetMovementState_Implementation(EMovementState value)
 	{
 	case EMovementState::WALK:
 		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchWalkSpeed;
 		break;
 	case EMovementState::RUN:
 		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+		GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchRunSpeed;
 		break;
 	case EMovementState::SPRINT:
 		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSprintSpeed;
 		break;
 	default:
 		break;

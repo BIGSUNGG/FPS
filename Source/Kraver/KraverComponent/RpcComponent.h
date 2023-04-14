@@ -27,6 +27,9 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+protected:
+	ACharacter* OwnerCharacter;
+
 public:
 	void OwningOtherActor(AActor* Actor);
 	void SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated);
@@ -44,7 +47,11 @@ public:
 	void SpawnNiagaraAtLocation(UObject* WorldContextObject, class UNiagaraSystem* SystemTemplate, FVector Location, FRotator Rotation = FRotator::ZeroRotator, FVector Scale = FVector(1.f), bool bAutoDestroyNiagara = true, bool bAutoActivateNiagara = true, ENCPoolMethod PoolingMethod = ENCPoolMethod::None, bool bPreCullCheck = true);
 	void SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionEnabled::Type Value);
 	void SetHiddenInGame(USceneComponent* Component, bool NewHidden);
-
+	void SetVelocity(FVector Value); 
+	void SetPendingLaunchVelocity(FVector Value);
+	void SetGroundFriction(float Value);
+	void SetBrakingDecelerationWalking(float Value);
+	void SetGravityScale(float Value);
 private:
 	// Server
 	UFUNCTION(Server, Reliable)
@@ -79,6 +86,17 @@ private:
 		void Server_SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionEnabled::Type Value);
 	UFUNCTION(Server, Reliable)
 		void Server_SetHiddenInGame(USceneComponent* Component, bool NewHidden);
+	UFUNCTION(Server, Reliable)
+		void Server_SetVelocity(FVector Value);
+	UFUNCTION(Server, Reliable)
+		void Server_SetPendingLaunchVelocity(FVector Value);
+	UFUNCTION(Server, Reliable)
+		void Server_SetGroundFriction(float Value);
+	UFUNCTION(Server, Reliable)
+		void Server_SetBrakingDecelerationWalking(float Value);
+	UFUNCTION(Server, Reliable)
+		void Server_SetGravityScale(float Value);
+
 
 private:
 	// Multicast

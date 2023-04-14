@@ -165,7 +165,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float WalkSpeed = 600.f; // EMovementState가 WALK가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
-		float CrouchSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
+		float CrouchWalkSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
+		float CrouchRunSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
+		float CrouchSprintSpeed = 450.f; // 앉았을때 설정할 캐릭터 속도
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CREATURE, meta = (AllowPrivateAccess = "true"))
 		float ImpulseResistanceRatio = 1.f;
 
