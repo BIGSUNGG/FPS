@@ -43,6 +43,7 @@ ACreature::ACreature()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
+	GetCharacterMovement()->SetWalkableFloorAngle(50.f);
 
 }	
 
@@ -512,6 +513,14 @@ void ACreature::StopReloadMontage()
 		return;
 
 	RpcComponent->Montage_Stop(GetMesh(), CombatComponent->GetCurWeapon()->GetReloadMontageTpp(), 0.f);
+}
+
+void ACreature::Jump()
+{
+	ACharacter::Jump();
+
+	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
+	RpcComponent->Montage_Play(GetMesh(), CreatureAnim->GetJumpMontage());
 }
 
 void ACreature::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)

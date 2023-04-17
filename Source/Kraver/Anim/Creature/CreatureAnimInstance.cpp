@@ -28,7 +28,7 @@ void UCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	UCharacterMovementComponent* MovementComp = Creature->GetCharacterMovement();
 
-	FVector Velocity = MovementComp->Velocity;
+	Velocity = MovementComp->Velocity;
 	UpDownSpeed = Velocity.Z;
 
 	FVector Right = Creature->GetControlRotation().Vector().GetSafeNormal2D().RotateAngleAxis(-90.0f, FVector::UpVector);
@@ -37,8 +37,10 @@ void UCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	FVector Forward = Creature->GetControlRotation().Vector().GetSafeNormal2D();
 	ForwardSpeed = FVector::DotProduct(Velocity, Forward) / Forward.Size2D();
 
-	Velocity.Z = 0;
-	Speed = Velocity.Size();
+	FVector TempVelocity = Velocity;
+	TempVelocity.Z = 0.f;
+
+	Speed = TempVelocity.Size();
 	SpeedRatio = Speed / Creature->GetMovementComponent()->GetMaxSpeed();
 
 	MovementState = Creature->GetMovementState();

@@ -18,4 +18,11 @@ void UKraverPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (KraverPlayer == nullptr)
 		return;
 
+
+	CurWallRunState = KraverPlayer->GetCurWallRunState();
+	IsWallRunning = (CurWallRunState != EWallRunState::NONE);
+	IsSliding = KraverPlayer->GetIsSliding();
+
+	if(CurWallRunState != EWallRunState::NONE)
+		KR_LOG(Log, TEXT("H"));
 }

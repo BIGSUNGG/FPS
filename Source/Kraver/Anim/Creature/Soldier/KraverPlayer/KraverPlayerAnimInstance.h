@@ -11,6 +11,8 @@
 
 class AKraverPlayer;
 
+enum class EWallRunState : uint8;
+
 UCLASS()
 class KRAVER_API UKraverPlayerAnimInstance : public USoldierAnimInstance
 {
@@ -23,4 +25,10 @@ public:
 protected:
 	AKraverPlayer* KraverPlayer;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement, Meta = (AllowPrivateAccess = true))
+		bool IsWallRunning = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement, Meta = (AllowPrivateAccess = true))
+		EWallRunState CurWallRunState;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement, Meta = (AllowPrivateAccess = true))
+		bool IsSliding = false;
 };

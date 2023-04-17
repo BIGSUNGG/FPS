@@ -38,8 +38,8 @@ public:
 	void SetPhysicsLinearVelocity(UPrimitiveComponent* Component, FVector Velocity);
 	void AddImpulse(UPrimitiveComponent* Component, FVector Direction, FName BoneName = NAME_None, bool bVelChange = false);
 	void AddImpulseAtLocation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName = NAME_None);
-	void SetLocation(UPrimitiveComponent* Component, FVector Location);
-	void SetRotation(UPrimitiveComponent* Component, FRotator Location);
+	void SetComponentLocation(UPrimitiveComponent* Component, FVector Location);
+	void SetComponentRotation(UPrimitiveComponent* Component, FRotator Location);
 	void SetCharacterWalkSpeed(ACharacter* Character, float Speed);
 	void Montage_Play(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 1.f);
 	void Montage_Stop(USkeletalMeshComponent* Mesh, UAnimMontage* Montage, float Speed = 0.f);
@@ -52,6 +52,12 @@ public:
 	void SetGroundFriction(float Value);
 	void SetBrakingDecelerationWalking(float Value);
 	void SetGravityScale(float Value);
+	void AddAngularImpulseInDegrees(UPrimitiveComponent* Component, FVector Impulse, FName BoneName = NAME_None, bool bVelChange = false);
+	void SetOwnerLocation(FVector Location);
+	void SetOwnerRotation(FRotator Rotation);
+
+	void RegistCurMovement();
+
 private:
 	// Server
 	UFUNCTION(Server, Reliable)
@@ -69,9 +75,9 @@ private:
 	UFUNCTION(Server, Reliable)
 		void Server_AddImpulseAtLocation(UPrimitiveComponent* Component, FVector Direction, FVector Location, FName BoneName = NAME_None);
 	UFUNCTION(Server, Reliable)
-		void Server_SetLocation(UPrimitiveComponent* Component, FVector Location);
+		void Server_SetComponentLocation(UPrimitiveComponent* Component, FVector Location);
 	UFUNCTION(Server, Reliable)
-		void Server_SetRotation(UPrimitiveComponent* Component, FRotator Rotation);
+		void Server_SetComponentRotation(UPrimitiveComponent* Component, FRotator Rotation);
 	UFUNCTION(Server, Reliable)
 		void Server_SetCharacterWalkSpeed(ACharacter* Character, float Speed);
 	UFUNCTION(Server, Reliable)
@@ -96,7 +102,12 @@ private:
 		void Server_SetBrakingDecelerationWalking(float Value);
 	UFUNCTION(Server, Reliable)
 		void Server_SetGravityScale(float Value);
-
+	UFUNCTION(Server, Reliable)
+		void Server_AddAngularImpulseInDegrees(UPrimitiveComponent* Component, FVector Impulse, FName BoneName = NAME_None, bool bVelChange = false);
+	UFUNCTION(Server, Reliable)
+		void Server_SetOwnerLocation(FVector Location);
+	UFUNCTION(Server, Reliable)
+		void Server_SetOwnerRotation(FRotator Rotation);
 
 private:
 	// Multicast
@@ -124,6 +135,8 @@ private:
 		void Multicast_SetCollisionEnabled(UPrimitiveComponent* Object, ECollisionEnabled::Type Value);
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_SetHiddenInGame(USceneComponent* Component, bool NewHidden);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_AddAngularImpulseInDegrees(UPrimitiveComponent* Component, FVector Impulse, FName BoneName = NAME_None, bool bVelChange = false);
 
 private:
 	// Client

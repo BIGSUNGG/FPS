@@ -30,10 +30,13 @@ public:
 public:
 	// Getter Setter
 	UAnimMontage* GetLandedMontage() { return LandedMontage; }
+	UAnimMontage* GetJumpMontage() { return JumpMontage; }
 
 protected:
 	ACreature* Creature;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
+		FVector Velocity; // 현재 캐릭터 속력
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
 		float Speed; // 현재 캐릭터의 속도
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, Meta = (AllowPrivateAccess = true))
@@ -63,4 +66,6 @@ protected:
 	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montage, Meta = (AllowPrivateAccess = true))
 		UAnimMontage* LandedMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montage, Meta = (AllowPrivateAccess = true))
+		UAnimMontage* JumpMontage;
 };

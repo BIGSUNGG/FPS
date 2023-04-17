@@ -29,6 +29,8 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AWeapon, WeaponState);
 	DOREPLIFETIME(AWeapon, OwnerCreature);
+	DOREPLIFETIME(AWeapon, IsAttacking);
+	DOREPLIFETIME(AWeapon, IsSubAttacking);
 }
 
 float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -242,7 +244,7 @@ void AWeapon::AttackStartEvent()
 		return;
 	}
 
-	IsAttacking = true;
+	SetIsAttacking(true);
 	if(bFirstAttackDelay == false)
 		Attack();
 	if (bAutomaticAttack)
@@ -255,18 +257,18 @@ void AWeapon::AttackEndEvent()
 	if(IsAttacking == false)
 		return;
 
-	IsAttacking = false;
+	SetIsAttacking(false);
 	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle);
 }
 
 void AWeapon::SubAttackStartEvent()
 {
-	IsSubAttacking = true;
+	SetIsSubAttacking(true);
 }
 
 void AWeapon::SubAttackEndEvent()
 {
-	IsSubAttacking = false;
+	SetIsSubAttacking(false);
 }
 
 void AWeapon::Attack()
@@ -287,4 +289,26 @@ void AWeapon::SetOwnerCreature(ACreature* pointer)
 void AWeapon::Server_SetOwnerCreature_Implementation(ACreature* pointer)
 {
 	OwnerCreature = pointer;
+}
+
+void AWeapon::SetIsAttacking(bool Value)
+{
+	IsAttacking = Value;
+	Server_SetIsAttacking(Value);
+}
+
+void AWeapon::Server_SetIsAttacking_Implementation(bool Value)
+{
+	IsAttacking = Value;
+}
+
+void AWeapon::SetIsSubAttacking(bool Value)
+{
+	IsSubAttacking = Value;
+	Server_SetIsSubAttacking(Value);
+}
+
+void AWeapon::Server_SetIsSubAttacking_Implementation(bool Value)
+{
+	IsSubAttacking = Value;
 }

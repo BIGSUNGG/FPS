@@ -52,6 +52,8 @@ public:
 	FORCEINLINE TMap<AWeapon*, USkeletalMeshComponent*> GetArmWeaponMeshes() { return ArmWeaponMeshes; }
 	const bool GetIsWallRunning() { return CurWallRunState != EWallRunState::NONE; }
 	virtual bool GetCanAttack() override;
+	EWallRunState GetCurWallRunState() { return CurWallRunState; }
+	bool GetIsSliding() { return IsSliding; }
 
 protected:
 	// input event
@@ -81,9 +83,7 @@ protected:
 	void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
 
 	virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
-	virtual void Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
 	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
-	virtual void Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon) override;
 	virtual void OnHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	virtual void OnHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 
@@ -195,17 +195,22 @@ protected:
 	float DefaultBrakingDecelerationWalking = 0.f;
 
 	// Advanced Movement / Double Jump
-	bool bCanDoubleJump = false;
+	bool bCanDoubleJump = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AdvancedMovement", meta = (AllowPrivateAccess = "true"))
 		FVector DobuleJumpPower;
 
 	// Advanced Movement / Wall Run
-	EWallRunState CurWallRunState;
+	UPROPERTY(Replicated)
+		EWallRunState CurWallRunState;
+	void SetCurWallRunState(EWallRunState Value);
+	UFUNCTION(Server, reliable)
+		void Server_SetCurWallRunState(EWallRunState Value);
+
 	bool bWallRunHorizonSupressed = false;
 	bool bWallRunVerticalSupressed = false;
 	bool bWallRunGravity = true;
 	float WallRunHorizonSpeed = 900.f;
-	float WallRunVerticalSpeed = 400.f;
+	float WallRunVerticalSpeed = 600.f;
 	float WallRunJumpHeight = 400.f;
 	float WallRunJumpOffForce  = 400.f;
 	float WallRunTargetGravity = 0.75f;
@@ -214,8 +219,13 @@ protected:
 	FTimerHandle SuppressWallRunVerticalTimer;
 
 	// Advanced Movement / Slide
+	UPROPERTY(Replicated)
+		bool IsSliding = false;
+	void SetIsSliding(bool Value);
+	UFUNCTION(Server, Reliable)
+		void Server_SetIsSliding(bool Value);
+
 	bool bSlideSupressed = false;
-	bool IsSliding = false;
 	float MinSlideRequireSpeed = 900.f;
 	float SlideSlopeSpeed = 20.f;
 	float SlideSpeed = 2000.f;

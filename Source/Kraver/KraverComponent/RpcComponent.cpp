@@ -44,7 +44,6 @@ void URpcComponent::OwningOtherActor(AActor* Actor)
 
 void URpcComponent::SetSimulatedPhysics(UPrimitiveComponent* Component, bool bSimulated)
 {
-	Component->SetSimulatePhysics(bSimulated);
 	if (GetOwner()->HasAuthority() == false)
 		Server_SetSimulatedPhysics(Component,bSimulated);
 	else
@@ -92,18 +91,18 @@ void URpcComponent::AddImpulseAtLocation(UPrimitiveComponent* Component, FVector
 		Multicast_AddImpulseAtLocation(Component, Direction, Location, BoneName);
 }
 
-void URpcComponent::SetLocation(UPrimitiveComponent* Component, FVector Location)
+void URpcComponent::SetComponentLocation(UPrimitiveComponent* Component, FVector Location)
 {
 	Component->SetWorldLocation(Location);
 	if (GetOwner()->HasAuthority() == false)
-		Server_SetLocation(Component,Location);
+		Server_SetComponentLocation(Component,Location);
 }
 
-void URpcComponent::SetRotation(UPrimitiveComponent* Component, FRotator Rotation)
+void URpcComponent::SetComponentRotation(UPrimitiveComponent* Component, FRotator Rotation)
 {
 	Component->SetWorldRotation(Rotation);
 	if (GetOwner()->HasAuthority() == false)
-		Server_SetRotation(Component, Rotation);
+		Server_SetComponentRotation(Component, Rotation);
 }
 
 void URpcComponent::SetCharacterWalkSpeed(ACharacter* Character, float Speed)
@@ -190,6 +189,34 @@ void URpcComponent::SetGravityScale(float Value)
 	Server_SetGravityScale(Value);
 }
 
+void URpcComponent::AddAngularImpulseInDegrees(UPrimitiveComponent* Component, FVector Impulse, FName BoneName /*= NAME_None*/, bool bVelChange /*= false*/)
+{
+	if (GetOwner()->HasAuthority() == false)
+		Server_AddAngularImpulseInDegrees(Component, Impulse, BoneName, bVelChange);
+	else
+		Multicast_AddAngularImpulseInDegrees(Component, Impulse, BoneName, bVelChange);
+}
+
+void URpcComponent::SetOwnerLocation(FVector Location)
+{
+	OwnerCharacter->SetActorLocation(Location);
+	Server_SetOwnerLocation(Location);
+}
+
+void URpcComponent::SetOwnerRotation(FRotator Rotation)
+{
+	OwnerCharacter->SetActorRotation(Rotation);
+	Server_SetOwnerRotation(Rotation);
+}
+
+void URpcComponent::RegistCurMovement()
+{
+	Server_SetOwnerLocation(OwnerCharacter->GetActorLocation());
+	Server_SetOwnerRotation(OwnerCharacter->GetActorRotation());
+	Server_SetVelocity(OwnerCharacter->GetCharacterMovement()->Velocity);
+	Server_SetPendingLaunchVelocity(OwnerCharacter->GetCharacterMovement()->PendingLaunchVelocity);
+}
+
 void URpcComponent::Server_SetPhysicsLinearVelocity_Implementation(UPrimitiveComponent* Component, FVector Velocity)
 {
 	Multicast_SetPhysicsLinearVelocity(Component,Velocity);
@@ -207,7 +234,6 @@ void URpcComponent::Server_AddImpulseAtLocation_Implementation(UPrimitiveCompone
 
 void URpcComponent::Server_SetSimulatedPhysics_Implementation(UPrimitiveComponent* Component, bool bSimulated)
 {
-	Component->SetSimulatePhysics(bSimulated);
 	Multicast_SetSimulatedPhysics(Component,bSimulated);
 }
 
@@ -222,12 +248,12 @@ void URpcComponent::Server_AttachComponentToComponent_Implementation(USceneCompo
 	Multicast_AttachComponentToComponent(Child,Parent, BoneName);
 }
 
-void URpcComponent::Server_SetLocation_Implementation(UPrimitiveComponent* Component, FVector Location)
+void URpcComponent::Server_SetComponentLocation_Implementation(UPrimitiveComponent* Component, FVector Location)
 {
 	Component->SetWorldLocation(Location);
 }
 
-void URpcComponent::Server_SetRotation_Implementation(UPrimitiveComponent* Component, FRotator Rotation)
+void URpcComponent::Server_SetComponentRotation_Implementation(UPrimitiveComponent* Component, FRotator Rotation)
 {
 	Component->SetWorldRotation(Rotation);
 }
@@ -297,6 +323,21 @@ void URpcComponent::Server_SetGravityScale_Implementation(float Value)
 	OwnerCharacter->GetCharacterMovement()->GravityScale = Value;
 }
 
+void URpcComponent::Server_AddAngularImpulseInDegrees_Implementation(UPrimitiveComponent* Component, FVector Impulse, FName BoneName /*= NAME_None*/, bool bVelChange /*= false*/)
+{
+	Multicast_AddAngularImpulseInDegrees(Component,Impulse,BoneName,bVelChange);
+}
+
+void URpcComponent::Server_SetOwnerLocation_Implementation(FVector Location)
+{
+	OwnerCharacter->SetActorLocation(Location);
+}
+
+void URpcComponent::Server_SetOwnerRotation_Implementation(FRotator Rotation)
+{
+	OwnerCharacter->SetActorRotation(Rotation);
+}
+
 void URpcComponent::Multicast_AttachComponentToComponent_Implementation(USceneComponent* Child, USceneComponent* Parent, FName BoneName)
 {
 	Child->AttachToComponent(Parent, FAttachmentTransformRules::SnapToTargetIncludingScale, BoneName);
@@ -355,4 +396,9 @@ void URpcComponent::Multicast_SetCollisionEnabled_Implementation(UPrimitiveCompo
 void URpcComponent::Multicast_SetHiddenInGame_Implementation(USceneComponent* Component, bool NewHidden)
 {	
 	Component->SetHiddenInGame(NewHidden);
+}
+
+void URpcComponent::Multicast_AddAngularImpulseInDegrees_Implementation(UPrimitiveComponent* Component, FVector Impulse, FName BoneName /*= NAME_None*/, bool bVelChange /*= false*/)
+{
+	Component->AddAngularImpulseInDegrees(Impulse,BoneName,bVelChange);
 }

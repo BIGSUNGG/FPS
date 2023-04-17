@@ -119,6 +119,8 @@ protected:
 
 	virtual void StopReloadMontage();
 
+	virtual void Jump();
+
 public:
 	// Component
 	URpcComponent* RpcComponent;

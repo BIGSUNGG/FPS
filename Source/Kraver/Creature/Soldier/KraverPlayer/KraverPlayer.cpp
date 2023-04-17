@@ -142,6 +142,8 @@ void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	ASoldier::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AKraverPlayer, ViewType);
+	DOREPLIFETIME(AKraverPlayer, CurWallRunState);
+	DOREPLIFETIME(AKraverPlayer, IsSliding);
 }
 
 bool AKraverPlayer::GetCanAttack()
@@ -158,6 +160,28 @@ void AKraverPlayer::SetViewType(EViewType Type)
 void AKraverPlayer::Server_SetViewType_Implementation(EViewType Type)
 {
 	ViewType = Type;
+}
+
+void AKraverPlayer::SetCurWallRunState(EWallRunState Value)
+{
+	CurWallRunState = Value;
+	Server_SetCurWallRunState(Value);
+}
+
+void AKraverPlayer::Server_SetCurWallRunState_Implementation(EWallRunState Value)
+{
+	CurWallRunState = Value;
+}
+
+void AKraverPlayer::SetIsSliding(bool Value)
+{
+	IsSliding = Value;
+	Server_SetIsSliding(Value);
+}
+
+void AKraverPlayer::Server_SetIsSliding_Implementation(bool Value)
+{
+	IsSliding = Value;
 }
 
 void AKraverPlayer::SubAttackButtonPressed()
@@ -366,32 +390,29 @@ void AKraverPlayer::ChangeView()
 
 void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 {
-	if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == false)
-		return;
-
 	if (CombatComponent->GetIsDead() == false)
 	{
 		switch (ViewType)
 		{
 		case EViewType::FIRST_PERSON:
-			if (Weapon->GetWeaponMesh()->IsSimulatingPhysics() == true)
-			{
-				RpcComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
-				Weapon->GetWeaponMesh()->SetWorldLocation(ArmWeaponMeshes[Weapon]->GetComponentLocation());
-				Weapon->GetWeaponMesh()->SetWorldRotation(ArmWeaponMeshes[Weapon]->GetComponentRotation());
-				GetWorldTimerManager().SetTimer(
-					UnEquipWeaponTimerHandle,
-					[=]() {					
-						RpcComponent->DetachComponentFromComponent(Weapon->GetWeaponMesh());
-						RpcComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
-						RpcComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
-						RpcComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() * WeaponThrowPower * Weapon->GetWeaponMesh()->GetMass()));
-						Weapon->GetWeaponMesh()->AddAngularImpulseInDegrees(Camera->GetForwardVector() * WeaponThrowAngularPower ,NAME_None,true);
-					},
-					0.000001f,
-						false);
-			}
+		{
+			USkeletalMeshComponent* ArmWeaponMesh = ArmWeaponMeshes[Weapon];
+			RpcComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
+			RpcComponent->DetachComponentFromComponent(Weapon->GetWeaponMesh());
+			RpcComponent->SetComponentLocation(Weapon->GetWeaponMesh(), ArmWeaponMesh->GetComponentLocation());
+			RpcComponent->SetComponentRotation(Weapon->GetWeaponMesh(), ArmWeaponMesh->GetComponentRotation());
+			GetWorldTimerManager().SetTimer(
+				UnEquipWeaponTimerHandle,
+				[=]() {					
+					RpcComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
+					RpcComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
+					RpcComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() * WeaponThrowPower * Weapon->GetWeaponMesh()->GetMass()));
+					RpcComponent->AddAngularImpulseInDegrees(Weapon->GetWeaponMesh(), Camera->GetForwardVector() * WeaponThrowAngularPower, NAME_None, true);
+				},
+				0.000001f,
+					false);
 			break;
+		}
 		case EViewType::THIRD_PERSON:
 			Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
 			Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * WeaponThrowPower, NAME_None, true);
@@ -495,11 +516,6 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	ShowOnlyThirdPerson.Push(Weapon->GetWeaponMesh());
 }
 
-void AKraverPlayer::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
-{
-	ASoldier::Server_OnEquipWeaponSuccessEvent_Implementation(Weapon);
-}
-
 void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	ASoldier::OnUnEquipWeaponSuccessEvent(Weapon);
@@ -569,16 +585,16 @@ void AKraverPlayer::UnCrouch(bool bClientSimulation /*= false*/)
 
 void AKraverPlayer::PlayReloadMontage()
 {
-ASoldier::PlayReloadMontage();
+	ASoldier::PlayReloadMontage();
 
-if (CombatComponent->GetCurWeapon() == nullptr ||
-	CombatComponent->GetCurWeapon()->GetCanReload() == false ||
-	ArmMesh->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageFpp()) == true)
-{
-	return;
-}
+	if (CombatComponent->GetCurWeapon() == nullptr ||
+		CombatComponent->GetCurWeapon()->GetCanReload() == false ||
+		ArmMesh->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageFpp()) == true)
+	{
+		return;
+	}
 
-ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetReloadMontageFpp(), 1.5f);
+	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetReloadMontageFpp(), 1.5f);
 }
 
 void AKraverPlayer::PlayAttackMontage()
@@ -753,6 +769,10 @@ void AKraverPlayer::DoubleJump()
 
 	LaunchCharacter(LaunchPower, bOverideXY, true);
 	RpcComponent->SetPendingLaunchVelocity(GetCharacterMovement()->PendingLaunchVelocity);
+
+	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
+	RpcComponent->Montage_Play(GetMesh(), CreatureAnim->GetJumpMontage());
+
 	KR_LOG(Log, TEXT("Dobule Jump Power : %f %f"), ForwardLaunchPower, RightLaunchPower);
 }
 
@@ -813,7 +833,7 @@ bool AKraverPlayer::WallRunHorizonUpdate()
 		if(!GetIsWallRunning())
 			WallRunStart();
 
-		CurWallRunState = EWallRunState::WALLRUN_RIGHT;
+		SetCurWallRunState(EWallRunState::WALLRUN_RIGHT);
 		return true;
 	}
 	else if(CurWallRunState == EWallRunState::WALLRUN_RIGHT)
@@ -826,7 +846,7 @@ bool AKraverPlayer::WallRunHorizonUpdate()
 		if (!GetIsWallRunning())
 			WallRunStart();
 
-		CurWallRunState = EWallRunState::WALLRUN_LEFT;
+		SetCurWallRunState(EWallRunState::WALLRUN_LEFT);
 		return true;
 	}
 	else if (CurWallRunState != EWallRunState::WALLRUN_VERTICAL)
@@ -849,7 +869,7 @@ bool AKraverPlayer::WallRunVerticalUpdate()
 		if(!GetIsWallRunning())
 			WallRunStart();
 	
-		CurWallRunState = EWallRunState::WALLRUN_VERTICAL;
+		SetCurWallRunState(EWallRunState::WALLRUN_VERTICAL);
 		RpcComponent->SetGravityScale(0.f);
 		return true;
 	}
@@ -880,9 +900,12 @@ bool AKraverPlayer::WallRunHorizonMovement(FVector Start, FVector End, float Wal
 		if (GetMovementComponent()->IsFalling() && CalculateValidWallVector(Result.Normal))
 		{ 
 			WallRunNormal = Result.Normal;
-			LaunchCharacter(CalculatePlayerToWallVector(),false ,false);	
-			LaunchCharacter(FVector::CrossProduct(WallRunNormal, FVector(0, 0, 1)) * (WallRunDirection * WallRunHorizonSpeed),true, !bWallRunGravity);
-			RpcComponent->SetPendingLaunchVelocity(GetCharacterMovement()->PendingLaunchVelocity);
+			FVector WallRunVec = FVector::CrossProduct(WallRunNormal, FVector(0, 0, 1)) * (WallRunDirection * WallRunHorizonSpeed);
+			LaunchCharacter(WallRunVec,true, !bWallRunGravity);
+
+			FRotator Temp = WallRunVec.Rotation();
+			KR_LOG(Log, TEXT("%f %f %f"), Temp.Pitch, Temp.Roll, Temp.Yaw);
+			RpcComponent->RegistCurMovement();
 			return true;
 		}
 	}
@@ -990,7 +1013,7 @@ bool AKraverPlayer::WallRunVerticalMovement(FVector Start, FVector End)
 			WallRunNormal = Result.Normal;
 
 			LaunchCharacter(GetActorUpVector() * WallRunVerticalSpeed, true, true);
-			RpcComponent->SetPendingLaunchVelocity(GetCharacterMovement()->PendingLaunchVelocity);
+			RpcComponent->RegistCurMovement();
 			return true;
 		}
 	}
@@ -1010,7 +1033,7 @@ void AKraverPlayer::WallRunEnd(float ResetTime)
 	if (GetIsWallRunning() == false)
 		return;
 
-	CurWallRunState = EWallRunState::NONE;
+	SetCurWallRunState(EWallRunState::NONE);
 	RpcComponent->SetGravityScale(DefaultGravity);
 	SuppressWallRunHorizion(ResetTime);
 	SuppressWallRunVertical(ResetTime);
@@ -1021,7 +1044,7 @@ void AKraverPlayer::WallRunHorizonEnd(float ResetTime)
 	if(GetIsWallRunning() == false)
 		return;
 
-	CurWallRunState = EWallRunState::NONE;
+	SetCurWallRunState(EWallRunState::NONE);
 	RpcComponent->SetGravityScale(DefaultGravity);
 	SuppressWallRunHorizion(ResetTime);
 }
@@ -1031,7 +1054,7 @@ void AKraverPlayer::WallRunVerticalEnd(float ResetTime)
 	if (GetIsWallRunning() == false)
 		return; 
 
-	CurWallRunState = EWallRunState::NONE;
+	SetCurWallRunState(EWallRunState::NONE);
 	RpcComponent->SetGravityScale(DefaultGravity);
 	SuppressWallRunVertical(ResetTime);
 }
@@ -1064,7 +1087,7 @@ FVector AKraverPlayer::CalculateRightWallRunEndVector()
 {
 	return (
 		GetActorLocation() + 
-		GetActorRightVector() * 75.f + 
+		GetActorRightVector() * 75.f +
 		GetActorForwardVector() * -35.f
 		);
 }
@@ -1093,7 +1116,7 @@ bool AKraverPlayer::CalculateValidWallVector(FVector InVec)
 
 FVector AKraverPlayer::CalculatePlayerToWallVector()
 {
-	return (WallRunNormal * (WallRunNormal - GetActorLocation()).Length());
+	return -WallRunNormal;
 }
 
 bool AKraverPlayer::CanSlide()
@@ -1131,10 +1154,3 @@ void AKraverPlayer::SlideUpdate()
 	GetCharacterMovement()->Velocity += SlopePhysics;
 	RpcComponent->SetVelocity(GetCharacterMovement()->Velocity);
 }
-
-void AKraverPlayer::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
-{
-	ASoldier::Server_OnUnEquipWeaponSuccessEvent_Implementation(Weapon);
-	
-}
-
