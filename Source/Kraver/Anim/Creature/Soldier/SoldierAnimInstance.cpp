@@ -22,16 +22,23 @@ void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (Soldier == nullptr)
 		return;
 
-	IsEquippingWeapon = (Soldier->CombatComponent->GetCurWeapon() != nullptr);
+	CurWeapon = Soldier->CombatComponent->GetCurWeapon();
+	IsEquippingWeapon = (CurWeapon != nullptr);
 	if (IsEquippingWeapon)
 	{
 		IsAttacking = Soldier->CombatComponent->GetCurWeapon()->GetIsAttacking();
 		IsSubAttacking = Soldier->CombatComponent->GetCurWeapon()->GetIsSubAttacking();
+		AnimWeaponIdleTpp = CurWeapon->GetAnimIdleTpp();
+		AnimWeaponMovementTpp = CurWeapon->GetAnimMovementTpp();
+		CurWeaponType = CurWeapon->GetWeaponType();
 	}
 	else
 	{
 		IsAttacking = false;
 		IsSubAttacking = false;
+		AnimWeaponIdleTpp = nullptr;
+		AnimWeaponMovementTpp = nullptr;
+		CurWeaponType = EWeaponType::NONE;
 	}
 	if (Soldier->CombatComponent->GetCurWeapon() && Soldier->GetMesh())
 	{
@@ -48,4 +55,24 @@ void USoldierAnimInstance::FabrikLeftHand(USkeletalMeshComponent* HandMesh, USke
 	Transform.SetLocation(OutPosition);
 	Transform.SetRotation(FQuat(OutRotation));
 
+}
+
+void USoldierAnimInstance::AnimNotify_Melee_SwingAttack()
+{
+	OnMelee_SwingAttack.Broadcast();
+}
+
+void USoldierAnimInstance::AnimNotify_Melee_CanInputNextCombo()
+{
+	OnMelee_CanInputNextCombo.Broadcast();
+}
+
+void USoldierAnimInstance::AnimNotify_Melee_AttackNextCombo()
+{
+	OnMelee_AttackNextCombo.Broadcast();
+}
+
+void USoldierAnimInstance::AnimNotify_Melee_ComboEnd()
+{
+	OnMelee_ComboEnd.Broadcast();
 }

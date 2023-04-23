@@ -135,7 +135,7 @@ bool AGun::RefillAmmo()
 
 void AGun::Attack()
 {
-	if(IsAttacking == false)
+	if (!IsAttacking)
 		return;
 
 	if (OwnerCreature == nullptr)

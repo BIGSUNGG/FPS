@@ -25,4 +25,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = Fabrik, meta = (AllowPrivateAccess = "true"))
 		FTransform LeftHandFppFabrikTransform; // 왼쪽손에 적용할 트랜스폼
 
+	// Anim
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+		UAnimSequence* AnimWeaponIdleFpp;	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+		UBlendSpace* AnimWeaponMovementFpp;	
 };

@@ -14,6 +14,12 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if(!KraverPlayer->IsLocallyControlled())
 		return;
 
+	if (IsEquippingWeapon)
+	{
+		AnimWeaponIdleFpp = CurWeapon->GetAnimIdleFpp();
+		AnimWeaponMovementTpp = CurWeapon->GetAnimMovementFpp();
+	}
+
 	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()] && KraverPlayer->GetArmMesh())
 	{
 		FabrikLeftHand(KraverPlayer->GetArmMesh(), KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()], LeftHandFppFabrikTransform);
@@ -26,4 +32,5 @@ void UKraverPlayerFppAnimInstance::AnimNotify_RefillAmmo()
 		return;
 
 	KraverPlayer->CombatComponent->GetCurWeapon()->RefillAmmo();
+
 }

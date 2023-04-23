@@ -8,8 +8,11 @@
 /**
  * 
  */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAnimNotifyDele);
 
 class ASoldier;
+class AWeapon;
+enum class EWeaponType : uint8;
 
 UCLASS()
 class KRAVER_API USoldierAnimInstance : public UCreatureAnimInstance
@@ -24,8 +27,29 @@ public:
 	virtual void FabrikLeftHand(USkeletalMeshComponent* HandMesh, USkeletalMeshComponent* WeaponMesh, FTransform& Transform);
 
 protected:
+	// Anim Notify
+	UFUNCTION()
+		void AnimNotify_Melee_SwingAttack();
+	UFUNCTION()
+		void AnimNotify_Melee_CanInputNextCombo();
+	UFUNCTION()
+		void AnimNotify_Melee_AttackNextCombo();
+	UFUNCTION()
+		void AnimNotify_Melee_ComboEnd();
+
+public:
+	FAnimNotifyDele OnMelee_SwingAttack;
+	FAnimNotifyDele OnMelee_CanInputNextCombo;
+	FAnimNotifyDele OnMelee_AttackNextCombo;
+	FAnimNotifyDele OnMelee_ComboEnd;
+
+protected:
 	ASoldier* Soldier;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = true))
+		AWeapon* CurWeapon;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = true))
+		EWeaponType CurWeaponType;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = true))
 		bool IsEquippingWeapon; // 캐릭터가 무기를 장착하고 있는지 여부
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = true))
@@ -36,4 +60,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = Fabrik, meta = (AllowPrivateAccess = "true"))
 		FTransform LeftHandFabrikTransform; // 왼쪽손에 적용할 트랜스폼
 
+	// Anim
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+		UAnimSequence* AnimWeaponIdleTpp;	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+		UBlendSpace* AnimWeaponMovementTpp;	
 };

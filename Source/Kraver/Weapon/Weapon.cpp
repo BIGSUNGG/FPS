@@ -76,7 +76,7 @@ void AWeapon::Tick(float DeltaTime)
 		if (CurAttackDelay < 0.f)
 		{
 			CurAttackDelay = 0.f;
-			if (bFirstInputAttack && bAutomaticAttack)
+			if (bFirstInputAttack && bCanFirstInputAttack)
 			{
 				bFirstInputAttack = false;
 				AttackStartEvent();
@@ -178,7 +178,7 @@ bool AWeapon::GetCanInteracted()
 
 bool AWeapon::UnEquipped()
 {
-	RemoveOnAttackDelegate();
+	RemoveOnOwnerDelegate();
 
 	ACreature* CreaturePtr = OwnerCreature;
 	SetOwnerCreature(nullptr);
@@ -194,21 +194,20 @@ bool AWeapon::UnEquipped()
 
 bool AWeapon::Hold()
 {
-	AddOnAttackDelegate();
+	AddOnOwnerDelegate();
 	return true;
 }
 
 bool AWeapon::Holster()
 {
-	RemoveOnAttackDelegate();
+	RemoveOnOwnerDelegate();
 	return true;
 }
 
-void AWeapon::AddOnAttackDelegate()
+void AWeapon::AddOnOwnerDelegate()
 {
 	if (OwnerCreature == nullptr)
-	{
-	}
+		return;
 
 	OwnerCreature->CombatComponent->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
 	OwnerCreature->CombatComponent->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
@@ -217,8 +216,11 @@ void AWeapon::AddOnAttackDelegate()
 	OwnerCreature->CombatComponent->OnSubAttackEndDelegate.AddDynamic(this, &AWeapon::SubAttackEndEvent);
 }
 
-void AWeapon::RemoveOnAttackDelegate()
+void AWeapon::RemoveOnOwnerDelegate()
 {
+	if (OwnerCreature == nullptr)
+		return;
+
 	OwnerCreature->CombatComponent->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
 	OwnerCreature->CombatComponent->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
 
@@ -238,17 +240,24 @@ void AWeapon::AttackStartEvent()
 	if(IsAttacking == true)
 		return;
 
-	if (CurAttackDelay > 0 && bAutomaticAttack)
+	if (CurAttackDelay > 0 && bCanFirstInputAttack)
 	{	
 		bFirstInputAttack = true;
 		return;
 	}
 
 	SetIsAttacking(true);
-	if(bFirstAttackDelay == false)
-		Attack();
-	if (bAutomaticAttack)
-		GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, true);
+
+	if(bCanAttack)
+	{	
+		if (!bFirstAttackDelay)
+		{
+			Attack();
+		}
+
+		if(bAutomaticAttack)
+			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, bAutomaticAttack, AttackDelay);
+	}
 }
 
 void AWeapon::AttackEndEvent()
@@ -273,8 +282,6 @@ void AWeapon::SubAttackEndEvent()
 
 void AWeapon::Attack()
 {
-	if(IsAttacking == false)
-		return;
 	CurAttackDelay = AttackDelay;
 
 	OnAttack.Broadcast();

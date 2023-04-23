@@ -246,7 +246,6 @@ void ACreature::AttackButtonPressed()
 	if (GetCanAttack())
 	{
 		CombatComponent->SetIsAttacking(true);
-		StopReloadMontage();
 	}
 
 }
@@ -404,13 +403,11 @@ void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	if (Weapon == nullptr)
 		return;
 
-	CombatComponent->GetCurWeapon()->OnAttack.AddDynamic(this, &ACreature::OnCurWeaponAttackEvent);
 	Server_OnEquipWeaponSuccessEvent(Weapon);
 }
 
 void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	Weapon->OnAttack.RemoveDynamic(this, &ACreature::OnCurWeaponAttackEvent);
 	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), false);
 	Server_OnUnEquipWeaponSuccessEvent(Weapon);
 }
@@ -418,6 +415,7 @@ void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
 {
 	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), false);
+	CombatComponent->GetCurWeapon()->OnAttack.AddDynamic(this, &ACreature::OnCurWeaponAttackEvent);
 
 }
 
@@ -428,6 +426,8 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 
 	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), true);
 	RpcComponent->Montage_Stop(GetMesh(), Weapon->GetReloadMontageTpp());
+	RpcComponent->Montage_Stop(GetMesh(), Weapon->GetAttackMontageTpp());
+	Weapon->OnAttack.RemoveDynamic(this, &ACreature::OnCurWeaponAttackEvent);
 }
 
 void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

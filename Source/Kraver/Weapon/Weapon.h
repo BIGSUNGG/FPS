@@ -21,6 +21,7 @@ enum class EWeaponType : uint8
 {
 	NONE   UMETA(DisplayName = "NONE"),
 	GUN   UMETA(DisplayName = "GUN"),
+	MELEE   UMETA(DisplayName = "MELEE"),
 };
 
 UCLASS()
@@ -50,11 +51,11 @@ public:
 	virtual bool RefillAmmo(); // CurAmmo를 보충함
 	virtual bool Equipped(ACreature* Character); // Character에게 장착됨
 	virtual bool UnEquipped(); // 장착해제됨
-	virtual bool Hold();
-	virtual bool Holster();
+	virtual bool Hold(); // Character 손에 들려짐
+	virtual bool Holster(); // Character 손에서 집어넣어짐
 
-	virtual void AddOnAttackDelegate();
-	virtual void RemoveOnAttackDelegate();
+	virtual void AddOnOwnerDelegate();
+	virtual void RemoveOnOwnerDelegate();
 protected:
 	UFUNCTION(Server, Reliable)
 		void Server_Equipped(ACreature* Character);
@@ -88,8 +89,13 @@ public:
 
 	UAnimMontage* GetReloadMontageTpp() { return ReloadMontageTpp; }
 	UAnimMontage* GetReloadMontageFpp() { return ReloadMontageFpp; }
-	UAnimMontage* GetAttackMontageTpp() { return AttackMontageTpp; }
-	UAnimMontage* GetAttackMontageFpp() { return AttackMontageFpp; }
+	UAnimSequence* GetAnimIdleTpp() { return AnimIdleTpp; }
+	UAnimSequence* GetAnimIdleFpp() { return AnimIdleFpp; }
+	UBlendSpace* GetAnimMovementTpp() { return AnimMovementTpp; }
+	UBlendSpace* GetAnimMovementFpp() { return AnimMovementFpp; }
+
+	virtual UAnimMontage* GetAttackMontageTpp() { return AttackMontageTpp; }
+	virtual UAnimMontage* GetAttackMontageFpp() { return AttackMontageFpp; }
 public:
 	FAttackDele OnAttack;
 
@@ -125,6 +131,16 @@ protected:
 		UAnimMontage* AttackMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontageFpp;
+	
+	// Anim
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+		UAnimSequence* AnimIdleTpp;	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+		UAnimSequence* AnimIdleFpp;	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+		UBlendSpace* AnimMovementTpp;	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+		UBlendSpace* AnimMovementFpp;	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* WeaponMesh; // 기본적으로 보이는 메쉬
@@ -133,32 +149,36 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 		FName AttachSocketName = "SOCKET_Weapon_AR_01"; // Weapon을 Attach할 스켈레탈 본 이름
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated)
 		bool IsAttacking = false; // 공격중인지
 	void SetIsAttacking(bool Value);
 	UFUNCTION(Server, Reliable)
 		void Server_SetIsAttacking(bool Value);
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated)
 		bool IsSubAttacking = false; // 보조 공격중인지
 	void SetIsSubAttacking(bool Value);
 	UFUNCTION(Server, Reliable)
 		void Server_SetIsSubAttacking(bool Value);
 
+	bool bCanAttack = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		bool bAutomaticAttack = false; // 연사공격이 가능한지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		bool bFirstAttackDelay = false; // 첫공격에 딜레이가 있는지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		bool bFirstInputAttack = false; // 공격 선입력이 입력되어있는지 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack" , meta = (AllowPrivateAccess = "true"))
-		float AttackDelay = 0.2f; // 공격 딜레이
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack" , meta = (AllowPrivateAccess = "true"))
-		float CurAttackDelay = 0.f; // 현재 공격 딜레이
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-		float AttackDamage = 10.f; // 공격을 하였을때 주는 데미지
+		bool bCanFirstInputAttack = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		float AttackDelay = 0.2f; // 공격 딜레이
+
+	float CurAttackDelay = 0.f; // 현재 공격 딜레이
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		float AttackDamage = 10.f; // 공격을 하였을때 주는 데미지	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 		float AttackImpulse = 150.f; // 공격을 하였을때 주는 충격량
 
 	FTimerHandle AutomaticAttackHandle; // 연사공격을 담당하는 TimerHandle
+
 };

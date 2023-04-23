@@ -31,4 +31,5 @@ protected:
 		EWallRunState CurWallRunState;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement, Meta = (AllowPrivateAccess = true))
 		bool IsSliding = false;
+
 };

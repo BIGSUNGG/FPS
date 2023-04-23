@@ -507,8 +507,12 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 		ShowOnlyFirstPerson.Push(FireEffect);
 	}
 	break;
+	case EWeaponType::MELEE:
+	{
+
+	}
+		break;
 	default:
-		UE_LOG(LogTemp, Fatal, TEXT("Need to support more EWeaponType"));
 		break;
 	}
 	RefreshCurViewType();
@@ -536,8 +540,11 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 			ShowOnlyFirstPerson.Remove(FireEffect);
 		}
 		break;
+		case EWeaponType::MELEE:
+		{
+		}
+		break;
 		default:
-			UE_LOG(LogTemp, Fatal, TEXT("Need to support more EWeaponType"));
 			break;
 		}
 	}
@@ -562,6 +569,7 @@ void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
 	
 	ArmWeaponMeshes[Weapon]->SetHiddenInGame(true);
 	RpcComponent->Montage_Stop(ArmMesh, Weapon->GetReloadMontageFpp());
+	RpcComponent->Montage_Stop(ArmMesh, Weapon->GetAttackMontageFpp());
 	RefreshCurViewType();
 }
 
@@ -711,6 +719,8 @@ void AKraverPlayer::WallRunJump()
 		LaunchVector.Z = WallRunJumpHeight;
 		LaunchCharacter(LaunchVector, false ,true);
 		RpcComponent->SetPendingLaunchVelocity(GetCharacterMovement()->PendingLaunchVelocity);
+		UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
+		RpcComponent->Montage_Play(GetMesh(), CreatureAnim->GetJumpMontage());
 	}
 	else
 	{
