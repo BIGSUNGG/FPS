@@ -99,54 +99,53 @@ public:
 public:
 	FAttackDele OnAttack;
 
-	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Crosshairs")
 		class UTexture2D* CrosshairsCenter;
-	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Crosshairs")
 		UTexture2D* CrosshairsLeft;
-	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Crosshairs")
 		UTexture2D* CrosshairsRight;
-	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Crosshairs")
 		UTexture2D* CrosshairsTop;
-	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Crosshairs")
 		UTexture2D* CrosshairsBottom;
 
 protected:
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Owner", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated)
 		class ACreature* OwnerCreature = nullptr;
-		void SetOwnerCreature(ACreature* pointer);
+	void SetOwnerCreature(ACreature* pointer);
 	UFUNCTION(Server, Reliable)
 		void Server_SetOwnerCreature(ACreature* pointer);
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "WeaponState", meta = (AllowPrivateAccess = "true"))
-		EWeaponState WeaponState = EWeaponState::NONE; // 무기 상태
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WeaponType", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated)
+	EWeaponState WeaponState = EWeaponState::NONE; // 무기 상태
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
 		EWeaponType WeaponType = EWeaponType::NONE; // 무기 종류
 
 	// Montage
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* ReloadMontageTpp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* ReloadMontageFpp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontageTpp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontageFpp;
 	
 	// Anim
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
 		UAnimSequence* AnimIdleTpp;	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
 		UAnimSequence* AnimIdleFpp;	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
 		UBlendSpace* AnimMovementTpp;	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
 		UBlendSpace* AnimMovementFpp;	
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* WeaponMesh; // 기본적으로 보이는 메쉬
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Additive", meta = (AllowPrivateAccess = "true"))
-		TArray<USkeletalMeshComponent*> AdditiveWeaponMesh; // 추가적인 WeaponMesh를 가지는 배열
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	TArray<USkeletalMeshComponent*> AdditiveWeaponMesh; // 추가적인 WeaponMesh를 가지는 배열
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
 		FName AttachSocketName = "SOCKET_Weapon_AR_01"; // Weapon을 Attach할 스켈레탈 본 이름
 
 	UPROPERTY(Replicated)
@@ -162,21 +161,20 @@ protected:
 		void Server_SetIsSubAttacking(bool Value);
 
 	bool bCanAttack = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 		bool bAutomaticAttack = false; // 연사공격이 가능한지
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 		bool bFirstAttackDelay = false; // 첫공격에 딜레이가 있는지
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-		bool bFirstInputAttack = false; // 공격 선입력이 입력되어있는지 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	bool bFirstInputAttack = false; // 공격 선입력이 입력되어있는지 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 		bool bCanFirstInputAttack = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 		float AttackDelay = 0.2f; // 공격 딜레이
-
 	float CurAttackDelay = 0.f; // 현재 공격 딜레이
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 		float AttackDamage = 10.f; // 공격을 하였을때 주는 데미지	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 		float AttackImpulse = 150.f; // 공격을 하였을때 주는 충격량
 
 	FTimerHandle AutomaticAttackHandle; // 연사공격을 담당하는 TimerHandle

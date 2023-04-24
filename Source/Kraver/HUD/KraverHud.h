@@ -46,15 +46,13 @@ public:
 private:
 	FCrosshairsPackage HUDPackage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<UUserWidget> CombatWidgetClass; // CombatWidget의 클래스 레퍼런스를 가지는 변수
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-		UUserWidget* CombatWidget; // PlayerCharacter의 상태를 알려주는 위젯
+	UUserWidget* CombatWidget; // PlayerCharacter의 상태를 알려주는 위젯
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<class UUserWidget> InteractionWidgetClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-		UUserWidget* InteractionWidget; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
+	UUserWidget* InteractionWidget; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
 
 	bool bDrawCrosshair = true;
 	UPROPERTY(EditAnywhere)

@@ -146,24 +146,24 @@ protected:
 	AKraverPlayerController* Controller;
 	AKraverHUD* HUD;
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		AWeapon* CurWeapon = nullptr; // 현재 무기
 	void SetCurWeapon(AWeapon* Weapon);
 	UFUNCTION(Server, reliable)
 		void Server_SetCurWeapon(AWeapon* Weapon);
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		int32 MaxWeaponSlotSize = 1; // WeaponSlot 사이즈
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = State, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
 		int32 CurHp = 100.f; // 현재 Hp
 	UFUNCTION(Server, reliable)
 		void Server_SetCurHp(int32 value);
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_SetCurHp(int32 value);
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = State, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
 		int32 MaxHp = 100.f; // 최대 Hp
 	UFUNCTION(Server, reliable)
 		void Server_SetMaxHp(int32 value);
