@@ -246,89 +246,64 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 	float Radius = InteractionRadius;
 	float Distance = InteractionDistance + SpringArm->TargetArmLength;
 
-	TArray<FHitResult> WeaponHitResults;
-	FCollisionQueryParams WeaponParams(NAME_None, false, this);
-
-	bool bResult = GetWorld()->LineTraceMultiByChannel(
-		WeaponHitResults,
-		Camera->GetComponentLocation(),
-		Camera->GetComponentLocation() + Camera->GetForwardVector() * Distance,
-		ECollisionChannel::ECC_GameTraceChannel1,
-		WeaponParams
-	);
-
-	if (bResult)
 	{
-		for(auto& Result : WeaponHitResults)
-		{ 
-			if (Result.bBlockingHit && IsValid(Result.GetActor()))
-			{
-				auto Weapon = Cast<AWeapon>(Result.GetActor());
-				if(Weapon && Weapon->GetCanInteracted())
-				{
-					// 찾는 범위에 있는 오브젝트 사이에 다른 오브젝트가 있는지
-					FHitResult ObjectHitResult;
-					FCollisionQueryParams ObjectParams(NAME_None, false, this);
-					bool bObjectResult = GetWorld()->LineTraceSingleByChannel(
-						ObjectHitResult,
-						Camera->GetComponentLocation(),
-						Result.ImpactPoint,
-						ECollisionChannel::ECC_GameTraceChannel2,
-						ObjectParams
-					);
-					if (bObjectResult == false || IsValid(ObjectHitResult.GetActor()) == false)
-					{
-						CanInteractWeapon = Weapon;
-					}
-				}
-			}
-		}
+		TArray<FHitResult> HitResults;
+		FCollisionQueryParams Params(NAME_None, false, this);
 
-	}
-
-	if (CanInteractWeapon == nullptr)
-	{
-		WeaponHitResults.Empty();
-		bResult = GetWorld()->SweepMultiByChannel(
-			WeaponHitResults,
+		bool bResult = LineTraceMultiByChannel_ExceptWorldObject(
+			GetWorld(),
+			HitResults,
 			Camera->GetComponentLocation(),
 			Camera->GetComponentLocation() + Camera->GetForwardVector() * Distance,
-			FQuat::Identity,
-			ECollisionChannel::ECC_GameTraceChannel1,
-			FCollisionShape::MakeSphere(Radius),
-			WeaponParams
+			ECC_INTERACTION,
+			Params
 		);
 
 		if (bResult)
 		{
-			for (auto& Result : WeaponHitResults)
+			for (auto& Result : HitResults)
 			{
-				if (Result.bBlockingHit && IsValid(Result.GetActor()))
+				AWeapon* Weapon = Cast<AWeapon>(Result.GetActor());
+				if (Result.bBlockingHit && Weapon && Weapon->GetCanInteracted())
 				{
-					auto Weapon = Cast<AWeapon>(Result.GetActor());
-					if (Weapon && Weapon->GetCanInteracted())
-					{
-						// 찾는 범위에 있는 오브젝트 사이에 다른 오브젝트가 있는지
-						FHitResult ObjectHitResult;
-						FCollisionQueryParams ObjectParams(NAME_None, false, this);
-						bool bObjectResult = GetWorld()->LineTraceSingleByChannel(
-							ObjectHitResult,
-							Camera->GetComponentLocation(),
-							Result.ImpactPoint,
-							ECollisionChannel::ECC_GameTraceChannel2,
-							ObjectParams
-						);
-						if (bObjectResult == false || IsValid(ObjectHitResult.GetActor()) == false)
-						{
-							CanInteractWeapon = Weapon;
-						}
-					}
+					CanInteractWeapon = Weapon;
+					break;
 				}
 			}
 		}
 	}
 
-	if (CanInteractWeapon != nullptr && GEngine)
+	if (CanInteractWeapon == nullptr)
+	{
+		TArray<FHitResult> HitResults;
+		FCollisionQueryParams Params(NAME_None, false, this);
+
+		bool bResult = SweepMultiByChannel_ExceptWorldObject(
+			GetWorld(),
+			HitResults,
+			Camera->GetComponentLocation(),
+			Camera->GetComponentLocation() + Camera->GetForwardVector() * Distance,
+			FQuat::Identity,
+			ECC_INTERACTION,
+			FCollisionShape::MakeSphere(Radius),
+			Params
+		);
+
+		if (bResult)
+		{
+			for (auto& Result : HitResults)
+			{
+				AWeapon* Weapon = Cast<AWeapon>(Result.GetActor());
+				if (Result.bBlockingHit && Weapon && Weapon->GetCanInteracted())
+				{
+					CanInteractWeapon = Weapon;
+					break;
+				}
+			}
+		}
+	}
+
+	if (CanInteractWeapon && GEngine)
 	{
 		FString Text = "CanInteractWeapon : " + CanInteractWeapon->GetName();
 		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::White, Text);
@@ -608,7 +583,7 @@ void AKraverPlayer::PlayReloadMontage()
 void AKraverPlayer::PlayAttackMontage()
 {
 	ASoldier::PlayAttackMontage();
-	RpcComponent->Montage_Play(ArmMesh, CombatComponent->GetCurWeapon()->GetAttackMontageFpp(), 1.5f);
+	RpcComponent->Montage_Play(ArmMesh, CombatComponent->GetCurWeapon()->GetAttackMontageFpp(), 1.0f);
 }
 
 void AKraverPlayer::PlayLandedMontage()
@@ -901,7 +876,7 @@ bool AKraverPlayer::WallRunHorizonMovement(FVector Start, FVector End, float Wal
 		Result,
 		Start,
 		End, 
-		ECollisionChannel::ECC_GameTraceChannel2,
+		ECC_ONLY_OBJECT,
 		ObjectParams
 	);
 
@@ -1012,7 +987,7 @@ bool AKraverPlayer::WallRunVerticalMovement(FVector Start, FVector End)
 		Result,
 		Start,
 		End,
-		ECollisionChannel::ECC_GameTraceChannel2,
+		ECC_ONLY_OBJECT,
 		ObjectParams
 	);
 

@@ -142,7 +142,7 @@ float ACreature::CalculateCurrentFloorSlope()
 	FVector StartLocation = GetActorLocation();
 	FVector EndLocation = StartLocation - FVector(0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 60.f);
 	FCollisionQueryParams QueryParams;
-	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_GameTraceChannel2, QueryParams);
+	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_ONLY_OBJECT, QueryParams);
 
 	// Calculate floor slope if hit result is valid
 	if (HitResult.IsValidBlockingHit())
@@ -170,7 +170,7 @@ FVector ACreature::CaclulateCurrentFllorSlopeVector()
 		FCollisionQueryParams QueryParams;
 		QueryParams.bFindInitialOverlaps = true;
 
-		if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_GameTraceChannel2, QueryParams))
+		if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_ONLY_OBJECT, QueryParams))
 		{
 			FVector FloorNormal = HitResult.ImpactNormal;
 			return FloorNormal;
@@ -498,7 +498,7 @@ void ACreature::PlayReloadMontage()
 
 void ACreature::PlayAttackMontage()
 {
-	RpcComponent->Montage_Play(GetMesh(), CombatComponent->GetCurWeapon()->GetAttackMontageTpp());
+	RpcComponent->Montage_Play(GetMesh(), CombatComponent->GetCurWeapon()->GetAttackMontageTpp(), 1.0f);
 }
 
 void ACreature::PlayLandedMontage()

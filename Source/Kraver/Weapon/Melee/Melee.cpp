@@ -22,6 +22,12 @@ void AMelee::BeginPlay()
 		KR_LOG(Error, TEXT("Melee Weapon's bAutomaticAttack is true"));
 		bAutomaticAttack = false;
 	}
+
+	if(MaxComboAttack + 1 != AttackMontagesFpp.Num())
+		KR_LOG(Warning, TEXT("AttackMontagesFpp size don't match with MaxComboAttack "));
+	if (MaxComboAttack + 1 != AttackMontagesTpp.Num())
+		KR_LOG(Warning, TEXT("AttackMontagesTpp size don't match with MaxComboAttack "));
+
 }
 
 void AMelee::Tick(float DeltaTime)
@@ -75,8 +81,7 @@ void AMelee::AddOnOwnerDelegate()
 		AnimInstance->OnMelee_CanInputNextCombo.AddDynamic(this, &AMelee::OnCanInputNextComboEvent);
 		AnimInstance->OnMelee_AttackNextCombo.AddDynamic(this, &AMelee::OnAttackNextComboEvent);
 		AnimInstance->OnMelee_ComboEnd.AddDynamic(this, &AMelee::OnComboEndEvent);
-	}
-	
+	}	
 }
 
 void AMelee::RemoveOnOwnerDelegate()
@@ -111,6 +116,37 @@ void AMelee::AttackStartEvent()
 		bInputNextCombo = true;
 
 	AWeapon::AttackStartEvent();
+}
+
+void AMelee::SwingAttack()
+{
+	KR_LOG(Log,TEXT("H"));
+	
+	TArray<FHitResult> HitResults;
+	FCollisionQueryParams Params(NAME_None, false, OwnerCreature);
+
+	bool bResult = SweepMultiByChannel_ExceptWorldObject(
+		GetWorld(),
+		HitResults,
+		OwnerCreature->GetCamera()->GetComponentLocation(),
+		OwnerCreature->GetCamera()->GetComponentLocation() + OwnerCreature->GetCamera()->GetForwardVector() * 200.f,
+		FQuat::Identity,
+		ECC_SWING,
+		FCollisionShape::MakeSphere(20.f),
+		Params
+	);
+
+	for (auto& Result : HitResults)
+	{
+		auto Creature = Cast<ACreature>(Result.GetActor());
+		if (IsValid(Result.GetActor()))
+		{
+			FPointDamageEvent damageEvent;
+			damageEvent.HitInfo = Result;
+			damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
+			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);
+		}
+	}
 }
 
 void AMelee::ComboStart()
@@ -152,6 +188,7 @@ void AMelee::OnCanInputNextComboEvent()
 
 void AMelee::OnSwingAttackEvent()
 {
+	SwingAttack();
 }
 
 void AMelee::OnAttackNextComboEvent()

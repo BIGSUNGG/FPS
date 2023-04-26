@@ -169,7 +169,7 @@ void AGun::Attack()
 			SpreadZ = FMath::RandRange(-Spread, Spread);
 		}
 
-		TArray<FHitResult> BulletHitResults = CalculateFireHit(ECollisionChannel::ECC_GameTraceChannel3 ,FVector(SpreadX,SpreadY,SpreadZ));
+		TArray<FHitResult> BulletHitResults = CalculateFireHit(ECC_BULLET,FVector(SpreadX,SpreadY,SpreadZ));
 
 		for (auto& Result : BulletHitResults)
 		{

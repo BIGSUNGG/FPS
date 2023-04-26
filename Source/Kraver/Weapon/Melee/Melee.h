@@ -20,16 +20,17 @@ public:
 
 protected:
 	// Function
-	virtual bool Equipped(ACreature* Character); // Character에게 장착됨
-	virtual bool UnEquipped(); // 장착해제됨
-	virtual bool Hold(); // Character 손에 들려짐
-	virtual bool Holster(); // Character 손에서 집어넣어짐
+	virtual bool Equipped(ACreature* Character) override; // Character에게 장착됨
+	virtual bool UnEquipped() override; // 장착해제됨
+	virtual bool Hold() override; // Character 손에 들려짐
+	virtual bool Holster() override; // Character 손에서 집어넣어짐
 
 	virtual void AddOnOwnerDelegate() override;
 	virtual void RemoveOnOwnerDelegate() override;
 
 	virtual void Attack() override; // 공격할때 호출되는 함수
 	virtual void AttackStartEvent() override; // 캐릭터의 공격이 시작하였을때 호출되는 함수
+	virtual void SwingAttack();
 
 	virtual void ComboStart();
 	virtual void NextComboAttack();

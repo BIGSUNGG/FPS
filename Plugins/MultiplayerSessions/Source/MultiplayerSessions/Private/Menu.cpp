@@ -74,15 +74,6 @@ void UMenu::OnCreateSession(bool bWasSuccessful)
 		{
 			World->ServerTravel(PathToLobby);
 		}
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.f,
-				FColor::Red,
-				FString(TEXT("Success to create session!"))
-			);
-		}
 	}
 	else
 	{
@@ -144,15 +135,6 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 
 void UMenu::OnDestroySession(bool bWasSuccessful)
 {
-	if (bWasSuccessful && GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Red,
-			FString(TEXT("Success to destroy session!"))
-		);
-	}
 }
 
 void UMenu::OnStartSession(bool bWasSuccessful)
