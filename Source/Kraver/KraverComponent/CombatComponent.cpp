@@ -66,6 +66,7 @@ float UCombatComponent::GiveDamage(AActor* DamagedActor, float DamageAmount, FDa
 		Damage = DamageAmount;
 
 	KR_LOG(Log, TEXT("Give %f Damge to %s"), Damage, *DamagedActor->GetName());
+	OnGiveAnyDamage.Broadcast(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);

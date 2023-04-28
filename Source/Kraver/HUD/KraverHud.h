@@ -8,6 +8,8 @@
 #include "Kraver/Widget/CombatWidget.h"
 #include "KraverHUD.generated.h"
 
+class ACreature;
+
 // 크로스헤어의 이미지를 가지는 구조체
 USTRUCT(BlueprintType)
 struct FCrosshairsPackage
@@ -33,8 +35,13 @@ public:
 	virtual void DrawHUD() override;
 	virtual void BeginPlay() override;
 
-private:
-	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
+private:	
+		void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color = FLinearColor::White);
+
+protected:
+	// Delegate
+	UFUNCTION()
+		void OnGivePointDamageEvent(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 public:
 	// Getter Setter
@@ -42,9 +49,17 @@ public:
 
 	FORCEINLINE void SetCrosshairsPackage(const FCrosshairsPackage& Package) { HUDPackage = Package; } // HUDPackage를 설정하는 함수
 	FORCEINLINE void SetbDrawCrosshair(bool value) { bDrawCrosshair = value; }
-	FORCEINLINE void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
+	void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
+
 private:
+	ACreature* OwnerCreature;
+
 	FCrosshairsPackage HUDPackage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
+		UTexture2D* Hitmark;
+	float HitmarkAppearanceTime = 0.f;
+	bool bHitmartCritical = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<UUserWidget> CombatWidgetClass; // CombatWidget의 클래스 레퍼런스를 가지는 변수

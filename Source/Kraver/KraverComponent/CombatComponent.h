@@ -137,6 +137,7 @@ public:
 	FDeathDele OnDeath; // 죽었을때 호출
 
 	FGiveDamageDele OnGiveDamage; // 데미지를 주었을때 호출
+	FGiveDamageDele OnGiveAnyDamage;
 	FGivePointDamageDele OnGivePointDamage;
 	FGiveRadialDamageDele OnGiveRadialDamage;
 

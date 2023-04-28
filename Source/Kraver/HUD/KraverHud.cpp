@@ -2,6 +2,7 @@
 
 
 #include "KraverHUD.h"
+#include "Kraver/Creature/Creature.h"
 
 AKraverHUD::AKraverHUD()
 {
@@ -47,6 +48,15 @@ void AKraverHUD::DrawHUD()
 			DrawCrosshair(HUDPackage.CrosshairsBottom, ViewportCenter, Spread);
 		}
 
+		if (HitmarkAppearanceTime > 0.f)
+		{
+			HitmarkAppearanceTime -= GetWorld()->GetDeltaSeconds();
+
+			if(bHitmartCritical)
+				DrawCrosshair(Hitmark, ViewportCenter, FVector2D::ZeroVector, FLinearColor::Red);
+			else
+				DrawCrosshair(Hitmark, ViewportCenter, FVector2D::ZeroVector);
+		}
 	}
 }
 
@@ -61,9 +71,15 @@ void AKraverHUD::BeginPlay()
 		CombatWidget->AddToViewport();
 	else
 		UE_LOG(LogTemp, Fatal, TEXT("CombatWidget is null"));
+
+	OwnerCreature = Cast<ACreature>(PlayerController->GetCharacter());
+	if (OwnerCreature)
+	{
+		OwnerCreature->CombatComponent->OnGivePointDamage.AddDynamic(this, &AKraverHUD::OnGivePointDamageEvent);
+	}
 }
 
-void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread)
+void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color)
 {
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();
@@ -81,8 +97,16 @@ void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FV
 		0.f,
 		1.f,
 		1.f,
-		FLinearColor::White
+		Color
 	);
+}
+
+void AKraverHUD::OnGivePointDamageEvent(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	if(Cast<ACreature>(DamagedActor))
+		HitmarkAppearanceTime = 0.05f;
+
+	bHitmartCritical = DamageEvent.HitInfo.BoneName == "head";
 }
 
 void AKraverHUD::SetInteractWidget(bool value)
