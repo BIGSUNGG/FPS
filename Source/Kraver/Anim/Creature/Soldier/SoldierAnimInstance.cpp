@@ -76,3 +76,13 @@ void USoldierAnimInstance::AnimNotify_Melee_ComboEnd()
 {
 	OnMelee_ComboEnd.Broadcast();
 }
+
+void USoldierAnimInstance::AnimNotify_Melee_AssassinateAttack()
+{
+	OnMelee_AssassinateAttack.Broadcast();
+}
+
+void USoldierAnimInstance::AnimNotify_Melee_AssassinateEnd()
+{
+	OnMelee_AssassinateEnd.Broadcast();
+}

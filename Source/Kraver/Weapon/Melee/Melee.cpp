@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Melee.h"
 #include "Kraver/Creature/Creature.h"
 #include "Kraver/Anim/Creature/Soldier/SoldierAnimInstance.h"
@@ -43,28 +42,33 @@ void AMelee::Tick(float DeltaTime)
 			TEXT("InputNextCombo")
 		);
 	}
+
 }
 
 bool AMelee::Equipped(ACreature* Character)
 {
-	return AWeapon::Equipped(Character);
+	bool bSuccess = AWeapon::Equipped(Character);
+	return bSuccess;
 }
 
 bool AMelee::UnEquipped()
 {
+	bool bSuccess = AWeapon::UnEquipped();
 	ComboEnd();
-	return AWeapon::UnEquipped();
+	return bSuccess;
 }
 
 bool AMelee::Hold()
 {
-	return AWeapon::Hold();
+	bool bSuccess = AWeapon::Hold();
+	return bSuccess;
 }
 
 bool AMelee::Holster()
 {
+	bool bSuccess = AWeapon::Holster();
 	ComboEnd();
-	return AWeapon::Holster();
+	return bSuccess;
 }
 
 void AMelee::AddOnOwnerDelegate()
@@ -81,6 +85,8 @@ void AMelee::AddOnOwnerDelegate()
 		AnimInstance->OnMelee_CanInputNextCombo.AddDynamic(this, &AMelee::OnCanInputNextComboEvent);
 		AnimInstance->OnMelee_AttackNextCombo.AddDynamic(this, &AMelee::OnAttackNextComboEvent);
 		AnimInstance->OnMelee_ComboEnd.AddDynamic(this, &AMelee::OnComboEndEvent);
+		AnimInstance->OnMelee_AssassinateAttack.AddDynamic(this, &AMelee::OnAssassinateAttackEvent);
+		AnimInstance->OnMelee_AssassinateEnd.AddDynamic(this, &AMelee::OnAssassinateEndEvent);
 	}	
 }
 
@@ -98,16 +104,26 @@ void AMelee::RemoveOnOwnerDelegate()
 		AnimInstance->OnMelee_CanInputNextCombo.RemoveDynamic(this, &AMelee::OnCanInputNextComboEvent);
 		AnimInstance->OnMelee_AttackNextCombo.RemoveDynamic(this, &AMelee::OnAttackNextComboEvent);
 		AnimInstance->OnMelee_ComboEnd.RemoveDynamic(this, &AMelee::OnComboEndEvent);
+		AnimInstance->OnMelee_AssassinateAttack.RemoveDynamic(this, &AMelee::OnAssassinateAttackEvent);
+		AnimInstance->OnMelee_AssassinateEnd.RemoveDynamic(this, &AMelee::OnAssassinateEndEvent);
 	}
 }
 
 void AMelee::Attack()
 {
+	if (IsComboAttacking() == false)
+	{
+		if (bCanAssassination)
+		{
+			pair<bool, FHitResult> CanAssassinate = CalculateCanAssassinate();	
+			if (CanAssassinate.first)
+				Assassinate(CanAssassinate.second.GetActor());
+		}
+		
+		if(!IsAssassinating)
+			ComboStart();
+	}
 	AWeapon::Attack();
-
-	if(CurComboAttack == 0)
-		ComboStart();
-
 }
 
 void AMelee::AttackStartEvent()
@@ -119,9 +135,7 @@ void AMelee::AttackStartEvent()
 }
 
 void AMelee::SwingAttack()
-{
-	KR_LOG(Log,TEXT("H"));
-	
+{	
 	TArray<FHitResult> HitResults;
 	FCollisionQueryParams Params(NAME_None, false, OwnerCreature);
 
@@ -176,6 +190,71 @@ void AMelee::ComboEnd()
 	bInputNextCombo = false;
 	bCanAttack = true;
 	CurComboAttack = 0;
+
+	if(bAutomaticRepeatCombo && IsAttacking)
+		Attack();
+}
+
+std::pair<bool, FHitResult> AMelee::CalculateCanAssassinate()
+{
+	pair<bool, FHitResult> Result;
+
+	FCollisionQueryParams Params(NAME_None, false, this);
+	Params.AddIgnoredActor(OwnerCreature);
+
+	bool bSuccess = GetWorld()->SweepSingleByChannel(
+		Result.second,
+		OwnerCreature->GetCamera()->GetComponentLocation(),
+		OwnerCreature->GetCamera()->GetComponentLocation() + OwnerCreature->GetCamera()->GetForwardVector() * 30.f,
+		FQuat::Identity,
+		ECC_ASSASSINATION,
+		FCollisionShape::MakeSphere(34.f),
+		Params
+	);
+
+	if (bSuccess)
+	{
+		float YawDifference = Result.second.GetActor()->GetActorRotation().Yaw - OwnerCreature->GetActorRotation().Yaw;
+		
+		Result.first = (-45.f < YawDifference && 45.f > YawDifference);
+	}
+	else
+		Result.first = false;
+
+
+	return Result;
+}
+
+void AMelee::Assassinate(AActor* Actor)
+{
+	if(!Actor)
+		return;
+
+	ACreature* Creature = Cast<ACreature>(Actor);
+	if(!Creature)
+		return;
+
+	IsAssassinating = true;
+	CurAssasinatedCreature = Creature;
+
+	AttackEndEvent();
+	SubAttackEndEvent();
+
+	OnAssassinate.Broadcast(Actor);
+	Server_Assassinate(Actor);
+}
+
+void AMelee::Server_Assassinate_Implementation(AActor* Actor)
+{
+	ACreature* Creature = Cast<ACreature>(Actor);
+	if (!Creature)
+		return;
+
+	FAssassinateInfo AssassinateInfo;
+	AssassinateInfo.AssassinatedMontagesFpp = AssassinatedMontagesFpp;
+	AssassinateInfo.AssassinatedMontagesTpp = AssassinatedMontagesTpp;
+
+	Creature->Assassinated(OwnerCreature, AssassinateInfo);
 }
 
 void AMelee::OnCanInputNextComboEvent()
@@ -205,4 +284,37 @@ void AMelee::OnAttackNextComboEvent()
 void AMelee::OnComboEndEvent()
 {
 	ComboEnd();
+}
+
+void AMelee::OnAssassinateAttackEvent()
+{
+	FDamageEvent TempDamageEvent;
+	OwnerCreature->CombatComponent->GiveDamage(CurAssasinatedCreature, AttackDamage * 2, TempDamageEvent, OwnerCreature->GetController(), this);
+
+	OwnerCreature->RpcComponent->SetSimulatedPhysics(CurAssasinatedCreature->GetMesh(), false);
+}
+
+void AMelee::OnAssassinateEndEvent()
+{
+	IsAssassinating = false;
+	if(CurAssasinatedCreature->CombatComponent->GetCurHp() <= 0)
+		OwnerCreature->RpcComponent->SetSimulatedPhysics(CurAssasinatedCreature->GetMesh(), true);
+
+	OnAssassinateEnd.Broadcast();
+}
+
+UAnimMontage* AMelee::GetAttackMontageTpp()
+{
+	if(IsAssassinating)
+		return AssassinateMontagesTpp;
+
+	return AttackMontagesTpp[CurComboAttack];
+}
+
+UAnimMontage* AMelee::GetAttackMontageFpp()
+{
+	if (IsAssassinating)
+		return AssassinateMontagesFpp;
+
+	return AttackMontagesFpp[CurComboAttack];
 }

@@ -37,7 +37,7 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
-	virtual void CameraTick();
+	virtual void CameraTick(float DeletaTime) override;
 	virtual void CameraTilt(float TargetRoll);
 	virtual void ClientTick(float DeltaTime);
 	virtual void ServerClientTick(float DeltaTime);
@@ -54,6 +54,7 @@ public:
 	virtual bool GetCanAttack() override;
 	EWallRunState GetCurWallRunState() { return CurWallRunState; }
 	bool GetIsSliding() { return IsSliding; }
+	virtual USkeletalMeshComponent* GetCurMainMesh() override;
 
 protected:
 	// input event
@@ -86,6 +87,9 @@ protected:
 	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void OnHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	virtual void OnHolsterWeaponEvent(AWeapon* Weapon); // 무기를 넣을때 호출되는 함수
+
+	virtual void OnAssassinateEvent(AActor* AssassinatedActor) override;
+	virtual void OnAssassinateEndEvent() override;
 
 	// Function
 	void Crouch(bool bClientSimulation = false) override;
@@ -190,10 +194,6 @@ protected:
 	// Movement
 	bool bWantToJump = false;
 
-	float DefaultGravity = 0.f;
-	float DefaultGroundFriction = 0.f;
-	float DefaultBrakingDecelerationWalking = 0.f;
-
 	// Advanced Movement / Double Jump
 	bool bCanDoubleJump = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Movement|AdvancedMovement", meta = (AllowPrivateAccess = "true"))
@@ -209,7 +209,7 @@ protected:
 	bool bWallRunHorizonSupressed = false;
 	bool bWallRunVerticalSupressed = false;
 	bool bWallRunGravity = true;
-	float WallRunHorizonSpeed = 900.f;
+	float WallRunHorizonSpeed = 1200.f;
 	float WallRunVerticalSpeed = 600.f;
 	float WallRunJumpHeight = 400.f;
 	float WallRunJumpOffForce  = 400.f;

@@ -6,6 +6,7 @@
 #include "Components/WidgetComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Kraver/Weapon/Melee/Melee.h"
 
 // Sets default values
 ACreature::ACreature()
@@ -65,10 +66,29 @@ float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	return Damage;
 }
 
+void ACreature::Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
+{
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	DisableInput(PlayerController);
+
+	SetActorLocationAndRotation
+	(
+		Attacker->GetActorLocation() + Attacker->GetActorForwardVector() * 100,
+		Attacker->GetActorRotation()
+	);
+
+	RpcComponent->Montage_Play(GetMesh(), AssassinateInfo.AssassinatedMontagesTpp);
+}
+
 // Called when the game starts or when spawned
 void ACreature::BeginPlay()
 {
 	Super::BeginPlay();
+
+	DefaultGravity = GetCharacterMovement()->GravityScale;
+	DefaultGroundFriction = GetCharacterMovement()->GroundFriction;
+	DefaultBrakingDecelerationWalking = GetCharacterMovement()->BrakingDecelerationWalking;
+	DefaultCameraLocation = Camera->GetRelativeLocation();
 }
 
 void ACreature::PostInitializeComponents()
@@ -82,7 +102,13 @@ void ACreature::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	CameraTick(DeltaTime);
 	AimOffset(DeltaTime);
+}
+
+void ACreature::CameraTick(float DeltaTime)
+{
+	Camera->SetRelativeLocation(FMath::VInterpTo(Camera->GetRelativeLocation(), TargetCameraRelativeLocation, DeltaTime, 10.f));
 }
 
 // Called to bind functionality to input
@@ -416,6 +442,22 @@ void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
 	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), false);
 	CombatComponent->GetCurWeapon()->OnAttack.AddDynamic(this, &ACreature::OnCurWeaponAttackEvent);
 
+	switch (Weapon->GetWeaponType())
+	{
+	case EWeaponType::NONE:
+		break;
+	case EWeaponType::GUN:
+		break;
+	case EWeaponType::MELEE:
+	{
+		AMelee* Melee = Cast<AMelee>(Weapon);
+		Melee->OnAssassinate.AddDynamic(this, &ACreature::OnAssassinateEvent);
+		Melee->OnAssassinateEnd.AddDynamic(this, &ACreature::OnAssassinateEndEvent);
+	}
+		break;
+	default:
+		break;
+	}
 }
 
 void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
@@ -427,6 +469,23 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 	RpcComponent->Montage_Stop(GetMesh(), Weapon->GetReloadMontageTpp());
 	RpcComponent->Montage_Stop(GetMesh(), Weapon->GetAttackMontageTpp());
 	Weapon->OnAttack.RemoveDynamic(this, &ACreature::OnCurWeaponAttackEvent);
+
+	switch (Weapon->GetWeaponType())
+	{
+	case EWeaponType::NONE:
+		break;
+	case EWeaponType::GUN:
+		break;
+	case EWeaponType::MELEE:
+	{
+		AMelee* Melee = Cast<AMelee>(Weapon);
+		Melee->OnAssassinate.RemoveDynamic(this, &ACreature::OnAssassinateEvent);
+		Melee->OnAssassinateEnd.RemoveDynamic(this, &ACreature::OnAssassinateEndEvent);
+	}
+	break;
+	default:
+		break;
+	}
 }
 
 void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -447,6 +506,25 @@ void ACreature::OnCurWeaponAttackEvent()
 		UE_LOG(LogTemp,Fatal,TEXT("Cur weapon is nullptr but it attacked"));
 
 	PlayAttackMontage();
+}
+
+void ACreature::OnAssassinateEvent(AActor* AssassinatedActor)
+{
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	DisableInput(PlayerController);
+
+	Camera->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepRelativeTransform, "head");
+	
+}
+
+void ACreature::OnAssassinateEndEvent()
+{
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	EnableInput(PlayerController);
+
+	Camera->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+
+	Camera->AttachToComponent(SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
 }
 
 void ACreature::Landed(const FHitResult& Hit)

@@ -4,6 +4,8 @@
 
 #include "EngineMinimal.h"
 
+using namespace std;
+
 DECLARE_LOG_CATEGORY_EXTERN(Kraver, Log, All);
 
 // Coliision
@@ -11,6 +13,7 @@ DECLARE_LOG_CATEGORY_EXTERN(Kraver, Log, All);
 #define ECC_ONLY_OBJECT ECollisionChannel::ECC_GameTraceChannel2
 #define ECC_BULLET ECollisionChannel::ECC_GameTraceChannel3
 #define ECC_SWING ECollisionChannel::ECC_GameTraceChannel4
+#define ECC_ASSASSINATION ECollisionChannel::ECC_GameTraceChannel5
 
 // Log
 #define KR_CALLINFO (FString(__FUNCTION__) + TEXT("(") + FString::FromInt(__LINE__) + TEXT(")"))

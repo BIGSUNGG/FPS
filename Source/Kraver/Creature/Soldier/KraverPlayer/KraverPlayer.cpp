@@ -50,10 +50,6 @@ void AKraverPlayer::BeginPlay()
 		if (KraverController)
 			HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
 		RefreshCurViewType();
-
-		DefaultGravity = GetCharacterMovement()->GravityScale;
-		DefaultGroundFriction = GetCharacterMovement()->GroundFriction;
-		DefaultBrakingDecelerationWalking = GetCharacterMovement()->BrakingDecelerationWalking;
 	}
 }
 
@@ -73,8 +69,10 @@ void AKraverPlayer::Tick(float DeltaTime)
 	LocallyControlTick(DeltaTime);
 }
 
-void AKraverPlayer::CameraTick()
+void AKraverPlayer::CameraTick(float DeletaSeconds)
 {
+	ASoldier::CameraTick(DeletaSeconds);
+	
 	if (CurWallRunState == EWallRunState::WALLRUN_LEFT)
 		CameraTilt(15.f);
 	else if(CurWallRunState == EWallRunState::WALLRUN_RIGHT)
@@ -122,7 +120,6 @@ void AKraverPlayer::LocallyControlTick(float DeltaTime)
 	SlideUpdate();
 
 	SpringArmTick(DeltaTime);
-	CameraTick();
 }
 
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -149,6 +146,22 @@ void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 bool AKraverPlayer::GetCanAttack()
 {
 	return true;
+}
+
+USkeletalMeshComponent* AKraverPlayer::GetCurMainMesh()
+{
+	switch (ViewType)
+	{
+	case EViewType::FIRST_PERSON:
+		return ArmMesh;
+		break;
+	case EViewType::THIRD_PERSON:
+		return GetMesh();
+		break;
+	default:
+		return nullptr;
+		break;
+	}
 }
 
 void AKraverPlayer::SetViewType(EViewType Type)
@@ -546,6 +559,25 @@ void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
 	RpcComponent->Montage_Stop(ArmMesh, Weapon->GetReloadMontageFpp());
 	RpcComponent->Montage_Stop(ArmMesh, Weapon->GetAttackMontageFpp());
 	RefreshCurViewType();
+}
+
+void AKraverPlayer::OnAssassinateEvent(AActor* AssassinatedActor)
+{
+	ASoldier::OnAssassinateEvent(AssassinatedActor);
+
+	GetMesh()->SetOwnerNoSee(false);
+	ArmMesh->SetOwnerNoSee(true);
+
+}	
+
+void AKraverPlayer::OnAssassinateEndEvent()
+{
+	ASoldier::OnAssassinateEndEvent();
+
+	RefreshCurViewType();
+
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
+	ArmMesh->GetAnimInstance()->Montage_Stop(0.f);
 }
 
 void AKraverPlayer::Crouch(bool bClientSimulation /*= false*/)

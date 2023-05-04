@@ -10,6 +10,8 @@
 #include "Engine/DamageEvents.h"
 #include "Creature.generated.h"
 
+struct FAssassinateInfo;
+
 // 캐릭터의 움직임 상태를 가지는 enum class
 UENUM(BlueprintType)
 enum class EMovementState : uint8
@@ -30,6 +32,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	virtual void Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 
 	void OwningOtherActor(AActor* Actor);
 protected:
@@ -40,6 +43,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void CameraTick(float DeltaTime);
+
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -58,6 +63,7 @@ public:
 	float CalculateRightSpeed();
 	float CalculateCurrentFloorSlope();
 	FVector CaclulateCurrentFllorSlopeVector();
+	virtual USkeletalMeshComponent* GetCurMainMesh() { return GetMesh(); }
 
 protected:
 	// Axis Input
@@ -96,6 +102,10 @@ protected:
 		virtual void OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 호출되는 함수
 	UFUNCTION()
 		virtual void OnCurWeaponAttackEvent();
+	UFUNCTION()
+		virtual void OnAssassinateEvent(AActor* AssassinatedActor);
+	UFUNCTION()
+		virtual void OnAssassinateEndEvent();
 	UFUNCTION()
 		void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
 	UFUNCTION()
@@ -143,6 +153,7 @@ protected:
 	UFUNCTION(Server, reliable)
 		void Server_SetAO_Pitch(float value);
 	FRotator StartingAimRotation;
+	FVector TargetCameraRelativeLocation;
 
 	// Movement
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
@@ -182,4 +193,10 @@ protected:
 	float InputRightRatio = 1.f;
 	bool bJumpButtonPress = false;
 	bool bCrouchButtonPress = false;
+
+	// Default Value
+	float DefaultGravity = 0.f;
+	float DefaultGroundFriction = 0.f;
+	float DefaultBrakingDecelerationWalking = 0.f;
+	FVector DefaultCameraLocation;
 }; 

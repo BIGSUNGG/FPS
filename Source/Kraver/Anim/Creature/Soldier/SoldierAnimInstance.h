@@ -36,12 +36,18 @@ protected:
 		void AnimNotify_Melee_AttackNextCombo();
 	UFUNCTION()
 		void AnimNotify_Melee_ComboEnd();
+	UFUNCTION()
+		void AnimNotify_Melee_AssassinateAttack();
+	UFUNCTION()
+		void AnimNotify_Melee_AssassinateEnd();
 
 public:
 	FAnimNotifyDele OnMelee_SwingAttack;
 	FAnimNotifyDele OnMelee_CanInputNextCombo;
 	FAnimNotifyDele OnMelee_AttackNextCombo;
 	FAnimNotifyDele OnMelee_ComboEnd;
+	FAnimNotifyDele OnMelee_AssassinateAttack;
+	FAnimNotifyDele OnMelee_AssassinateEnd;
 
 protected:
 	ASoldier* Soldier;
