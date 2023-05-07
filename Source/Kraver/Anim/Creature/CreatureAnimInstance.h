@@ -11,7 +11,6 @@
  */
 
 class ACreature;
-enum class EMovementState : uint8;
 
 UCLASS()
 class KRAVER_API UCreatureAnimInstance : public UAnimInstance

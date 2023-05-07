@@ -84,8 +84,11 @@ void AKraverPlayer::CameraTick(float DeletaSeconds)
 
 void AKraverPlayer::CameraTilt(float TargetRoll)
 {
-	FRotator TargetRotation(GetController()->GetControlRotation().Pitch, GetController()->GetControlRotation().Yaw, TargetRoll);
-	GetController()->SetControlRotation(FMath::RInterpTo(GetController()->GetControlRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), 10.f));
+	if(!Controller)
+		return;
+
+	FRotator TargetRotation(Controller->GetControlRotation().Pitch, Controller->GetControlRotation().Yaw, TargetRoll);
+	Controller->SetControlRotation(FMath::RInterpTo(Controller->GetControlRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), 10.f));
 
 }
 
@@ -568,6 +571,8 @@ void AKraverPlayer::OnAssassinateEvent(AActor* AssassinatedActor)
 	GetMesh()->SetOwnerNoSee(false);
 	ArmMesh->SetOwnerNoSee(true);
 
+	CombatComponent->GetCurWeapon()->GetWeaponMesh()->SetOwnerNoSee(false);
+	ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->SetOwnerNoSee(true);
 }	
 
 void AKraverPlayer::OnAssassinateEndEvent()
@@ -578,6 +583,12 @@ void AKraverPlayer::OnAssassinateEndEvent()
 
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
 	ArmMesh->GetAnimInstance()->Montage_Stop(0.f);
+}
+
+void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
+{
+	ASoldier::OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
+	RpcComponent->Montage_Play(ArmMesh, PlayedMontage, Speed);
 }
 
 void AKraverPlayer::Crouch(bool bClientSimulation /*= false*/)
@@ -598,42 +609,12 @@ void AKraverPlayer::UnCrouch(bool bClientSimulation /*= false*/)
 		ASoldier::UnCrouch(bClientSimulation);
 }
 
-void AKraverPlayer::PlayReloadMontage()
-{
-	ASoldier::PlayReloadMontage();
-
-	if (CombatComponent->GetCurWeapon() == nullptr ||
-		CombatComponent->GetCurWeapon()->GetCanReload() == false ||
-		ArmMesh->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageFpp()) == true)
-	{
-		return;
-	}
-
-	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetReloadMontageFpp(), 1.5f);
-}
-
-void AKraverPlayer::PlayAttackMontage()
-{
-	ASoldier::PlayAttackMontage();
-	RpcComponent->Montage_Play(ArmMesh, CombatComponent->GetCurWeapon()->GetAttackMontageFpp(), 1.0f);
-}
-
 void AKraverPlayer::PlayLandedMontage()
 {
 	ASoldier::PlayLandedMontage();
 
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(ArmMesh->GetAnimInstance());
 	CreatureAnim->PlayLandedMontage();
-}
-
-void AKraverPlayer::StopReloadMontage()
-{
-	ASoldier::StopReloadMontage();
-
-	if (CombatComponent->GetCurWeapon() == nullptr)
-		return;
-
-	RpcComponent->Montage_Stop(ArmMesh, CombatComponent->GetCurWeapon()->GetReloadMontageFpp(), 0.f);
 }
 
 void AKraverPlayer::WeaponADS(float DeltaTime)

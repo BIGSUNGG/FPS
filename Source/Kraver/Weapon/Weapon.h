@@ -7,22 +7,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Weapon.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackDele);
-
-UENUM(BlueprintType)
-enum class EWeaponState : uint8
-{
-	NONE   UMETA(DisplayName = "NONE"),
-	EQUIPPED   UMETA(DisplayName = "EQUIPPED"),
-};
-
-UENUM(BlueprintType)
-enum class EWeaponType : uint8
-{
-	NONE   UMETA(DisplayName = "NONE"),
-	GUN   UMETA(DisplayName = "GUN"),
-	MELEE   UMETA(DisplayName = "MELEE"),
-};
+class UWeaponComponent;
 
 UCLASS()
 class KRAVER_API AWeapon : public AActor
@@ -56,23 +41,31 @@ public:
 
 	virtual void AddOnOwnerDelegate();
 	virtual void RemoveOnOwnerDelegate();
+
+	virtual void AttackCancel();
+
+	// Delegate
+	UFUNCTION()
+		virtual void OnAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
+	UFUNCTION()
+		virtual void OnAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
+
+	UFUNCTION()
+		virtual void OnSubAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
+	UFUNCTION()
+		virtual void OnSubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
 protected:
+	// Rpc
 	UFUNCTION(Server, Reliable)
 		void Server_Equipped(ACreature* Character);
 	UFUNCTION(Server, Reliable)
 		void Server_UnEquipped();
 
+	// Delegate
 	UFUNCTION()
-		virtual void AttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
-	UFUNCTION()
-		virtual void AttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
+		virtual void OnAttackEvent();
 
-	UFUNCTION()
-		virtual void SubAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
-	UFUNCTION()
-		virtual void SubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
-
-	virtual void Attack(); // 공격할때 호출되는 함수
+	virtual void Attack() final; // 공격할때 호출되는 함수
 public:
 	// Getter Setter
 	bool GetCanInteracted();
@@ -84,7 +77,7 @@ public:
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
-	USkeletalMeshComponent* GetWeaponMesh() {return WeaponMesh;}
+	USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
 	TArray<USkeletalMeshComponent*> GetAdditiveWeaponMesh() { return AdditiveWeaponMesh; }
 
 	UAnimMontage* GetReloadMontageTpp() { return ReloadMontageTpp; }
@@ -98,6 +91,24 @@ public:
 	virtual UAnimMontage* GetAttackMontageFpp() { return AttackMontageFpp; }
 public:
 	FAttackDele OnAttack;
+	FAttackDele OnBeforeAttack;
+
+	FAttackDele OnAttackSuccess;
+	FAttackDele OnAttackFailed;
+
+	FAttackStartDele OnAttackStart;
+	FAttackStartDele OnSubAttackStart;
+	FAttackEndDele OnAttackEnd;
+	FAttackEndDele OnSubAttackEnd;
+
+	FPlayMontageDele OnPlayTppMontage;
+	FPlayMontageDele OnPlayFppMontage;
+
+	FAddOnDele OnAddOnDelegate;
+	FRemoveOnDele OnRemoveOnDelegate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Component", Meta = (AllowPrivateAccess = true))
+		TArray<UWeaponComponent*> WeaponComponents;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Crosshairs")
 		class UTexture2D* CrosshairsCenter;
@@ -160,6 +171,7 @@ protected:
 	UFUNCTION(Server, Reliable)
 		void Server_SetIsSubAttacking(bool Value);
 
+	bool bAttackCanceled = false;
 	bool bCanAttack = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 		bool bAutomaticAttack = false; // 연사공격이 가능한지

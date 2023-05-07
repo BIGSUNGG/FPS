@@ -129,69 +129,8 @@ bool AGun::RefillAmmo()
 		Server_SetCurAmmo(CurAmmo);
 		Server_SetTotalAmmo(TotalAmmo);
 	}
-	AttackEndEvent();
+	OnAttackEndEvent();
 	return true;
-}
-
-void AGun::Attack()
-{
-	if (!IsAttacking)
-		return;
-
-	if (OwnerCreature == nullptr)
-	{
-		KR_LOG(Error, TEXT("OwnerCreature is nullptr"),*GetName());
-		return;
-	}
-
-	if(CurAmmo > 0)
-	{ 
-		AWeapon::Attack();
-
-		--CurAmmo;		
-		if(!HasAuthority())
-			Server_SetCurAmmo(CurAmmo);
-
-		float SpreadX;
-		float SpreadY;
-		float SpreadZ;
-		if (IsSubAttacking)
-		{
-			SpreadX = 0.f;
-			SpreadY = 0.f;
-			SpreadZ = 0.f;
-		}
-		else
-		{
-			float Spread = CalculateCurSpread();
-			SpreadX = FMath::RandRange(-Spread, Spread);
-			SpreadY = FMath::RandRange(-Spread, Spread);
-			SpreadZ = FMath::RandRange(-Spread, Spread);
-		}
-
-		TArray<FHitResult> BulletHitResults = CalculateFireHit(ECC_BULLET,FVector(SpreadX,SpreadY,SpreadZ));
-
-		for (auto& Result : BulletHitResults)
-		{
-			auto Creature = Cast<ACreature>(Result.GetActor());
-			if (IsValid(Result.GetActor()))
-			{
-				FPointDamageEvent damageEvent;
-				damageEvent.HitInfo = Result;
-				damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
-				OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);
-				if (Result.bBlockingHit)
-				{
-					FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
-					OwnerCreature->RpcComponent->SpawnNiagaraAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpaceEffectPos);
-				}
-			}
-		}
-		AddRecoil();
-		ShowFireEffect();
-	}
-	else
-		AttackEndEvent();
 }
 
 TArray<FHitResult> AGun::CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread /*= FVector(0,0,0)*/)
@@ -228,6 +167,74 @@ void AGun::AddRecoil()
 {
 	TargetRecoilPitch += FMath::RandRange(MinRecoilPitch,MaxRecoilPitch);
 	TargetRecoilYaw += FMath::RandRange(MinRecoilYaw, MaxRecoilYaw);
+}
+
+void AGun::OnAttackEvent()
+{
+	if (!IsAttacking)
+		return;
+
+	if (OwnerCreature == nullptr)
+	{
+		KR_LOG(Error, TEXT("OwnerCreature is nullptr"), *GetName());
+		return;
+	}
+
+	if (CurAmmo > 0)
+	{
+		if (!bInfinityAmmo)
+		{
+			--CurAmmo;
+			if (!HasAuthority())
+				Server_SetCurAmmo(CurAmmo);
+		}
+
+		float SpreadX;
+		float SpreadY;
+		float SpreadZ;
+		if (IsSubAttacking)
+		{
+			SpreadX = 0.f;
+			SpreadY = 0.f;
+			SpreadZ = 0.f;
+		}
+		else
+		{
+			float Spread = CalculateCurSpread();
+			SpreadX = FMath::RandRange(-Spread, Spread);
+			SpreadY = FMath::RandRange(-Spread, Spread);
+			SpreadZ = FMath::RandRange(-Spread, Spread);
+		}
+
+		TArray<FHitResult> BulletHitResults = CalculateFireHit(ECC_BULLET, FVector(SpreadX, SpreadY, SpreadZ));
+
+		for (auto& Result : BulletHitResults)
+		{
+			auto Creature = Cast<ACreature>(Result.GetActor());
+			if (IsValid(Result.GetActor()))
+			{
+				FPointDamageEvent damageEvent;
+				damageEvent.HitInfo = Result;
+				damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
+				OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);
+				if (Result.bBlockingHit)
+				{
+					FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
+					OwnerCreature->RpcComponent->SpawnNiagaraAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpaceEffectPos);
+				}
+			}
+		}
+		AddRecoil();
+		ShowFireEffect();
+		OnPlayTppMontage.Broadcast(AttackMontageTpp, 1.f);
+		OnPlayFppMontage.Broadcast(AttackMontageFpp, 1.f);
+	}
+	else
+	{
+		OnAttackEndEvent();
+	}
+
+	AWeapon::OnAttackEvent();
 }
 
 void AGun::Server_SetTotalAmmo_Implementation(int32 Ammo)

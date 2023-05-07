@@ -28,12 +28,15 @@ public:
 
 	virtual bool RefillAmmo();
 protected:
-	virtual void Attack() override;
 	TArray<FHitResult>  CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread = FVector(0,0,0));
 	virtual void ShowFireEffect(); // FireEffect를 실행하는 함수
 	virtual void AddRecoil();
 
 protected:
+	// Delegate
+	virtual void OnAttackEvent() override;
+
+	// Rpc
 	UFUNCTION(Server, Reliable)
 		virtual void Server_ShowFireEffect();
 	UFUNCTION(NetMulticast, Reliable)
@@ -80,6 +83,8 @@ protected:
 		float BulletDistance = 10000.f; // 총알 길이
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
 		float BulletRadius = 0.f; // 총알 범위
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
+		bool bInfinityAmmo = false;
 
 	// Recoil
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Spread", meta = (AllowPrivateAccess = "true"))

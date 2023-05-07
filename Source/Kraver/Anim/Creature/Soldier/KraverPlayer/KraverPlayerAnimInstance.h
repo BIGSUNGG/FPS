@@ -11,8 +11,6 @@
 
 class AKraverPlayer;
 
-enum class EWallRunState : uint8;
-
 UCLASS()
 class KRAVER_API UKraverPlayerAnimInstance : public USoldierAnimInstance
 {

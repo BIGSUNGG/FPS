@@ -8,11 +8,9 @@
 /**
  * 
  */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAnimNotifyDele);
 
 class ASoldier;
 class AWeapon;
-enum class EWeaponType : uint8;
 
 UCLASS()
 class KRAVER_API USoldierAnimInstance : public UCreatureAnimInstance

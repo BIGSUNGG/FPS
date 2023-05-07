@@ -9,24 +9,6 @@
  * 
  */
 
-// 캐릭터의 AdvancedMovement 상태를 가지는 enum class
-UENUM(BlueprintType)
-enum class EWallRunState : uint8
-{
-	NONE		UMETA(DisplayName = "NONE"),
-	WALLRUN_RIGHT UMETA(DisplayName = "WALLRUN_RIGHT"),
-	WALLRUN_LEFT UMETA(DisplayName = "WALLRUN_LEFT"),
-	WALLRUN_VERTICAL UMETA(DisplayName = "WALLRUN_VERTICAL"),
-};
-
-// 카메라 시점 종류를 가지는 enum class
-UENUM(BlueprintType)
-enum class EViewType : uint8
-{
-	FIRST_PERSON   UMETA(DisplayName = "FIRST_PERSON"),
-	THIRD_PERSON   UMETA(DisplayName = "THIRD_PERSON"),
-};
-
 UCLASS()
 class KRAVER_API AKraverPlayer : public ASoldier
 {
@@ -60,11 +42,16 @@ protected:
 	// input event
 	virtual void SubAttackButtonPressed() override;
 	virtual void SubAttackButtonReleased() override;
-	virtual void EquipButtonPressed();
-	virtual void UnEquipButtonPressed();
-	virtual void ChangeWeapon1Pressed();
-	virtual void ChangeWeapon2Pressed();
-	virtual void ChangeWeapon3Pressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void EquipButtonPressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void UnEquipButtonPressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void ChangeWeapon1Pressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void ChangeWeapon2Pressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void ChangeWeapon3Pressed();
 
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
@@ -90,16 +77,13 @@ protected:
 
 	virtual void OnAssassinateEvent(AActor* AssassinatedActor) override;
 	virtual void OnAssassinateEndEvent() override;
+	virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed) override;
 
 	// Function
 	void Crouch(bool bClientSimulation = false) override;
 	void UnCrouch(bool bClientSimulation = false) override;
 
-	virtual void PlayReloadMontage() override;
-	virtual void PlayAttackMontage() override;
 	virtual void PlayLandedMontage() override;
-
-	virtual void StopReloadMontage() override;
 
 	void WeaponADS(float DeltaTime);
 	void SpringArmTick(float DeltaTime);
@@ -164,8 +148,8 @@ protected:
 
 	TMap<AWeapon*, USkeletalMeshComponent*> ArmWeaponMeshes; // 각 Weapon들의 WeaponMesh를 1인칭 시점에 맞게 복사한 매쉬들의 맵
 
-	AWeapon* CanInteractWeapon;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
+		AWeapon* CanInteractWeapon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
 		float InteractionDistance = 300.f; // 장착가능한 무기를 찾는 거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))

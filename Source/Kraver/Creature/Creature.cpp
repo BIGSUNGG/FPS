@@ -7,6 +7,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Kraver/Weapon/Melee/Melee.h"
+#include "Kraver/KraverComponent/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
 
 // Sets default values
 ACreature::ACreature()
@@ -33,7 +34,7 @@ ACreature::ACreature()
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritRoll = true;
 	SpringArm->bInheritYaw = true;
-	SpringArm->bDoCollisionTest = true;
+	SpringArm->bDoCollisionTest = false;
 
 	Camera->SetupAttachment(SpringArm);
 	Camera->bUsePawnControlRotation = true;
@@ -108,7 +109,7 @@ void ACreature::Tick(float DeltaTime)
 
 void ACreature::CameraTick(float DeltaTime)
 {
-	Camera->SetRelativeLocation(FMath::VInterpTo(Camera->GetRelativeLocation(), TargetCameraRelativeLocation, DeltaTime, 10.f));
+	Camera->SetRelativeLocation(FMath::VInterpTo(Camera->GetRelativeLocation(), TargetCameraRelativeLocation, DeltaTime, 5.f));
 }
 
 // Called to bind functionality to input
@@ -132,6 +133,33 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("SubAttack"), EInputEvent::IE_Released, this, &ACreature::SubAttackButtonReleased);
 	PlayerInputComponent->BindAction(TEXT("HolsterWeapon"), EInputEvent::IE_Pressed, this, &ACreature::HolsterWeaponPressed);
 
+}
+
+void ACreature::OnAssassinateEvent(AActor* AssassinatedActor)
+{
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	DisableInput(PlayerController);
+
+	Camera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "head");
+
+	GetMovementComponent()->Velocity = FVector::ZeroVector;
+}
+
+void ACreature::OnAssassinateEndEvent()
+{
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	EnableInput(PlayerController);
+
+	Camera->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+	Camera->AttachToComponent(SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
+
+	FTransform HeadTransform = GetMesh()->GetSocketTransform("head", ERelativeTransformSpace::RTS_World);
+	FTransform CameraTransform = Camera->GetComponentTransform();
+	FTransform RelativeTransform = HeadTransform.GetRelativeTransform(CameraTransform);
+	FVector RelativeLocation = RelativeTransform.GetLocation();
+	Camera->SetRelativeLocation(RelativeLocation);
+
+	TargetCameraRelativeLocation = FVector::ZeroVector;
 }
 
 bool ACreature::GetCanAttack()
@@ -263,7 +291,6 @@ void ACreature::ReloadButtonPressed()
 	}
 
 	CombatComponent->SetIsAttacking(false);
-	PlayReloadMontage();
 }
 
 void ACreature::AttackButtonPressed()
@@ -440,7 +467,8 @@ void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
 {
 	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), false);
-	CombatComponent->GetCurWeapon()->OnAttack.AddDynamic(this, &ACreature::OnCurWeaponAttackEvent);
+	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
+	Weapon->OnPlayFppMontage.AddDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 
 	switch (Weapon->GetWeaponType())
 	{
@@ -450,9 +478,12 @@ void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
 		break;
 	case EWeaponType::MELEE:
 	{
-		AMelee* Melee = Cast<AMelee>(Weapon);
-		Melee->OnAssassinate.AddDynamic(this, &ACreature::OnAssassinateEvent);
-		Melee->OnAssassinateEnd.AddDynamic(this, &ACreature::OnAssassinateEndEvent);
+		UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
+		if (AssassinateComp)
+		{
+			AssassinateComp->OnAssassinate.AddDynamic(this, &ACreature::OnAssassinateEvent);
+			AssassinateComp->OnAssassinateEnd.AddDynamic(this, &ACreature::OnAssassinateEndEvent);
+		}
 	}
 		break;
 	default:
@@ -465,10 +496,12 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 	if(!Weapon)
 		return;
 
+	Weapon->OnPlayTppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
+	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
+
 	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), true);
 	RpcComponent->Montage_Stop(GetMesh(), Weapon->GetReloadMontageTpp());
 	RpcComponent->Montage_Stop(GetMesh(), Weapon->GetAttackMontageTpp());
-	Weapon->OnAttack.RemoveDynamic(this, &ACreature::OnCurWeaponAttackEvent);
 
 	switch (Weapon->GetWeaponType())
 	{
@@ -478,9 +511,12 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 		break;
 	case EWeaponType::MELEE:
 	{
-		AMelee* Melee = Cast<AMelee>(Weapon);
-		Melee->OnAssassinate.RemoveDynamic(this, &ACreature::OnAssassinateEvent);
-		Melee->OnAssassinateEnd.RemoveDynamic(this, &ACreature::OnAssassinateEndEvent);
+		UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
+		if (AssassinateComp)
+		{
+			AssassinateComp->OnAssassinate.RemoveDynamic(this, &ACreature::OnAssassinateEvent);
+			AssassinateComp->OnAssassinateEnd.RemoveDynamic(this, &ACreature::OnAssassinateEndEvent);
+		}
 	}
 	break;
 	default:
@@ -498,33 +534,6 @@ void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent
 	RpcComponent->SetCollisionProfileName(GetMesh(), FName("Ragdoll"));
 
 	Server_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-}
-
-void ACreature::OnCurWeaponAttackEvent()
-{
-	if(CombatComponent->GetCurWeapon() == nullptr)
-		UE_LOG(LogTemp,Fatal,TEXT("Cur weapon is nullptr but it attacked"));
-
-	PlayAttackMontage();
-}
-
-void ACreature::OnAssassinateEvent(AActor* AssassinatedActor)
-{
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	DisableInput(PlayerController);
-
-	Camera->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepRelativeTransform, "head");
-	
-}
-
-void ACreature::OnAssassinateEndEvent()
-{
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	EnableInput(PlayerController);
-
-	Camera->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
-
-	Camera->AttachToComponent(SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
 }
 
 void ACreature::Landed(const FHitResult& Hit)
@@ -555,6 +564,16 @@ void ACreature::OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust)
 
 }
  
+void ACreature::OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
+{
+	RpcComponent->Montage_Play(GetMesh(), PlayedMontage, Speed);
+}
+
+void ACreature::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
+{
+
+}
+
 void ACreature::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
 }
@@ -568,28 +587,10 @@ void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamag
 {
 }
 
-void ACreature::PlayReloadMontage()
-{
-	RpcComponent->Montage_Play(GetMesh(), CombatComponent->GetCurWeapon()->GetReloadMontageTpp(), 1.5f);
-}
-
-void ACreature::PlayAttackMontage()
-{
-	RpcComponent->Montage_Play(GetMesh(), CombatComponent->GetCurWeapon()->GetAttackMontageTpp(), 1.0f);
-}
-
 void ACreature::PlayLandedMontage()
 {
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
 	RpcComponent->Montage_Play(GetMesh(), CreatureAnim->GetLandedMontage());
-}
-
-void ACreature::StopReloadMontage()
-{
-	if(CombatComponent->GetCurWeapon() == nullptr)
-		return;
-
-	RpcComponent->Montage_Stop(GetMesh(), CombatComponent->GetCurWeapon()->GetReloadMontageTpp(), 0.f);
 }
 
 void ACreature::Jump()

@@ -3,6 +3,8 @@
 #pragma once
 
 #include "EngineMinimal.h"
+#include "Kraver/Custom/CustomDelegate.h"
+#include "Kraver/Custom/CustomEnum.h"
 
 using namespace std;
 
@@ -20,6 +22,7 @@ DECLARE_LOG_CATEGORY_EXTERN(Kraver, Log, All);
 #define KR_LOG_S(Verbosity) UE_LOG(Kraver, Verbosity, TEXT("%s"), *KR_CALLINFO)
 #define KR_LOG(Verbosity, Format, ...) UE_LOG(Kraver, Verbosity, TEXT("%s : %s : %s"), *KR_CALLINFO, *this->GetName() ,*FString::Printf(Format, ##__VA_ARGS__))
 #define KR_LOG_CHECK(Expr, ...) {if(!(Expr)) { KR_LOG(Error, TEXT("SSERTION : %s"), TEXT("'"#Expr"'")); return __VA_ARGS__;}}
+#define KR_LOG_VECTOR(Vector) { KR_LOG(Log, TEXT("X : %f , Y : %f , Z : %f"), Vector.X, Vector.Y, Vector.Z) }
 
 // Function
 bool LineTraceMultiByChannel_ExceptWorldObject(UWorld* World, TArray<struct FHitResult>& OutHits, const FVector& Start, const FVector& End, ECollisionChannel TraceChannel, const FCollisionQueryParams& Params = FCollisionQueryParams::DefaultQueryParam, const FCollisionResponseParams& ResponseParam = FCollisionResponseParams::DefaultResponseParam); 

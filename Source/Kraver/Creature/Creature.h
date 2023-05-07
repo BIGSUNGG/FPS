@@ -4,22 +4,13 @@
 
 #include "Kraver/Kraver.h"
 #include "GameFramework/Character.h"
-#include "Kraver/KraverComponent/CombatComponent.h"
-#include "Kraver/KraverComponent/RpcComponent.h"
+#include "Kraver/KraverComponent/Combat/CombatComponent.h"
+#include "Kraver/KraverComponent/Rpc/RpcComponent.h"
 #include "Kraver/Weapon/Weapon.h"
 #include "Engine/DamageEvents.h"
 #include "Creature.generated.h"
 
 struct FAssassinateInfo;
-
-// 캐릭터의 움직임 상태를 가지는 enum class
-UENUM(BlueprintType)
-enum class EMovementState : uint8
-{
-	WALK		UMETA(DisplayName = "WALK"),
-	RUN			UMETA(DisplayName = "RUN"),
-	SPRINT		UMETA(DisplayName = "SPRINT"),
-};
 
 UCLASS()
 class KRAVER_API ACreature : public ACharacter
@@ -45,9 +36,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void CameraTick(float DeltaTime);
 
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	// Delegate
+	UFUNCTION()
+		virtual void OnAssassinateEvent(AActor* AssassinatedActor);
+	UFUNCTION()
+		virtual void OnAssassinateEndEvent();
 
 public:
 	// Getter Setter
@@ -73,18 +69,30 @@ protected:
 	virtual void Turn(float NewAxisValue);
 
 	// Button Input
-	virtual void ReloadButtonPressed();
-	virtual void AttackButtonPressed();
-	virtual void AttackButtonReleased();
-	virtual void SubAttackButtonPressed();
-	virtual void SubAttackButtonReleased();
-	virtual void RunButtonPressed();
-	virtual void RunButtonReleased();
-	virtual void CrouchButtonPressed();
-	virtual void CrouchButtonReleased();
-	virtual void JumpingButtonPressed();
-	virtual void JumpingButtonReleased();
-	virtual void HolsterWeaponPressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void ReloadButtonPressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void AttackButtonPressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void AttackButtonReleased();
+	UFUNCTION(BlueprintCallable)
+		virtual void SubAttackButtonPressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void SubAttackButtonReleased();
+	UFUNCTION(BlueprintCallable)
+		virtual void RunButtonPressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void RunButtonReleased();
+	UFUNCTION(BlueprintCallable)
+		virtual void CrouchButtonPressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void CrouchButtonReleased();
+	UFUNCTION(BlueprintCallable)
+		virtual void JumpingButtonPressed();
+	UFUNCTION(BlueprintCallable)
+		virtual void JumpingButtonReleased();
+	UFUNCTION(BlueprintCallable)
+		virtual void HolsterWeaponPressed();
 
 	// Tick함수에서 호출될 함수
 	virtual void AimOffset(float DeltaTime);
@@ -101,16 +109,14 @@ protected:
 	UFUNCTION()
 		virtual void OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 호출되는 함수
 	UFUNCTION()
-		virtual void OnCurWeaponAttackEvent();
-	UFUNCTION()
-		virtual void OnAssassinateEvent(AActor* AssassinatedActor);
-	UFUNCTION()
-		virtual void OnAssassinateEndEvent();
-	UFUNCTION()
 		void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
 	UFUNCTION()
 		virtual void OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 	void OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust) override; // 일어났을때 호출되는 함수
+	UFUNCTION()
+		virtual void OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+	UFUNCTION()
+		virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 
 	// RPC
 	UFUNCTION(Server, reliable)
@@ -123,18 +129,15 @@ protected:
 		void Multicast_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 모든 클라이언트에서 호출되는 함수
 
 	// Function
-	virtual void PlayReloadMontage();
-	virtual void PlayAttackMontage();
 	virtual void PlayLandedMontage();
-
-	virtual void StopReloadMontage();
 
 	virtual void Jump();
 
 public:
 	// Component
 	URpcComponent* RpcComponent;
-	UCombatComponent* CombatComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
+		UCombatComponent* CombatComponent;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))

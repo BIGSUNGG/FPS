@@ -4,6 +4,7 @@
 #include "Weapon.h"
 #include "Net/UnrealNetwork.h"
 #include "Kraver/Creature/Creature.h"
+#include "Kraver/KraverComponent/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
 #include "Engine/EngineTypes.h"
 #include "Engine/DamageEvents.h"
 
@@ -15,12 +16,15 @@ AWeapon::AWeapon()
 	bReplicates = true;
 	SetReplicateMovement(true);
 
+	WeaponComponents.SetNum(10);
+
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
 	WeaponMesh->SetCollisionProfileName(FName("WeaponMesh"));
 	WeaponMesh->SetSimulatePhysics(true);
 	WeaponMesh->bReplicatePhysicsToAutonomousProxy = true;
 	SetRootComponent(WeaponMesh);
 
+	OnAttack.AddDynamic(this, &AWeapon::OnAttackEvent);
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -79,7 +83,7 @@ void AWeapon::Tick(float DeltaTime)
 			if (bFirstInputAttack && bCanFirstInputAttack)
 			{
 				bFirstInputAttack = false;
-				AttackStartEvent();
+				OnAttackStartEvent();
 			}
 		}
 	}
@@ -184,7 +188,7 @@ bool AWeapon::UnEquipped()
 	SetOwnerCreature(nullptr);
 
 	if(IsAttacking)
-		AttackEndEvent();
+		OnAttackEndEvent();
 
 	WeaponMesh->SetSimulatePhysics(true);
 	CreaturePtr->RpcComponent->SetCollisionEnabled(WeaponMesh, ECollisionEnabled::QueryAndPhysics);
@@ -209,11 +213,13 @@ void AWeapon::AddOnOwnerDelegate()
 	if (OwnerCreature == nullptr)
 		return;
 
-	OwnerCreature->CombatComponent->OnAttackStartDelegate.AddDynamic(this, &AWeapon::AttackStartEvent);
-	OwnerCreature->CombatComponent->OnAttackEndDelegate.AddDynamic(this, &AWeapon::AttackEndEvent);
+	OwnerCreature->CombatComponent->OnAttackStartDelegate.AddDynamic(this, &AWeapon::OnAttackStartEvent);
+	OwnerCreature->CombatComponent->OnAttackEndDelegate.AddDynamic(this, &AWeapon::OnAttackEndEvent);
 
-	OwnerCreature->CombatComponent->OnSubAttackStartDelegate.AddDynamic(this, &AWeapon::SubAttackStartEvent);
-	OwnerCreature->CombatComponent->OnSubAttackEndDelegate.AddDynamic(this, &AWeapon::SubAttackEndEvent);
+	OwnerCreature->CombatComponent->OnSubAttackStartDelegate.AddDynamic(this, &AWeapon::OnSubAttackStartEvent);
+	OwnerCreature->CombatComponent->OnSubAttackEndDelegate.AddDynamic(this, &AWeapon::OnSubAttackEndEvent);
+
+	OnAddOnDelegate.Broadcast(OwnerCreature);
 }
 
 void AWeapon::RemoveOnOwnerDelegate()
@@ -221,11 +227,69 @@ void AWeapon::RemoveOnOwnerDelegate()
 	if (OwnerCreature == nullptr)
 		return;
 
-	OwnerCreature->CombatComponent->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::AttackStartEvent);
-	OwnerCreature->CombatComponent->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::AttackEndEvent);
+	OwnerCreature->CombatComponent->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::OnAttackStartEvent);
+	OwnerCreature->CombatComponent->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::OnAttackEndEvent);
 
-	OwnerCreature->CombatComponent->OnSubAttackStartDelegate.RemoveDynamic(this, &AWeapon::SubAttackStartEvent);
-	OwnerCreature->CombatComponent->OnSubAttackEndDelegate.RemoveDynamic(this, &AWeapon::SubAttackEndEvent);
+	OwnerCreature->CombatComponent->OnSubAttackStartDelegate.RemoveDynamic(this, &AWeapon::OnSubAttackStartEvent);
+	OwnerCreature->CombatComponent->OnSubAttackEndDelegate.RemoveDynamic(this, &AWeapon::OnSubAttackEndEvent);
+
+	OnRemoveOnDelegate.Broadcast(OwnerCreature);
+}
+
+void AWeapon::AttackCancel()
+{
+	bAttackCanceled = true;
+	KR_LOG(Log, TEXT("Attack Canceled2"));
+}
+
+void AWeapon::OnAttackStartEvent()
+{
+	if (IsAttacking == true)
+		return;
+
+	if (CurAttackDelay > 0 && bCanFirstInputAttack)
+	{
+		bFirstInputAttack = true;
+		return;
+	}
+
+	SetIsAttacking(true);
+
+	if (bCanAttack)
+	{
+		if (!bFirstAttackDelay)
+		{
+			Attack();
+		}
+
+		if (bAutomaticAttack)
+			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, bAutomaticAttack, AttackDelay);
+	}
+
+	OnAttackStart.Broadcast();
+}
+
+void AWeapon::OnAttackEndEvent()
+{
+	bFirstInputAttack = false;
+	if (IsAttacking == false)
+		return;
+
+	SetIsAttacking(false);
+	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle);
+	OnAttackEnd.Broadcast();
+}
+
+void AWeapon::OnSubAttackStartEvent()
+{
+	SetIsSubAttacking(true);
+	OnSubAttackStart.Broadcast();
+}
+
+void AWeapon::OnSubAttackEndEvent()
+{
+	SetIsSubAttacking(false);
+	OnSubAttackEnd.Broadcast();
 }
 
 void AWeapon::Server_UnEquipped_Implementation()
@@ -235,56 +299,26 @@ void AWeapon::Server_UnEquipped_Implementation()
 	WeaponMesh->SetSimulatePhysics(true);
 }
 
-void AWeapon::AttackStartEvent()
+void AWeapon::OnAttackEvent()
 {
-	if(IsAttacking == true)
-		return;
 
-	if (CurAttackDelay > 0 && bCanFirstInputAttack)
-	{	
-		bFirstInputAttack = true;
-		return;
-	}
-
-	SetIsAttacking(true);
-
-	if(bCanAttack)
-	{	
-		if (!bFirstAttackDelay)
-		{
-			Attack();
-		}
-
-		if(bAutomaticAttack)
-			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, bAutomaticAttack, AttackDelay);
-	}
-}
-
-void AWeapon::AttackEndEvent()
-{
-	bFirstInputAttack = false;
-	if(IsAttacking == false)
-		return;
-
-	SetIsAttacking(false);
-	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle);
-}
-
-void AWeapon::SubAttackStartEvent()
-{
-	SetIsSubAttacking(true);
-}
-
-void AWeapon::SubAttackEndEvent()
-{
-	SetIsSubAttacking(false);
 }
 
 void AWeapon::Attack()
 {
 	CurAttackDelay = AttackDelay;
+	
+	OnBeforeAttack.Broadcast();
 
+	if (bAttackCanceled)
+	{
+		bAttackCanceled = false;
+		OnAttackFailed.Broadcast();
+		KR_LOG(Log,TEXT("Attack Canceled"));
+		return;
+	}
 	OnAttack.Broadcast();
+	OnAttackSuccess.Broadcast();
 }
 
 void AWeapon::SetOwnerCreature(ACreature* pointer)
