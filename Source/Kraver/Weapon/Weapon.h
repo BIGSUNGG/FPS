@@ -4,7 +4,6 @@
 
 #include "Kraver/Kraver.h"
 #include "GameFramework/Actor.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "Weapon.generated.h"
 
 class UWeaponComponent;

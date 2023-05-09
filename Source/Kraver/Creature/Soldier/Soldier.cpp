@@ -2,7 +2,6 @@
 
 
 #include "Soldier.h"
-#include "Net/UnrealNetwork.h"
 
 ASoldier::ASoldier()
 	: ACreature()

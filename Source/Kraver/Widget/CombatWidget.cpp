@@ -4,7 +4,6 @@
 #include "Kraver/Widget/CombatWidget.h"
 #include "Kraver/Creature/Creature.h"
 #include "Kraver/Weapon/Gun/Gun.h"
-#include "Components/TextBlock.h"
 
 void UCombatWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {

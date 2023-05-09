@@ -2,7 +2,6 @@
 
 
 #include "InteractionWidget.h"
-#include "Components/TextBlock.h"
 
 void UInteractionWidget::NativeOnInitialized()
 {

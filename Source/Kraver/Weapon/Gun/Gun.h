@@ -3,8 +3,6 @@
 #pragma once
 
 #include "Kraver/Weapon/Weapon.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
 #include "Gun.generated.h"
 
 /**

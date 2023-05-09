@@ -6,8 +6,6 @@
 #include "GameFramework/Character.h"
 #include "Kraver/KraverComponent/Combat/CombatComponent.h"
 #include "Kraver/KraverComponent/Rpc/RpcComponent.h"
-#include "Kraver/Weapon/Weapon.h"
-#include "Engine/DamageEvents.h"
 #include "Creature.generated.h"
 
 struct FAssassinateInfo;
@@ -135,9 +133,9 @@ protected:
 
 public:
 	// Component
-	URpcComponent* RpcComponent;
+	class URpcComponent* RpcComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-		UCombatComponent* CombatComponent;
+		class UCombatComponent* CombatComponent;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))

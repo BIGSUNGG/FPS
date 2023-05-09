@@ -5,7 +5,6 @@
 #include "Kraver/Kraver.h"
 #include "Components/ActorComponent.h"
 #include "Kraver/Weapon/Weapon.h"
-#include "Engine/DamageEvents.h"
 #include "CombatComponent.generated.h"
 
 class ACreature;

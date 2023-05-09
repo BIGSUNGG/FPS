@@ -3,15 +3,10 @@
 
 #include "KraverPlayer.h"
 #include "Kraver/Weapon/Gun/Gun.h"
-#include "DrawDebugHelpers.h"
-#include "Net/UnrealNetwork.h"
 #include "Kraver/HUD/KraverHud.h"
 #include "Kraver/PlayerController/KraverPlayerController.h"
 #include "Kraver/GameMode/KraverGameMode.h"
 #include "Kraver/Anim/Creature/CreatureAnimInstance.h"
-#include "Math/UnrealMathUtility.h"
-#include "Math/TransformNonVectorized.h"
-#include "Kismet/KismetMathLibrary.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {

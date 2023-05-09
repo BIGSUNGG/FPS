@@ -2,11 +2,7 @@
 
 
 #include "Gun.h"
-#include "Components/DecalComponent.h"
-#include "Net/UnrealNetwork.h"
 #include "Kraver/Creature/Creature.h"
-#include "Engine/EngineTypes.h"
-#include "Engine/DamageEvents.h"
 
 AGun::AGun() : AWeapon()
 {

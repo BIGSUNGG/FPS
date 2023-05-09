@@ -27,6 +27,7 @@ protected:
 	UFUNCTION()
 		virtual void OnRefiilAmmoEvent();
 
+	virtual void OnBeforeAttackEvent() override;
 public:
 	bool GetCanReload();
 

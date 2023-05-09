@@ -58,6 +58,14 @@ void UWeaponReloadComponent::OnRefiilAmmoEvent()
 	OwnerGun->RefillAmmo();
 }
 
+void UWeaponReloadComponent::OnBeforeAttackEvent()
+{
+	UWeaponComponent::OnBeforeAttackEvent();
+
+	if(GetOwnerCreature()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontageTpp))
+		OwnerGun->AttackCancel();
+}
+
 bool UWeaponReloadComponent::GetCanReload()
 {
 	if (OwnerGun->GetCurAmmo() == OwnerGun->GetMaxAmmo())

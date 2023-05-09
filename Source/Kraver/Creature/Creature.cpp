@@ -3,9 +3,6 @@
 
 #include "Creature.h"
 #include "Kraver/Anim/Creature/CreatureAnimInstance.h"
-#include "Components/WidgetComponent.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Net/UnrealNetwork.h"
 #include "Kraver/Weapon/Melee/Melee.h"
 #include "Kraver/KraverComponent/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
 
@@ -473,17 +470,16 @@ void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
 	case EWeaponType::GUN:
 		break;
 	case EWeaponType::MELEE:
-	{
-		UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
-		if (AssassinateComp)
-		{
-			AssassinateComp->OnAssassinate.AddDynamic(this, &ACreature::OnAssassinateEvent);
-			AssassinateComp->OnAssassinateEnd.AddDynamic(this, &ACreature::OnAssassinateEndEvent);
-		}
-	}
 		break;
 	default:
 		break;
+	}
+
+	UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
+	if (AssassinateComp)
+	{
+		AssassinateComp->OnAssassinate.AddDynamic(this, &ACreature::OnAssassinateEvent);
+		AssassinateComp->OnAssassinateEnd.AddDynamic(this, &ACreature::OnAssassinateEndEvent);
 	}
 }
 
@@ -505,17 +501,16 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 	case EWeaponType::GUN:
 		break;
 	case EWeaponType::MELEE:
-	{
-		UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
-		if (AssassinateComp)
-		{
-			AssassinateComp->OnAssassinate.RemoveDynamic(this, &ACreature::OnAssassinateEvent);
-			AssassinateComp->OnAssassinateEnd.RemoveDynamic(this, &ACreature::OnAssassinateEndEvent);
-		}
-	}
-	break;
+		break;
 	default:
 		break;
+	}
+
+	UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
+	if (AssassinateComp)
+	{
+		AssassinateComp->OnAssassinate.RemoveDynamic(this, &ACreature::OnAssassinateEvent);
+		AssassinateComp->OnAssassinateEnd.RemoveDynamic(this, &ACreature::OnAssassinateEndEvent);
 	}
 }
 

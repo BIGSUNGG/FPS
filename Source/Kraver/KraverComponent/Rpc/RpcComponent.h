@@ -4,9 +4,6 @@
 
 #include "Kraver/Kraver.h"
 #include "Components/ActorComponent.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
-#include "Engine/EngineTypes.h"
 #include "RpcComponent.generated.h"
 
 // 서버에서 호출되는 함수를 가지는 컴포넌트

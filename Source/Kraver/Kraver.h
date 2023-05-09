@@ -3,8 +3,9 @@
 #pragma once
 
 #include "EngineMinimal.h"
-#include "Kraver/Custom/CustomDelegate.h"
-#include "Kraver/Custom/CustomEnum.h"
+#include "Kraver/Utility/UnrealHeaders.h"
+#include "Kraver/Utility/CustomDelegate.h"
+#include "Kraver/Utility/CustomEnum.h"
 
 using namespace std;
 
