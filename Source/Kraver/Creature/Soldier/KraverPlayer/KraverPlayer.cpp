@@ -559,7 +559,6 @@ void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
 	ASoldier::OnHolsterWeaponEvent(Weapon);
 	
 	ArmWeaponMeshes[Weapon]->SetHiddenInGame(true);
-	RpcComponent->Montage_Stop(ArmMesh, Weapon->GetReloadMontageFpp());
 	RpcComponent->Montage_Stop(ArmMesh, Weapon->GetAttackMontageFpp());
 	RefreshCurViewType();
 }
@@ -619,7 +618,7 @@ void AKraverPlayer::PlayLandedMontage()
 
 void AKraverPlayer::WeaponADS(float DeltaTime)
 {
-	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && ArmMesh->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageFpp()) == false)
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking())
 	{
 		USkeletalMeshComponent* ArmWeaponMesh = GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()];
 		ArmMesh->AddRelativeRotation(WeaponAdsRotation * -1);
@@ -648,7 +647,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 		if (HUD)
 			HUD->SetbDrawCrosshair(false);
 	}
-	else if ((CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && ArmMesh->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageFpp())) == false)
+	else if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() == false)
 	{
 		FRotator TargetRotation = FRotator::ZeroRotator;
 		FVector TargetLocation = FVector::ZeroVector;
@@ -658,7 +657,6 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 
 		if (HUD)
 			HUD->SetbDrawCrosshair(true);
-
 	}
 
 }

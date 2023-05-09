@@ -188,14 +188,6 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	}
 }
 
-void UCombatComponent::RefillAmmo()
-{
-	if(!CurWeapon)
-		return;
-
-	CurWeapon->RefillAmmo();
-}
-
 void UCombatComponent::EquipWeapon(AWeapon* Weapon)
 {
 	if (!Weapon)

@@ -34,7 +34,6 @@ void UWeaponAssassinateComponent::OnAddOnDelegateEvent(UObject* Object)
 	{
 		AnimInstance->OnMelee_AssassinateAttack.AddDynamic(this, &UWeaponAssassinateComponent::OnAssassinateAttackEvent);
 		AnimInstance->OnMelee_AssassinateEnd.AddDynamic(this, &UWeaponAssassinateComponent::OnAssassinateEndEvent);
-		KR_LOG(Log, TEXT("H"));
 	}
 }
 
@@ -77,12 +76,12 @@ std::pair<bool, FHitResult> UWeaponAssassinateComponent::CalculateCanAssassinate
 	pair<bool, FHitResult> Result;
 
 	FCollisionQueryParams Params(NAME_None, false, OwnerMelee);
-	Params.AddIgnoredActor(OwnerCreature);
+	Params.AddIgnoredActor(GetOwnerCreature());
 
 	bool bSuccess = GetWorld()->SweepSingleByChannel(
 		Result.second,
-		OwnerCreature->GetCamera()->GetComponentLocation(),
-		OwnerCreature->GetCamera()->GetComponentLocation() + OwnerCreature->GetCamera()->GetForwardVector() * 30.f,
+		GetOwnerCreature()->GetCamera()->GetComponentLocation(),
+		GetOwnerCreature()->GetCamera()->GetComponentLocation() + GetOwnerCreature()->GetCamera()->GetForwardVector() * 30.f,
 		FQuat::Identity,
 		ECC_ASSASSINATION,
 		FCollisionShape::MakeSphere(34.f),
@@ -91,7 +90,7 @@ std::pair<bool, FHitResult> UWeaponAssassinateComponent::CalculateCanAssassinate
 
 	if (bSuccess)
 	{
-		FTransform OwnerTransform = OwnerCreature->GetTransform();
+		FTransform OwnerTransform = GetOwnerCreature()->GetTransform();
 		FTransform EnemyTransform = Result.second.GetActor()->GetTransform();
 		FTransform RelativeTransform = OwnerTransform.GetRelativeTransform(EnemyTransform);
 		FRotator RelativeRotation = RelativeTransform.Rotator();
@@ -116,22 +115,22 @@ void UWeaponAssassinateComponent::Server_Assassinate_Implementation(AActor* Acto
 	AssassinateInfo.AssassinatedMontagesFpp = AssassinatedMontagesFpp;
 	AssassinateInfo.AssassinatedMontagesTpp = AssassinatedMontagesTpp;
 
-	Creature->Assassinated(OwnerCreature, AssassinateInfo);
+	Creature->Assassinated(GetOwnerCreature(), AssassinateInfo);
 }
 
 void UWeaponAssassinateComponent::OnAssassinateAttackEvent()
 {
 	FDamageEvent TempDamageEvent;
-	OwnerCreature->CombatComponent->GiveDamage(CurAssassinatedCreature, AssassinationDamage, TempDamageEvent, OwnerCreature->GetController(), OwnerMelee);
+	GetOwnerCreature()->CombatComponent->GiveDamage(CurAssassinatedCreature, AssassinationDamage, TempDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
 
-	OwnerCreature->RpcComponent->SetSimulatedPhysics(CurAssassinatedCreature->GetMesh(), false);
+	GetOwnerCreature()->RpcComponent->SetSimulatedPhysics(CurAssassinatedCreature->GetMesh(), false);
 }
 
 void UWeaponAssassinateComponent::OnAssassinateEndEvent()
 {
 	IsAssassinating = false;
 	if (CurAssassinatedCreature->CombatComponent->GetCurHp() <= 0)
-		OwnerCreature->RpcComponent->SetSimulatedPhysics(CurAssassinatedCreature->GetMesh(), true);
+		GetOwnerCreature()->RpcComponent->SetSimulatedPhysics(CurAssassinatedCreature->GetMesh(), true);
 
 	OnAssassinateEnd.Broadcast();
 }

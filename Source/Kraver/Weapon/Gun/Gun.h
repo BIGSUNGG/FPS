@@ -26,7 +26,7 @@ public:
 	virtual int32 MakeAdditiveWeaponMesh() override;
 	virtual int32 RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh) override;
 
-	virtual bool RefillAmmo();
+	virtual bool RefillAmmo(); // CurAmmo를 보충함
 protected:
 	TArray<FHitResult>  CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread = FVector(0,0,0));
 	virtual void ShowFireEffect(); // FireEffect를 실행하는 함수
@@ -48,7 +48,6 @@ public:
 	int32 GetMaxAmmo() { return MaxAmmo; }
 	int32 GetTotalAmmo() { return TotalAmmo; }
 	float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; }
-	virtual bool GetCanReload() override;
 	UNiagaraComponent* GetFireEffect() { return FireEffect; }
 	TArray<UNiagaraComponent*> GetAdditiveFireEffect() { return AdditiveFireEffect; }
 

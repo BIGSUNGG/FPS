@@ -35,9 +35,6 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void SetHUDCrosshairs(float DeltaTime);
 
-	// Ect
-	virtual void RefillAmmo(); // 재장전하는 함수
-
 	// Equip UnEquip
 	virtual void EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
 	virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수

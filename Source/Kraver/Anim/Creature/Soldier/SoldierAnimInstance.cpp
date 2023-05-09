@@ -86,3 +86,8 @@ void USoldierAnimInstance::AnimNotify_Melee_AssassinateEnd()
 {
 	OnMelee_AssassinateEnd.Broadcast();
 }
+
+void USoldierAnimInstance::AnimNotify_RefillAmmo()
+{
+	OnRefillAmmo.Broadcast();
+}

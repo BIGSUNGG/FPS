@@ -17,9 +17,6 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 protected:
-	// Anim notify
-	UFUNCTION()
-		void AnimNotify_RefillAmmo();
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Data|Fabrik", meta = (AllowPrivateAccess = "true"))

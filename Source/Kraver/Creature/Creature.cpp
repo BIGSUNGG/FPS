@@ -283,14 +283,10 @@ void ACreature::Turn(float NewAxisValue)
 
 void ACreature::ReloadButtonPressed()
 {
-	if (CombatComponent->GetCurWeapon() == nullptr ||
-		CombatComponent->GetCurWeapon()->GetCanReload() == false ||
-		GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetReloadMontageTpp()) == true)
-	{
+	if(CombatComponent->GetCurWeapon() == nullptr)
 		return;
-	}
 
-	CombatComponent->SetIsAttacking(false);
+	CombatComponent->GetCurWeapon()->OnSkillFirst.Broadcast();
 }
 
 void ACreature::AttackButtonPressed()
@@ -500,7 +496,6 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 
 	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), true);
-	RpcComponent->Montage_Stop(GetMesh(), Weapon->GetReloadMontageTpp());
 	RpcComponent->Montage_Stop(GetMesh(), Weapon->GetAttackMontageTpp());
 
 	switch (Weapon->GetWeaponType())

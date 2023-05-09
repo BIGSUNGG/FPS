@@ -40,7 +40,6 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
-	OwnerCreature = OwnerWeapon->GetOwnerCreature();
 }
 
 void UWeaponComponent::OnAddOnDelegateEvent(UObject* Objcet)
@@ -56,5 +55,10 @@ void UWeaponComponent::OnRemoveOnDelegateEvent(UObject* Objcet)
 void UWeaponComponent::OnBeforeAttackEvent()
 {
 
+}
+
+ACreature* UWeaponComponent::GetOwnerCreature()
+{
+	return OwnerWeapon->GetOwnerCreature();
 }
 

@@ -8,7 +8,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class KRAVER_API UWeaponParrryComponent : public UWeaponComponent
 {
 	GENERATED_BODY()

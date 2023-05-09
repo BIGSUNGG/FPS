@@ -25,12 +25,3 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		FabrikLeftHand(KraverPlayer->GetArmMesh(), KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()], LeftHandFppFabrikTransform);
 	}
 }
-
-void UKraverPlayerFppAnimInstance::AnimNotify_RefillAmmo()
-{
-	if (KraverPlayer->CombatComponent->GetCurWeapon() == nullptr)
-		return;
-
-	KraverPlayer->CombatComponent->GetCurWeapon()->RefillAmmo();
-
-}

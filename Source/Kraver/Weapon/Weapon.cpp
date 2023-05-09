@@ -16,8 +16,6 @@ AWeapon::AWeapon()
 	bReplicates = true;
 	SetReplicateMovement(true);
 
-	WeaponComponents.SetNum(10);
-
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
 	WeaponMesh->SetCollisionProfileName(FName("WeaponMesh"));
 	WeaponMesh->SetSimulatePhysics(true);
@@ -143,11 +141,6 @@ int32 AWeapon::FindAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 	return Index;
 }
 
-bool AWeapon::RefillAmmo()
-{
-	return false;
-}
-
 bool AWeapon::Equipped(ACreature* Character)
 {
 	if (GetCanInteracted() == false)
@@ -239,7 +232,6 @@ void AWeapon::RemoveOnOwnerDelegate()
 void AWeapon::AttackCancel()
 {
 	bAttackCanceled = true;
-	KR_LOG(Log, TEXT("Attack Canceled2"));
 }
 
 void AWeapon::OnAttackStartEvent()
@@ -313,12 +305,9 @@ void AWeapon::Attack()
 	if (bAttackCanceled)
 	{
 		bAttackCanceled = false;
-		OnAttackFailed.Broadcast();
-		KR_LOG(Log,TEXT("Attack Canceled"));
 		return;
 	}
 	OnAttack.Broadcast();
-	OnAttackSuccess.Broadcast();
 }
 
 void AWeapon::SetOwnerCreature(ACreature* pointer)

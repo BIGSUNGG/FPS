@@ -32,9 +32,12 @@ protected:
 		virtual void OnBeforeAttackEvent();
 
 public:
+	// Getter Setter
+	ACreature* GetOwnerCreature();
+
+public:
 	FPlayMontageDele OnAttackDele;
 
 protected:
 	AWeapon* OwnerWeapon = nullptr;
-	ACreature* OwnerCreature = nullptr;
 };

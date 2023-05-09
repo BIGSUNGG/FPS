@@ -33,7 +33,6 @@ public:
 	virtual int32 RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh); // 추가적인 WeaponMesh를 제거 (Return 값은 제거된 WeaponMesh의 인덱스값)
 	virtual int32 FindAdditiveWeaponMesh(USkeletalMeshComponent* Mesh); // 추가적인 WeaponMesh를 찾음 (Return 값은 찾은 WeaponMesh의 인덱스값 못찾았을 경우 -1)
 
-	virtual bool RefillAmmo(); // CurAmmo를 보충함
 	virtual bool Equipped(ACreature* Character); // Character에게 장착됨
 	virtual bool UnEquipped(); // 장착해제됨
 	virtual bool Hold(); // Character 손에 들려짐
@@ -71,7 +70,6 @@ public:
 	bool GetCanInteracted();
 	bool GetIsAttacking() { return IsAttacking; }
 	bool GetIsSubAttacking() { return IsSubAttacking; }
-	virtual bool GetCanReload() { return false; }
 	float GetAttackImpulse() { return AttackImpulse; }
 	FName GetAttachSocketName() { return AttachSocketName; }
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
@@ -80,8 +78,6 @@ public:
 	USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
 	TArray<USkeletalMeshComponent*> GetAdditiveWeaponMesh() { return AdditiveWeaponMesh; }
 
-	UAnimMontage* GetReloadMontageTpp() { return ReloadMontageTpp; }
-	UAnimMontage* GetReloadMontageFpp() { return ReloadMontageFpp; }
 	UAnimSequence* GetAnimIdleTpp() { return AnimIdleTpp; }
 	UAnimSequence* GetAnimIdleFpp() { return AnimIdleFpp; }
 	UBlendSpace* GetAnimMovementTpp() { return AnimMovementTpp; }
@@ -93,13 +89,14 @@ public:
 	FAttackDele OnAttack;
 	FAttackDele OnBeforeAttack;
 
-	FAttackDele OnAttackSuccess;
-	FAttackDele OnAttackFailed;
-
 	FAttackStartDele OnAttackStart;
 	FAttackStartDele OnSubAttackStart;
 	FAttackEndDele OnAttackEnd;
 	FAttackEndDele OnSubAttackEnd;
+
+	FSkillDele OnSkillFirst; // R
+	FSkillDele OnSkillSecond; // Q
+	FSkillDele OnSkillThird; // E
 
 	FPlayMontageDele OnPlayTppMontage;
 	FPlayMontageDele OnPlayFppMontage;
@@ -134,10 +131,6 @@ protected:
 		EWeaponType WeaponType = EWeaponType::NONE; // 무기 종류
 
 	// Montage
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* ReloadMontageTpp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* ReloadMontageFpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))

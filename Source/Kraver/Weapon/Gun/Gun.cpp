@@ -108,8 +108,6 @@ int32 AGun::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 
 bool AGun::RefillAmmo()
 {
-	AWeapon::RefillAmmo();
-
 	if(CurAmmo == MaxAmmo)
 		return false;
 
@@ -267,17 +265,6 @@ void AGun::Multicast_ShowFireEffect_Implementation()
 			TempFireEffect->Activate(true);
 		}
 	}
-}
-
-bool AGun::GetCanReload()
-{
-	if (CurAmmo == MaxAmmo)
-		return false;
-
-	if (TotalAmmo == 0)
-		return false;
-
-	return true;
 }
 
 void AGun::AddSpread(float Spread)
