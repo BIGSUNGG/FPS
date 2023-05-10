@@ -118,20 +118,43 @@ void UWeaponAssassinateComponent::Server_Assassinate_Implementation(AActor* Acto
 	Creature->Assassinated(GetOwnerCreature(), AssassinateInfo);
 }
 
+void UWeaponAssassinateComponent::Server_OnAssassinateAttackEvent_Implementation()
+{
+	Multicast_OnAssassinateAttackEvent();
+}
+
+void UWeaponAssassinateComponent::Multicast_OnAssassinateAttackEvent_Implementation()
+{
+	CurAssassinatedCreature->GetMesh()->SetSimulatePhysics(false);
+}
+
+void UWeaponAssassinateComponent::Server_OnAssassinateEndEvent_Implementation()
+{
+	Multicast_OnAssassinateEndEvent();
+}
+
+void UWeaponAssassinateComponent::Multicast_OnAssassinateEndEvent_Implementation()
+{
+	if (CurAssassinatedCreature->CombatComponent->GetCurHp() <= 0)
+		CurAssassinatedCreature->GetMesh()->SetSimulatePhysics(true);
+}
+
 void UWeaponAssassinateComponent::OnAssassinateAttackEvent()
 {
 	FDamageEvent TempDamageEvent;
 	GetOwnerCreature()->CombatComponent->GiveDamage(CurAssassinatedCreature, AssassinationDamage, TempDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
+	CurAssassinatedCreature->GetMesh()->SetSimulatePhysics(false);
 
-	GetOwnerCreature()->RpcComponent->SetSimulatedPhysics(CurAssassinatedCreature->GetMesh(), false);
+	Server_OnAssassinateAttackEvent();
 }
 
 void UWeaponAssassinateComponent::OnAssassinateEndEvent()
 {
 	IsAssassinating = false;
 	if (CurAssassinatedCreature->CombatComponent->GetCurHp() <= 0)
-		GetOwnerCreature()->RpcComponent->SetSimulatedPhysics(CurAssassinatedCreature->GetMesh(), true);
+		CurAssassinatedCreature->GetMesh()->SetSimulatePhysics(true);
 
+	Server_OnAssassinateEndEvent();
 	OnAssassinateEnd.Broadcast();
 }
 

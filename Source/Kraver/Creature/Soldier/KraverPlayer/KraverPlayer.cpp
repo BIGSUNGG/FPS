@@ -376,38 +376,13 @@ void AKraverPlayer::ChangeView()
 
 void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 {
-	if (CombatComponent->GetIsDead() == false)
-	{
-		switch (ViewType)
-		{
-		case EViewType::FIRST_PERSON:
-		{
-			USkeletalMeshComponent* ArmWeaponMesh = ArmWeaponMeshes[Weapon];
-			RpcComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), false);
-			RpcComponent->DetachComponentFromComponent(Weapon->GetWeaponMesh());
-			RpcComponent->SetComponentLocation(Weapon->GetWeaponMesh(), ArmWeaponMesh->GetComponentLocation());
-			RpcComponent->SetComponentRotation(Weapon->GetWeaponMesh(), ArmWeaponMesh->GetComponentRotation());
-			GetWorldTimerManager().SetTimer(
-				UnEquipWeaponTimerHandle,
-				[=]() {					
-					RpcComponent->SetSimulatedPhysics(Weapon->GetWeaponMesh(), true);
-					RpcComponent->SetPhysicsLinearVelocity(Weapon->GetWeaponMesh(), FVector::ZeroVector);
-					RpcComponent->AddImpulse(Weapon->GetWeaponMesh(), (Camera->GetForwardVector() * WeaponThrowPower * Weapon->GetWeaponMesh()->GetMass()));
-					RpcComponent->AddAngularImpulseInDegrees(Weapon->GetWeaponMesh(), Camera->GetForwardVector() * WeaponThrowAngularPower, NAME_None, true);
-				},
-				0.000001f,
-					false);
-			break;
-		}
-		case EViewType::THIRD_PERSON:
-			Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
-			Weapon->GetWeaponMesh()->AddImpulse(Camera->GetForwardVector() * WeaponThrowPower, NAME_None, true);
-			break;
-		default:
-			UE_LOG(LogTemp, Fatal, TEXT("Need to support more EViewType"));
-			break;
-		}
-	}
+	USkeletalMeshComponent* ArmWeaponMesh = ArmWeaponMeshes[Weapon];
+	Server_ThrowWeapon(
+		Weapon,
+		ArmWeaponMesh->GetComponentLocation(),
+		ArmWeaponMesh->GetComponentRotation(),
+		Camera->GetForwardVector()
+		);
 
 }
 
@@ -441,6 +416,113 @@ void AKraverPlayer::Multicast_RefreshSpringArm_Implementation(FVector Vector, fl
 {
 	SpringArm->SetRelativeLocation(Vector);
 	SpringArm->TargetArmLength = Length;
+}
+
+void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction)
+{
+	Multicast_ThrowWeapon(Weapon, Location, Rotation, Direction);
+}
+
+void AKraverPlayer::Multicast_ThrowWeapon_Implementation(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction)
+{
+	Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
+	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	Weapon->GetWeaponMesh()->SetWorldLocation(Location);
+	Weapon->GetWeaponMesh()->SetWorldRotation(Rotation);
+	GetWorldTimerManager().SetTimer(
+		UnEquipWeaponTimerHandle,
+		[=]() {
+			Weapon->GetWeaponMesh()->SetSimulatePhysics(true);
+			Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
+			Weapon->GetWeaponMesh()->AddImpulse(Direction * WeaponThrowPower);
+			Weapon->GetWeaponMesh()->AddAngularImpulseInDegrees(Direction * WeaponThrowAngularPower, NAME_None, true);
+		},
+		0.000001f,
+			false);
+
+
+}
+
+void AKraverPlayer::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
+{
+	ASoldier::Multicast_OnPlayWeaponFppMontageEvent_Implementation(PlayedMontage, Speed);
+
+	ArmMesh->GetAnimInstance()->Montage_Play(PlayedMontage, Speed);
+}
+
+void AKraverPlayer::Server_WallRunJumpSuccess_Implementation(FVector PendingLaunchVelocity)
+{
+	GetCharacterMovement()->PendingLaunchVelocity = PendingLaunchVelocity;
+
+	Multicast_WallRunJumpSuccess(PendingLaunchVelocity);
+}
+
+void AKraverPlayer::Multicast_WallRunJumpSuccess_Implementation(FVector PendingLaunchVelocity)
+{
+	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
+	GetMesh()->GetAnimInstance()->Montage_Play(CreatureAnim->GetJumpMontage());
+}
+
+void AKraverPlayer::Server_WallRunEnd_Implementation()
+{
+	GetCharacterMovement()->GravityScale = DefaultGravity;
+}
+
+void AKraverPlayer::Server_DoubleJump_Implementation(FVector PendingLaunchVelocity)
+{
+	GetCharacterMovement()->PendingLaunchVelocity = PendingLaunchVelocity;
+	Multicast_DoubleJump(PendingLaunchVelocity);
+}
+
+void AKraverPlayer::Multicast_DoubleJump_Implementation(FVector PendingLaunchVelocity)
+{
+	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
+	GetMesh()->GetAnimInstance()->Montage_Play(CreatureAnim->GetJumpMontage());
+}
+
+void AKraverPlayer::Server_WallRunHorizonSuccess_Implementation()
+{
+	if (bWallRunGravity)
+		GetCharacterMovement()->GravityScale = WallRunTargetGravity;
+	if (GetVelocity().Z < 0.f)
+	{
+		GetCharacterMovement()->GravityScale = 0.f;
+		GetCharacterMovement()->PendingLaunchVelocity.Z = 0.f;
+	}
+}
+
+void AKraverPlayer::Server_WallRunVerticalSuccess_Implementation()
+{
+	GetCharacterMovement()->GravityScale = 0.f;
+}
+
+void AKraverPlayer::Server_WallRunSuccess_Implementation(FVector Location, FRotator Rotation, FVector Velocity, FVector PendingLaunchVelocity)
+{
+	SetActorLocation(Location);
+	SetActorRotation(Rotation);
+	GetCharacterMovement()->Velocity = Velocity;
+	GetCharacterMovement()->PendingLaunchVelocity = PendingLaunchVelocity;
+}
+
+void AKraverPlayer::Server_SlideSuccess_Implementation(FVector Velocity)
+{
+	GetCharacterMovement()->GroundFriction = SlideGroundFriction;
+	GetCharacterMovement()->BrakingDecelerationWalking = SlideBrakingDecelerationWalking;
+	GetCharacterMovement()->Velocity = Velocity;
+}
+
+void AKraverPlayer::Server_SlideEnd_Implementation()
+{
+	GetCharacterMovement()->GroundFriction = DefaultGroundFriction;
+	GetCharacterMovement()->BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
+}
+
+void AKraverPlayer::Server_SlideUpdate_Implementation()
+{
+	FVector Slope = CaclulateCurrentFllorSlopeVector();
+	FVector SlopePhysics = Slope * SlideSlopeSpeed;
+	SlopePhysics.Z = 0.f;
+	GetCharacterMovement()->Velocity += SlopePhysics;
 }
 
 void AKraverPlayer::RefreshCurViewType()
@@ -554,7 +636,7 @@ void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
 	ASoldier::OnHolsterWeaponEvent(Weapon);
 	
 	ArmWeaponMeshes[Weapon]->SetHiddenInGame(true);
-	RpcComponent->Montage_Stop(ArmMesh, Weapon->GetAttackMontageFpp());
+	ArmMesh->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageFpp());
 	RefreshCurViewType();
 }
 
@@ -582,7 +664,6 @@ void AKraverPlayer::OnAssassinateEndEvent()
 void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
 {
 	ASoldier::OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
-	RpcComponent->Montage_Play(ArmMesh, PlayedMontage, Speed);
 }
 
 void AKraverPlayer::Crouch(bool bClientSimulation /*= false*/)
@@ -699,9 +780,7 @@ void AKraverPlayer::WallRunJump()
 		LaunchVector.Y = WallRunNormal.Y * WallRunJumpOffForce;
 		LaunchVector.Z = WallRunJumpHeight;
 		LaunchCharacter(LaunchVector, false ,true);
-		RpcComponent->SetPendingLaunchVelocity(GetCharacterMovement()->PendingLaunchVelocity);
-		UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-		RpcComponent->Montage_Play(GetMesh(), CreatureAnim->GetJumpMontage());
+		Server_WallRunJumpSuccess(GetCharacterMovement()->PendingLaunchVelocity);
 	}
 	else
 	{
@@ -759,10 +838,8 @@ void AKraverPlayer::DoubleJump()
 	}
 
 	LaunchCharacter(LaunchPower, bOverideXY, true);
-	RpcComponent->SetPendingLaunchVelocity(GetCharacterMovement()->PendingLaunchVelocity);
 
-	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-	RpcComponent->Montage_Play(GetMesh(), CreatureAnim->GetJumpMontage());
+	Server_DoubleJump(GetCharacterMovement()->PendingLaunchVelocity);
 
 	KR_LOG(Log, TEXT("Dobule Jump Power : %f %f"), ForwardLaunchPower, RightLaunchPower);
 }
@@ -785,6 +862,8 @@ bool AKraverPlayer::WallRunUpdate()
 					FColor::White,
 					TEXT("WallRunVertical")
 				);
+				Server_WallRunVerticalSuccess();
+				Server_WallRunSuccess(GetActorLocation(), GetActorRotation(), GetCharacterMovement()->Velocity, GetCharacterMovement()->PendingLaunchVelocity);
 				return true;
 			}
 		}
@@ -795,12 +874,11 @@ bool AKraverPlayer::WallRunUpdate()
 			if (WallRunHorizonSuccess)
 			{
 				if (bWallRunGravity)
-					RpcComponent->SetGravityScale(WallRunTargetGravity);
+					GetCharacterMovement()->GravityScale = WallRunTargetGravity;
 				if (GetVelocity().Z < 0.f)
 				{
-					RpcComponent->SetGravityScale(0.f);
+					GetCharacterMovement()->GravityScale = 0.f;
 					GetCharacterMovement()->PendingLaunchVelocity.Z = 0.f;
-					RpcComponent->SetPendingLaunchVelocity(GetCharacterMovement()->PendingLaunchVelocity);
 				}
 
 				GEngine->AddOnScreenDebugMessage(
@@ -809,6 +887,9 @@ bool AKraverPlayer::WallRunUpdate()
 					FColor::White,
 					TEXT("WallRunHorizon")
 				);
+
+				Server_WallRunHorizonSuccess();
+				Server_WallRunSuccess(GetActorLocation(), GetActorRotation(), GetCharacterMovement()->Velocity, GetCharacterMovement()->PendingLaunchVelocity);
 				return true;
 			}
 		}
@@ -861,7 +942,6 @@ bool AKraverPlayer::WallRunVerticalUpdate()
 			WallRunStart();
 	
 		SetCurWallRunState(EWallRunState::WALLRUN_VERTICAL);
-		RpcComponent->SetGravityScale(0.f);
 		return true;
 	}
 	else
@@ -896,7 +976,6 @@ bool AKraverPlayer::WallRunHorizonMovement(FVector Start, FVector End, float Wal
 
 			FRotator Temp = WallRunVec.Rotation();
 			KR_LOG(Log, TEXT("%f %f %f"), Temp.Pitch, Temp.Roll, Temp.Yaw);
-			RpcComponent->RegistCurMovement();
 			return true;
 		}
 	}
@@ -905,7 +984,7 @@ bool AKraverPlayer::WallRunHorizonMovement(FVector Start, FVector End, float Wal
 
 void AKraverPlayer::SlideStart()
 {
-	if(IsSliding)
+	if(!CanSlide())
 		return;
 
 	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
@@ -942,12 +1021,10 @@ void AKraverPlayer::SlideStart()
 	InputRightRatio = 0.4f;
 	GetCharacterMovement()->GroundFriction = SlideGroundFriction;
 	GetCharacterMovement()->BrakingDecelerationWalking = SlideBrakingDecelerationWalking;
-	RpcComponent->SetGroundFriction(SlideGroundFriction);
-	RpcComponent->SetBrakingDecelerationWalking(SlideBrakingDecelerationWalking);
 	GetCharacterMovement()->Velocity.X = SlidePower.X;
 	GetCharacterMovement()->Velocity.Y = SlidePower.Y;
-	RpcComponent->SetVelocity(GetCharacterMovement()->Velocity);
 	ASoldier::Crouch(true);
+	Server_SlideSuccess(GetCharacterMovement()->Velocity);
 
 	KR_LOG(Log,TEXT("Slide Start"));
 }
@@ -963,13 +1040,12 @@ void AKraverPlayer::SlideEnd(bool DoUncrouch)
 	InputRightRatio = 1.f;
 	GetCharacterMovement()->GroundFriction = DefaultGroundFriction;
 	GetCharacterMovement()->BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
-	RpcComponent->SetGroundFriction(DefaultGroundFriction);
-	RpcComponent->SetBrakingDecelerationWalking(DefaultBrakingDecelerationWalking);
 
 	if(DoUncrouch)
 		ASoldier::UnCrouch(true);
 
 	SuppressSlide(0.5f);
+	Server_SlideEnd();
 	KR_LOG(Log, TEXT("Slide End"));
 }
 
@@ -1004,7 +1080,6 @@ bool AKraverPlayer::WallRunVerticalMovement(FVector Start, FVector End)
 			WallRunNormal = Result.Normal;
 
 			LaunchCharacter(GetActorUpVector() * WallRunVerticalSpeed, true, true);
-			RpcComponent->RegistCurMovement();
 			return true;
 		}
 	}
@@ -1025,9 +1100,10 @@ void AKraverPlayer::WallRunEnd(float ResetTime)
 		return;
 
 	SetCurWallRunState(EWallRunState::NONE);
-	RpcComponent->SetGravityScale(DefaultGravity);
+	GetCharacterMovement()->GravityScale = DefaultGravity;
 	SuppressWallRunHorizion(ResetTime);
 	SuppressWallRunVertical(ResetTime);
+	Server_WallRunEnd();
 }
 
 void AKraverPlayer::WallRunHorizonEnd(float ResetTime)
@@ -1036,8 +1112,9 @@ void AKraverPlayer::WallRunHorizonEnd(float ResetTime)
 		return;
 
 	SetCurWallRunState(EWallRunState::NONE);
-	RpcComponent->SetGravityScale(DefaultGravity);
+	GetCharacterMovement()->GravityScale = DefaultGravity;
 	SuppressWallRunHorizion(ResetTime);
+	Server_WallRunEnd();
 }
 
 void AKraverPlayer::WallRunVerticalEnd(float ResetTime)
@@ -1046,8 +1123,9 @@ void AKraverPlayer::WallRunVerticalEnd(float ResetTime)
 		return; 
 
 	SetCurWallRunState(EWallRunState::NONE);
-	RpcComponent->SetGravityScale(DefaultGravity);
+	GetCharacterMovement()->GravityScale = DefaultGravity;
 	SuppressWallRunVertical(ResetTime);
+	Server_WallRunEnd();
 }
 
 void AKraverPlayer::ResetWallRunHorizonSuppression()
@@ -1143,5 +1221,5 @@ void AKraverPlayer::SlideUpdate()
 	FVector SlopePhysics = Slope * SlideSlopeSpeed;
 	SlopePhysics.Z = 0.f;
 	GetCharacterMovement()->Velocity += SlopePhysics;
-	RpcComponent->SetVelocity(GetCharacterMovement()->Velocity);
+	Server_SlideUpdate();
 }

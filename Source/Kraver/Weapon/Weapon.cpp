@@ -43,10 +43,8 @@ float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
 		if(Weapon)
-		{ 
-			Weapon->GetOwnerCreature()->RpcComponent->AddImpulseAtLocation
-			( 
-				WeaponMesh,
+		{
+			Server_TakeImpulseAtLocation(
 				PointDamageEvent->ShotDirection * Weapon->GetAttackImpulse() * WeaponMesh->GetMass(),
 				PointDamageEvent->HitInfo.ImpactPoint
 			);
@@ -147,17 +145,8 @@ bool AWeapon::Equipped(ACreature* Character)
 		return false;
 
 	SetOwnerCreature(Character);
-	OwnerCreature->RpcComponent->SetSimulatedPhysics(WeaponMesh, false);
-	
-	Character->RpcComponent->SetCollisionEnabled(WeaponMesh, ECollisionEnabled::NoCollision);
 	Server_Equipped(OwnerCreature);
 	return true;
-}
-
-void AWeapon::Server_Equipped_Implementation(ACreature* Character)
-{
-	SetOwnerCreature(Character);
-	WeaponState = EWeaponState::EQUIPPED;
 }
 
 bool AWeapon::GetCanInteracted()
@@ -183,8 +172,6 @@ bool AWeapon::UnEquipped()
 	if(IsAttacking)
 		OnAttackEndEvent();
 
-	WeaponMesh->SetSimulatePhysics(true);
-	CreaturePtr->RpcComponent->SetCollisionEnabled(WeaponMesh, ECollisionEnabled::QueryAndPhysics);
 	Server_UnEquipped();
 	return true;
 }
@@ -284,11 +271,42 @@ void AWeapon::OnSubAttackEndEvent()
 	OnSubAttackEnd.Broadcast();
 }
 
+void AWeapon::Server_Equipped_Implementation(ACreature* Character)
+{
+	SetOwnerCreature(Character);
+	WeaponState = EWeaponState::EQUIPPED;
+
+	Multicast_Equipped(Character);
+}
+
 void AWeapon::Server_UnEquipped_Implementation()
 {
 	WeaponState = EWeaponState::NONE;
-
 	WeaponMesh->SetSimulatePhysics(true);
+
+	Multicast_UnEquipped();
+}
+
+void AWeapon::Multicast_Equipped_Implementation(ACreature* Character)
+{
+	WeaponMesh->SetSimulatePhysics(false);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AWeapon::Multicast_UnEquipped_Implementation()
+{
+	WeaponMesh->SetSimulatePhysics(true);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+}
+
+void AWeapon::Server_TakeImpulseAtLocation_Implementation(FVector Impulse, FVector ImpactPoint)
+{
+	Multicast_TakeImpulseAtLocation(Impulse, ImpactPoint);
+}
+
+void AWeapon::Multicast_TakeImpulseAtLocation_Implementation(FVector Impulse, FVector ImpactPoint)
+{
+	WeaponMesh->AddImpulseAtLocation(Impulse,ImpactPoint);
 }
 
 void AWeapon::OnAttackEvent()

@@ -214,7 +214,7 @@ void AGun::OnAttackEvent()
 				if (Result.bBlockingHit)
 				{
 					FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
-					OwnerCreature->RpcComponent->SpawnNiagaraAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpaceEffectPos);
+					Server_SpawnImpactEffect(ImpaceEffectPos);
 				}
 			}
 		}
@@ -261,6 +261,16 @@ void AGun::Multicast_ShowFireEffect_Implementation()
 			TempFireEffect->Activate(true);
 		}
 	}
+}
+
+void AGun::Server_SpawnImpactEffect_Implementation(FVector ImpactPos)
+{
+	Multicast_SpawnImpactEffect(ImpactPos);
+}
+
+void AGun::Multicast_SpawnImpactEffect_Implementation(FVector ImpactPos)
+{
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpactPos);
 }
 
 void AGun::AddSpread(float Spread)

@@ -39,6 +39,14 @@ protected:
 	// Rpc
 	UFUNCTION(Server, Reliable)
 		virtual void Server_Assassinate(AActor* Actor);
+	UFUNCTION(Server, Reliable)
+		void Server_OnAssassinateAttackEvent();
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_OnAssassinateAttackEvent();
+	UFUNCTION(Server, Reliable)
+		void Server_OnAssassinateEndEvent();
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_OnAssassinateEndEvent();
 
 	// Delegate
 	UFUNCTION()

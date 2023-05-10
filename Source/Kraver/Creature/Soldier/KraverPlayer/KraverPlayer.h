@@ -61,10 +61,40 @@ protected:
 
 	virtual void RefreshArm();
 	virtual void RefreshSpringArm(); // SpringArm의 RelativeLocation을 새로고침하는 함수
+
+	// Rpc
 	UFUNCTION(Server, reliable)
 		void Server_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
+	UFUNCTION(Server, reliable)
+		void Server_ThrowWeapon(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction);
+	UFUNCTION(NetMulticast, reliable)
+		void Multicast_ThrowWeapon(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction);
+	virtual void Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed);
+	UFUNCTION(Server, reliable)
+		virtual void Server_WallRunJumpSuccess(FVector PendingLaunchVelocity);
+	UFUNCTION(NetMulticast, reliable)
+		virtual void Multicast_WallRunJumpSuccess(FVector PendingLaunchVelocity);
+	UFUNCTION(Server, Reliable)
+		virtual void Server_WallRunEnd();
+	UFUNCTION(Server, Reliable)
+		virtual void Server_DoubleJump(FVector PendingLaunchVelocity);
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void Multicast_DoubleJump(FVector PendingLaunchVelocity);
+	UFUNCTION(Server, Reliable)
+		virtual void Server_WallRunHorizonSuccess();
+	UFUNCTION(Server, Reliable)
+		virtual void Server_WallRunVerticalSuccess();
+	UFUNCTION(Server, Reliable)
+		virtual void Server_WallRunSuccess(FVector Location, FRotator Rotation, FVector Velocity, FVector PendingLaunchVelocity);
+	UFUNCTION(Server, Reliable)
+		virtual void Server_SlideSuccess(FVector Velocity);
+	UFUNCTION(Server, Reliable)
+		virtual void Server_SlideEnd();
+	UFUNCTION(Server, Reliable)
+		virtual void Server_SlideUpdate();
+
 	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
 
 	// Delegate Event

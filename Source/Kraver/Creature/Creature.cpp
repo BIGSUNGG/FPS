@@ -15,7 +15,6 @@ ACreature::ACreature()
 	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	RpcComponent = CreateDefaultSubobject<URpcComponent>("ServerComponent");
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
@@ -69,13 +68,7 @@ void ACreature::Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateIn
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	DisableInput(PlayerController);
 
-	SetActorLocationAndRotation
-	(
-		Attacker->GetActorLocation() + Attacker->GetActorForwardVector() * 100,
-		Attacker->GetActorRotation()
-	);
-
-	RpcComponent->Montage_Play(GetMesh(), AssassinateInfo.AssassinatedMontagesTpp);
+	Server_Assassinated(Attacker, AssassinateInfo);
 }
 
 // Called when the game starts or when spawned
@@ -448,18 +441,19 @@ void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	if (Weapon == nullptr)
 		return;
 
+	Weapon->SetOwner(this);
 	Server_OnEquipWeaponSuccessEvent(Weapon);
 }
 
 void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), false);
+	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
 	Server_OnUnEquipWeaponSuccessEvent(Weapon);
 }
 
 void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
 {
-	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), false);
+	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
 	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.AddDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 
@@ -491,8 +485,8 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 	Weapon->OnPlayTppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 
-	RpcComponent->SetHiddenInGame(Weapon->GetWeaponMesh(), true);
-	RpcComponent->Montage_Stop(GetMesh(), Weapon->GetAttackMontageTpp());
+	Weapon->GetWeaponMesh()->SetHiddenInGame(true);
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageTpp());
 
 	switch (Weapon->GetWeaponType())
 	{
@@ -516,12 +510,13 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 
 void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	RpcComponent->SetSimulatedPhysics(GetMesh(), true);
+	GetMesh()->SetSimulatePhysics(true);
 	DisableInput(GetController<APlayerController>());
 	if (CombatComponent->GetCurWeapon() != nullptr)
 		CombatComponent->UnEquipWeapon(CombatComponent->GetCurWeapon());
-	RpcComponent->SetCollisionProfileName(GetCapsuleComponent(), FName("DeadPawn"));
-	RpcComponent->SetCollisionProfileName(GetMesh(), FName("Ragdoll"));
+
+	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
+	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
 
 	Server_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
@@ -536,16 +531,7 @@ void ACreature::Landed(const FHitResult& Hit)
 
 void ACreature::OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
-	if (Weapon && CombatComponent->GetIsDead())
-	{
-		RpcComponent->AddImpulseAtLocation
-		(
-			GetMesh(),
-			DamageEvent.ShotDirection * Weapon->GetAttackImpulse() * GetMesh()->GetMass() * ImpulseResistanceRatio,
-			DamageEvent.HitInfo.ImpactPoint
-		);
-	}
+	Server_OnAfterTakePointDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ACreature::OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust)
@@ -556,16 +542,33 @@ void ACreature::OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust)
  
 void ACreature::OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
 {
-	RpcComponent->Montage_Play(GetMesh(), PlayedMontage, Speed);
+	Server_OnPlayWeaponTppMontageEvent(PlayedMontage, Speed);
 }
 
 void ACreature::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
 {
+	Server_OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
+}
 
+void ACreature::Server_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
+{
+	SetActorLocationAndRotation
+	(
+		Attacker->GetActorLocation() + Attacker->GetActorForwardVector() * 100,
+		Attacker->GetActorRotation()
+	);
+
+	Multicast_Assassinated(Attacker, AssassinateInfo);
+}
+
+void ACreature::Multicast_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
+{
+	GetMesh()->GetAnimInstance()->Montage_Play(AssassinateInfo.AssassinatedMontagesTpp);
 }
 
 void ACreature::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
+	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
 }
 
 void ACreature::Server_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -575,29 +578,78 @@ void ACreature::Server_OnDeathEvent_Implementation(float DamageAmount, FDamageEv
 
 void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	GetMesh()->SetSimulatePhysics(true);
+	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
+	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
+}
+
+void ACreature::Server_OnAfterTakePointDamageEvent_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Multicast_OnAfterTakePointDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void ACreature::Multicast_OnAfterTakePointDamageEvent_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
+	if (Weapon && CombatComponent->GetIsDead())
+	{
+		GetMesh()->AddImpulseAtLocation(
+			DamageEvent.ShotDirection * Weapon->GetAttackImpulse() * GetMesh()->GetMass() * ImpulseResistanceRatio,
+			DamageEvent.HitInfo.ImpactPoint
+		);
+	}
+}
+
+void ACreature::Server_Jump_Implementation()
+{
+	Multicast_Jump();
+}
+
+void ACreature::Multicast_Jump_Implementation()
+{
+	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
+	GetMesh()->GetAnimInstance()->Montage_Play(CreatureAnim->GetJumpMontage());
+}
+
+void ACreature::Server_OnPlayWeaponTppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
+{
+	Multicast_OnPlayWeaponTppMontageEvent(PlayedMontage, Speed);
+}
+
+void ACreature::Multicast_OnPlayWeaponTppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
+{
+	GetMesh()->GetAnimInstance()->Montage_Play(PlayedMontage, Speed);
+}
+
+void ACreature::Server_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
+{
+	Multicast_OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
+}
+
+void ACreature::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
+{
+
 }
 
 void ACreature::PlayLandedMontage()
 {
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-	RpcComponent->Montage_Play(GetMesh(), CreatureAnim->GetLandedMontage());
+	GetMesh()->GetAnimInstance()->Montage_Play(CreatureAnim->GetLandedMontage());
 }
 
 void ACreature::Jump()
 {
 	ACharacter::Jump();
-
-	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-	RpcComponent->Montage_Play(GetMesh(), CreatureAnim->GetJumpMontage());
 }
 
 void ACreature::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
+	Weapon->SetOwner(this);
+
 	Weapon->GetWeaponMesh()->AttachToComponent
 	(
 		GetMesh(),
 		FAttachmentTransformRules::SnapToTargetIncludingScale,
 		Weapon->GetAttachSocketName()
 	);
-
 }

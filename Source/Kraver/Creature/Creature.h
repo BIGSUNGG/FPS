@@ -5,7 +5,6 @@
 #include "Kraver/Kraver.h"
 #include "GameFramework/Character.h"
 #include "Kraver/KraverComponent/Combat/CombatComponent.h"
-#include "Kraver/KraverComponent/Rpc/RpcComponent.h"
 #include "Creature.generated.h"
 
 struct FAssassinateInfo;
@@ -117,6 +116,10 @@ protected:
 		virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 
 	// RPC
+	UFUNCTION(Server, Reliable)
+		virtual void Server_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void Multicast_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(Server, reliable)
 		void Server_OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 서버에서 호출되는 함수
 	UFUNCTION(Server, reliable)
@@ -125,6 +128,22 @@ protected:
 		void Server_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 모든 클라이언트에서 호출되는 함수
+	UFUNCTION(Server, reliable)
+		virtual void Server_OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(NetMulticast, reliable)
+		virtual void Multicast_OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(Server, reliable)
+		virtual void Server_Jump();
+	UFUNCTION(NetMulticast, reliable)
+		virtual void Multicast_Jump();
+	UFUNCTION(Server, reliable)
+		virtual void Server_OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+	UFUNCTION(NetMulticast, reliable)
+		virtual void Multicast_OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+	UFUNCTION(Server, reliable)
+		virtual void Server_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+	UFUNCTION(NetMulticast, reliable)
+		virtual void Multicast_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 
 	// Function
 	virtual void PlayLandedMontage();
@@ -133,7 +152,6 @@ protected:
 
 public:
 	// Component
-	class URpcComponent* RpcComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 		class UCombatComponent* CombatComponent;
 

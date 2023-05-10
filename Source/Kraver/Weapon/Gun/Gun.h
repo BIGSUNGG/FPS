@@ -39,7 +39,10 @@ protected:
 		virtual void Server_ShowFireEffect();
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_ShowFireEffect();
-
+	UFUNCTION(Server, Reliable)
+		virtual void Server_SpawnImpactEffect(FVector ImpactPos);
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void Multicast_SpawnImpactEffect(FVector ImpactPos);
 public:
 	// Getter Setter
 	int32 GetCurAmmo() { return CurAmmo; }
