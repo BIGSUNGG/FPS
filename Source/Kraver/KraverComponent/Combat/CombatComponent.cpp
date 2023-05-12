@@ -195,6 +195,9 @@ void UCombatComponent::EquipWeapon(AWeapon* Weapon)
 
 	HolsterCurWeapon();
 	SetCurWeapon(Weapon);
+
+	OwnerCreature->OwnOtherActor(Weapon);
+	CurWeapon->SetOwner(GetOwner());
 	bool Success = CurWeapon->Equipped(OwnerCreature);
 	
 	if(Success)

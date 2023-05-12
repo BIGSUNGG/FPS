@@ -383,7 +383,6 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 		ArmWeaponMesh->GetComponentRotation(),
 		Camera->GetForwardVector()
 		);
-
 }
 
 void AKraverPlayer::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -420,11 +419,6 @@ void AKraverPlayer::Multicast_RefreshSpringArm_Implementation(FVector Vector, fl
 
 void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction)
 {
-	Multicast_ThrowWeapon(Weapon, Location, Rotation, Direction);
-}
-
-void AKraverPlayer::Multicast_ThrowWeapon_Implementation(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction)
-{
 	Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
 	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	Weapon->GetWeaponMesh()->SetWorldLocation(Location);
@@ -434,11 +428,18 @@ void AKraverPlayer::Multicast_ThrowWeapon_Implementation(AWeapon* Weapon, FVecto
 		[=]() {
 			Weapon->GetWeaponMesh()->SetSimulatePhysics(true);
 			Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
-			Weapon->GetWeaponMesh()->AddImpulse(Direction * WeaponThrowPower);
+			Weapon->GetWeaponMesh()->AddImpulse(Direction * WeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
 			Weapon->GetWeaponMesh()->AddAngularImpulseInDegrees(Direction * WeaponThrowAngularPower, NAME_None, true);
 		},
 		0.000001f,
 			false);
+
+	Multicast_ThrowWeapon(Weapon, Location, Rotation, Direction);
+}
+
+void AKraverPlayer::Multicast_ThrowWeapon_Implementation(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction)
+{
+
 
 
 }
@@ -506,6 +507,8 @@ void AKraverPlayer::Server_WallRunSuccess_Implementation(FVector Location, FRota
 
 void AKraverPlayer::Server_SlideSuccess_Implementation(FVector Velocity)
 {
+	IsSliding = true;
+
 	GetCharacterMovement()->GroundFriction = SlideGroundFriction;
 	GetCharacterMovement()->BrakingDecelerationWalking = SlideBrakingDecelerationWalking;
 	GetCharacterMovement()->Velocity = Velocity;
@@ -513,6 +516,8 @@ void AKraverPlayer::Server_SlideSuccess_Implementation(FVector Velocity)
 
 void AKraverPlayer::Server_SlideEnd_Implementation()
 {
+	IsSliding = false;
+
 	GetCharacterMovement()->GroundFriction = DefaultGroundFriction;
 	GetCharacterMovement()->BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
 }

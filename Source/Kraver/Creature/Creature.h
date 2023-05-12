@@ -22,7 +22,7 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 	virtual void Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 
-	void OwningOtherActor(AActor* Actor);
+	void OwnOtherActor(AActor* Actor);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -117,13 +117,21 @@ protected:
 
 	// RPC
 	UFUNCTION(Server, Reliable)
+		void Server_OwnOtherActor(AActor* Actor);
+	UFUNCTION(Server, Reliable)
 		virtual void Server_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
+	UFUNCTION(Client, Reliable)
+		virtual void Client_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(Server, reliable)
 		void Server_OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 서버에서 호출되는 함수
+	UFUNCTION(NetMulticast, reliable)
+		void Multicast_OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 서버에서 호출되는 함수
 	UFUNCTION(Server, reliable)
 		void Server_OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
+	UFUNCTION(NetMulticast, reliable)
+		void Multicast_OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
 	UFUNCTION(Server, reliable)
 		void Server_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
 	UFUNCTION(NetMulticast, reliable)

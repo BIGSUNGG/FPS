@@ -24,6 +24,13 @@ void UWeaponAssassinateComponent::TickComponent(float DeltaTime, ELevelTick Tick
 	
 }
 
+void UWeaponAssassinateComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	UWeaponComponent::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UWeaponAssassinateComponent, CurAssassinatedCreature);
+}
+
 void UWeaponAssassinateComponent::OnAddOnDelegateEvent(UObject* Object)
 {
 	UWeaponComponent::OnAddOnDelegateEvent(Object);
@@ -110,6 +117,8 @@ void UWeaponAssassinateComponent::Server_Assassinate_Implementation(AActor* Acto
 	ACreature* Creature = Cast<ACreature>(Actor);
 	if (!Creature)
 		return;
+
+	CurAssassinatedCreature = Creature;
 
 	FAssassinateInfo AssassinateInfo;
 	AssassinateInfo.AssassinatedMontagesFpp = AssassinatedMontagesFpp;

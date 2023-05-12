@@ -65,10 +65,13 @@ float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 
 void ACreature::Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
 {
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	DisableInput(PlayerController);
-
 	Server_Assassinated(Attacker, AssassinateInfo);
+}
+
+void ACreature::OwnOtherActor(AActor* Actor)
+{
+	Actor->SetOwner(this);
+	Server_OwnOtherActor(Actor);
 }
 
 // Called when the game starts or when spawned
@@ -442,6 +445,7 @@ void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 		return;
 
 	Weapon->SetOwner(this);
+
 	Server_OnEquipWeaponSuccessEvent(Weapon);
 }
 
@@ -550,6 +554,11 @@ void ACreature::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float S
 	Server_OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
 }
 
+void ACreature::Server_OwnOtherActor_Implementation(AActor* Actor)
+{
+	Actor->SetOwner(this);
+}
+
 void ACreature::Server_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
 {
 	SetActorLocationAndRotation
@@ -558,6 +567,7 @@ void ACreature::Server_Assassinated_Implementation(ACreature* Attacker, FAssassi
 		Attacker->GetActorRotation()
 	);
 
+	Client_Assassinated(Attacker, AssassinateInfo);
 	Multicast_Assassinated(Attacker, AssassinateInfo);
 }
 
@@ -566,7 +576,21 @@ void ACreature::Multicast_Assassinated_Implementation(ACreature* Attacker, FAssa
 	GetMesh()->GetAnimInstance()->Montage_Play(AssassinateInfo.AssassinatedMontagesTpp);
 }
 
+void ACreature::Client_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
+{
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	DisableInput(PlayerController);
+	KR_IS_SERVER();
+}
+
 void ACreature::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
+{
+	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
+
+	Multicast_OnUnEquipWeaponSuccessEvent(Weapon);
+}
+
+void ACreature::Multicast_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
 	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
 }
@@ -652,4 +676,12 @@ void ACreature::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 		FAttachmentTransformRules::SnapToTargetIncludingScale,
 		Weapon->GetAttachSocketName()
 	);
+
+	Multicast_OnEquipWeaponSuccessEvent(Weapon);
+}
+
+void ACreature::Multicast_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
+{
+	Weapon->SetOwner(this);
+
 }

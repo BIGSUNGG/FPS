@@ -29,6 +29,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void OnAddOnDelegateEvent(UObject* Object) override;
 	virtual void OnRemoveOnDelegateEvent(UObject* Object) override;
@@ -37,16 +38,16 @@ protected:
 	virtual std::pair<bool, FHitResult> CalculateCanAssassinate();
 
 	// Rpc
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, reliable)
 		virtual void Server_Assassinate(AActor* Actor);
-	UFUNCTION(Server, Reliable)
-		void Server_OnAssassinateAttackEvent();
-	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_OnAssassinateAttackEvent();
-	UFUNCTION(Server, Reliable)
-		void Server_OnAssassinateEndEvent();
-	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_OnAssassinateEndEvent();
+	UFUNCTION(Server, reliable)
+		virtual void Server_OnAssassinateAttackEvent();
+	UFUNCTION(NetMulticast, reliable)
+		virtual void Multicast_OnAssassinateAttackEvent();
+	UFUNCTION(Server, reliable)
+		virtual void Server_OnAssassinateEndEvent();
+	UFUNCTION(NetMulticast, reliable)
+		virtual void Multicast_OnAssassinateEndEvent();
 
 	// Delegate
 	UFUNCTION()
@@ -63,7 +64,8 @@ protected:
 	AMelee* OwnerMelee = nullptr;
 
 	bool IsAssassinating = false;
-	ACreature* CurAssassinatedCreature;
+	UPROPERTY(Replicated)
+		ACreature* CurAssassinatedCreature;
 	UPROPERTY(BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
 		bool bCanAssassination = true;
 	UPROPERTY(BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))

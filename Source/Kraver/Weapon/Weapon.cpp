@@ -144,6 +144,9 @@ bool AWeapon::Equipped(ACreature* Character)
 	if (GetCanInteracted() == false)
 		return false;
 
+	WeaponMesh->SetSimulatePhysics(false);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	SetOwnerCreature(Character);
 	Server_Equipped(OwnerCreature);
 	return true;
@@ -275,6 +278,9 @@ void AWeapon::Server_Equipped_Implementation(ACreature* Character)
 {
 	SetOwnerCreature(Character);
 	WeaponState = EWeaponState::EQUIPPED;
+
+	WeaponMesh->SetSimulatePhysics(false);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	Multicast_Equipped(Character);
 }
