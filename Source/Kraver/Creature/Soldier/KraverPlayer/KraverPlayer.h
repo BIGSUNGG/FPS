@@ -69,8 +69,6 @@ protected:
 		void Multicast_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
 	UFUNCTION(Server, reliable)
 		void Server_ThrowWeapon(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction);
-	UFUNCTION(NetMulticast, reliable)
-		void Multicast_ThrowWeapon(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction);
 	virtual void Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed);
 	UFUNCTION(Server, reliable)
 		virtual void Server_WallRunJumpSuccess(FVector PendingLaunchVelocity);

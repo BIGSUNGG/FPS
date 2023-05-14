@@ -580,7 +580,6 @@ void ACreature::Client_Assassinated_Implementation(ACreature* Attacker, FAssassi
 {
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	DisableInput(PlayerController);
-	KR_IS_SERVER();
 }
 
 void ACreature::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)

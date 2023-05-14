@@ -125,6 +125,16 @@ void UWeaponAssassinateComponent::Server_Assassinate_Implementation(AActor* Acto
 	AssassinateInfo.AssassinatedMontagesTpp = AssassinatedMontagesTpp;
 
 	Creature->Assassinated(GetOwnerCreature(), AssassinateInfo);
+	Multicast_Assassinate(Actor);
+}
+
+void UWeaponAssassinateComponent::Multicast_Assassinate_Implementation(AActor* Actor)
+{
+	ACreature* Creature = Cast<ACreature>(Actor);
+	if (!Creature)
+		return;
+
+	CurAssassinatedCreature = Creature;
 }
 
 void UWeaponAssassinateComponent::Server_OnAssassinateAttackEvent_Implementation()
@@ -134,6 +144,12 @@ void UWeaponAssassinateComponent::Server_OnAssassinateAttackEvent_Implementation
 
 void UWeaponAssassinateComponent::Multicast_OnAssassinateAttackEvent_Implementation()
 {
+	if (CurAssassinatedCreature == nullptr)
+	{
+		KR_LOG(Error,TEXT("CurAssassinatedCreature is  nullptr"));
+		return;
+	}
+
 	CurAssassinatedCreature->GetMesh()->SetSimulatePhysics(false);
 }
 

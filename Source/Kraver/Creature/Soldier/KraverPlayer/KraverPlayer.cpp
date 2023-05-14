@@ -391,7 +391,11 @@ void AKraverPlayer::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageE
 
 	GetMesh()->SetOwnerNoSee(false);
 	ArmMesh->SetOwnerNoSee(true);
-	Camera->AttachToComponent(GetMesh(),FAttachmentTransformRules::SnapToTargetIncludingScale,"head");
+	
+	FAttachmentTransformRules TransformRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
+	TransformRules.bWeldSimulatedBodies = true;
+	TransformRules.RotationRule = EAttachmentRule::KeepWorld;
+	Camera->AttachToComponent(GetMesh(), TransformRules, "head");
 }
 
 void AKraverPlayer::RefreshArm()
@@ -433,14 +437,6 @@ void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FVector L
 		},
 		0.000001f,
 			false);
-
-	Multicast_ThrowWeapon(Weapon, Location, Rotation, Direction);
-}
-
-void AKraverPlayer::Multicast_ThrowWeapon_Implementation(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction)
-{
-
-
 
 }
 
