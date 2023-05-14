@@ -38,21 +38,22 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
-	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	if (DamageEvent.IsOfType(FKraverDamageEvent::ClassID))
 	{
-		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+		const FKraverDamageEvent* KraverDamageEvent = static_cast<const FKraverDamageEvent*>(&DamageEvent);
 		AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
 		if(Weapon)
 		{
+			FVector Direction = KraverDamageEvent->GetHitDirection();
 			Server_TakeImpulseAtLocation(
-				PointDamageEvent->ShotDirection * Weapon->GetAttackImpulse() * WeaponMesh->GetMass(),
-				PointDamageEvent->HitInfo.ImpactPoint
+				Direction * KraverDamageEvent->DamageImpulse * WeaponMesh->GetMass(),
+				KraverDamageEvent->HitInfo.ImpactPoint
 			);
 		}
 	}
-	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	else
 	{
-		const FRadialDamageEvent* RadialDamageEvent = static_cast<const FRadialDamageEvent*>(&DamageEvent);
+		KR_LOG(Error, TEXT("Use only FKraverDamageEvent"));
 	}
 
 	return DamageAmount;

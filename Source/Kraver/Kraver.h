@@ -4,8 +4,9 @@
 
 #include "EngineMinimal.h"
 #include "Kraver/Utility/UnrealHeaders.h"
-#include "Kraver/Utility/CustomDelegate.h"
-#include "Kraver/Utility/CustomEnum.h"
+#include "Kraver/Utility/KraverDelegate.h"
+#include "Kraver/Utility/KraverEnum.h"
+#include "Kraver/Utility/KraverStructHeaders.h"
 
 using namespace std;
 

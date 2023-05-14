@@ -134,10 +134,10 @@ void AMelee::SwingAttack()
 		auto Creature = Cast<ACreature>(Result.GetActor());
 		if (IsValid(Result.GetActor()))
 		{
-			FPointDamageEvent damageEvent;
-			damageEvent.HitInfo = Result;
-			damageEvent.ShotDirection = OwnerCreature->GetCamera()->GetForwardVector();
-			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, damageEvent, OwnerCreature->GetController(), this);
+			FKraverDamageEvent DamageEvent;
+			DamageEvent.DamageImpulse = AttackImpulse;
+			DamageEvent.HitInfo = Result;
+			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
 		}
 	}
 }

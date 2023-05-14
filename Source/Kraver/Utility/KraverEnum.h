@@ -4,7 +4,7 @@
 
 #include "EngineMinimal.h"
 #include "GameFramework/Actor.h"
-#include "CustomEnum.generated.h"
+#include "KraverEnum.generated.h"
 
 UENUM(BlueprintType)
 enum class EWeaponState : uint8
@@ -46,6 +46,14 @@ enum class EMovementState : uint8
 	WALK		UMETA(DisplayName = "WALK"),
 	RUN			UMETA(DisplayName = "RUN"),
 	SPRINT		UMETA(DisplayName = "SPRINT"),
+};
+
+UENUM(BlueprintType)
+enum class EKraverDamageType : uint8
+{
+	SWING		UMETA(DisplayName = "SWING"),
+	BULLET		UMETA(DisplayName = "BULLET"),
+	EXPLOSION	UMETA(DisplayName = "EXPLOSION"),
 };
 
 UCLASS()

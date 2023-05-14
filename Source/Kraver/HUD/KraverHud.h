@@ -10,19 +10,6 @@
 
 class ACreature;
 
-// 크로스헤어의 이미지를 가지는 구조체
-USTRUCT(BlueprintType)
-struct FCrosshairsPackage
-{
-	GENERATED_BODY()
-public:
-	class UTexture2D* CrosshairsCenter;
-	class UTexture2D* CrosshairsLeft;
-	class UTexture2D* CrosshairsRight;
-	class UTexture2D* CrosshairsTop;
-	class UTexture2D* CrosshairsBottom;
-	float CrosshairSpread;
-};
 /**
  * 
  */
@@ -41,7 +28,7 @@ private:
 protected:
 	// Delegate
 	UFUNCTION()
-		void OnGivePointDamageEvent(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+		void OnGiveDamageEvent(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 public:
 	// Getter Setter

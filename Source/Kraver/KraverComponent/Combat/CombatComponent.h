@@ -21,13 +21,13 @@ class KRAVER_API UCombatComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UCombatComponent();
-	float CalculateDamage(float DamageAmount, FDamageEvent const& DamageEvent); // 해당 컴포넌트가 받을 데미지를 계산
+	float CalculateDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent); // 해당 컴포넌트가 받을 데미지를 계산
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을경우 호출
+	void Death(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을경우 호출
 
 public:	
 	// Called every frame
@@ -44,38 +44,26 @@ public:
 	virtual bool HolsterCurWeapon(); // CurWeapon을 집어넣는 함수
 
 	// Damage Event
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
-	virtual float GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 주는 함수 (클라이언트에서 서버로 GiveDamage이벤트 호출)
+	virtual float TakeDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
+	virtual float GiveDamage(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 주는 함수 (클라이언트에서 서버로 GiveDamage이벤트 호출)
 
 protected:
 	// Take Damage
 	UFUNCTION(Server, reliable)
-		void Server_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Server, reliable)
-		void Server_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Server, reliable)
-		void Server_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+		void Server_TakeDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 	UFUNCTION(Client, reliable)
-		void Client_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Client, reliable)
-		void Client_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Client, reliable)
-		void Client_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+		void Client_TakeDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 	// Give Damage
 	UFUNCTION(Server, reliable)
-		void Server_GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Server, reliable)
-		void Server_GivePointDamage(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Server, reliable)
-		void Server_GiveRadialDamage(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+		void Server_GiveDamage(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 	// Death
 	UFUNCTION(Server, reliable)
-		void Server_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을경우 호출
+		void Server_Death(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을경우 호출
 	UFUNCTION(Client, reliable)
-		void Client_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을경우 호출
+		void Client_Death(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을경우 호출
 
 public:
 	// Getter Setter
@@ -103,14 +91,8 @@ public:
 	FHolsterWeaponDele OnHolsterWeapon;
 
 	FTakeDamageDele OnAfterTakeDamage; // 데미지를 받았을때 호출
-	FTakePointDamageDele OnAfterTakePointDamage;
-	FTakeRadialDamageDele OnAfterTakeRadialDamge;
-	FDeathDele OnDeath; // 죽었을때 호출
-
 	FGiveDamageDele OnGiveDamage; // 데미지를 주었을때 호출
-	FGiveDamageDele OnGiveAnyDamage;
-	FGivePointDamageDele OnGivePointDamage;
-	FGiveRadialDamageDele OnGiveRadialDamage;
+	FDeathDele OnDeath; // 죽었을때 호출
 
 protected:
 	ACreature* OwnerCreature;

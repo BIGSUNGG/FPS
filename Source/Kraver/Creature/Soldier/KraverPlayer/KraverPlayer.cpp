@@ -385,7 +385,7 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 		);
 }
 
-void AKraverPlayer::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void AKraverPlayer::OnDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	ASoldier::OnDeathEvent(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
 

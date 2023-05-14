@@ -5,7 +5,8 @@
 #include "EngineMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Engine/DamageEvents.h"
-#include "CustomDelegate.generated.h"
+#include "Kraver/Utility/KraverStructHeaders.h"
+#include "KraverDelegate.generated.h"
 
 // AssassinateDele
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAssassinateDele, AActor*, AssassinatedActor);
@@ -28,15 +29,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHoldWeaponDele, AWeapon*, Weapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHolsterWeaponDele, AWeapon*, Weapon);
 
 // Damaged Delegate
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakeDamageDele, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakePointDamageDele, float, DamageAmount, FPointDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakeRadialDamageDele, float, DamageAmount, FRadialDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FDeathDele, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FTakeDamageDele, float, DamageAmount, FKraverDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
+
+// Death Delegate
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FDeathDele, float, DamageAmount, FKraverDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
 
 // GiveDamage Delegate
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FGiveDamageDele, AActor*, DamagedActor, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FGivePointDamageDele, AActor*, DamagedActor, float, DamageAmount, FPointDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FGiveRadialDamageDele, AActor*, DamagedActor, float, DamageAmount, FRadialDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FGiveDamageDele, AActor*, DamagedActor, float, DamageAmount, FKraverDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
 
 // Anim Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAnimNotifyDele);

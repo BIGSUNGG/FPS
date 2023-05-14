@@ -166,7 +166,7 @@ void UWeaponAssassinateComponent::Multicast_OnAssassinateEndEvent_Implementation
 
 void UWeaponAssassinateComponent::OnAssassinateAttackEvent()
 {
-	FDamageEvent TempDamageEvent;
+	FKraverDamageEvent TempDamageEvent;
 	GetOwnerCreature()->CombatComponent->GiveDamage(CurAssassinatedCreature, AssassinationDamage, TempDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
 	CurAssassinatedCreature->GetMesh()->SetSimulatePhysics(false);
 

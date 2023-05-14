@@ -77,7 +77,6 @@ public:
 	bool GetCanInteracted();
 	bool GetIsAttacking() { return IsAttacking; }
 	bool GetIsSubAttacking() { return IsSubAttacking; }
-	float GetAttackImpulse() { return AttackImpulse; }
 	FName GetAttachSocketName() { return AttachSocketName; }
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
 	EWeaponType GetWeaponType() { return WeaponType; }

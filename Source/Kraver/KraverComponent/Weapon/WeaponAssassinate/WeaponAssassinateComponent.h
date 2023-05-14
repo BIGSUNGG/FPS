@@ -10,17 +10,6 @@ class AMelee;
 /**
  * 
  */
- 
-USTRUCT(BlueprintType)
-struct FAssassinateInfo
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY()
-		UAnimMontage* AssassinatedMontagesTpp;
-	UPROPERTY()
-		UAnimMontage* AssassinatedMontagesFpp;
-};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class KRAVER_API UWeaponAssassinateComponent : public UWeaponComponent

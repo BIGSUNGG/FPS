@@ -57,7 +57,7 @@ protected:
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
 	virtual void ThrowWeapon(AWeapon* Weapon);
 
- 	virtual void OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+ 	virtual void OnDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	virtual void RefreshArm();
 	virtual void RefreshSpringArm(); // SpringArm의 RelativeLocation을 새로고침하는 함수

@@ -21,7 +21,7 @@ ACreature::ACreature()
 	CombatComponent->OnDeath.AddDynamic(this, &ACreature::OnDeathEvent);
 	CombatComponent->OnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnEquipWeaponSuccessEvent);
 	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnUnEquipWeaponSuccessEvent);	
-	CombatComponent->OnAfterTakePointDamage.AddDynamic(this, &ACreature::OnAfterTakePointDamageEvent);
+	CombatComponent->OnAfterTakeDamage.AddDynamic(this, &ACreature::OnAfterTakeDamageEvent);
 	CombatComponent->OnHoldWeapon.AddDynamic(this, &ACreature::OnHoldWeaponEvent);
 	CombatComponent->OnHolsterWeapon.AddDynamic(this, &ACreature::OnHolsterWeaponEvent);
 
@@ -59,7 +59,17 @@ float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	float Damage = CombatComponent->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	float Damage;
+	if (DamageEvent.IsOfType(FKraverDamageEvent::ClassID))
+	{
+		const FKraverDamageEvent* KraverDamageEvent = static_cast<const FKraverDamageEvent*>(&DamageEvent);
+		Damage = CombatComponent->TakeDamage(DamageAmount, *KraverDamageEvent, EventInstigator, DamageCauser);
+	}
+	else
+	{
+		Damage = 0.f;
+		KR_LOG(Error, TEXT("Use only FKraverDamageEvent"));
+	}
 	return Damage;
 }
 
@@ -512,7 +522,7 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 	}
 }
 
-void ACreature::OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::OnDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	GetMesh()->SetSimulatePhysics(true);
 	DisableInput(GetController<APlayerController>());
@@ -533,9 +543,9 @@ void ACreature::Landed(const FHitResult& Hit)
 	PlayLandedMontage();
 }
 
-void ACreature::OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::OnAfterTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	Server_OnAfterTakePointDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Server_OnAfterTakeDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ACreature::OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust)
@@ -594,30 +604,32 @@ void ACreature::Multicast_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* We
 	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
 }
 
-void ACreature::Server_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::Server_OnDeathEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Multicast_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
-void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	GetMesh()->SetSimulatePhysics(true);
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
 	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
 }
 
-void ACreature::Server_OnAfterTakePointDamageEvent_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::Server_OnAfterTakeDamageEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	Multicast_OnAfterTakePointDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Multicast_OnAfterTakeDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
-void ACreature::Multicast_OnAfterTakePointDamageEvent_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::Multicast_OnAfterTakeDamageEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
 	if (Weapon && CombatComponent->GetIsDead())
 	{
+		FVector Direction = DamageEvent.GetHitDirection();
+
 		GetMesh()->AddImpulseAtLocation(
-			DamageEvent.ShotDirection * Weapon->GetAttackImpulse() * GetMesh()->GetMass() * ImpulseResistanceRatio,
+			Direction * DamageEvent.DamageImpulse * GetMesh()->GetMass() * ImpulseResistanceRatio,
 			DamageEvent.HitInfo.ImpactPoint
 		);
 	}
