@@ -20,6 +20,12 @@ void UWeaponReloadComponent::BeginPlay()
 	OwnerGun->OnSkillFirst.AddDynamic(this, &UWeaponReloadComponent::OnSkillFirstEvent);
 }
 
+void UWeaponReloadComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	UWeaponComponent::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+}
+
 void UWeaponReloadComponent::OnAddOnDelegateEvent(UObject* Object)
 {
 	UWeaponComponent::OnAddOnDelegateEvent(Object);
@@ -68,6 +74,9 @@ void UWeaponReloadComponent::OnBeforeAttackEvent()
 
 bool UWeaponReloadComponent::GetCanReload()
 {
+	if (OwnerGun->GetIsSubAttacking())
+		return false;
+
 	if (OwnerGun->GetCurAmmo() == OwnerGun->GetMaxAmmo())
 		return false;
 

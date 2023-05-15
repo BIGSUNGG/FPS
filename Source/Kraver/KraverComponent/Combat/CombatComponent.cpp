@@ -46,8 +46,13 @@ float UCombatComponent::GiveDamage(AActor* DamagedActor, float DamageAmount, FKr
 
 	KR_LOG(Log, TEXT("Give %f Damge to %s"), Damage, *DamagedActor->GetName());
 	Server_GiveDamage(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	OnGiveDamage.Broadcast(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnClientGiveDamage.Broadcast(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	return Damage;
+}
+
+void UCombatComponent::CancelTakeDamage()
+{
+	bCanceledTakeDamage = true;
 }
 
 // Called when the game starts
@@ -317,6 +322,13 @@ void UCombatComponent::Server_SetMaxHp_Implementation(int32 value)
 
 void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	OnServerBeforeTakeDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if (bCanceledTakeDamage)
+	{
+		bCanceledTakeDamage = false;
+		return;
+	}
+
 	float Damage = CalculateDamage(DamageAmount, DamageEvent);
 	KR_LOG(Log, TEXT("Take %f Damage by %s"), Damage, *DamageCauser->GetName());
 	CurHp -= Damage;
@@ -332,7 +344,7 @@ void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FKra
 
 void UCombatComponent::Client_TakeDamage_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	OnAfterTakeDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnClientAfterTakeDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void UCombatComponent::Server_GiveDamage_Implementation(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -349,5 +361,5 @@ void UCombatComponent::Client_Death_Implementation(float DamageAmount, FKraverDa
 {
 	KR_LOG(Log, TEXT("Dead By %s"), *DamageCauser->GetName());
 	Server_SetCurHp(CurHp);
-	OnDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnClientDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }

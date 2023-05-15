@@ -18,10 +18,10 @@ ACreature::ACreature()
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
-	CombatComponent->OnDeath.AddDynamic(this, &ACreature::OnDeathEvent);
+	CombatComponent->OnClientDeath.AddDynamic(this, &ACreature::OnDeathEvent);
 	CombatComponent->OnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnEquipWeaponSuccessEvent);
 	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnUnEquipWeaponSuccessEvent);	
-	CombatComponent->OnAfterTakeDamage.AddDynamic(this, &ACreature::OnAfterTakeDamageEvent);
+	CombatComponent->OnClientAfterTakeDamage.AddDynamic(this, &ACreature::OnAfterTakeDamageEvent);
 	CombatComponent->OnHoldWeapon.AddDynamic(this, &ACreature::OnHoldWeaponEvent);
 	CombatComponent->OnHolsterWeapon.AddDynamic(this, &ACreature::OnHolsterWeaponEvent);
 
@@ -530,7 +530,6 @@ void ACreature::OnDeathEvent(float DamageAmount, FKraverDamageEvent const& Damag
 		CombatComponent->UnEquipWeapon(CombatComponent->GetCurWeapon());
 
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
-	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
 
 	Server_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
@@ -613,7 +612,6 @@ void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FKrave
 {
 	GetMesh()->SetSimulatePhysics(true);
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
-	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
 }
 
 void ACreature::Server_OnAfterTakeDamageEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

@@ -135,6 +135,7 @@ void AMelee::SwingAttack()
 		if (IsValid(Result.GetActor()))
 		{
 			FKraverDamageEvent DamageEvent;
+			DamageEvent.bCanParried = true;
 			DamageEvent.DamageImpulse = AttackImpulse;
 			DamageEvent.HitInfo = Result;
 			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);

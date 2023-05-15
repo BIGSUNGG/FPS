@@ -21,7 +21,7 @@ class KRAVER_API UCombatComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UCombatComponent();
-	float CalculateDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent); // 해당 컴포넌트가 받을 데미지를 계산
+	float CalculateDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent); // 해	당 컴포넌트가 받을 데미지를 계산
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -46,6 +46,7 @@ public:
 	// Damage Event
 	virtual float TakeDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
 	virtual float GiveDamage(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 주는 함수 (클라이언트에서 서버로 GiveDamage이벤트 호출)
+	virtual void CancelTakeDamage();
 
 protected:
 	// Take Damage
@@ -90,9 +91,11 @@ public:
 	FHoldWeaponDele OnHoldWeapon;
 	FHolsterWeaponDele OnHolsterWeapon;
 
-	FTakeDamageDele OnAfterTakeDamage; // 데미지를 받았을때 호출
-	FGiveDamageDele OnGiveDamage; // 데미지를 주었을때 호출
-	FDeathDele OnDeath; // 죽었을때 호출
+	FTakeDamageDele OnServerBeforeTakeDamage; // 데미지를 받았을때 호출
+
+	FTakeDamageDele OnClientAfterTakeDamage; // 데미지를 받았을때 호출
+	FGiveDamageDele OnClientGiveDamage; // 데미지를 주었을때 호출
+	FDeathDele OnClientDeath; // 죽었을때 호출
 
 protected:
 	ACreature* OwnerCreature;
@@ -122,4 +125,5 @@ protected:
 	UFUNCTION(Server, reliable)
 		void Server_SetMaxHp(int32 value);
 
+	bool bCanceledTakeDamage = false; // Server에서만 사용
 };

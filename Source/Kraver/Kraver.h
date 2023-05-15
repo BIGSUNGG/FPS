@@ -19,8 +19,11 @@ DECLARE_LOG_CATEGORY_EXTERN(Kraver, Log, All);
 #define ECC_SWING ECollisionChannel::ECC_GameTraceChannel4
 #define ECC_ASSASSINATION ECollisionChannel::ECC_GameTraceChannel5
 
+// Server
+#define IS_SERVER() GetWorld()->IsNetMode(ENetMode::NM_DedicatedServer) || GetWorld()->IsNetMode(ENetMode::NM_ListenServer)
+
 // Log
-#define KR_CALLINFO ((GetWorld()->IsNetMode(ENetMode::NM_DedicatedServer) || GetWorld()->IsNetMode(ENetMode::NM_ListenServer) ? TEXT("Server :") : TEXT("Client :")) + FString(__FUNCTION__) + TEXT("(") + FString::FromInt(__LINE__) + TEXT(")"))
+#define KR_CALLINFO ((IS_SERVER() ? TEXT("Server :") : TEXT("Client :")) + FString(__FUNCTION__) + TEXT("(") + FString::FromInt(__LINE__) + TEXT(")"))
 #define KR_LOG_S(Verbosity) UE_LOG(Kraver, Verbosity, TEXT("%s"), *KR_CALLINFO)
 #define KR_LOG(Verbosity, Format, ...) UE_LOG(Kraver, Verbosity, TEXT("%s : %s : %s"), *KR_CALLINFO, *this->GetName() ,*FString::Printf(Format, ##__VA_ARGS__))
 #define KR_LOG_CHECK(Expr, ...) {if(!(Expr)) { KR_LOG(Error, TEXT("SSERTION : %s"), TEXT("'"#Expr"'")); return __VA_ARGS__;}}

@@ -75,7 +75,7 @@ void AKraverHUD::BeginPlay()
 	OwnerCreature = Cast<ACreature>(PlayerController->GetCharacter());
 	if (OwnerCreature)
 	{
-		OwnerCreature->CombatComponent->OnGiveDamage.AddDynamic(this, &AKraverHUD::OnGiveDamageEvent);
+		OwnerCreature->CombatComponent->OnClientGiveDamage.AddDynamic(this, &AKraverHUD::OnGiveDamageEvent);
 	}
 }
 
@@ -103,7 +103,8 @@ void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FV
 
 void AKraverHUD::OnGiveDamageEvent(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if(Cast<ACreature>(DamagedActor))
+	ACreature* Creature = Cast<ACreature>(DamagedActor);
+	if(Creature)
 		HitmarkAppearanceTime = 0.05f;
 
 	bHitmartCritical = DamageEvent.HitInfo.BoneName == "head";

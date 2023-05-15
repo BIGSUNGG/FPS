@@ -695,7 +695,7 @@ void AKraverPlayer::PlayLandedMontage()
 
 void AKraverPlayer::WeaponADS(float DeltaTime)
 {
-	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking())
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && Cast<AGun>(CombatComponent->GetCurWeapon()))
 	{
 		USkeletalMeshComponent* ArmWeaponMesh = GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()];
 		ArmMesh->AddRelativeRotation(WeaponAdsRotation * -1);
@@ -724,7 +724,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 		if (HUD)
 			HUD->SetbDrawCrosshair(false);
 	}
-	else if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() == false)
+	else
 	{
 		FRotator TargetRotation = FRotator::ZeroRotator;
 		FVector TargetLocation = FVector::ZeroVector;

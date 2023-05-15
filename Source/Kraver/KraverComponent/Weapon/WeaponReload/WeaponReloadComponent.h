@@ -18,6 +18,7 @@ class KRAVER_API UWeaponReloadComponent : public UWeaponComponent
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void OnAddOnDelegateEvent(UObject* Object) override;
 	virtual void OnRemoveOnDelegateEvent(UObject* Object) override;
