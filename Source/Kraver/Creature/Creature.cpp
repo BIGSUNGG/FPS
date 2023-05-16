@@ -19,7 +19,8 @@ ACreature::ACreature()
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
 	CombatComponent->OnClientDeath.AddDynamic(this, &ACreature::OnDeathEvent);
-	CombatComponent->OnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnEquipWeaponSuccessEvent);
+	CombatComponent->OnClientEquipWeaponSuccess.AddDynamic(this, &ACreature::OnClientEquipWeaponSuccessEvent);
+	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ACreature::OnServerEquipWeaponSuccessEvent);
 	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnUnEquipWeaponSuccessEvent);	
 	CombatComponent->OnClientAfterTakeDamage.AddDynamic(this, &ACreature::OnAfterTakeDamageEvent);
 	CombatComponent->OnHoldWeapon.AddDynamic(this, &ACreature::OnHoldWeaponEvent);
@@ -449,14 +450,31 @@ void ACreature::Server_SetIsJumping_Implementation(bool value)
 	IsJumping = value;
 }
 
-void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
+void ACreature::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	if (Weapon == nullptr)
 		return;
 
+}
+
+void ACreature::OnServerEquipWeaponSuccessEvent(AWeapon* Weapon)
+{
+	if (IS_SERVER() == false)
+	{
+		KR_LOG(Error, TEXT("Called on client"));
+		return;
+	}
+
 	Weapon->SetOwner(this);
 
-	Server_OnEquipWeaponSuccessEvent(Weapon);
+	Weapon->GetWeaponMesh()->AttachToComponent
+	(
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetIncludingScale,
+		Weapon->GetAttachSocketName()
+	);
+
+	Multicast_OnEquipWeaponSuccessEvent(Weapon);
 }
 
 void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -673,20 +691,6 @@ void ACreature::PlayLandedMontage()
 void ACreature::Jump()
 {
 	ACharacter::Jump();
-}
-
-void ACreature::Server_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
-{
-	Weapon->SetOwner(this);
-
-	Weapon->GetWeaponMesh()->AttachToComponent
-	(
-		GetMesh(),
-		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		Weapon->GetAttachSocketName()
-	);
-
-	Multicast_OnEquipWeaponSuccessEvent(Weapon);
 }
 
 void ACreature::Multicast_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)

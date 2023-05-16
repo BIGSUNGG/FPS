@@ -550,12 +550,12 @@ void AKraverPlayer::Landed(const FHitResult& Hit)
 	bCanDoubleJump = true;
 }
 
-void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
+void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 {	
 	if(!Weapon)
 		return;
 
-	ASoldier::OnEquipWeaponSuccessEvent(Weapon);
+	ASoldier::OnClientEquipWeaponSuccessEvent(Weapon);
 
 	int32 Index = Weapon->MakeAdditiveWeaponMesh();
 	ArmWeaponMeshes.Add(Weapon, Weapon->GetAdditiveWeaponMesh()[Index]);

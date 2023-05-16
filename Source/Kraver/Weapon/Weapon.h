@@ -32,7 +32,7 @@ public:
 	virtual int32 RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh); // 추가적인 WeaponMesh를 제거 (Return 값은 제거된 WeaponMesh의 인덱스값)
 	virtual int32 FindAdditiveWeaponMesh(USkeletalMeshComponent* Mesh); // 추가적인 WeaponMesh를 찾음 (Return 값은 찾은 WeaponMesh의 인덱스값 못찾았을 경우 -1)
 
-	virtual bool Equipped(ACreature* Character); // Character에게 장착됨
+	virtual bool Equipped(ACreature* Character); // Character에게 장착됨 Server에서만 호출됨
 	virtual bool UnEquipped(); // 장착해제됨
 	virtual bool Hold(); // Character 손에 들려짐
 	virtual bool Holster(); // Character 손에서 집어넣어짐
@@ -54,8 +54,6 @@ public:
 		virtual void OnSubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
 protected:
 	// Rpc
-	UFUNCTION(Server, Reliable)
-		void Server_Equipped(ACreature* Character);
 	UFUNCTION(Server, Reliable)
 		void Server_UnEquipped();
 	UFUNCTION(NetMulticast, Reliable)
@@ -91,6 +89,9 @@ public:
 
 	virtual UAnimMontage* GetAttackMontageTpp() { return AttackMontageTpp; }
 	virtual UAnimMontage* GetAttackMontageFpp() { return AttackMontageFpp; }
+
+	void SetOwnerCreature(ACreature* pointer);
+
 public:
 	FAttackDele OnAttack;
 	FAttackDele OnBeforeAttack;
@@ -127,7 +128,6 @@ public:
 protected:
 	UPROPERTY(Replicated)
 		class ACreature* OwnerCreature = nullptr;
-	void SetOwnerCreature(ACreature* pointer);
 	UFUNCTION(Server, Reliable)
 		void Server_SetOwnerCreature(ACreature* pointer);
 

@@ -72,9 +72,9 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UCombatComponent, CurWeapon);
+	DOREPLIFETIME(UCombatComponent, CurWeapon); 
 	DOREPLIFETIME(UCombatComponent, CurHp);
-	DOREPLIFETIME(UCombatComponent,	MaxHp);
+	DOREPLIFETIME(UCombatComponent, MaxHp);
 }
 
 
@@ -161,25 +161,7 @@ void UCombatComponent::EquipWeapon(AWeapon* Weapon)
 	if (!Weapon)
 		return;
 
-	HolsterCurWeapon();
-	SetCurWeapon(Weapon);
-
-	OwnerCreature->OwnOtherActor(Weapon);
-	CurWeapon->SetOwner(GetOwner());
-	bool Success = CurWeapon->Equipped(OwnerCreature);
-	
-	if(Success)
-	{ 
-		KR_LOG(Log,TEXT("Success to equip weapon %s"), *Weapon->GetName());
-		WeaponSlot.Add(Weapon);
-		if(WeaponSlot.Num() > MaxWeaponSlotSize)
-			KR_LOG(Error,TEXT("WeaponSlot size is bigger than MaxWeaponSlot"));
-
-		OnEquipWeaponSuccess.Broadcast(Weapon);
-		HoldWeapon(Weapon);
-	}
-	else
-		KR_LOG(Warning, TEXT("Failed to equip weapon"));
+	Server_EquipWeapon(Weapon);
 }
 
 void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
@@ -318,6 +300,39 @@ void UCombatComponent::Multicast_SetCurHp_Implementation(int32 value)
 void UCombatComponent::Server_SetMaxHp_Implementation(int32 value)
 {
 	MaxHp = value;
+}
+
+void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
+{
+	if (!Weapon)
+		return;
+
+	bool Success = Weapon->Equipped(OwnerCreature);
+	if (Success)
+	{
+		OwnerCreature->OwnOtherActor(Weapon);
+		KR_LOG(Log, TEXT("Success to equip weapon %s"), *Weapon->GetName());
+
+		OnServerEquipWeaponSuccess.Broadcast(Weapon);
+		Client_EquipWeaponSuccess(Weapon);
+	}
+	else
+		KR_LOG(Warning, TEXT("Failed to equip weapon"));
+}
+
+void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
+{
+	HolsterCurWeapon();
+
+	SetCurWeapon(Weapon);
+	Weapon->SetOwnerCreature(OwnerCreature);
+	WeaponSlot.Add(Weapon);
+	if (WeaponSlot.Num() > MaxWeaponSlotSize)
+		KR_LOG(Error, TEXT("WeaponSlot size is bigger than MaxWeaponSlot"));
+
+	OnClientEquipWeaponSuccess.Broadcast(Weapon);
+
+	HoldWeapon(Weapon);
 }
 
 void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

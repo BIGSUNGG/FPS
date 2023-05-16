@@ -142,14 +142,24 @@ int32 AWeapon::FindAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 
 bool AWeapon::Equipped(ACreature* Character)
 {
+	if (IS_SERVER() == false)
+	{
+		KR_LOG(Error, TEXT("Called on client"));
+		return false;
+	}
+
 	if (GetCanInteracted() == false)
 		return false;
+
+	SetOwner(Character);
+	SetOwnerCreature(Character);
+	WeaponState = EWeaponState::EQUIPPED;
 
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	SetOwnerCreature(Character);
-	Server_Equipped(OwnerCreature);
+	Multicast_Equipped(Character);
+
 	return true;
 }
 
@@ -273,17 +283,6 @@ void AWeapon::OnSubAttackEndEvent()
 {
 	SetIsSubAttacking(false);
 	OnSubAttackEnd.Broadcast();
-}
-
-void AWeapon::Server_Equipped_Implementation(ACreature* Character)
-{
-	SetOwnerCreature(Character);
-	WeaponState = EWeaponState::EQUIPPED;
-
-	WeaponMesh->SetSimulatePhysics(false);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	Multicast_Equipped(Character);
 }
 
 void AWeapon::Server_UnEquipped_Implementation()

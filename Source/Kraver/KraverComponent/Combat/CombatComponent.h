@@ -49,10 +49,16 @@ public:
 	virtual void CancelTakeDamage();
 
 protected:
+	// Equip Weapon
+	UFUNCTION(Server, reliable)
+		virtual void Server_EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
+
+	UFUNCTION(Client, reliable)
+		virtual void Client_EquipWeaponSuccess(AWeapon* Weapon);
+
 	// Take Damage
 	UFUNCTION(Server, reliable)
 		void Server_TakeDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-
 	UFUNCTION(Client, reliable)
 		void Client_TakeDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
@@ -85,7 +91,8 @@ public:
 	FAttackStartDele OnSubAttackStartDelegate; // 공격을 시작할때 호출
 	FAttackEndDele OnSubAttackEndDelegate; // 공격을 멈출때 호출
 
-	FEquipWeaponSuccessDele OnEquipWeaponSuccess; // 무기를 장착했을때 호출
+	FEquipWeaponSuccessDele OnServerEquipWeaponSuccess; // 무기를 장착했을때 호출
+	FEquipWeaponSuccessDele OnClientEquipWeaponSuccess; // 무기를 장착했을때 호출
 	FUnEquipWeaponSuccessDele OnUnEquipWeaponSuccess; // 무기를 해제했을때 호출
 
 	FHoldWeaponDele OnHoldWeapon;
@@ -108,7 +115,7 @@ protected:
 	void SetCurWeapon(AWeapon* Weapon);
 	UFUNCTION(Server, reliable)
 		void Server_SetCurWeapon(AWeapon* Weapon);
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		int32 MaxWeaponSlotSize = 1; // WeaponSlot 사이즈

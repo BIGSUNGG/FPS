@@ -98,7 +98,7 @@ protected:
 	// Delegate Event
 	void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
 
-	virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
+	virtual void OnClientEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void OnHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	virtual void OnHolsterWeaponEvent(AWeapon* Weapon); // 무기를 넣을때 호출되는 함수
