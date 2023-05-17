@@ -166,23 +166,10 @@ void UCombatComponent::EquipWeapon(AWeapon* Weapon)
 
 void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
 {
-	SetIsAttacking(false);
-	if (CurWeapon == Weapon)
-	{
-		HolsterCurWeapon();
-		SetCurWeapon(nullptr);
-	}
+	if(!Weapon)
+		return;
 
-	bool Success = Weapon->UnEquipped();
-
-	if(Success)
-	{ 
-		KR_LOG(Log, TEXT("UnEquipWeapon %s"), *Weapon->GetName());
-		WeaponSlot.Remove(Weapon);
-		OnUnEquipWeaponSuccess.Broadcast(Weapon);
-	}
-	else
-		KR_LOG(Warning, TEXT("Failed to unequip weapon"));
+	Server_UnEquipWeapon(Weapon);
 }
 
 bool UCombatComponent::HoldWeapon(int32 WeaponIndex)
@@ -310,7 +297,7 @@ void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
 	bool Success = Weapon->Equipped(OwnerCreature);
 	if (Success)
 	{
-		OwnerCreature->OwnOtherActor(Weapon);
+		Weapon->SetOwner(OwnerCreature);
 		KR_LOG(Log, TEXT("Success to equip weapon %s"), *Weapon->GetName());
 
 		OnServerEquipWeaponSuccess.Broadcast(Weapon);
@@ -318,6 +305,24 @@ void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
 	}
 	else
 		KR_LOG(Warning, TEXT("Failed to equip weapon"));
+}
+
+void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
+{
+	if (!Weapon)
+		return;
+
+	bool Success = Weapon->UnEquipped();
+	if (Success)
+	{
+		Weapon->SetOwner(nullptr);
+		KR_LOG(Log, TEXT("UnEquipWeapon %s"), *Weapon->GetName());
+
+		OnServerUnEquipWeaponSuccess.Broadcast(Weapon);
+		Client_UnEquipWeaponSuccess(Weapon);
+	}
+	else
+		KR_LOG(Warning, TEXT("Failed to unequip weapon"));
 }
 
 void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
@@ -333,6 +338,14 @@ void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
 	OnClientEquipWeaponSuccess.Broadcast(Weapon);
 
 	HoldWeapon(Weapon);
+}
+
+void UCombatComponent::Client_UnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
+{
+	HolsterCurWeapon();
+	WeaponSlot.Remove(Weapon);
+
+	OnClientUnEquipWeaponSuccess.Broadcast(Weapon);
 }
 
 void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

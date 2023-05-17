@@ -52,9 +52,13 @@ protected:
 	// Equip Weapon
 	UFUNCTION(Server, reliable)
 		virtual void Server_EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
+	UFUNCTION(Server, reliable)
+		virtual void Server_UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
 
 	UFUNCTION(Client, reliable)
-		virtual void Client_EquipWeaponSuccess(AWeapon* Weapon);
+		virtual void Client_EquipWeaponSuccess(AWeapon* Weapon);		
+	UFUNCTION(Client, reliable)
+		virtual void Client_UnEquipWeaponSuccess(AWeapon* Weapon);
 
 	// Take Damage
 	UFUNCTION(Server, reliable)
@@ -93,7 +97,8 @@ public:
 
 	FEquipWeaponSuccessDele OnServerEquipWeaponSuccess; // 무기를 장착했을때 호출
 	FEquipWeaponSuccessDele OnClientEquipWeaponSuccess; // 무기를 장착했을때 호출
-	FUnEquipWeaponSuccessDele OnUnEquipWeaponSuccess; // 무기를 해제했을때 호출
+	FUnEquipWeaponSuccessDele OnServerUnEquipWeaponSuccess; // 무기를 해제했을때 호출
+	FUnEquipWeaponSuccessDele OnClientUnEquipWeaponSuccess; // 무기를 해제했을때 호출
 
 	FHoldWeaponDele OnHoldWeapon;
 	FHolsterWeaponDele OnHolsterWeapon;

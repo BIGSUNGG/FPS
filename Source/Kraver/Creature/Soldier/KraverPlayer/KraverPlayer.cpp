@@ -589,9 +589,9 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 	ShowOnlyThirdPerson.Push(Weapon->GetWeaponMesh());
 }
 
-void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
+void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	ASoldier::OnUnEquipWeaponSuccessEvent(Weapon);
+	ASoldier::OnClientUnEquipWeaponSuccessEvent(Weapon);
 	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
 	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
 

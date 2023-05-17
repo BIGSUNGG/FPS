@@ -54,8 +54,8 @@ public:
 		virtual void OnSubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
 protected:
 	// Rpc
-	UFUNCTION(Server, Reliable)
-		void Server_UnEquipped();
+	UFUNCTION(Client, Reliable)
+		void Client_UnEquipped();
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_Equipped(ACreature* Character);
 	UFUNCTION(NetMulticast, Reliable)

@@ -21,11 +21,12 @@ ACreature::ACreature()
 	CombatComponent->OnClientDeath.AddDynamic(this, &ACreature::OnDeathEvent);
 	CombatComponent->OnClientEquipWeaponSuccess.AddDynamic(this, &ACreature::OnClientEquipWeaponSuccessEvent);
 	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ACreature::OnServerEquipWeaponSuccessEvent);
-	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnUnEquipWeaponSuccessEvent);	
+	CombatComponent->OnClientUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnClientUnEquipWeaponSuccessEvent);	
+	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnServerUnEquipWeaponSuccessEvent);
 	CombatComponent->OnClientAfterTakeDamage.AddDynamic(this, &ACreature::OnAfterTakeDamageEvent);
 	CombatComponent->OnHoldWeapon.AddDynamic(this, &ACreature::OnHoldWeaponEvent);
 	CombatComponent->OnHolsterWeapon.AddDynamic(this, &ACreature::OnHolsterWeaponEvent);
-
+	
 	SpringArm->SetupAttachment(GetMesh());
 	SpringArm->bUsePawnControlRotation = true;
 	SpringArm->bInheritPitch = true;
@@ -473,14 +474,11 @@ void ACreature::OnServerEquipWeaponSuccessEvent(AWeapon* Weapon)
 		FAttachmentTransformRules::SnapToTargetIncludingScale,
 		Weapon->GetAttachSocketName()
 	);
-
-	Multicast_OnEquipWeaponSuccessEvent(Weapon);
 }
 
-void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
+void ACreature::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
-	Server_OnUnEquipWeaponSuccessEvent(Weapon);
 }
 
 void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
@@ -609,8 +607,14 @@ void ACreature::Client_Assassinated_Implementation(ACreature* Attacker, FAssassi
 	DisableInput(PlayerController);
 }
 
-void ACreature::Server_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
+void ACreature::OnServerUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
+	if (IS_SERVER() == false)
+	{
+		KR_LOG(Error, TEXT("Called on client"));
+		return;
+	}
+
 	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
 
 	Multicast_OnUnEquipWeaponSuccessEvent(Weapon);
@@ -691,10 +695,4 @@ void ACreature::PlayLandedMontage()
 void ACreature::Jump()
 {
 	ACharacter::Jump();
-}
-
-void ACreature::Multicast_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
-{
-	Weapon->SetOwner(this);
-
 }

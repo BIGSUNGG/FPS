@@ -101,7 +101,7 @@ protected:
 		virtual void OnServerEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 서버에서 호출되는 함수
 
 	UFUNCTION()
-		virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 호출되는 함수
+		virtual void OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 호출되는 함수
 	UFUNCTION()
 		virtual void OnHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
@@ -127,10 +127,8 @@ protected:
 		virtual void Multicast_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(Client, Reliable)
 		virtual void Client_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
-	UFUNCTION(NetMulticast, reliable)
-		void Multicast_OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 서버에서 호출되는 함수
 	UFUNCTION(Server, reliable)
-		void Server_OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
+		void OnServerUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
 	UFUNCTION(Server, reliable)

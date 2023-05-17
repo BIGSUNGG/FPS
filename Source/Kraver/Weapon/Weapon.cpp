@@ -178,15 +178,25 @@ bool AWeapon::GetCanInteracted()
 
 bool AWeapon::UnEquipped()
 {
-	RemoveOnOwnerDelegate();
+	if (IS_SERVER() == false)
+	{
+		KR_LOG(Error, TEXT("Called on client"));
+		return false;
+	}
+
 
 	ACreature* CreaturePtr = OwnerCreature;
 	SetOwnerCreature(nullptr);
 
-	if(IsAttacking)
-		OnAttackEndEvent();
+	WeaponState = EWeaponState::NONE;
+	WeaponMesh->SetSimulatePhysics(true);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-	Server_UnEquipped();
+	OnAttackEndEvent();
+	OnSubAttackEndEvent();
+
+	Client_UnEquipped();
+	Multicast_UnEquipped();
 	return true;
 }
 
@@ -285,12 +295,9 @@ void AWeapon::OnSubAttackEndEvent()
 	OnSubAttackEnd.Broadcast();
 }
 
-void AWeapon::Server_UnEquipped_Implementation()
+void AWeapon::Client_UnEquipped_Implementation()
 {
-	WeaponState = EWeaponState::NONE;
-	WeaponMesh->SetSimulatePhysics(true);
-
-	Multicast_UnEquipped();
+	RemoveOnOwnerDelegate();
 }
 
 void AWeapon::Multicast_Equipped_Implementation(ACreature* Character)
