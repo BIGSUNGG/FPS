@@ -169,6 +169,7 @@ void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
 	if(!Weapon)
 		return;
 
+	HolsterWeapon(CurWeapon);
 	Server_UnEquipWeapon(Weapon);
 }
 
@@ -197,34 +198,44 @@ bool UCombatComponent::HoldWeapon(int32 WeaponIndex)
 		return false;
 	}
 
-	HolsterCurWeapon();
 	HoldWeapon(WeaponSlot[WeaponIndex]);
 	return true;
 }
 
 void UCombatComponent::HoldWeapon(AWeapon* Weapon)
 {
+	if (Weapon == nullptr)
+	{
+		KR_LOG(Warning, TEXT("Weapon is nullptr"));
+		return;
+	}
+	
 	KR_LOG(Log,TEXT("Hold Weapon %s"),*Weapon->GetName());
+	HolsterWeapon(CurWeapon);
 	SetCurWeapon(Weapon);
-	SetIsAttacking(false);
-	SetIsSubAttacking(false);
 	Weapon->Hold();
-	OnHoldWeapon.Broadcast(Weapon);
+	OnClientHoldWeapon.Broadcast(Weapon);
+
+	Server_HoldWeapon(Weapon);
 }
 
-bool UCombatComponent::HolsterCurWeapon()
+bool UCombatComponent::HolsterWeapon(AWeapon* Weapon)
 {
 	if(CurWeapon == nullptr)
 		return false;
 
 	KR_LOG(Log, TEXT("Holster Weapon %s"), *CurWeapon->GetName());
-	AWeapon* WeaponPtr = CurWeapon;
-	SetIsAttacking(false);
-	SetIsSubAttacking(false);
-	SetCurWeapon(nullptr);
-	WeaponPtr->Holster();
-	OnHolsterWeapon.Broadcast(WeaponPtr);
-	return true;
+	bool Success = Weapon->Holster();
+	if(Success)
+	{
+		SetCurWeapon(nullptr);
+		OnClientHolsterWeapon.Broadcast(Weapon);
+
+		Server_HolsterWeapon(Weapon);
+		return true;
+	}
+
+	return false;
 }
 
 void UCombatComponent::SetIsAttacking(bool bAttack)
@@ -327,7 +338,7 @@ void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 
 void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
 {
-	HolsterCurWeapon();
+	HolsterWeapon(CurWeapon);
 
 	SetCurWeapon(Weapon);
 	Weapon->SetOwnerCreature(OwnerCreature);
@@ -342,10 +353,20 @@ void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
 
 void UCombatComponent::Client_UnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
 {
-	HolsterCurWeapon();
+	HolsterWeapon(Weapon);
 	WeaponSlot.Remove(Weapon);
 
 	OnClientUnEquipWeaponSuccess.Broadcast(Weapon);
+}
+
+void UCombatComponent::Server_HoldWeapon_Implementation(AWeapon* Weapon)
+{
+	OnServerHoldWeapon.Broadcast(Weapon);
+}
+
+void UCombatComponent::Server_HolsterWeapon_Implementation(AWeapon* Weapon)
+{
+	OnServerHolsterWeapon.Broadcast(Weapon);
 }
 
 void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -382,6 +403,7 @@ void UCombatComponent::Server_GiveDamage_Implementation(AActor* DamagedActor, fl
 
 void UCombatComponent::Server_Death_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	OnServerDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	Client_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 

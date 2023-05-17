@@ -192,9 +192,6 @@ bool AWeapon::UnEquipped()
 	WeaponMesh->SetSimulatePhysics(true);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-	OnAttackEndEvent();
-	OnSubAttackEndEvent();
-
 	Client_UnEquipped();
 	Multicast_UnEquipped();
 	return true;
@@ -202,12 +199,18 @@ bool AWeapon::UnEquipped()
 
 bool AWeapon::Hold()
 {
+	OnAttackEndEvent();
+	OnSubAttackEndEvent();
+
 	AddOnOwnerDelegate();
 	return true;
 }
 
 bool AWeapon::Holster()
 {
+	OnAttackEndEvent();
+	OnSubAttackEndEvent();
+
 	RemoveOnOwnerDelegate();
 	return true;
 }
@@ -295,8 +298,17 @@ void AWeapon::OnSubAttackEndEvent()
 	OnSubAttackEnd.Broadcast();
 }
 
+void AWeapon::Client_Equipped_Implementation()
+{
+	OnAttackEndEvent();
+	OnSubAttackEndEvent();
+}
+
 void AWeapon::Client_UnEquipped_Implementation()
 {
+	OnAttackEndEvent();
+	OnSubAttackEndEvent();
+
 	RemoveOnOwnerDelegate();
 }
 

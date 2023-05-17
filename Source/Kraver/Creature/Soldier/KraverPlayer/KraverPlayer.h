@@ -57,7 +57,7 @@ protected:
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
 	virtual void ThrowWeapon(AWeapon* Weapon);
 
- 	virtual void OnDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+ 	virtual void OnClientDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	virtual void RefreshArm();
 	virtual void RefreshSpringArm(); // SpringArm의 RelativeLocation을 새로고침하는 함수
@@ -100,8 +100,8 @@ protected:
 
 	virtual void OnClientEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
-	virtual void OnHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
-	virtual void OnHolsterWeaponEvent(AWeapon* Weapon); // 무기를 넣을때 호출되는 함수
+	virtual void OnClientHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+	virtual void OnClientHolsterWeaponEvent(AWeapon* Weapon); // 무기를 넣을때 호출되는 함수
 
 	virtual void OnAssassinateEvent(AActor* AssassinatedActor) override;
 	virtual void OnAssassinateEndEvent() override;

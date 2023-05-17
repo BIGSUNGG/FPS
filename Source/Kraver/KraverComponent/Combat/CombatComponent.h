@@ -40,8 +40,8 @@ public:
 
 	// Hold Holster
 	virtual bool HoldWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
-	virtual void HoldWeapon(AWeapon* Weapon); // WeaponSlot을 드는 함수
-	virtual bool HolsterCurWeapon(); // CurWeapon을 집어넣는 함수
+	virtual void HoldWeapon(AWeapon* Weapon); // Weapon을 드는 함수
+	virtual bool HolsterWeapon(AWeapon* Weapon); // CurWeapon을 집어넣는 함수
 
 	// Damage Event
 	virtual float TakeDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
@@ -59,6 +59,12 @@ protected:
 		virtual void Client_EquipWeaponSuccess(AWeapon* Weapon);		
 	UFUNCTION(Client, reliable)
 		virtual void Client_UnEquipWeaponSuccess(AWeapon* Weapon);
+
+	UFUNCTION(Server, reliable)
+		virtual void Server_HoldWeapon(AWeapon* Weapon);
+	UFUNCTION(Server, reliable)
+		virtual void Server_HolsterWeapon(AWeapon* Weapon); // CurWeapon을 집어넣는 함수
+
 
 	// Take Damage
 	UFUNCTION(Server, reliable)
@@ -100,14 +106,17 @@ public:
 	FUnEquipWeaponSuccessDele OnServerUnEquipWeaponSuccess; // 무기를 해제했을때 호출
 	FUnEquipWeaponSuccessDele OnClientUnEquipWeaponSuccess; // 무기를 해제했을때 호출
 
-	FHoldWeaponDele OnHoldWeapon;
-	FHolsterWeaponDele OnHolsterWeapon;
+	FHoldWeaponDele OnClientHoldWeapon;
+	FHoldWeaponDele OnServerHoldWeapon;
+	FHolsterWeaponDele OnClientHolsterWeapon;
+	FHolsterWeaponDele OnServerHolsterWeapon;
 
 	FTakeDamageDele OnServerBeforeTakeDamage; // 데미지를 받았을때 호출
 
 	FTakeDamageDele OnClientAfterTakeDamage; // 데미지를 받았을때 호출
 	FGiveDamageDele OnClientGiveDamage; // 데미지를 주었을때 호출
 	FDeathDele OnClientDeath; // 죽었을때 호출
+	FDeathDele OnServerDeath; // 죽었을때 호출
 
 protected:
 	ACreature* OwnerCreature;

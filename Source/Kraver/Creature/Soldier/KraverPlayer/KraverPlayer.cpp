@@ -385,9 +385,9 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 		);
 }
 
-void AKraverPlayer::OnDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void AKraverPlayer::OnClientDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	ASoldier::OnDeathEvent(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
+	ASoldier::OnClientDeathEvent(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
 
 	GetMesh()->SetOwnerNoSee(false);
 	ArmMesh->SetOwnerNoSee(true);
@@ -624,17 +624,17 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 }
 
-void AKraverPlayer::OnHoldWeaponEvent(AWeapon* Weapon)
+void AKraverPlayer::OnClientHoldWeaponEvent(AWeapon* Weapon)
 {
-	ASoldier::OnHoldWeaponEvent(Weapon);
+	ASoldier::OnClientHoldWeaponEvent(Weapon);
 
 	ArmWeaponMeshes[Weapon]->SetHiddenInGame(false);
 	RefreshCurViewType();
 }
 
-void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
+void AKraverPlayer::OnClientHolsterWeaponEvent(AWeapon* Weapon)
 {
-	ASoldier::OnHolsterWeaponEvent(Weapon);
+	ASoldier::OnClientHolsterWeaponEvent(Weapon);
 	
 	ArmWeaponMeshes[Weapon]->SetHiddenInGame(true);
 	ArmMesh->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageFpp());

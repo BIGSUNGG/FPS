@@ -18,14 +18,21 @@ ACreature::ACreature()
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
-	CombatComponent->OnClientDeath.AddDynamic(this, &ACreature::OnDeathEvent);
+
+	CombatComponent->OnClientDeath.AddDynamic(this, &ACreature::OnClientDeathEvent);
+	CombatComponent->OnServerDeath.AddDynamic(this, &ACreature::OnServerDeathEvent);
+
 	CombatComponent->OnClientEquipWeaponSuccess.AddDynamic(this, &ACreature::OnClientEquipWeaponSuccessEvent);
 	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ACreature::OnServerEquipWeaponSuccessEvent);
 	CombatComponent->OnClientUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnClientUnEquipWeaponSuccessEvent);	
 	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnServerUnEquipWeaponSuccessEvent);
-	CombatComponent->OnClientAfterTakeDamage.AddDynamic(this, &ACreature::OnAfterTakeDamageEvent);
-	CombatComponent->OnHoldWeapon.AddDynamic(this, &ACreature::OnHoldWeaponEvent);
-	CombatComponent->OnHolsterWeapon.AddDynamic(this, &ACreature::OnHolsterWeaponEvent);
+
+	CombatComponent->OnClientAfterTakeDamage.AddDynamic(this, &ACreature::OnClientAfterTakeDamageEvent);
+
+	CombatComponent->OnClientHoldWeapon.AddDynamic(this, &ACreature::OnClientHoldWeaponEvent);
+	CombatComponent->OnServerHoldWeapon.AddDynamic(this, &ACreature::OnServerHoldWeaponEvent);
+	CombatComponent->OnClientHolsterWeapon.AddDynamic(this, &ACreature::OnClientHolsterWeaponEvent);
+	CombatComponent->OnServerHolsterWeapon.AddDynamic(this, &ACreature::OnServerHolsterWeaponEvent);
 	
 	SpringArm->SetupAttachment(GetMesh());
 	SpringArm->bUsePawnControlRotation = true;
@@ -360,7 +367,8 @@ void ACreature::JumpingButtonReleased()
 
 void ACreature::HolsterWeaponPressed()
 {
-	CombatComponent->HolsterCurWeapon();
+	if(CombatComponent->GetCurWeapon())
+		CombatComponent->HolsterWeapon(CombatComponent->GetCurWeapon());
 }
 
 void ACreature::AimOffset(float DeltaTime)
@@ -476,12 +484,25 @@ void ACreature::OnServerEquipWeaponSuccessEvent(AWeapon* Weapon)
 	);
 }
 
+void ACreature::OnServerUnEquipWeaponSuccessEvent(AWeapon* Weapon)
+{
+	if (IS_SERVER() == false)
+	{
+		KR_LOG(Error, TEXT("Called on client"));
+		return;
+	}
+
+	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
+
+	Multicast_OnUnEquipWeaponSuccessEvent(Weapon);
+}
+
 void ACreature::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
 }
 
-void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
+void ACreature::OnClientHoldWeaponEvent(AWeapon* Weapon)
 {
 	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
 	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
@@ -507,7 +528,12 @@ void ACreature::OnHoldWeaponEvent(AWeapon* Weapon)
 	}
 }
 
-void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
+void ACreature::OnServerHoldWeaponEvent(AWeapon* Weapon)
+{
+	Multicast_HoldWeaponEvent(Weapon);
+}
+
+void ACreature::OnClientHolsterWeaponEvent(AWeapon* Weapon)
 {
 	if(!Weapon)
 		return;
@@ -538,7 +564,12 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 	}
 }
 
-void ACreature::OnDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::OnServerHolsterWeaponEvent(AWeapon* Weapon)
+{
+	Multicast_HolsterWeaponEvent(Weapon);
+}
+
+void ACreature::OnClientDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	GetMesh()->SetSimulatePhysics(true);
 	DisableInput(GetController<APlayerController>());
@@ -546,8 +577,11 @@ void ACreature::OnDeathEvent(float DamageAmount, FKraverDamageEvent const& Damag
 		CombatComponent->UnEquipWeapon(CombatComponent->GetCurWeapon());
 
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
+}
 
-	Server_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+void ACreature::OnServerDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Multicast_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ACreature::Landed(const FHitResult& Hit)
@@ -558,7 +592,7 @@ void ACreature::Landed(const FHitResult& Hit)
 	PlayLandedMontage();
 }
 
-void ACreature::OnAfterTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::OnClientAfterTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Server_OnAfterTakeDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
@@ -607,27 +641,9 @@ void ACreature::Client_Assassinated_Implementation(ACreature* Attacker, FAssassi
 	DisableInput(PlayerController);
 }
 
-void ACreature::OnServerUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
-{
-	if (IS_SERVER() == false)
-	{
-		KR_LOG(Error, TEXT("Called on client"));
-		return;
-	}
-
-	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
-
-	Multicast_OnUnEquipWeaponSuccessEvent(Weapon);
-}
-
 void ACreature::Multicast_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
 	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
-}
-
-void ACreature::Server_OnDeathEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	Multicast_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -684,6 +700,16 @@ void ACreature::Server_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* 
 void ACreature::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
 {
 
+}
+
+void ACreature::Multicast_HoldWeaponEvent_Implementation(AWeapon* Weapon)
+{
+	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
+}
+
+void ACreature::Multicast_HolsterWeaponEvent_Implementation(AWeapon* Weapon)
+{
+	Weapon->GetWeaponMesh()->SetHiddenInGame(true);
 }
 
 void ACreature::PlayLandedMontage()

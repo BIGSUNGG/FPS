@@ -55,6 +55,8 @@ public:
 protected:
 	// Rpc
 	UFUNCTION(Client, Reliable)
+		void Client_Equipped();
+	UFUNCTION(Client, Reliable)
 		void Client_UnEquipped();
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_Equipped(ACreature* Character);
