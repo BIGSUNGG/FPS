@@ -26,7 +26,7 @@ protected:
 	UFUNCTION()
 		virtual void OnSubAttackStartEvent();
 	UFUNCTION()
-		virtual void OnServerBeforeTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+		virtual void OnServerBeforeTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	// Rpc
 	UFUNCTION(Server, Reliable)
 		virtual void Server_ParryStart();

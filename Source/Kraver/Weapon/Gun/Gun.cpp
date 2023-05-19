@@ -208,6 +208,7 @@ void AGun::OnAttackEvent()
 			if (IsValid(Result.GetActor()))
 			{
 				FKraverDamageEvent DamageEvent;
+				DamageEvent.bCanHeadShot = true;
 				DamageEvent.bCanParried = true;
 				DamageEvent.DamageImpulse = AttackImpulse;
 				DamageEvent.HitInfo = Result;

@@ -28,7 +28,7 @@ private:
 protected:
 	// Delegate
 	UFUNCTION()
-		void OnGiveDamageEvent(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+		void OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 public:
 	// Getter Setter

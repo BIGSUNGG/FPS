@@ -50,7 +50,7 @@ void UWeaponParryComponent::OnSubAttackStartEvent()
 	ParryStart();
 }
 
-void UWeaponParryComponent::OnServerBeforeTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void UWeaponParryComponent::OnServerBeforeTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	if (IS_SERVER() == false)
 	{

@@ -32,21 +32,38 @@ public:
 };
 
 USTRUCT(BlueprintType)
+struct FKraverDamageResult
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	bool bAlreadyDead = false;
+	UPROPERTY()
+	bool bCreatureDead = false;
+	UPROPERTY()
+	bool bCritical = false;
+	UPROPERTY()
+	float ActualDamage = 0.f;
+};
+
+USTRUCT(BlueprintType)
 struct FKraverDamageEvent : public FDamageEvent
 {
 	GENERATED_BODY()
+
 public:
 	UPROPERTY()
 	FHitResult HitInfo;
-
 	UPROPERTY()
 	EKraverDamageType DamageType;
 
 	UPROPERTY()
 	float DamageImpulse = 0.f;
-
 	UPROPERTY()
 	bool bCanParried = false;
+	UPROPERTY()
+	bool bCanHeadShot = false;
 
 public:
 	FVector GetHitDirection() const

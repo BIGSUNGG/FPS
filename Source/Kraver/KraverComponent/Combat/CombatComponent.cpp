@@ -17,19 +17,29 @@ UCombatComponent::UCombatComponent()
 	// ...
 }
 
-float UCombatComponent::CalculateDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent)
+FKraverDamageResult UCombatComponent::CalculateDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent)
 {
-	float Damage = DamageAmount;
+	FKraverDamageResult Result;
+	Result.ActualDamage = DamageAmount;
 
-	if(DamageEvent.HitInfo.BoneName == "Head")
-		Damage *= 10.f;
+	if(GetIsDead())
+		Result.bAlreadyDead = true;
 
-	return Damage;
+	if (DamageEvent.bCanHeadShot && DamageEvent.HitInfo.BoneName == "Head")
+	{
+		Result.ActualDamage *= 10.f;
+		Result.bCritical = true;
+	}
+
+	if(CurHp - Result.ActualDamage <= 0.f)
+		Result.bCreatureDead = true;
+
+	return Result;
 }
 
 float UCombatComponent::TakeDamage(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	float Damage = CalculateDamage(DamageAmount,DamageEvent);
+	float Damage = CalculateDamage(DamageAmount, DamageEvent).ActualDamage;
 	Server_TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
 	return Damage;
@@ -40,14 +50,18 @@ float UCombatComponent::GiveDamage(AActor* DamagedActor, float DamageAmount, FKr
 	float Damage;
 	ACreature* Creature = Cast<ACreature>(DamagedActor);
 	if(Creature)
-		Damage = Creature->CombatComponent->CalculateDamage(DamageAmount, DamageEvent);
+		Damage = Creature->CombatComponent->CalculateDamage(DamageAmount, DamageEvent).ActualDamage;
 	else
 		Damage = DamageAmount;
 
 	KR_LOG(Log, TEXT("Give %f Damge to %s"), Damage, *DamagedActor->GetName());
 	Server_GiveDamage(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	OnClientGiveDamage.Broadcast(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	return Damage;
+}
+
+void UCombatComponent::Client_GiveDamageSuccess_Implementation(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	OnClientGiveDamageSuccess.Broadcast(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
 void UCombatComponent::CancelTakeDamage()
@@ -371,16 +385,17 @@ void UCombatComponent::Server_HolsterWeapon_Implementation(AWeapon* Weapon)
 
 void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	OnServerBeforeTakeDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	FKraverDamageResult DamageResult = CalculateDamage(DamageAmount, DamageEvent);
+
+	OnServerBeforeTakeDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 	if (bCanceledTakeDamage)
 	{
 		bCanceledTakeDamage = false;
 		return;
 	}
 
-	float Damage = CalculateDamage(DamageAmount, DamageEvent);
-	KR_LOG(Log, TEXT("Take %f Damage by %s"), Damage, *DamageCauser->GetName());
-	CurHp -= Damage;
+	KR_LOG(Log, TEXT("Take %f Damage by %s"), DamageResult.ActualDamage, *DamageCauser->GetName());
+	CurHp -= DamageResult.ActualDamage;
 	if (CurHp <= 0)
 	{
 		CurHp = 0;
@@ -388,17 +403,28 @@ void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FKra
 		Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	}
 	Server_SetCurHp(CurHp);
-	Client_TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	Client_TakeDamageSuccess(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+
+	ACreature* Creature = Cast<ACreature>(DamageCauser->GetOwner());
+	if(Creature)
+		Creature->CombatComponent->Client_GiveDamageSuccess(GetOwner(), DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
-void UCombatComponent::Client_TakeDamage_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void UCombatComponent::Client_TakeDamageSuccess_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
-	OnClientAfterTakeDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnClientAfterTakeDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
 void UCombatComponent::Server_GiveDamage_Implementation(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float Damage = DamagedActor->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	FKraverDamageResult DamageResult;
+	ACreature* Creature = Cast<ACreature>(DamagedActor);
+	if(Creature)
+		DamageResult = CalculateDamage(DamageAmount, DamageEvent);
+
 }
 
 void UCombatComponent::Server_Death_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

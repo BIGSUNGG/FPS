@@ -27,7 +27,7 @@ ACreature::ACreature()
 	CombatComponent->OnClientUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnClientUnEquipWeaponSuccessEvent);	
 	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnServerUnEquipWeaponSuccessEvent);
 
-	CombatComponent->OnClientAfterTakeDamage.AddDynamic(this, &ACreature::OnClientAfterTakeDamageEvent);
+	CombatComponent->OnClientAfterTakeDamageSuccess.AddDynamic(this, &ACreature::OnClientAfterTakeDamageEvent);
 
 	CombatComponent->OnClientHoldWeapon.AddDynamic(this, &ACreature::OnClientHoldWeaponEvent);
 	CombatComponent->OnServerHoldWeapon.AddDynamic(this, &ACreature::OnServerHoldWeaponEvent);
@@ -592,7 +592,7 @@ void ACreature::Landed(const FHitResult& Hit)
 	PlayLandedMontage();
 }
 
-void ACreature::OnClientAfterTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::OnClientAfterTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	Server_OnAfterTakeDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
