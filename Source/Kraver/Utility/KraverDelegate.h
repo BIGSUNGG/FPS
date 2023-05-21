@@ -32,7 +32,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHolsterWeaponDele, AWeapon*, Weapon
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FTakeDamageDele, float, DamageAmount, FKraverDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser, FKraverDamageResult const&, DamageResult);
 
 // Death Delegate
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FDeathDele, float, DamageAmount, FKraverDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FDeathDele, float, DamageAmount, FKraverDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser, FKraverDamageResult const&, DamageResult);
 
 // GiveDamage Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FGiveDamageDele, AActor*, DamagedActor, float, DamageAmount, FKraverDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser, FKraverDamageResult const&, DamageResult);

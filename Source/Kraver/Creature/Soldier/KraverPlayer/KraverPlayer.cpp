@@ -385,19 +385,6 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 		);
 }
 
-void AKraverPlayer::OnClientDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	ASoldier::OnClientDeathEvent(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
-
-	GetMesh()->SetOwnerNoSee(false);
-	ArmMesh->SetOwnerNoSee(true);
-	
-	FAttachmentTransformRules TransformRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
-	TransformRules.bWeldSimulatedBodies = true;
-	TransformRules.RotationRule = EAttachmentRule::KeepWorld;
-	Camera->AttachToComponent(GetMesh(), TransformRules, "head");
-}
-
 void AKraverPlayer::RefreshArm()
 {
 	ArmMesh->SetRelativeLocation(BasicArmLocation + WeaponAdsLocation, false);
@@ -639,6 +626,19 @@ void AKraverPlayer::OnClientHolsterWeaponEvent(AWeapon* Weapon)
 	ArmWeaponMeshes[Weapon]->SetHiddenInGame(true);
 	ArmMesh->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageFpp());
 	RefreshCurViewType();
+}
+
+void AKraverPlayer::Client_SimulateMesh_Implementation()
+{
+	ASoldier::Client_SimulateMesh_Implementation();
+
+	GetMesh()->SetOwnerNoSee(false);
+	ArmMesh->SetOwnerNoSee(true);
+
+	FAttachmentTransformRules TransformRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
+	TransformRules.bWeldSimulatedBodies = true;
+	TransformRules.RotationRule = EAttachmentRule::KeepWorld;
+	Camera->AttachToComponent(GetMesh(), TransformRules, "head");
 }
 
 void AKraverPlayer::OnAssassinateEvent(AActor* AssassinatedActor)

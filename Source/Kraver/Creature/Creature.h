@@ -20,7 +20,9 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 	virtual void Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
+	virtual void AssassinatedEnd();
 
 	void OwnOtherActor(AActor* Actor);
 protected:
@@ -113,9 +115,9 @@ protected:
 	UFUNCTION()
 		virtual void OnServerHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
-		virtual void OnClientDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 호출되는 함수
+		virtual void OnClientDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을때 호출되는 함수
 	UFUNCTION()
-		virtual void OnServerDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
+		virtual void OnServerDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
 
 	UFUNCTION()
 		void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
@@ -160,6 +162,12 @@ protected:
 		virtual void Multicast_HoldWeaponEvent(AWeapon* Weapon);
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_HolsterWeaponEvent(AWeapon* Weapon);
+	UFUNCTION(Client, reliable)
+		virtual void Client_SimulateMesh();
+	UFUNCTION(NetMulticast, reliable)
+		virtual void Multicast_SimulateMesh();
+	UFUNCTION(Server, reliable)
+		virtual void Server_OnAssassinatedEndEvent();
 
 	// Function
 	virtual void PlayLandedMontage();

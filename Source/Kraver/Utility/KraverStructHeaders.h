@@ -64,6 +64,8 @@ public:
 	bool bCanParried = false;
 	UPROPERTY()
 	bool bCanHeadShot = false;
+	UPROPERTY()
+	bool bCanSimulate = true;
 
 public:
 	FVector GetHitDirection() const

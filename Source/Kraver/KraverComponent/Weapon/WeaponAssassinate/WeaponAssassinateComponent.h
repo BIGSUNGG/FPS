@@ -35,12 +35,8 @@ protected:
 		virtual void Multicast_Assassinate(AActor* Actor);
 	UFUNCTION(Server, reliable)
 		virtual void Server_OnAssassinateAttackEvent();
-	UFUNCTION(NetMulticast, reliable)
-		virtual void Multicast_OnAssassinateAttackEvent();
 	UFUNCTION(Server, reliable)
 		virtual void Server_OnAssassinateEndEvent();
-	UFUNCTION(NetMulticast, reliable)
-		virtual void Multicast_OnAssassinateEndEvent();
 
 	// Delegate
 	UFUNCTION()

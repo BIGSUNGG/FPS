@@ -91,12 +91,6 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, MaxHp);
 }
 
-
-void UCombatComponent::Death(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	Server_Death(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
-}
-
 bool UCombatComponent::GetCanEquipWeapon()
 {
 	if (WeaponSlot.Num() < MaxWeaponSlotSize)
@@ -400,7 +394,7 @@ void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FKra
 	{
 		CurHp = 0;
 		Server_SetCurHp(CurHp);
-		Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+		Server_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 	}
 	Server_SetCurHp(CurHp);
 
@@ -427,15 +421,15 @@ void UCombatComponent::Server_GiveDamage_Implementation(AActor* DamagedActor, fl
 
 }
 
-void UCombatComponent::Server_Death_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void UCombatComponent::Server_Death_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
-	OnServerDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	Client_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnServerDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+	Client_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
-void UCombatComponent::Client_Death_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void UCombatComponent::Client_Death_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	KR_LOG(Log, TEXT("Dead By %s"), *DamageCauser->GetName());
 	Server_SetCurHp(CurHp);
-	OnClientDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnClientDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }

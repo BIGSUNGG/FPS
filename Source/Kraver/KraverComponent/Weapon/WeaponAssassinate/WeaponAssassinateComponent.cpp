@@ -82,6 +82,12 @@ std::pair<bool, FHitResult> UWeaponAssassinateComponent::CalculateCanAssassinate
 {
 	pair<bool, FHitResult> Result;
 
+	if (GetOwnerCreature() == nullptr)
+	{
+		KR_LOG(Error, TEXT("Owner is nullptr"));
+		return Result;
+	}
+
 	FCollisionQueryParams Params(NAME_None, false, OwnerMelee);
 	Params.AddIgnoredActor(GetOwnerCreature());
 
@@ -139,48 +145,27 @@ void UWeaponAssassinateComponent::Multicast_Assassinate_Implementation(AActor* A
 
 void UWeaponAssassinateComponent::Server_OnAssassinateAttackEvent_Implementation()
 {
-	Multicast_OnAssassinateAttackEvent();
-}
-
-void UWeaponAssassinateComponent::Multicast_OnAssassinateAttackEvent_Implementation()
-{
-	if (CurAssassinatedCreature == nullptr)
-	{
-		KR_LOG(Error,TEXT("CurAssassinatedCreature is  nullptr"));
-		return;
-	}
-
-	CurAssassinatedCreature->GetMesh()->SetSimulatePhysics(false);
+	FKraverDamageEvent AssassinateDamageEvent;
+	AssassinateDamageEvent.bCanSimulate = false;
+	GetOwnerCreature()->CombatComponent->GiveDamage(CurAssassinatedCreature, AssassinationDamage, AssassinateDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
 }
 
 void UWeaponAssassinateComponent::Server_OnAssassinateEndEvent_Implementation()
 {
-	Multicast_OnAssassinateEndEvent();
-}
-
-void UWeaponAssassinateComponent::Multicast_OnAssassinateEndEvent_Implementation()
-{
-	if (CurAssassinatedCreature->CombatComponent->GetCurHp() <= 0)
-		CurAssassinatedCreature->GetMesh()->SetSimulatePhysics(true);
+	CurAssassinatedCreature->AssassinatedEnd();
 }
 
 void UWeaponAssassinateComponent::OnAssassinateAttackEvent()
 {
-	FKraverDamageEvent TempDamageEvent;
-	GetOwnerCreature()->CombatComponent->GiveDamage(CurAssassinatedCreature, AssassinationDamage, TempDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
-	CurAssassinatedCreature->GetMesh()->SetSimulatePhysics(false);
-
 	Server_OnAssassinateAttackEvent();
 }
 
 void UWeaponAssassinateComponent::OnAssassinateEndEvent()
 {
 	IsAssassinating = false;
-	if (CurAssassinatedCreature->CombatComponent->GetCurHp() <= 0)
-		CurAssassinatedCreature->GetMesh()->SetSimulatePhysics(true);
 
-	Server_OnAssassinateEndEvent();
 	OnAssassinateEnd.Broadcast();
+	Server_OnAssassinateEndEvent();
 }
 
 void UWeaponAssassinateComponent::OnBeforeAttackEvent()

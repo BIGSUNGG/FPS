@@ -87,6 +87,11 @@ void ACreature::Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateIn
 	Server_Assassinated(Attacker, AssassinateInfo);
 }
 
+void ACreature::AssassinatedEnd()
+{
+	Server_OnAssassinatedEndEvent();
+}
+
 void ACreature::OwnOtherActor(AActor* Actor)
 {
 	Actor->SetOwner(this);
@@ -102,6 +107,7 @@ void ACreature::BeginPlay()
 	DefaultGroundFriction = GetCharacterMovement()->GroundFriction;
 	DefaultBrakingDecelerationWalking = GetCharacterMovement()->BrakingDecelerationWalking;
 	DefaultCameraLocation = Camera->GetRelativeLocation();
+
 }
 
 void ACreature::PostInitializeComponents()
@@ -148,7 +154,7 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 }
 
 void ACreature::OnAssassinateEvent(AActor* AssassinatedActor)
-{
+{	
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	DisableInput(PlayerController);
 
@@ -569,9 +575,8 @@ void ACreature::OnServerHolsterWeaponEvent(AWeapon* Weapon)
 	Multicast_HolsterWeaponEvent(Weapon);
 }
 
-void ACreature::OnClientDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::OnClientDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
-	GetMesh()->SetSimulatePhysics(true);
 	DisableInput(GetController<APlayerController>());
 	if (CombatComponent->GetCurWeapon() != nullptr)
 		CombatComponent->UnEquipWeapon(CombatComponent->GetCurWeapon());
@@ -579,8 +584,14 @@ void ACreature::OnClientDeathEvent(float DamageAmount, FKraverDamageEvent const&
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
 }
 
-void ACreature::OnServerDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::OnServerDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
+	if (DamageEvent.bCanSimulate)
+	{
+		Client_SimulateMesh();
+		Multicast_SimulateMesh();
+	}
+
 	Multicast_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
@@ -648,7 +659,6 @@ void ACreature::Multicast_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* We
 
 void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	GetMesh()->SetSimulatePhysics(true);
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
 }
 
@@ -710,6 +720,22 @@ void ACreature::Multicast_HoldWeaponEvent_Implementation(AWeapon* Weapon)
 void ACreature::Multicast_HolsterWeaponEvent_Implementation(AWeapon* Weapon)
 {
 	Weapon->GetWeaponMesh()->SetHiddenInGame(true);
+}
+
+void ACreature::Client_SimulateMesh_Implementation()
+{
+
+}
+
+void ACreature::Multicast_SimulateMesh_Implementation()
+{
+	GetMesh()->SetSimulatePhysics(true);
+}
+
+void ACreature::Server_OnAssassinatedEndEvent_Implementation()
+{
+	Client_SimulateMesh();
+	Multicast_SimulateMesh();
 }
 
 void ACreature::PlayLandedMontage()
