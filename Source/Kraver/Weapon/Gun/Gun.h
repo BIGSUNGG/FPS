@@ -18,6 +18,8 @@ public:
 	AGun();
 
 	virtual void Tick(float DeltaTime) override;
+	virtual void BeginPlay() override;
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 
@@ -29,6 +31,7 @@ protected:
 	TArray<FHitResult>  CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread = FVector(0,0,0));
 	virtual void ShowFireEffect(); // FireEffect를 실행하는 함수
 	virtual void AddRecoil();
+	virtual void FireBullet();
 
 protected:
 	// Delegate
@@ -45,6 +48,7 @@ protected:
 		virtual void Multicast_SpawnImpactEffect(FVector ImpactPos);
 public:
 	// Getter Setter
+	virtual bool GetbApplySpread() { return !IsSubAttacking; }
 	int32 GetCurAmmo() { return CurAmmo; }
 	int32 GetMaxAmmo() { return MaxAmmo; }
 	int32 GetTotalAmmo() { return TotalAmmo; }

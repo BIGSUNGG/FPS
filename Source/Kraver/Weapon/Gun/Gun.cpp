@@ -22,16 +22,15 @@ void AGun::Tick(float DeltaTime)
 
 	if (OwnerCreature)
 	{
-		if (IsAttacking == false)
-		{
-			CurBulletSpread -= SpreadForceBack * DeltaTime;
-			if (CurBulletSpread < 0)
-				CurBulletSpread = 0;
-		}
-
-		if (AttackDelay > 0)
+		if (CurAttackDelay > 0)
 		{
 			AddSpread(SpreadPerTime * DeltaTime);
+		}
+		else
+		{
+			CurBulletSpread -= SpreadForceBack * DeltaTime;
+			if (CurBulletSpread < MinSpread)
+				CurBulletSpread = MinSpread;
 		}
 
 		if (OwnerCreature->GetMovementComponent()->IsFalling())
@@ -59,6 +58,12 @@ void AGun::Tick(float DeltaTime)
 		TargetRecoilPitch -= AddRecoilPitch;
 		TargetRecoilYaw -= AddRecoilYaw;
 	}
+}
+
+void AGun::BeginPlay()
+{
+	AWeapon::BeginPlay();
+	CurBulletSpread = MinSpread;
 }
 
 void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -163,6 +168,47 @@ void AGun::AddRecoil()
 	TargetRecoilYaw += FMath::RandRange(MinRecoilYaw, MaxRecoilYaw);
 }
 
+void AGun::FireBullet()
+{
+	float SpreadX;
+	float SpreadY;
+	float SpreadZ;
+	if (GetbApplySpread())
+	{
+		float Spread = CalculateCurSpread();
+		SpreadX = FMath::RandRange(-Spread, Spread);
+		SpreadY = FMath::RandRange(-Spread, Spread);
+		SpreadZ = FMath::RandRange(-Spread, Spread);
+	}
+	else
+	{
+		SpreadX = 0.f;
+		SpreadY = 0.f;
+		SpreadZ = 0.f;
+	}
+
+	TArray<FHitResult> BulletHitResults = CalculateFireHit(ECC_BULLET, FVector(SpreadX, SpreadY, SpreadZ));
+
+	for (auto& Result : BulletHitResults)
+	{
+		auto Creature = Cast<ACreature>(Result.GetActor());
+		if (IsValid(Result.GetActor()))
+		{
+			FKraverDamageEvent DamageEvent;
+			DamageEvent.bCanHeadShot = true;
+			DamageEvent.bCanParried = true;
+			DamageEvent.DamageImpulse = AttackImpulse;
+			DamageEvent.HitInfo = Result;
+			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
+			if (Result.bBlockingHit)
+			{
+				FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
+				Server_SpawnImpactEffect(ImpaceEffectPos);
+			}
+		}
+	}
+}
+
 void AGun::OnAttackEvent()
 {
 	if (!IsAttacking)
@@ -183,43 +229,7 @@ void AGun::OnAttackEvent()
 				Server_SetCurAmmo(CurAmmo);
 		}
 
-		float SpreadX;
-		float SpreadY;
-		float SpreadZ;
-		if (IsSubAttacking)
-		{
-			SpreadX = 0.f;
-			SpreadY = 0.f;
-			SpreadZ = 0.f;
-		}
-		else
-		{
-			float Spread = CalculateCurSpread();
-			SpreadX = FMath::RandRange(-Spread, Spread);
-			SpreadY = FMath::RandRange(-Spread, Spread);
-			SpreadZ = FMath::RandRange(-Spread, Spread);
-		}
-
-		TArray<FHitResult> BulletHitResults = CalculateFireHit(ECC_BULLET, FVector(SpreadX, SpreadY, SpreadZ));
-
-		for (auto& Result : BulletHitResults)
-		{
-			auto Creature = Cast<ACreature>(Result.GetActor());
-			if (IsValid(Result.GetActor()))
-			{
-				FKraverDamageEvent DamageEvent;
-				DamageEvent.bCanHeadShot = true;
-				DamageEvent.bCanParried = true;
-				DamageEvent.DamageImpulse = AttackImpulse;
-				DamageEvent.HitInfo = Result;
-				OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
-				if (Result.bBlockingHit)
-				{
-					FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
-					Server_SpawnImpactEffect(ImpaceEffectPos);
-				}
-			}
-		}
+		FireBullet();
 		AddRecoil();
 		ShowFireEffect();
 		OnPlayTppMontage.Broadcast(AttackMontageTpp, 1.f);
