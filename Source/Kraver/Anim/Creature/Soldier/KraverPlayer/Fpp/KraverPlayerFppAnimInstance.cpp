@@ -17,7 +17,14 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (IsEquippingWeapon)
 	{
 		AnimWeaponIdleFpp = CurWeapon->GetAnimIdleFpp();
-		AnimWeaponMovementTpp = CurWeapon->GetAnimMovementFpp();
+		AnimWeaponSubAttackFpp = CurWeapon->GetSubAttackFpp();
+		AnimWeaponMovementFpp = CurWeapon->GetAnimMovementFpp();
+	}
+	else
+	{
+		AnimWeaponIdleFpp = nullptr;
+		AnimWeaponSubAttackFpp = nullptr;
+		AnimWeaponMovementFpp = nullptr;
 	}
 
 	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()] && KraverPlayer->GetArmMesh())

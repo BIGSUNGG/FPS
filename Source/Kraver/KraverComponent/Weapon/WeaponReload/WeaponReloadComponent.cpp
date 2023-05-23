@@ -74,9 +74,6 @@ void UWeaponReloadComponent::OnBeforeAttackEvent()
 
 bool UWeaponReloadComponent::GetCanReload()
 {
-	if (OwnerGun->GetIsSubAttacking())
-		return false;
-
 	if (OwnerGun->GetCurAmmo() == OwnerGun->GetMaxAmmo())
 		return false;
 

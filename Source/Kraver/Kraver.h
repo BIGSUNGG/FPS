@@ -12,6 +12,9 @@ using namespace std;
 
 DECLARE_LOG_CATEGORY_EXTERN(Kraver, Log, All);
 
+// Test
+#define KR_TEST_ADS false
+
 // Coliision
 #define ECC_INTERACTION ECollisionChannel::ECC_GameTraceChannel1
 #define ECC_ONLY_OBJECT ECollisionChannel::ECC_GameTraceChannel2
@@ -28,6 +31,7 @@ DECLARE_LOG_CATEGORY_EXTERN(Kraver, Log, All);
 #define KR_LOG(Verbosity, Format, ...) UE_LOG(Kraver, Verbosity, TEXT("%s : %s : %s"), *KR_CALLINFO, *this->GetName() ,*FString::Printf(Format, ##__VA_ARGS__))
 #define KR_LOG_CHECK(Expr, ...) {if(!(Expr)) { KR_LOG(Error, TEXT("SSERTION : %s"), TEXT("'"#Expr"'")); return __VA_ARGS__;}}
 #define KR_LOG_VECTOR(Vector) { KR_LOG(Log, TEXT("X : %f , Y : %f , Z : %f"), Vector.X, Vector.Y, Vector.Z) }
+#define KR_LOG_ROTATOR(Rotator) { KR_LOG(Log, TEXT("Pitch : %f , Yaw : %f , Roll : %f"), Rotator.Pitch, Rotator.Yaw, Rotator.Roll) }
 
 // Function
 bool LineTraceMultiByChannel_ExceptWorldObject(UWorld* World, TArray<struct FHitResult>& OutHits, const FVector& Start, const FVector& End, ECollisionChannel TraceChannel, const FCollisionQueryParams& Params = FCollisionQueryParams::DefaultQueryParam, const FCollisionResponseParams& ResponseParam = FCollisionResponseParams::DefaultResponseParam); 

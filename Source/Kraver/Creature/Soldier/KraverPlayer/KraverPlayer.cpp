@@ -697,41 +697,23 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 {
 	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && Cast<AGun>(CombatComponent->GetCurWeapon()))
 	{
+		#if KR_TEST_ADS
 		USkeletalMeshComponent* ArmWeaponMesh = GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()];
-		ArmMesh->AddRelativeRotation(WeaponAdsRotation * -1);
-		ArmMesh->AddRelativeLocation(WeaponAdsLocation * -1);
-
 		FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
 		FTransform CameraTransform = Camera->GetComponentTransform();
 		FTransform RelativeTransform = WeaponTransform.GetRelativeTransform(CameraTransform);
 		FRotator RelativeRotation = RelativeTransform.Rotator();
 		FVector RelativeLocation = RelativeTransform.GetLocation();
 
-		FRotator TargetRotation;
-		FVector TargetLocation;
-
-		TargetRotation.Pitch = -RelativeRotation.Pitch;
-		TargetRotation.Roll = -RelativeRotation.Roll;
-		TargetRotation.Yaw = -(90.f + RelativeRotation.Yaw);
-
-		TargetLocation.X = -RelativeLocation.X;
-		TargetLocation.Y = -RelativeLocation.Y;
-		TargetLocation.Z = -RelativeLocation.Z;
-
-		WeaponAdsRotation = FMath::RInterpTo(WeaponAdsRotation, TargetRotation, DeltaTime, 20.f);
-		WeaponAdsLocation = FMath::VInterpTo(WeaponAdsLocation, TargetLocation, DeltaTime, 20.f);
+		KR_LOG_VECTOR(RelativeLocation);
+		KR_LOG_ROTATOR(RelativeRotation);
+		#endif
 
 		if (HUD)
 			HUD->SetbDrawCrosshair(false);
 	}
 	else
 	{
-		FRotator TargetRotation = FRotator::ZeroRotator;
-		FVector TargetLocation = FVector::ZeroVector;
-
-		WeaponAdsRotation = FMath::RInterpTo(WeaponAdsRotation, TargetRotation, DeltaTime, 20.f);
-		WeaponAdsLocation = FMath::VInterpTo(WeaponAdsLocation, TargetLocation, DeltaTime, 20.f);
-
 		if (HUD)
 			HUD->SetbDrawCrosshair(true);
 	}

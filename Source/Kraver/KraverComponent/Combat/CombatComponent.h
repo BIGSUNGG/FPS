@@ -34,8 +34,10 @@ public:
 	void SetHUDCrosshairs(float DeltaTime);
 
 	// Equip UnEquip
-	virtual void EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
-	virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수
+	UFUNCTION(BlueprintCallable)
+		virtual void EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
+	UFUNCTION(BlueprintCallable)
+		virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수
 
 	// Hold Holster
 	virtual bool HoldWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수

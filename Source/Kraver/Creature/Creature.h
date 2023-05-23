@@ -172,6 +172,7 @@ protected:
 	// Function
 	virtual void PlayLandedMontage();
 
+	virtual void SimulateMesh();
 	virtual void Jump();
 
 public:

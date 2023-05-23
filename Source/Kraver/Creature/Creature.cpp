@@ -588,8 +588,7 @@ void ACreature::OnServerDeathEvent(float DamageAmount, FKraverDamageEvent const&
 {
 	if (DamageEvent.bCanSimulate)
 	{
-		Client_SimulateMesh();
-		Multicast_SimulateMesh();
+		SimulateMesh();
 	}
 
 	Multicast_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
@@ -669,8 +668,7 @@ void ACreature::Server_OnAfterTakeDamageEvent_Implementation(float DamageAmount,
 
 void ACreature::Multicast_OnAfterTakeDamageEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
-	if (Weapon && CombatComponent->GetIsDead())
+	if (GetMesh()->IsSimulatingPhysics())
 	{
 		FVector Direction = DamageEvent.GetHitDirection();
 
@@ -734,14 +732,25 @@ void ACreature::Multicast_SimulateMesh_Implementation()
 
 void ACreature::Server_OnAssassinatedEndEvent_Implementation()
 {
-	Client_SimulateMesh();
-	Multicast_SimulateMesh();
+	SimulateMesh();
 }
 
 void ACreature::PlayLandedMontage()
 {
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
 	GetMesh()->GetAnimInstance()->Montage_Play(CreatureAnim->GetLandedMontage());
+}
+
+void ACreature::SimulateMesh()
+{
+	if (IS_SERVER() == false)
+	{
+		KR_LOG(Error, TEXT("Called on server"));
+		return;
+	}
+
+	Client_SimulateMesh();
+	Multicast_SimulateMesh();
 }
 
 void ACreature::Jump()

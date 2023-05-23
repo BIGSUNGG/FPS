@@ -28,7 +28,9 @@ void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		IsAttacking = Soldier->CombatComponent->GetCurWeapon()->GetIsAttacking();
 		IsSubAttacking = Soldier->CombatComponent->GetCurWeapon()->GetIsSubAttacking();
+
 		AnimWeaponIdleTpp = CurWeapon->GetAnimIdleTpp();
+		AnimWeaponSubAttackTpp = CurWeapon->GetSubAttackTpp();
 		AnimWeaponMovementTpp = CurWeapon->GetAnimMovementTpp();
 		CurWeaponType = CurWeapon->GetWeaponType();
 	}
@@ -36,7 +38,9 @@ void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		IsAttacking = false;
 		IsSubAttacking = false;
+
 		AnimWeaponIdleTpp = nullptr;
+		AnimWeaponSubAttackTpp = nullptr;
 		AnimWeaponMovementTpp = nullptr;
 		CurWeaponType = EWeaponType::NONE;
 	}

@@ -86,6 +86,8 @@ public:
 
 	UAnimSequence* GetAnimIdleTpp() { return AnimIdleTpp; }
 	UAnimSequence* GetAnimIdleFpp() { return AnimIdleFpp; }
+	UAnimSequence* GetSubAttackTpp() { return SubAttackAnimTpp; }
+	UAnimSequence* GetSubAttackFpp() { return SubAttackAnimFpp; }
 	UBlendSpace* GetAnimMovementTpp() { return AnimMovementTpp; }
 	UBlendSpace* GetAnimMovementFpp() { return AnimMovementFpp; }
 
@@ -149,6 +151,10 @@ protected:
 		UAnimSequence* AnimIdleTpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
 		UAnimSequence* AnimIdleFpp;	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
+		UAnimSequence* SubAttackAnimTpp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
+		UAnimSequence* SubAttackAnimFpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
 		UBlendSpace* AnimMovementTpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))

@@ -70,5 +70,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Anim", Meta = (AllowPrivateAccess = true))
 		UAnimSequence* AnimWeaponIdleTpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Anim", Meta = (AllowPrivateAccess = true))
+		UAnimSequence* AnimWeaponSubAttackTpp;	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Anim", Meta = (AllowPrivateAccess = true))
 		UBlendSpace* AnimWeaponMovementTpp;	
 };
