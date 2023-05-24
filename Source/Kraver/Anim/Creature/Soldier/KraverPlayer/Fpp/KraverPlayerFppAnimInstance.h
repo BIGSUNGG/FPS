@@ -29,4 +29,6 @@ protected:
 		UAnimSequence* AnimWeaponSubAttackFpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Anim", Meta = (AllowPrivateAccess = true))
 		UBlendSpace* AnimWeaponMovementFpp;	
-};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Sway", Meta = (AllowPrivateAccess = true))
+		FRotator WeaponSwayResultRot;
+}; 

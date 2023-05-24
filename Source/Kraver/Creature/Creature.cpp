@@ -12,9 +12,10 @@ ACreature::ACreature()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
-	
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+
+	Fp_Root = CreateDefaultSubobject<USceneComponent>(TEXT("Fp_Root"));
+	Fp_SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Fp_SpringArm"));
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Fp_Camera"));
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
@@ -33,16 +34,21 @@ ACreature::ACreature()
 	CombatComponent->OnServerHoldWeapon.AddDynamic(this, &ACreature::OnServerHoldWeaponEvent);
 	CombatComponent->OnClientHolsterWeapon.AddDynamic(this, &ACreature::OnClientHolsterWeaponEvent);
 	CombatComponent->OnServerHolsterWeapon.AddDynamic(this, &ACreature::OnServerHolsterWeaponEvent);
-	
-	SpringArm->SetupAttachment(GetMesh());
-	SpringArm->bUsePawnControlRotation = true;
-	SpringArm->bInheritPitch = true;
-	SpringArm->bInheritRoll = true;
-	SpringArm->bInheritYaw = true;
-	SpringArm->bDoCollisionTest = false;
 
-	Camera->SetupAttachment(SpringArm);
+	Fp_Root->SetupAttachment(GetCapsuleComponent());
+
+	Fp_SpringArm->SetupAttachment(Fp_Root);
+	Fp_SpringArm->SetRelativeLocation(FVector(0.f, 0.f, 80.f));
+	Fp_SpringArm->bUsePawnControlRotation = true;
+	Fp_SpringArm->bInheritPitch = true;
+	Fp_SpringArm->bInheritRoll = true;
+	Fp_SpringArm->bInheritYaw = true;
+	Fp_SpringArm->bDoCollisionTest = false;
+	Fp_SpringArm->TargetArmLength = 0.f;
+
+	Camera->SetupAttachment(Fp_SpringArm);
 	Camera->bUsePawnControlRotation = true;
+	Camera->SetFieldOfView(110.f);
 
 	GetCharacterMovement()->AirControl = 0.25f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchWalkSpeed;
@@ -169,7 +175,7 @@ void ACreature::OnAssassinateEndEvent()
 	EnableInput(PlayerController);
 
 	Camera->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
-	Camera->AttachToComponent(SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	Camera->AttachToComponent(Fp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
 
 	FTransform HeadTransform = GetMesh()->GetSocketTransform("head", ERelativeTransformSpace::RTS_World);
 	FTransform CameraTransform = Camera->GetComponentTransform();

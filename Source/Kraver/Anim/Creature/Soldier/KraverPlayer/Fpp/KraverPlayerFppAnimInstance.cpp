@@ -14,6 +14,7 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if(!KraverPlayer->IsLocallyControlled())
 		return;
 
+	WeaponSwayResultRot = KraverPlayer->GetWeaponSwayResultRot();
 	if (IsEquippingWeapon)
 	{
 		AnimWeaponIdleFpp = CurWeapon->GetAnimIdleFpp();

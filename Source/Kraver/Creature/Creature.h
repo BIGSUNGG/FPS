@@ -181,10 +181,12 @@ public:
 		class UCombatComponent* CombatComponent;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
+		USceneComponent* Fp_Root;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
 		UCameraComponent* Camera;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|SprintArm", meta = (AllowPrivateAccess = "true"))
-		USpringArmComponent* SpringArm;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
+		USpringArmComponent* Fp_SpringArm;
 
 	UPROPERTY(Replicated)
 		float AO_Yaw;

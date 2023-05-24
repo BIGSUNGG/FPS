@@ -20,6 +20,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void CameraTick(float DeletaTime) override;
+	virtual void ArmMeshTick(float DeletaTime);
 	virtual void CameraTilt(float TargetRoll);
 	virtual void ClientTick(float DeltaTime);
 	virtual void ServerClientTick(float DeltaTime);
@@ -37,6 +38,7 @@ public:
 	EWallRunState GetCurWallRunState() { return CurWallRunState; }
 	bool GetIsSliding() { return IsSliding; }
 	virtual USkeletalMeshComponent* GetCurMainMesh() override;
+	FRotator GetWeaponSwayResultRot() { return WeaponSwayResultRot; }
 
 protected:
 	// input event
@@ -114,6 +116,7 @@ protected:
 	virtual void PlayLandedMontage() override;
 
 	void WeaponADS(float DeltaTime);
+	void WeaponSway(float DeltaTime);
 	void SpringArmTick(float DeltaTime);
 
 	virtual void Jump() override;
@@ -165,6 +168,11 @@ protected:
 	class AKraverPlayerController* KraverController;
 	class AKraverHUD* HUD;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Third person", meta = (AllowPrivateAccess = "true"))
+		USceneComponent* Tp_Root;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Third person", meta = (AllowPrivateAccess = "true"))
+		USpringArmComponent* Tp_SpringArm;
+
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 		EViewType ViewType = EViewType::FIRST_PERSON;
 	void SetViewType(EViewType Type);
@@ -191,7 +199,7 @@ protected:
 
 	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
 	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트
-	FVector SpringArmBasicLocation; // 기본적으로 적용할 SprintArm의 RelativeLocation
+	FVector Fp_SpringArmBasicLocation; // 기본적으로 적용할 SprintArm의 RelativeLocation
 	FVector SpringArmCrouchLocation; // 추가적으로 적용할 SprintArm의 RelativeLocation
 
 	FTimerHandle UnEquipWeaponTimerHandle;
@@ -200,8 +208,12 @@ protected:
 
 	FVector BasicArmLocation;
 	FRotator BasicArmRotation;
-	FRotator WeaponAdsRotation;
-	FVector WeaponAdsLocation;
+
+	// Weapon Sway
+	FRotator WeaponSwayResultRot;
+	float SwayValue = 2.5f;
+	float MaxSwayDegree = 5.f;
+	float MinSwayDegree = -5.f;
 
 	// Movement
 	bool bWantToJump = false;

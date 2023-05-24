@@ -12,16 +12,31 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 {
 	NetUpdateFrequency = 300.f;
 
+	Tp_Root = CreateDefaultSubobject<USceneComponent>(TEXT("Tp_Root"));
+	Tp_SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Tp_SpringArm"));
+
 	ArmMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmMesh"));
-	ArmMesh->SetupAttachment(Camera);
+	ArmMesh->SetupAttachment(Fp_SpringArm);
+	ArmMesh->SetRelativeLocation(FVector(0.f,0.f, -160.516068f));
+	ArmMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 	ArmMesh->SetCastShadow(false);
 	ArmMesh->SetOnlyOwnerSee(true);
 	ArmMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ArmMesh->SetScalarParameterValueOnMaterials("Type",0);
 		
 	ShowOnlyFirstPerson.Push(ArmMesh);
-
 	ShowOnlyThirdPerson.Push(GetMesh());
+
+	Tp_Root->SetupAttachment(GetCapsuleComponent());
+	
+	Tp_SpringArm->SetupAttachment(Tp_Root);
+	Tp_SpringArm->SetRelativeLocation(FVector(0.f, 45.f, 62.f));
+	Tp_SpringArm->bUsePawnControlRotation = true;
+	Tp_SpringArm->bInheritPitch = true;
+	Tp_SpringArm->bInheritRoll = true;
+	Tp_SpringArm->bInheritYaw = true;
+	Tp_SpringArm->bDoCollisionTest = false;
+	Tp_SpringArm->TargetArmLength = 300.f;
 
 	GetCharacterMovement()->AirControl = 0.5f;
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
@@ -34,6 +49,7 @@ void AKraverPlayer::BeginPlay()
 {
 	ASoldier::BeginPlay();
 
+	Fp_SpringArmBasicLocation = Fp_SpringArm->GetRelativeLocation();
 	BasicArmLocation = ArmMesh->GetRelativeLocation();
 	BasicArmRotation = ArmMesh->GetRelativeRotation();
 
@@ -56,7 +72,7 @@ void AKraverPlayer::Tick(float DeltaTime)
 	if (KraverController)
 		HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
 
-	if (HasAuthority() == false && IsLocallyControlled() == false)
+	if (IsLocallyControlled() == false)
 		Camera->SetRelativeRotation(FRotator(AO_Pitch, AO_Yaw, 0.0f));
 
 	ClientTick(DeltaTime);
@@ -75,6 +91,11 @@ void AKraverPlayer::CameraTick(float DeletaSeconds)
 	else
 		CameraTilt(0.f);
 	
+}
+
+void AKraverPlayer::ArmMeshTick(float DeletaTime)
+{
+	ArmMesh->SetRelativeRotation(BasicArmRotation);
 }
 
 void AKraverPlayer::CameraTilt(float TargetRoll)
@@ -114,10 +135,13 @@ void AKraverPlayer::LocallyControlTick(float DeltaTime)
 	CheckCanInteractionWeapon();
 	
 	WeaponADS(DeltaTime);
+	WeaponSway(DeltaTime);
+
 	WallRunUpdate();
 	SlideUpdate();
 
 	SpringArmTick(DeltaTime);
+	ArmMeshTick(DeltaTime);
 }
 
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -255,7 +279,7 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 	}
 
 	float Radius = InteractionRadius;
-	float Distance = InteractionDistance + SpringArm->TargetArmLength;
+	float Distance = InteractionDistance + Fp_SpringArm->TargetArmLength;
 
 	{
 		TArray<FHitResult> HitResults;
@@ -339,8 +363,8 @@ void AKraverPlayer::ChangeView()
 	{
 	case EViewType::FIRST_PERSON:
 		SetViewType(EViewType::THIRD_PERSON);
-		SpringArm->TargetArmLength = 300.f;
-		SpringArmBasicLocation = FVector(-45.f, 0.f, 150.f);
+		Camera->AttachToComponent(Tp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
+
 		RefreshSpringArm();
 		for (auto& TempMesh : ShowOnlyFirstPerson)
 		{
@@ -355,8 +379,8 @@ void AKraverPlayer::ChangeView()
 		break;
 	case EViewType::THIRD_PERSON:
 		SetViewType(EViewType::FIRST_PERSON);
-		SpringArm->TargetArmLength = 0.f;
-		SpringArmBasicLocation = FVector(0.f, 0.f, 150.f);
+		Camera->AttachToComponent(Fp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
+
 		RefreshSpringArm();
 		for (auto TempMesh : ShowOnlyFirstPerson)
 		{
@@ -387,14 +411,12 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 
 void AKraverPlayer::RefreshArm()
 {
-	ArmMesh->SetRelativeLocation(BasicArmLocation + WeaponAdsLocation, false);
-	ArmMesh->SetRelativeRotation(BasicArmRotation + WeaponAdsRotation, false);
 }
 
 void AKraverPlayer::RefreshSpringArm()
 {
-	SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmCrouchLocation);
-	Server_RefreshSpringArm(SpringArmBasicLocation + SpringArmCrouchLocation, SpringArm->TargetArmLength);
+	Fp_SpringArm->SetRelativeLocation(Fp_SpringArmBasicLocation + SpringArmCrouchLocation);
+	Server_RefreshSpringArm(Fp_SpringArmBasicLocation + SpringArmCrouchLocation, Fp_SpringArm->TargetArmLength);
 }
 
 void AKraverPlayer::Server_RefreshSpringArm_Implementation(FVector Vector, float Length)
@@ -404,8 +426,8 @@ void AKraverPlayer::Server_RefreshSpringArm_Implementation(FVector Vector, float
 
 void AKraverPlayer::Multicast_RefreshSpringArm_Implementation(FVector Vector, float Length)
 {
-	SpringArm->SetRelativeLocation(Vector);
-	SpringArm->TargetArmLength = Length;
+	Fp_SpringArm->SetRelativeLocation(Vector);
+	Fp_SpringArm->TargetArmLength = Length;
 }
 
 void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction)
@@ -720,6 +742,44 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 
 }
 
+void AKraverPlayer::WeaponSway(float DeltaTime)
+{
+	float TurnValue = GetInputAxisValue("Turn") * SwayValue;
+	float LookUpValue = GetInputAxisValue("LookUp") * SwayValue;
+	FRotator WeaponSwayFinalRot;
+	FRotator WeaponSwayInitRot;
+
+	WeaponSwayFinalRot.Pitch = LookUpValue * SwayValue;
+	WeaponSwayFinalRot.Yaw = TurnValue * SwayValue;
+
+	FRotator TargetRot;
+	TargetRot.Pitch = WeaponSwayInitRot.Pitch - WeaponSwayFinalRot.Pitch;
+	TargetRot.Yaw = WeaponSwayInitRot.Yaw + WeaponSwayFinalRot.Yaw;
+	TargetRot.Roll = WeaponSwayInitRot.Roll + WeaponSwayFinalRot.Roll;
+
+	WeaponSwayResultRot = FMath::RInterpTo(WeaponSwayResultRot, TargetRot, DeltaTime, 2.f);
+
+	if(WeaponSwayResultRot.Pitch > MaxSwayDegree)
+		WeaponSwayResultRot.Pitch = MaxSwayDegree;
+	else if(WeaponSwayResultRot.Pitch < MinSwayDegree)
+		WeaponSwayResultRot.Pitch = MinSwayDegree;
+
+	if (WeaponSwayResultRot.Yaw > MaxSwayDegree)
+		WeaponSwayResultRot.Yaw = MaxSwayDegree;
+	else if (WeaponSwayResultRot.Yaw < MinSwayDegree)
+		WeaponSwayResultRot.Yaw = MinSwayDegree;
+
+	if (WeaponSwayResultRot.Roll > MaxSwayDegree)
+		WeaponSwayResultRot.Roll = MaxSwayDegree;
+	else if (WeaponSwayResultRot.Roll < MinSwayDegree)
+		WeaponSwayResultRot.Roll = MinSwayDegree;
+
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking())
+		WeaponSwayResultRot *= 0.8f;
+
+	KR_LOG_ROTATOR(TargetRot);
+}
+
 void AKraverPlayer::SpringArmTick(float DeltaTime)
 {
 	if (GetMovementComponent()->IsCrouching())
@@ -727,7 +787,7 @@ void AKraverPlayer::SpringArmTick(float DeltaTime)
 	else
 		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
 
-	SpringArm->SetRelativeLocation(SpringArmBasicLocation + SpringArmCrouchLocation);
+	Fp_SpringArm->SetRelativeLocation(Fp_SpringArmBasicLocation + SpringArmCrouchLocation);
 	RefreshArm();
 }
 
