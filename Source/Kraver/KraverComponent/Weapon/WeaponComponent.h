@@ -9,7 +9,7 @@
 class AWeapon;
 class ACreature;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class KRAVER_API UWeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()

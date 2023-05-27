@@ -34,6 +34,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void CameraTick(float DeltaTime);
+	virtual void Jump() override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -49,16 +50,18 @@ public:
 	FORCEINLINE FRotator GetCreatureAngle() { return Camera->GetComponentRotation() - GetMesh()->GetComponentRotation(); }
 	FORCEINLINE UCameraComponent* GetCamera() { return Camera; }
 	virtual bool GetCanAttack();
-	FORCEINLINE bool GetIsRunning() { return IsRunning; }
-	FORCEINLINE bool GetIsJumping() { return IsJumping; }
+	FORCEINLINE bool GetbRunButtonPress() { return bRunButtonPress; }
+	bool GetbJumpButtonPress() { return bJumpButtonPress; }
+	bool GetbCrouchButtonPress() { return bCrouchButtonPress; }
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
-	FORCEINLINE EMovementState GetMovementState() { return MovementState; }
 	float CalculateForwardSpeed();
 	float CalculateRightSpeed();
 	float CalculateCurrentFloorSlope();
 	FVector CaclulateCurrentFllorSlopeVector();
 	virtual USkeletalMeshComponent* GetCurMainMesh() { return GetMesh(); }
+	float GetCurrentInputForward() { return CurrentInputForward; }
+	float GetCurrentInputRight() { return CurrentInputRight; }
 
 protected:
 	// Axis Input
@@ -69,29 +72,29 @@ protected:
 
 	// Button Input
 	UFUNCTION(BlueprintCallable)
-		virtual void ReloadButtonPressed();
+		virtual void ReloadButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void AttackButtonPressed();
+		virtual void AttackButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void AttackButtonReleased();
+		virtual void AttackButtonReleased() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void SubAttackButtonPressed();
+		virtual void SubAttackButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void SubAttackButtonReleased();
+		virtual void SubAttackButtonReleased() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void RunButtonPressed();
+		virtual void RunButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void RunButtonReleased();
+		virtual void RunButtonReleased() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void CrouchButtonPressed();
+		virtual void CrouchButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void CrouchButtonReleased();
+		virtual void CrouchButtonReleased() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void JumpingButtonPressed();
+		virtual void JumpingButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void JumpingButtonReleased();
+		virtual void JumpingButtonReleased() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void HolsterWeaponPressed();
+		virtual void HolsterWeaponPressed() final;
 
 	// Tick함수에서 호출될 함수
 	virtual void AimOffset(float DeltaTime);
@@ -173,12 +176,13 @@ protected:
 	virtual void PlayLandedMontage();
 
 	virtual void SimulateMesh();
-	virtual void Jump();
 
 public:
 	// Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 		class UCombatComponent* CombatComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Movement", meta = (AllowPrivateAccess = "true"))
+		class UCreatureMovementComponent* CreatureMovementComponent;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
@@ -201,48 +205,14 @@ protected:
 	FRotator StartingAimRotation;
 	FVector TargetCameraRelativeLocation;
 
-	// Movement
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
-		EMovementState MovementState = EMovementState::WALK;
-	virtual void SetMovementState(EMovementState value) final;
-	UFUNCTION(Server, reliable)
-		void Server_SetMovementState(EMovementState value);
-
-	UPROPERTY(Replicated , VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		bool IsJumping = false;
-	void SetIsJumping(bool value);
-	UFUNCTION(Server, reliable)
-		void Server_SetIsJumping(bool value);
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		bool IsRunning = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float SprintSpeed = 1200.f; // EMovementState가 SPRINT가 되었을때 설정할 캐릭터 속도
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float RunSpeed = 600.f; // EMovementState가 RUN가 되었을때 설정할 캐릭터 속도
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float WalkSpeed = 600.f; // EMovementState가 WALK가 되었을때 설정할 캐릭터 속도
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float CrouchWalkSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float CrouchRunSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float CrouchSprintSpeed = 450.f; // 앉았을때 설정할 캐릭터 속도
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
 		float ImpulseResistanceRatio = 1.f;
 
 	// InputState
 	float CurrentInputForward = 0.f;
 	float CurrentInputRight = 0.f;
-	float InputForwardRatio = 1.f;
-	float InputRightRatio = 1.f;
 	bool bJumpButtonPress = false;
 	bool bCrouchButtonPress = false;
+	bool bRunButtonPress = false;
 
-	// Default Value
-	float DefaultGravity = 0.f;
-	float DefaultGroundFriction = 0.f;
-	float DefaultBrakingDecelerationWalking = 0.f;
-	FVector DefaultCameraLocation;
 }; 

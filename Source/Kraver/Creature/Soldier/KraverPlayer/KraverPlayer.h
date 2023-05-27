@@ -33,27 +33,22 @@ public:
 	FORCEINLINE AWeapon* GetCanInteractWeapon() { return CanInteractWeapon; }
 	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
 	FORCEINLINE TMap<AWeapon*, USkeletalMeshComponent*> GetArmWeaponMeshes() { return ArmWeaponMeshes; }
-	const bool GetIsWallRunning() { return CurWallRunState != EWallRunState::NONE; }
 	virtual bool GetCanAttack() override;
-	EWallRunState GetCurWallRunState() { return CurWallRunState; }
-	bool GetIsSliding() { return IsSliding; }
 	virtual USkeletalMeshComponent* GetCurMainMesh() override;
 	FRotator GetWeaponSwayResultRot() { return WeaponSwayResultRot; }
 
 protected:
 	// input event
-	virtual void SubAttackButtonPressed() override;
-	virtual void SubAttackButtonReleased() override;
 	UFUNCTION(BlueprintCallable)
-		virtual void EquipButtonPressed();
+		virtual void EquipButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void UnEquipButtonPressed();
+		virtual void UnEquipButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void ChangeWeapon1Pressed();
+		virtual void ChangeWeapon1Pressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void ChangeWeapon2Pressed();
+		virtual void ChangeWeapon2Pressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void ChangeWeapon3Pressed();
+		virtual void ChangeWeapon3Pressed() final;
 
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
@@ -70,34 +65,10 @@ protected:
 	UFUNCTION(Server, reliable)
 		void Server_ThrowWeapon(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction);
 	virtual void Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed);
-	UFUNCTION(Server, reliable)
-		virtual void Server_WallRunJumpSuccess(FVector PendingLaunchVelocity);
-	UFUNCTION(NetMulticast, reliable)
-		virtual void Multicast_WallRunJumpSuccess(FVector PendingLaunchVelocity);
-	UFUNCTION(Server, Reliable)
-		virtual void Server_WallRunEnd();
-	UFUNCTION(Server, Reliable)
-		virtual void Server_DoubleJump(FVector PendingLaunchVelocity);
-	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_DoubleJump(FVector PendingLaunchVelocity);
-	UFUNCTION(Server, Reliable)
-		virtual void Server_WallRunHorizonSuccess();
-	UFUNCTION(Server, Reliable)
-		virtual void Server_WallRunVerticalSuccess();
-	UFUNCTION(Server, Reliable)
-		virtual void Server_WallRunSuccess(FVector Location, FRotator Rotation, FVector Velocity, FVector PendingLaunchVelocity);
-	UFUNCTION(Server, Reliable)
-		virtual void Server_SlideSuccess(FVector Velocity);
-	UFUNCTION(Server, Reliable)
-		virtual void Server_SlideEnd();
-	UFUNCTION(Server, Reliable)
-		virtual void Server_SlideUpdate();
 
 	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
 
 	// Delegate Event
-	void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
-
 	virtual void OnClientEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void OnClientHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
@@ -110,48 +81,12 @@ protected:
 	virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed) override;
 
 	// Function
-	void Crouch(bool bClientSimulation = false) override;
-	void UnCrouch(bool bClientSimulation = false) override;
-
 	virtual void PlayLandedMontage() override;
 
 	void WeaponADS(float DeltaTime);
 	void WeaponSway(float DeltaTime);
 	void SpringArmTick(float DeltaTime);
 
-	virtual void Jump() override;
-
-	// Double Jump
-	void DoubleJump();
-
-	// Wall Run
-	void WallRunJump();
-	bool WallRunUpdate();
-	bool WallRunHorizonUpdate();
-	bool WallRunVerticalUpdate();
-	bool WallRunHorizonMovement(FVector Start, FVector End, float WallRunDirection);
-	bool WallRunVerticalMovement(FVector Start, FVector End);
-	void WallRunStart();
-	void WallRunEnd(float ResetTime);
-	void WallRunHorizonEnd(float ResetTime);
-	void WallRunVerticalEnd(float ResetTime);
-	void ResetWallRunHorizonSuppression();
-	void ResetWallRunVerticalSuppression();
-	void SuppressWallRunHorizion(float Delay);
-	void SuppressWallRunVertical(float Delay);
-	FVector CalculateRightWallRunEndVector();
-	FVector CalculateLeftWallRunEndVector();
-	FVector CalculateVerticaltWallRunEndVector();
-	bool CalculateValidWallVector(FVector InVec);
-	FVector CalculatePlayerToWallVector();
-
-	// Slide
-	bool CanSlide();
-	void SlideUpdate();
-	void SlideStart();
-	void SlideEnd(bool DoUncrouch);
-	void SuppressSlide(float Delay);
-	void ResetSlideSuppression();
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 		class UTexture2D* CrosshairsCenter;
@@ -215,46 +150,4 @@ protected:
 	float MaxSwayDegree = 5.f;
 	float MinSwayDegree = -5.f;
 
-	// Movement
-	bool bWantToJump = false;
-
-	// Advanced Movement / Double Jump
-	bool bCanDoubleJump = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Movement|AdvancedMovement", meta = (AllowPrivateAccess = "true"))
-		FVector DobuleJumpPower;
-
-	// Advanced Movement / Wall Run
-	UPROPERTY(Replicated)
-		EWallRunState CurWallRunState;
-	void SetCurWallRunState(EWallRunState Value);
-	UFUNCTION(Server, reliable)
-		void Server_SetCurWallRunState(EWallRunState Value);
-
-	bool bWallRunHorizonSupressed = false;
-	bool bWallRunVerticalSupressed = false;
-	bool bWallRunGravity = true;
-	float WallRunHorizonSpeed = 1200.f;
-	float WallRunVerticalSpeed = 600.f;
-	float WallRunJumpHeight = 400.f;
-	float WallRunJumpOffForce  = 400.f;
-	float WallRunTargetGravity = 0.75f;
-	FVector WallRunNormal;
-	FTimerHandle SuppressWallRunHorizonTimer;
-	FTimerHandle SuppressWallRunVerticalTimer;
-
-	// Advanced Movement / Slide
-	UPROPERTY(Replicated)
-		bool IsSliding = false;
-	void SetIsSliding(bool Value);
-	UFUNCTION(Server, Reliable)
-		void Server_SetIsSliding(bool Value);
-
-	bool bSlideSupressed = false;
-	float MinSlideRequireSpeed = 900.f;
-	float SlideSlopeSpeed = 20.f;
-	float SlideSpeed = 2000.f;
-	float SlideDuration = 2.f;
-	float SlideGroundFriction = 0.f;
-	float SlideBrakingDecelerationWalking = 1024.f;
-	FTimerHandle SuppressSlideTimer;
 };

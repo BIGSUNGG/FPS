@@ -3,8 +3,7 @@
 
 #include "CreatureAnimInstance.h"
 #include "Kraver/Creature/Creature.h"
-#include "Net/UnrealNetwork.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "Kraver/KraverComponent/Movement/CreatureMovementComponent.h"
 
 UCreatureAnimInstance::UCreatureAnimInstance()
 {
@@ -43,11 +42,11 @@ void UCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Speed = TempVelocity.Size();
 	SpeedRatio = Speed / Creature->GetMovementComponent()->GetMaxSpeed();
 
-	MovementState = Creature->GetMovementState();
+	MovementState = Creature->CreatureMovementComponent->GetMovementState();
 	IsCrouching = Creature->GetMovementComponent()->IsCrouching();
 	IsFalling = Creature->GetMovementComponent()->IsFalling();
-	IsRunning = Creature->GetIsRunning();
-	IsJumping = Creature->GetIsJumping();
+	IsRunning = Creature->GetbRunButtonPress();
+	IsJumping = Creature->CreatureMovementComponent->GetIsJumping();
 
 	FRotator CreatureRotation = Creature->GetCreatureAngle();
 	AO_Yaw = Creature->GetAO_Yaw();

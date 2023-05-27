@@ -7,6 +7,7 @@
 #include "Kraver/PlayerController/KraverPlayerController.h"
 #include "Kraver/GameMode/KraverGameMode.h"
 #include "Kraver/Anim/Creature/CreatureAnimInstance.h"
+#include "Kraver/KraverComponent/Movement/Advance/AdvanceMovementComponent.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
@@ -84,13 +85,17 @@ void AKraverPlayer::CameraTick(float DeletaSeconds)
 {
 	ASoldier::CameraTick(DeletaSeconds);
 	
-	if (CurWallRunState == EWallRunState::WALLRUN_LEFT)
-		CameraTilt(15.f);
-	else if(CurWallRunState == EWallRunState::WALLRUN_RIGHT)
-		CameraTilt(-15.f);		
-	else
-		CameraTilt(0.f);
-	
+	UAdvanceMovementComponent* AdvanceMovementComp = Cast<UAdvanceMovementComponent>(CreatureMovementComponent);
+
+	if(AdvanceMovementComp)
+	{
+		if (AdvanceMovementComp->GetCurWallRunState() == EWallRunState::WALLRUN_LEFT)
+			CameraTilt(15.f);
+		else if (AdvanceMovementComp->GetCurWallRunState() == EWallRunState::WALLRUN_RIGHT)
+			CameraTilt(-15.f);
+		else
+			CameraTilt(0.f);
+	}
 }
 
 void AKraverPlayer::ArmMeshTick(float DeletaTime)
@@ -126,19 +131,10 @@ void AKraverPlayer::LocallyControlTick(float DeltaTime)
 	if(!IsLocallyControlled())
 		return;
 
-	if (bWantToJump == true)
-	{
-		bWantToJump = false;
-		ASoldier::Jump();
-	}
-
 	CheckCanInteractionWeapon();
 	
 	WeaponADS(DeltaTime);
 	WeaponSway(DeltaTime);
-
-	WallRunUpdate();
-	SlideUpdate();
 
 	SpringArmTick(DeltaTime);
 	ArmMeshTick(DeltaTime);
@@ -161,8 +157,7 @@ void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	ASoldier::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AKraverPlayer, ViewType);
-	DOREPLIFETIME(AKraverPlayer, CurWallRunState);
-	DOREPLIFETIME(AKraverPlayer, IsSliding);
+
 }
 
 bool AKraverPlayer::GetCanAttack()
@@ -195,44 +190,6 @@ void AKraverPlayer::SetViewType(EViewType Type)
 void AKraverPlayer::Server_SetViewType_Implementation(EViewType Type)
 {
 	ViewType = Type;
-}
-
-void AKraverPlayer::SetCurWallRunState(EWallRunState Value)
-{
-	CurWallRunState = Value;
-	Server_SetCurWallRunState(Value);
-}
-
-void AKraverPlayer::Server_SetCurWallRunState_Implementation(EWallRunState Value)
-{
-	CurWallRunState = Value;
-}
-
-void AKraverPlayer::SetIsSliding(bool Value)
-{
-	IsSliding = Value;
-	Server_SetIsSliding(Value);
-}
-
-void AKraverPlayer::Server_SetIsSliding_Implementation(bool Value)
-{
-	IsSliding = Value;
-}
-
-void AKraverPlayer::SubAttackButtonPressed()
-{
-	ASoldier::SubAttackButtonPressed();
-
-}
-
-void AKraverPlayer::SubAttackButtonReleased()
-{
-	ASoldier::SubAttackButtonReleased();
-
-	if (CombatComponent->GetCurWeapon())
-	{
-		GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()]->SetRelativeRotation(FRotator::ZeroRotator);
-	}
 }
 
 void AKraverPlayer::EquipButtonPressed()
@@ -456,107 +413,10 @@ void AKraverPlayer::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMo
 	ArmMesh->GetAnimInstance()->Montage_Play(PlayedMontage, Speed);
 }
 
-void AKraverPlayer::Server_WallRunJumpSuccess_Implementation(FVector PendingLaunchVelocity)
-{
-	GetCharacterMovement()->PendingLaunchVelocity = PendingLaunchVelocity;
-
-	Multicast_WallRunJumpSuccess(PendingLaunchVelocity);
-}
-
-void AKraverPlayer::Multicast_WallRunJumpSuccess_Implementation(FVector PendingLaunchVelocity)
-{
-	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-	GetMesh()->GetAnimInstance()->Montage_Play(CreatureAnim->GetJumpMontage());
-}
-
-void AKraverPlayer::Server_WallRunEnd_Implementation()
-{
-	GetCharacterMovement()->GravityScale = DefaultGravity;
-}
-
-void AKraverPlayer::Server_DoubleJump_Implementation(FVector PendingLaunchVelocity)
-{
-	GetCharacterMovement()->PendingLaunchVelocity = PendingLaunchVelocity;
-	Multicast_DoubleJump(PendingLaunchVelocity);
-}
-
-void AKraverPlayer::Multicast_DoubleJump_Implementation(FVector PendingLaunchVelocity)
-{
-	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
-	GetMesh()->GetAnimInstance()->Montage_Play(CreatureAnim->GetJumpMontage());
-}
-
-void AKraverPlayer::Server_WallRunHorizonSuccess_Implementation()
-{
-	if (bWallRunGravity)
-		GetCharacterMovement()->GravityScale = WallRunTargetGravity;
-	if (GetVelocity().Z < 0.f)
-	{
-		GetCharacterMovement()->GravityScale = 0.f;
-		GetCharacterMovement()->PendingLaunchVelocity.Z = 0.f;
-	}
-}
-
-void AKraverPlayer::Server_WallRunVerticalSuccess_Implementation()
-{
-	GetCharacterMovement()->GravityScale = 0.f;
-}
-
-void AKraverPlayer::Server_WallRunSuccess_Implementation(FVector Location, FRotator Rotation, FVector Velocity, FVector PendingLaunchVelocity)
-{
-	SetActorLocation(Location);
-	SetActorRotation(Rotation);
-	GetCharacterMovement()->Velocity = Velocity;
-	GetCharacterMovement()->PendingLaunchVelocity = PendingLaunchVelocity;
-}
-
-void AKraverPlayer::Server_SlideSuccess_Implementation(FVector Velocity)
-{
-	IsSliding = true;
-
-	GetCharacterMovement()->GroundFriction = SlideGroundFriction;
-	GetCharacterMovement()->BrakingDecelerationWalking = SlideBrakingDecelerationWalking;
-	GetCharacterMovement()->Velocity = Velocity;
-}
-
-void AKraverPlayer::Server_SlideEnd_Implementation()
-{
-	IsSliding = false;
-
-	GetCharacterMovement()->GroundFriction = DefaultGroundFriction;
-	GetCharacterMovement()->BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
-}
-
-void AKraverPlayer::Server_SlideUpdate_Implementation()
-{
-	FVector Slope = CaclulateCurrentFllorSlopeVector();
-	FVector SlopePhysics = Slope * SlideSlopeSpeed;
-	SlopePhysics.Z = 0.f;
-	GetCharacterMovement()->Velocity += SlopePhysics;
-}
-
 void AKraverPlayer::RefreshCurViewType()
 {
 	for(int i = 0; i < 2; i++)
 		ChangeView();
-}
-
-void AKraverPlayer::Landed(const FHitResult& Hit)
-{
-	ASoldier::Landed(Hit);
-
-	ResetWallRunVerticalSuppression();
-	ResetWallRunHorizonSuppression();
-	ResetSlideSuppression();
-	if (bCrouchButtonPress)
-	{
-		if(CanSlide())
-			SlideStart();
-		else
-			ASoldier::Crouch();
-	}
-
-	bCanDoubleJump = true;
 }
 
 void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -689,24 +549,6 @@ void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, flo
 	ASoldier::OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
 }
 
-void AKraverPlayer::Crouch(bool bClientSimulation /*= false*/)
-{
-	if (GetMovementComponent()->IsFalling() == false && CanSlide())
-		SlideStart();
-	else if(GetIsWallRunning())
-		WallRunEnd(0.3f);
-	else if(GetCharacterMovement()->IsFalling() == false)
-		ASoldier::Crouch(bClientSimulation);
-}
-
-void AKraverPlayer::UnCrouch(bool bClientSimulation /*= false*/)
-{
-	if(IsSliding)
-		SlideEnd(true);
-	else if(GetCharacterMovement()->IsFalling() == false)
-		ASoldier::UnCrouch(bClientSimulation);
-}
-
 void AKraverPlayer::PlayLandedMontage()
 {
 	ASoldier::PlayLandedMontage();
@@ -749,35 +591,28 @@ void AKraverPlayer::WeaponSway(float DeltaTime)
 	FRotator WeaponSwayFinalRot;
 	FRotator WeaponSwayInitRot;
 
-	WeaponSwayFinalRot.Pitch = LookUpValue * SwayValue;
+	WeaponSwayFinalRot.Roll = LookUpValue * SwayValue;
 	WeaponSwayFinalRot.Yaw = TurnValue * SwayValue;
 
 	FRotator TargetRot;
-	TargetRot.Pitch = WeaponSwayInitRot.Pitch - WeaponSwayFinalRot.Pitch;
+	TargetRot.Roll = WeaponSwayInitRot.Roll - WeaponSwayFinalRot.Roll;
 	TargetRot.Yaw = WeaponSwayInitRot.Yaw + WeaponSwayFinalRot.Yaw;
-	TargetRot.Roll = WeaponSwayInitRot.Roll + WeaponSwayFinalRot.Roll;
 
-	WeaponSwayResultRot = FMath::RInterpTo(WeaponSwayResultRot, TargetRot, DeltaTime, 2.f);
+	WeaponSwayResultRot = FMath::RInterpTo(WeaponSwayResultRot, TargetRot, DeltaTime, 4.f);
 
-	if(WeaponSwayResultRot.Pitch > MaxSwayDegree)
-		WeaponSwayResultRot.Pitch = MaxSwayDegree;
-	else if(WeaponSwayResultRot.Pitch < MinSwayDegree)
-		WeaponSwayResultRot.Pitch = MinSwayDegree;
+	if(WeaponSwayResultRot.Roll > MaxSwayDegree)
+		WeaponSwayResultRot.Roll = MaxSwayDegree;
+	else if(WeaponSwayResultRot.Roll < MinSwayDegree)
+		WeaponSwayResultRot.Roll = MinSwayDegree;
 
 	if (WeaponSwayResultRot.Yaw > MaxSwayDegree)
 		WeaponSwayResultRot.Yaw = MaxSwayDegree;
 	else if (WeaponSwayResultRot.Yaw < MinSwayDegree)
 		WeaponSwayResultRot.Yaw = MinSwayDegree;
 
-	if (WeaponSwayResultRot.Roll > MaxSwayDegree)
-		WeaponSwayResultRot.Roll = MaxSwayDegree;
-	else if (WeaponSwayResultRot.Roll < MinSwayDegree)
-		WeaponSwayResultRot.Roll = MinSwayDegree;
-
 	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking())
-		WeaponSwayResultRot *= 0.8f;
+		WeaponSwayResultRot *= 0.9f;
 
-	KR_LOG_ROTATOR(TargetRot);
 }
 
 void AKraverPlayer::SpringArmTick(float DeltaTime)
@@ -789,480 +624,4 @@ void AKraverPlayer::SpringArmTick(float DeltaTime)
 
 	Fp_SpringArm->SetRelativeLocation(Fp_SpringArmBasicLocation + SpringArmCrouchLocation);
 	RefreshArm();
-}
-
-void AKraverPlayer::Jump()
-{
-	if (GetMovementComponent()->IsFalling() == false)
-	{
-		if (IsSliding)
-		{
-			SlideEnd(true);
-			bWantToJump = true;
-		}
-		else if (GetCharacterMovement()->IsCrouching())
-		{
-			UnCrouch();
-			bWantToJump = true;
-		}
-		ASoldier::Jump();
-	}
-	else if(GetIsWallRunning())
-		WallRunJump();
-	else if (bCanDoubleJump)
-		DoubleJump();
-}
-
-void AKraverPlayer::WallRunJump()
-{
-	if (GetIsWallRunning())
-	{
-		WallRunEnd(0.35);
-		FVector LaunchVector;
-		LaunchVector.X = WallRunNormal.X * WallRunJumpOffForce;
-		LaunchVector.Y = WallRunNormal.Y * WallRunJumpOffForce;
-		LaunchVector.Z = WallRunJumpHeight;
-		LaunchCharacter(LaunchVector, false ,true);
-		Server_WallRunJumpSuccess(GetCharacterMovement()->PendingLaunchVelocity);
-	}
-	else
-	{
-		KR_LOG(Warning, TEXT("IsWallRunning is false"))
-	}
-}
-
-void AKraverPlayer::DoubleJump()
-{
-	bCanDoubleJump = false;
-
-	FVector LaunchPower(0, 0, DobuleJumpPower.Z);
-
-	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
-
-	FVector Velocity = MovementComp->Velocity;
-
-	FVector Right = GetControlRotation().Vector().GetSafeNormal2D().RotateAngleAxis(-90.0f, FVector::UpVector);
-	float RightSpeed = -FVector::DotProduct(Velocity, Right) / Right.Size2D();
-
-	FVector Forward = GetControlRotation().Vector().GetSafeNormal2D();
-	float ForwardSpeed = FVector::DotProduct(Velocity, Forward) / Forward.Size2D();
-
-	float ForwardLaunchPower;
-	float RightLaunchPower;
-
-	if (CurrentInputForward > 0.f && ForwardSpeed > DobuleJumpPower.X * CurrentInputForward)
-		ForwardLaunchPower = ForwardSpeed;
-	else if (CurrentInputForward < 0.f && -ForwardSpeed > DobuleJumpPower.X * -CurrentInputForward)
-		ForwardLaunchPower = ForwardSpeed;
-	else
-		ForwardLaunchPower = DobuleJumpPower.X * CurrentInputForward;
-
-	if (CurrentInputRight > 0.f && RightSpeed > DobuleJumpPower.Y * CurrentInputRight)
-		RightLaunchPower = RightSpeed;
-	else if (CurrentInputRight < 0.f && -RightSpeed > DobuleJumpPower.Y * -CurrentInputRight)
-		RightLaunchPower = RightSpeed;
-	else
-		RightLaunchPower = DobuleJumpPower.Y * CurrentInputRight;
-
-	bool bOverideXY = false;
-	if (CurrentInputForward != 0.f)
-	{
-		FRotator Rotation = GetController()->GetControlRotation();
-		FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-		LaunchPower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X) * ForwardLaunchPower;
-		bOverideXY = true;
-	}
-	if (CurrentInputRight != 0.f)
-	{
-		FRotator Rotation = GetController()->GetControlRotation();
-		FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-		LaunchPower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y) * RightLaunchPower;
-		bOverideXY = true;
-	}
-
-	LaunchCharacter(LaunchPower, bOverideXY, true);
-
-	Server_DoubleJump(GetCharacterMovement()->PendingLaunchVelocity);
-
-	KR_LOG(Log, TEXT("Dobule Jump Power : %f %f"), ForwardLaunchPower, RightLaunchPower);
-}
-
-bool AKraverPlayer::WallRunUpdate()
-{
-	if (bJumpButtonPress || GetIsWallRunning())
-	{	
-		bool WallRunVerticalSuccess = false;
-		bool WallRunHorizonSuccess = false;
-
-		if(!bWallRunVerticalSupressed)
-		{
-			WallRunVerticalSuccess = WallRunVerticalUpdate();
-			if (WallRunVerticalSuccess)
-			{
-				GEngine->AddOnScreenDebugMessage(
-					0,
-					0.f,
-					FColor::White,
-					TEXT("WallRunVertical")
-				);
-				Server_WallRunVerticalSuccess();
-				Server_WallRunSuccess(GetActorLocation(), GetActorRotation(), GetCharacterMovement()->Velocity, GetCharacterMovement()->PendingLaunchVelocity);
-				return true;
-			}
-		}
-
-		if(!bWallRunHorizonSupressed)
-		{
-			WallRunHorizonSuccess = WallRunHorizonUpdate();
-			if (WallRunHorizonSuccess)
-			{
-				if (bWallRunGravity)
-					GetCharacterMovement()->GravityScale = WallRunTargetGravity;
-				if (GetVelocity().Z < 0.f)
-				{
-					GetCharacterMovement()->GravityScale = 0.f;
-					GetCharacterMovement()->PendingLaunchVelocity.Z = 0.f;
-				}
-
-				GEngine->AddOnScreenDebugMessage(
-					0,
-					0.f,
-					FColor::White,
-					TEXT("WallRunHorizon")
-				);
-
-				Server_WallRunHorizonSuccess();
-				Server_WallRunSuccess(GetActorLocation(), GetActorRotation(), GetCharacterMovement()->Velocity, GetCharacterMovement()->PendingLaunchVelocity);
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-bool AKraverPlayer::WallRunHorizonUpdate()
-{
-	if (WallRunHorizonMovement(GetActorLocation(), CalculateRightWallRunEndVector(), -1.f))
-	{
-		if(!GetIsWallRunning())
-			WallRunStart();
-
-		SetCurWallRunState(EWallRunState::WALLRUN_RIGHT);
-		return true;
-	}
-	else if(CurWallRunState == EWallRunState::WALLRUN_RIGHT)
-	{
-		WallRunHorizonEnd(1.f);
-		return false;
-	}
-	else if (WallRunHorizonMovement(GetActorLocation(), CalculateLeftWallRunEndVector(), 1.f))
-	{
-		if (!GetIsWallRunning())
-			WallRunStart();
-
-		SetCurWallRunState(EWallRunState::WALLRUN_LEFT);
-		return true;
-	}
-	else if (CurWallRunState != EWallRunState::WALLRUN_VERTICAL)
-	{
-		WallRunHorizonEnd(1.f);
-		return false;
-
-	}
-
-	return false;
-}
-
-bool AKraverPlayer::WallRunVerticalUpdate()
-{
-	if (bWallRunVerticalSupressed)
-		return false;
-
-	if (WallRunVerticalMovement(GetActorLocation(), CalculateVerticaltWallRunEndVector()))
-	{
-		if(!GetIsWallRunning())
-			WallRunStart();
-	
-		SetCurWallRunState(EWallRunState::WALLRUN_VERTICAL);
-		return true;
-	}
-	else
-	{
-		WallRunVerticalEnd(1.f);
-		return false;
-	}
-}
-
-bool AKraverPlayer::WallRunHorizonMovement(FVector Start, FVector End, float WallRunDirection)
-{
-	if(bWallRunHorizonSupressed)
-		return false;
-
-	FCollisionQueryParams ObjectParams(NAME_None, false, this);
-	FHitResult Result;
-	bool bSuccess = GetWorld()->LineTraceSingleByChannel(
-		Result,
-		Start,
-		End, 
-		ECC_ONLY_OBJECT,
-		ObjectParams
-	);
-
-	if (bSuccess && Result.bBlockingHit)
-	{
-		if (GetMovementComponent()->IsFalling() && CalculateValidWallVector(Result.Normal))
-		{ 
-			WallRunNormal = Result.Normal;
-			FVector WallRunVec = FVector::CrossProduct(WallRunNormal, FVector(0, 0, 1)) * (WallRunDirection * WallRunHorizonSpeed);
-			LaunchCharacter(WallRunVec,true, !bWallRunGravity);
-
-			FRotator Temp = WallRunVec.Rotation();
-			KR_LOG(Log, TEXT("%f %f %f"), Temp.Pitch, Temp.Roll, Temp.Yaw);
-			return true;
-		}
-	}
-	return false;
-}	
-
-void AKraverPlayer::SlideStart()
-{
-	if(!CanSlide())
-		return;
-
-	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
-
-	FVector Velocity = MovementComp->Velocity;
-
-	FVector Forward = GetControlRotation().Vector().GetSafeNormal2D();
-	float ForwardSpeed = FVector::DotProduct(Velocity, Forward) / Forward.Size2D();
-
-	FVector Right = GetControlRotation().Vector().GetSafeNormal2D().RotateAngleAxis(-90.0f, FVector::UpVector);
-	float RightSpeed = -FVector::DotProduct(Velocity, Right) / Right.Size2D();
-
-	IsSliding = true;
-
-	FVector SlidePower;
-	if (ForwardSpeed > SlideSpeed)
-	{
-		FRotator Rotation = GetController()->GetControlRotation();
-		FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-		SlidePower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X) * ForwardSpeed;
-	}
-	else
-	{
-		FRotator Rotation = GetController()->GetControlRotation();
-		FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-		SlidePower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X) * SlideSpeed;
-	}
-
-	FRotator Rotation = GetController()->GetControlRotation();
-	FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-	SlidePower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y) * RightSpeed;
-
-	InputForwardRatio = 0.4f;
-	InputRightRatio = 0.4f;
-	GetCharacterMovement()->GroundFriction = SlideGroundFriction;
-	GetCharacterMovement()->BrakingDecelerationWalking = SlideBrakingDecelerationWalking;
-	GetCharacterMovement()->Velocity.X = SlidePower.X;
-	GetCharacterMovement()->Velocity.Y = SlidePower.Y;
-	ASoldier::Crouch(true);
-	Server_SlideSuccess(GetCharacterMovement()->Velocity);
-
-	KR_LOG(Log,TEXT("Slide Start"));
-}
-
-void AKraverPlayer::SlideEnd(bool DoUncrouch)
-{
-	if(!IsSliding || bSlideSupressed)
-		return;
-
-	IsSliding = false;
-
-	InputForwardRatio = 1.f;
-	InputRightRatio = 1.f;
-	GetCharacterMovement()->GroundFriction = DefaultGroundFriction;
-	GetCharacterMovement()->BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
-
-	if(DoUncrouch)
-		ASoldier::UnCrouch(true);
-
-	SuppressSlide(0.5f);
-	Server_SlideEnd();
-	KR_LOG(Log, TEXT("Slide End"));
-}
-
-void AKraverPlayer::SuppressSlide(float Delay)
-{
-	bSlideSupressed = true;
-	GetWorldTimerManager().SetTimer(SuppressSlideTimer, this, &AKraverPlayer::ResetSlideSuppression, Delay, false);
-}
-
-void AKraverPlayer::ResetSlideSuppression()
-{
-	bSlideSupressed = false;
-	GetWorldTimerManager().ClearTimer(SuppressSlideTimer);
-}
-
-bool AKraverPlayer::WallRunVerticalMovement(FVector Start, FVector End)
-{
-	FCollisionQueryParams ObjectParams(NAME_None, false, this);
-	FHitResult Result;
-	bool bSuccess = GetWorld()->LineTraceSingleByChannel(
-		Result,
-		Start,
-		End,
-		ECC_ONLY_OBJECT,
-		ObjectParams
-	);
-
-	if (bSuccess && Result.bBlockingHit)
-	{
-		if (GetMovementComponent()->IsFalling() && CalculateValidWallVector(Result.Normal))
-		{
-			WallRunNormal = Result.Normal;
-
-			LaunchCharacter(GetActorUpVector() * WallRunVerticalSpeed, true, true);
-			return true;
-		}
-	}
-	return false;
-}
-
-void AKraverPlayer::WallRunStart()
-{
-	if(GetIsWallRunning())
-		return;
-
-	bCanDoubleJump = true;
-}
-
-void AKraverPlayer::WallRunEnd(float ResetTime)
-{
-	if (GetIsWallRunning() == false)
-		return;
-
-	SetCurWallRunState(EWallRunState::NONE);
-	GetCharacterMovement()->GravityScale = DefaultGravity;
-	SuppressWallRunHorizion(ResetTime);
-	SuppressWallRunVertical(ResetTime);
-	Server_WallRunEnd();
-}
-
-void AKraverPlayer::WallRunHorizonEnd(float ResetTime)
-{
-	if(GetIsWallRunning() == false)
-		return;
-
-	SetCurWallRunState(EWallRunState::NONE);
-	GetCharacterMovement()->GravityScale = DefaultGravity;
-	SuppressWallRunHorizion(ResetTime);
-	Server_WallRunEnd();
-}
-
-void AKraverPlayer::WallRunVerticalEnd(float ResetTime)
-{
-	if (GetIsWallRunning() == false)
-		return; 
-
-	SetCurWallRunState(EWallRunState::NONE);
-	GetCharacterMovement()->GravityScale = DefaultGravity;
-	SuppressWallRunVertical(ResetTime);
-	Server_WallRunEnd();
-}
-
-void AKraverPlayer::ResetWallRunHorizonSuppression()
-{
-	bWallRunHorizonSupressed = false;
-	GetWorldTimerManager().ClearTimer(SuppressWallRunHorizonTimer);
-}
-
-void AKraverPlayer::ResetWallRunVerticalSuppression()
-{
-	bWallRunVerticalSupressed = false;
-	GetWorldTimerManager().ClearTimer(SuppressWallRunVerticalTimer);
-}
-
-void AKraverPlayer::SuppressWallRunHorizion(float Delay)
-{
-	bWallRunHorizonSupressed = true;
-	GetWorldTimerManager().SetTimer(SuppressWallRunHorizonTimer, this, &AKraverPlayer::ResetWallRunHorizonSuppression, Delay, false);
-}
-
-void AKraverPlayer::SuppressWallRunVertical(float Delay)
-{
-	bWallRunVerticalSupressed = true;
-	GetWorldTimerManager().SetTimer(SuppressWallRunVerticalTimer, this, &AKraverPlayer::ResetWallRunVerticalSuppression, Delay, false);
-}
-
-FVector AKraverPlayer::CalculateRightWallRunEndVector()
-{
-	return (
-		GetActorLocation() + 
-		GetActorRightVector() * 75.f +
-		GetActorForwardVector() * -35.f
-		);
-}
-
-FVector AKraverPlayer::CalculateLeftWallRunEndVector()
-{
-	return (
-		GetActorLocation() +
-		GetActorRightVector() * -75.f +
-		GetActorForwardVector() * -35.f
-		);
-}
-
-FVector AKraverPlayer::CalculateVerticaltWallRunEndVector()
-{
-	return (
-		GetActorLocation() +
-		GetActorForwardVector() * 75.f
-		);
-}
-
-bool AKraverPlayer::CalculateValidWallVector(FVector InVec)
-{
-	return UKismetMathLibrary::InRange_FloatFloat(InVec.Z, -0.52f, 0.52, false, false);
-}
-
-FVector AKraverPlayer::CalculatePlayerToWallVector()
-{
-	return -WallRunNormal;
-}
-
-bool AKraverPlayer::CanSlide()
-{
-	if(bSlideSupressed)
-		return false;
-
-	if(IsSliding)
-		return false;
-
-	if(MovementState != EMovementState::SPRINT)
-		return false;
-
-	if (CalculateForwardSpeed() < MinSlideRequireSpeed)
-		return false;
-
-	return true;
-}
-
-void AKraverPlayer::SlideUpdate()
-{
-	if (!IsSliding)
-		return;
-
-	float Speed = GetVelocity().Size();
-	if (Speed < GetCharacterMovement()->MaxWalkSpeedCrouched)
-	{
-		SlideEnd(false);
-		return;
-	}
-
-	FVector Slope = CaclulateCurrentFllorSlopeVector();
-	FVector SlopePhysics = Slope * SlideSlopeSpeed;
-	SlopePhysics.Z = 0.f;
-	GetCharacterMovement()->Velocity += SlopePhysics;
-	Server_SlideUpdate();
 }

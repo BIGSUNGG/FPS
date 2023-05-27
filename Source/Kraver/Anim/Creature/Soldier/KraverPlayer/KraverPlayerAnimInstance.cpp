@@ -3,6 +3,7 @@
 
 #include "Kraver/Anim/Creature/Soldier/KraverPlayer/KraverPlayerAnimInstance.h"
 #include "Kraver/Creature/Soldier/KraverPlayer/KraverPlayer.h"
+#include "Kraver/KraverComponent/Movement/Advance/AdvanceMovementComponent.h"
 
 void UKraverPlayerAnimInstance::NativeBeginPlay()
 {
@@ -18,9 +19,11 @@ void UKraverPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (KraverPlayer == nullptr)
 		return;
 
-
-	CurWallRunState = KraverPlayer->GetCurWallRunState();
-	IsWallRunning = (CurWallRunState != EWallRunState::NONE);
-	IsSliding = KraverPlayer->GetIsSliding();
-
+	UAdvanceMovementComponent* AdvanceMovementComp = Cast<UAdvanceMovementComponent>(KraverPlayer->CreatureMovementComponent);
+	if(AdvanceMovementComp)
+	{
+		CurWallRunState = AdvanceMovementComp->GetCurWallRunState();
+		IsWallRunning = (CurWallRunState != EWallRunState::NONE);
+		IsSliding = AdvanceMovementComp->GetIsSliding();
+	}
 }

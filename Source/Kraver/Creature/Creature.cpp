@@ -5,6 +5,7 @@
 #include "Kraver/Anim/Creature/CreatureAnimInstance.h"
 #include "Kraver/Weapon/Melee/Melee.h"
 #include "Kraver/KraverComponent/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
+#include "Kraver/KraverComponent/Movement/CreatureMovementComponent.h"
 
 // Sets default values
 ACreature::ACreature()
@@ -16,6 +17,8 @@ ACreature::ACreature()
 	Fp_Root = CreateDefaultSubobject<USceneComponent>(TEXT("Fp_Root"));
 	Fp_SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Fp_SpringArm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Fp_Camera"));
+
+	CreatureMovementComponent = CreateDefaultSubobject<UCreatureMovementComponent>("CreatureMovementComponent");
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
@@ -51,8 +54,8 @@ ACreature::ACreature()
 	Camera->SetFieldOfView(110.f);
 
 	GetCharacterMovement()->AirControl = 0.25f;
-	GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchWalkSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = CreatureMovementComponent->GetWalkSpeed();
+	GetCharacterMovement()->MaxWalkSpeedCrouched = CreatureMovementComponent->GetCrouchWalkSpeed();
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
 	GetCharacterMovement()->SetWalkableFloorAngle(50.f);
@@ -64,8 +67,6 @@ void ACreature::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ACreature, MovementState);
-	DOREPLIFETIME(ACreature, IsJumping);
 	DOREPLIFETIME(ACreature, AO_Pitch);
 	DOREPLIFETIME(ACreature, AO_Yaw);
 }
@@ -109,11 +110,6 @@ void ACreature::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DefaultGravity = GetCharacterMovement()->GravityScale;
-	DefaultGroundFriction = GetCharacterMovement()->GroundFriction;
-	DefaultBrakingDecelerationWalking = GetCharacterMovement()->BrakingDecelerationWalking;
-	DefaultCameraLocation = Camera->GetRelativeLocation();
-
 }
 
 void ACreature::PostInitializeComponents()
@@ -134,6 +130,13 @@ void ACreature::Tick(float DeltaTime)
 void ACreature::CameraTick(float DeltaTime)
 {
 	Camera->SetRelativeLocation(FMath::VInterpTo(Camera->GetRelativeLocation(), TargetCameraRelativeLocation, DeltaTime, 5.f));
+}
+
+void ACreature::Jump()
+{
+	Super::Jump();
+
+	Server_Jump();
 }
 
 // Called to bind functionality to input
@@ -188,7 +191,7 @@ void ACreature::OnAssassinateEndEvent()
 
 bool ACreature::GetCanAttack()
 {
-	if (MovementState == EMovementState::SPRINT && GetMovementComponent()->IsFalling() == false)
+	if (CreatureMovementComponent->GetMovementState() == EMovementState::SPRINT && GetMovementComponent()->IsFalling() == false)
 		return false;
 
 	return true;
@@ -258,41 +261,16 @@ FVector ACreature::CaclulateCurrentFllorSlopeVector()
 
 void ACreature::MoveForward(float NewAxisValue)
 {
-	NewAxisValue *= InputForwardRatio;
 	CurrentInputForward = NewAxisValue;
 	
-	if(!GetMovementComponent()->IsFalling())
-	{ 
-		SetMovementState(EMovementState::WALK);
-
-		if(NewAxisValue == 0 || Controller == nullptr)
-			return;
-
-		if(IsRunning)
-		{ 
-			if (NewAxisValue >= 0.5f)
-				SetMovementState(EMovementState::SPRINT);
-			else
-				SetMovementState(EMovementState::RUN);
-		}
-	}
-
-	FRotator Rotation = GetController()->GetControlRotation();
-	FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-	AddMovementInput(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X), NewAxisValue);
+	CreatureMovementComponent->MoveForward(NewAxisValue);
 }
 
 void ACreature::MoveRight(float NewAxisValue)
 {
-	NewAxisValue *= InputRightRatio;
 	CurrentInputRight = NewAxisValue;
 
-	if(NewAxisValue == 0 || Controller == nullptr || NewAxisValue == 0)
-		return;
-
-	FRotator Rotation = GetController()->GetControlRotation();
-	FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-	AddMovementInput(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y), NewAxisValue);
+	CreatureMovementComponent->MoveRight(NewAxisValue);
 }
 
 void ACreature::LookUp(float NewAxisValue)
@@ -339,42 +317,38 @@ void ACreature::SubAttackButtonReleased()
 
 void ACreature::RunButtonPressed()
 {
-	IsRunning = true;
+	bRunButtonPress = true;
 }
 
 void ACreature::RunButtonReleased()
 {
-	IsRunning = false;
+	bRunButtonPress = false;
 }
 
 void ACreature::CrouchButtonPressed()
 {
 	bCrouchButtonPress = true;
-	Crouch();
+	CreatureMovementComponent->Crouch();
 }
 
 void ACreature::CrouchButtonReleased()
 {
 	bCrouchButtonPress = false;
-	UnCrouch();
+	CreatureMovementComponent->UnCrouch();
 }
 
 void ACreature::JumpingButtonPressed()
 {
 	bJumpButtonPress = true;
 
-	if(GetMovementComponent()->IsFalling() == false)
-		SetIsJumping(true);
-
-	Jump();
+	CreatureMovementComponent->JumpStart();
 }
 
 void ACreature::JumpingButtonReleased()
 {
 	bJumpButtonPress = false;
 
-	if (IsJumping)
-		StopJumping();
+	CreatureMovementComponent->JumpEnd();
 }
 
 void ACreature::HolsterWeaponPressed()
@@ -413,62 +387,6 @@ void ACreature::SetAO_Pitch(float value)
 void ACreature::Server_SetAO_Pitch_Implementation(float value)
 {
 	AO_Pitch = value;
-}
-
-void ACreature::SetMovementState(EMovementState value)
-{
-	MovementState = value;
-	switch (value)
-	{
-		case EMovementState::WALK:
-			GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-			GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchWalkSpeed;
-			break;
-		case EMovementState::RUN:
-			GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-			GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchRunSpeed;
-			break;
-		case EMovementState::SPRINT:
-			GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
-			GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSprintSpeed;
-			break;
-		default:
-			break;
-	}
-	Server_SetMovementState(value);
-}
-
-void ACreature::Server_SetMovementState_Implementation(EMovementState value)
-{
-	MovementState = value;
-	switch (value)
-	{
-	case EMovementState::WALK:
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-		GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchWalkSpeed;
-		break;
-	case EMovementState::RUN:
-		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-		GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchRunSpeed;
-		break;
-	case EMovementState::SPRINT:
-		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
-		GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSprintSpeed;
-		break;
-	default:
-		break;
-	}
-}
-
-void ACreature::SetIsJumping(bool value)
-{
-	IsJumping = value;
-	Server_SetIsJumping(value);
-}
-
-void ACreature::Server_SetIsJumping_Implementation(bool value)
-{
-	IsJumping = value;
 }
 
 void ACreature::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -604,7 +522,8 @@ void ACreature::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
-	SetIsJumping(false);
+	CreatureMovementComponent->Landed(Hit);
+
 	PlayLandedMontage();
 }
 
@@ -757,9 +676,4 @@ void ACreature::SimulateMesh()
 
 	Client_SimulateMesh();
 	Multicast_SimulateMesh();
-}
-
-void ACreature::Jump()
-{
-	ACharacter::Jump();
 }
