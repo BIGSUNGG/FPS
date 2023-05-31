@@ -122,8 +122,7 @@ protected:
 	UFUNCTION()
 		virtual void OnServerDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
 
-	UFUNCTION()
-		void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
+	void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
 	UFUNCTION()
 		virtual void OnClientAfterTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	void OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust) override; // 일어났을때 호출되는 함수

@@ -11,6 +11,7 @@
 #include "Components/DecalComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/TextBlock.h"
+#include "Components/TimelineComponent.h"
 
 // Net
 #include "Net/UnrealNetwork.h"

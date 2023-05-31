@@ -123,6 +123,8 @@ void UAdvanceMovementComponent::WallRunJump()
 		LaunchVector.Y = WallRunNormal.Y * WallRunJumpOffForce;
 		LaunchVector.Z = WallRunJumpHeight;
 		OwnerCreature->LaunchCharacter(LaunchVector, false, true);
+		OwnerCreature->OnJumped();
+
 		Server_WallRunJumpSuccess(OwnerCreature->GetCharacterMovement()->PendingLaunchVelocity);
 	}
 	else
@@ -181,6 +183,7 @@ void UAdvanceMovementComponent::DoubleJump()
 	}
 
 	OwnerCreature->LaunchCharacter(LaunchPower, bOverideXY, true);
+	OwnerCreature->OnJumped();
 
 	Server_DoubleJump(OwnerCreature->GetCharacterMovement()->PendingLaunchVelocity);
 
@@ -334,9 +337,6 @@ void UAdvanceMovementComponent::SlideStart()
 
 	FVector Velocity = MovementComp->Velocity;
 
-	float ForwardSpeed = OwnerCreature->CalculateForwardSpeed();
-
-	FVector Right = OwnerCreature->GetControlRotation().Vector().GetSafeNormal2D().RotateAngleAxis(-90.0f, FVector::UpVector);
 	float RightSpeed = OwnerCreature->CalculateRightSpeed();
 
 	IsSliding = true;
@@ -355,6 +355,8 @@ void UAdvanceMovementComponent::SlideStart()
 		SlidePower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y) * RightSpeed;
 	}
 
+	KR_LOG(Log,TEXT("%f"), SlideSpeed);
+
 	InputForwardRatio = 0.4f;
 	InputRightRatio = 0.4f;
 	OwnerCreature->GetCharacterMovement()->GroundFriction = SlideGroundFriction;
@@ -362,9 +364,10 @@ void UAdvanceMovementComponent::SlideStart()
 	OwnerCreature->GetCharacterMovement()->Velocity.X = SlidePower.X;
 	OwnerCreature->GetCharacterMovement()->Velocity.Y = SlidePower.Y;
 	OwnerCreature->Crouch(true);
+
 	Server_SlideSuccess(OwnerCreature->GetCharacterMovement()->Velocity);
 
-	KR_LOG(Log, TEXT("Slide Start"));
+	KR_LOG(Log, TEXT("Slide Start : %f %f"), SlidePower.X, SlidePower.Y);
 }
 
 void UAdvanceMovementComponent::SlideEnd(bool DoUncrouch)

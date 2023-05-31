@@ -31,4 +31,6 @@ protected:
 		UBlendSpace* AnimWeaponMovementFpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Sway", Meta = (AllowPrivateAccess = true))
 		FRotator WeaponSwayResultRot;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|ProceduralAnim", Meta = (AllowPrivateAccess = true))
+		FVector ProceduralAnimResultVec;
 }; 

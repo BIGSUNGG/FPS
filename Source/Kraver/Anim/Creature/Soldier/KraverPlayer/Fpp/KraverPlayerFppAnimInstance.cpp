@@ -32,4 +32,6 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		FabrikLeftHand(KraverPlayer->GetArmMesh(), KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()], LeftHandFppFabrikTransform);
 	}
+
+	ProceduralAnimResultVec = KraverPlayer->GetProceduralAnimResultVec();
 }

@@ -131,6 +131,8 @@ void AKraverPlayer::LocallyControlTick(float DeltaTime)
 	if(!IsLocallyControlled())
 		return;
 
+	ProceduralAnimTimeLine.TickTimeline(DeltaTime);
+
 	CheckCanInteractionWeapon();
 	
 	WeaponADS(DeltaTime);
@@ -549,6 +551,38 @@ void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, flo
 	ASoldier::OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
 }
 
+void AKraverPlayer::Landed(const FHitResult& Hit)
+{
+	ASoldier::Landed(Hit);
+
+	StartProceduralAnim(0.75f);
+}
+
+void AKraverPlayer::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	ASoldier::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	StartProceduralAnim(-0.5f);
+}
+
+void AKraverPlayer::OnJumped_Implementation()
+{
+	ASoldier::OnJumped_Implementation();
+
+	StartProceduralAnim(-0.75f);
+}
+
+void AKraverPlayer::ProceduralAnimEvent()
+{
+	float TimelineValue = ProceduralAnimTimeLine.GetPlaybackPosition();
+	float CurveFloatValue = ProceduralAnimCurve->GetFloatValue(TimelineValue);
+	
+	ProceduralAnimResultVec.Z = UKismetMathLibrary::Lerp(0.f, -10.f, CurveFloatValue * ProceduralAnimStrength);
+
+	if(CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking())
+		ProceduralAnimResultVec.Z *= 0.1f;
+}
+
 void AKraverPlayer::PlayLandedMontage()
 {
 	ASoldier::PlayLandedMontage();
@@ -561,7 +595,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 {
 	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && Cast<AGun>(CombatComponent->GetCurWeapon()))
 	{
-		#if KR_TEST_ADS
+		#if TEST_ADS
 		USkeletalMeshComponent* ArmWeaponMesh = GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()];
 		FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
 		FTransform CameraTransform = Camera->GetComponentTransform();
@@ -571,10 +605,10 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 
 		KR_LOG_VECTOR(RelativeLocation);
 		KR_LOG_ROTATOR(RelativeRotation);
-		#endif
-
+		#else
 		if (HUD)
 			HUD->SetbDrawCrosshair(false);
+		#endif
 	}
 	else
 	{
@@ -586,6 +620,10 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 
 void AKraverPlayer::WeaponSway(float DeltaTime)
 {
+	#if TEST_ADS
+	return;
+	#endif
+
 	float TurnValue = GetInputAxisValue("Turn") * SwayValue;
 	float LookUpValue = GetInputAxisValue("LookUp") * SwayValue;
 	FRotator WeaponSwayFinalRot;
@@ -624,4 +662,15 @@ void AKraverPlayer::SpringArmTick(float DeltaTime)
 
 	Fp_SpringArm->SetRelativeLocation(Fp_SpringArmBasicLocation + SpringArmCrouchLocation);
 	RefreshArm();
+}
+
+void AKraverPlayer::StartProceduralAnim(float Strength)
+{
+	ProceduralAnimStrength = Strength;
+
+	FOnTimelineFloat TimelineCallback;
+	TimelineCallback.BindUFunction(this, FName("ProceduralAnimEvent"));
+
+	ProceduralAnimTimeLine.AddInterpFloat(ProceduralAnimCurve, TimelineCallback);
+	ProceduralAnimTimeLine.PlayFromStart();
 }

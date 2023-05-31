@@ -36,6 +36,7 @@ public:
 	virtual bool GetCanAttack() override;
 	virtual USkeletalMeshComponent* GetCurMainMesh() override;
 	FRotator GetWeaponSwayResultRot() { return WeaponSwayResultRot; }
+	FVector GetProceduralAnimResultVec() { return ProceduralAnimResultVec; }
 
 protected:
 	// input event
@@ -80,12 +81,21 @@ protected:
 	virtual void OnAssassinateEndEvent() override;
 	virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed) override;
 
+	void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+	virtual void OnJumped_Implementation() override;
+
+	// TimeLine Event
+	UFUNCTION()
+		virtual void ProceduralAnimEvent();
+
 	// Function
 	virtual void PlayLandedMontage() override;
 
 	void WeaponADS(float DeltaTime);
 	void WeaponSway(float DeltaTime);
 	void SpringArmTick(float DeltaTime);
+	void StartProceduralAnim(float Strength);
 
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
@@ -149,5 +159,12 @@ protected:
 	float SwayValue = 2.5f;
 	float MaxSwayDegree = 5.f;
 	float MinSwayDegree = -5.f;
+
+	// Procedural Animation
+	FVector ProceduralAnimResultVec;
+	FTimeline ProceduralAnimTimeLine;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Curve", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* ProceduralAnimCurve;
+	float ProceduralAnimStrength = 0.f;
 
 };
