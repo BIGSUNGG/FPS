@@ -8,7 +8,16 @@
 #include "Kraver/Utility/KraverStructHeaders.h"
 #include "KraverDelegate.generated.h"
 
-// AssassinateDele
+// Crouch Delegate
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCrouchDele, float, HalfHeightAdjust, float, ScaledHalfHeightAdjust);
+
+// Landed Delegate
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLandedDele, const FHitResult&, Hit);
+
+// Jump Delegate
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FJumpDele);
+
+// Assassinate Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAssassinateDele, AActor*, AssassinatedActor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAssassinateEndDele);
 

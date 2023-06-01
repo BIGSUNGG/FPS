@@ -7,8 +7,6 @@
 #include "Kraver/KraverComponent/Combat/CombatComponent.h"
 #include "Creature.generated.h"
 
-struct FAssassinateInfo;
-
 UCLASS()
 class KRAVER_API ACreature : public ACharacter
 {
@@ -122,10 +120,13 @@ protected:
 	UFUNCTION()
 		virtual void OnServerDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
 
-	void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
+	virtual void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+	virtual void OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust) override; // 일어났을때 호출되는 함수
+	virtual void OnJumped_Implementation() override;
+
 	UFUNCTION()
 		virtual void OnClientAfterTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
-	void OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust) override; // 일어났을때 호출되는 함수
 	UFUNCTION()
 		virtual void OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 	UFUNCTION()
@@ -177,6 +178,12 @@ protected:
 	virtual void SimulateMesh();
 
 public:
+	// Delegate
+	FCrouchDele OnCrouchStart;
+	FCrouchDele OnCrouchEnd;
+	FLandedDele OnLand;
+	FJumpDele OnJump;
+
 	// Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 		class UCombatComponent* CombatComponent;

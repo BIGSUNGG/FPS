@@ -525,6 +525,29 @@ void ACreature::Landed(const FHitResult& Hit)
 	CreatureMovementComponent->Landed(Hit);
 
 	PlayLandedMontage();
+
+	OnLand.Broadcast(Hit);
+}
+
+void ACreature::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	OnCrouchStart.Broadcast(HalfHeightAdjust, ScaledHalfHeightAdjust);
+}
+
+void ACreature::OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust)
+{
+	Super::OnEndCrouch(HeightAdjust, ScaledHeightAdjust);
+
+	OnCrouchEnd.Broadcast(HeightAdjust, ScaledHeightAdjust);
+}
+
+void ACreature::OnJumped_Implementation()
+{
+	Super::OnJumped_Implementation();
+
+	OnJump.Broadcast();
 }
 
 void ACreature::OnClientAfterTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
@@ -532,12 +555,6 @@ void ACreature::OnClientAfterTakeDamageEvent(float DamageAmount, FKraverDamageEv
 	Server_OnAfterTakeDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
-void ACreature::OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust)
-{
-	Super::OnEndCrouch(HeightAdjust,ScaledHeightAdjust);
-
-}
- 
 void ACreature::OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
 {
 	Server_OnPlayWeaponTppMontageEvent(PlayedMontage, Speed);

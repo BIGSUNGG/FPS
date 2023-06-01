@@ -3,6 +3,7 @@
 
 #include "KraverPlayerFppAnimInstance.h"
 #include "Kraver/Creature/Soldier/KraverPlayer/KraverPlayer.h"
+#include "Kraver/KraverComponent/ProceduralAnimation/PlayerProceduralAnimComponent.h"
 
 void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -33,5 +34,5 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		FabrikLeftHand(KraverPlayer->GetArmMesh(), KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()], LeftHandFppFabrikTransform);
 	}
 
-	ProceduralAnimResultVec = KraverPlayer->GetProceduralAnimResultVec();
+	ProceduralAnimResultVec = KraverPlayer->PlayerProceduralAnimComponent->GetProceduralAnimResultVec();
 }
