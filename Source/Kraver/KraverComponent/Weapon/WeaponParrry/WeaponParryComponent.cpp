@@ -52,6 +52,9 @@ void UWeaponParryComponent::OnSubAttackStartEvent()
 
 void UWeaponParryComponent::OnServerBeforeTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
+	if(OwnerWeapon == nullptr)
+		return;
+	
 	if (IS_SERVER() == false)
 	{
 		KR_LOG(Error, TEXT("Called on client"));
@@ -78,5 +81,6 @@ void UWeaponParryComponent::Client_ParryStart_Implementation()
 
 void UWeaponParryComponent::Server_ParryEnd_Implementation()
 {
-	OwnerWeapon->GetOwnerCreature()->CombatComponent->OnServerBeforeTakeDamage.RemoveDynamic(this, &UWeaponParryComponent::OnServerBeforeTakeDamageEvent);
+	if(OwnerWeapon == nullptr)
+		OwnerWeapon->GetOwnerCreature()->CombatComponent->OnServerBeforeTakeDamage.RemoveDynamic(this, &UWeaponParryComponent::OnServerBeforeTakeDamageEvent);
 }

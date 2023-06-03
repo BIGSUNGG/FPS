@@ -103,6 +103,7 @@ void AKraverPlayer::CameraTick(float DeletaSeconds)
 
 void AKraverPlayer::ArmMeshTick(float DeletaTime)
 {
+	ArmMesh->SetRelativeLocation(BasicArmLocation + AdsArmLocation);
 	ArmMesh->SetRelativeRotation(BasicArmRotation);
 }
 
@@ -375,8 +376,8 @@ void AKraverPlayer::RefreshArm()
 
 void AKraverPlayer::RefreshSpringArm()
 {
-	Fp_SpringArm->SetRelativeLocation(Fp_SpringArmBasicLocation + SpringArmCrouchLocation);
-	Server_RefreshSpringArm(Fp_SpringArmBasicLocation + SpringArmCrouchLocation, Fp_SpringArm->TargetArmLength);
+	Fp_SpringArm->SetRelativeLocation(Fp_SpringArmBasicLocation + FP_SpringArmCrouchLocation);
+	Server_RefreshSpringArm(Fp_SpringArmBasicLocation + FP_SpringArmCrouchLocation, Fp_SpringArm->TargetArmLength);
 }
 
 void AKraverPlayer::Server_RefreshSpringArm_Implementation(FVector Vector, float Length)
@@ -575,14 +576,18 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 		KR_LOG_VECTOR(RelativeLocation);
 		KR_LOG_ROTATOR(RelativeRotation);
 		#else
-		if (HUD)
+		if (ViewType == EViewType::FIRST_PERSON && HUD)
 			HUD->SetbDrawCrosshair(false);
 		#endif
+
+		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, 95.f, DeltaTime, 15.f));
 	}
 	else
 	{
 		if (HUD)
 			HUD->SetbDrawCrosshair(true);
+
+		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, 110.f, DeltaTime, 15.f));
 	}
 
 }
@@ -625,10 +630,10 @@ void AKraverPlayer::WeaponSway(float DeltaTime)
 void AKraverPlayer::SpringArmTick(float DeltaTime)
 {
 	if (GetMovementComponent()->IsCrouching())
-		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, CrouchCameraHeight, DeltaTime, 20.f);
+		FP_SpringArmCrouchLocation.Z = FMath::FInterpTo(FP_SpringArmCrouchLocation.Z, CrouchCameraHeight, DeltaTime, 20.f);
 	else
-		SpringArmCrouchLocation.Z = FMath::FInterpTo(SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
+		FP_SpringArmCrouchLocation.Z = FMath::FInterpTo(FP_SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
 
-	Fp_SpringArm->SetRelativeLocation(Fp_SpringArmBasicLocation + SpringArmCrouchLocation);
+	Fp_SpringArm->SetRelativeLocation(Fp_SpringArmBasicLocation + FP_SpringArmCrouchLocation);
 	RefreshArm();
 }

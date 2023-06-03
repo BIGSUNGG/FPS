@@ -138,7 +138,7 @@ protected:
 	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
 	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트
 	FVector Fp_SpringArmBasicLocation; // 기본적으로 적용할 SprintArm의 RelativeLocation
-	FVector SpringArmCrouchLocation; // 추가적으로 적용할 SprintArm의 RelativeLocation
+	FVector FP_SpringArmCrouchLocation; // 추가적으로 적용할 SprintArm의 RelativeLocation
 
 	FTimerHandle UnEquipWeaponTimerHandle;
 	float WeaponThrowPower = 700.f; // 장착해제된 무기를 던지는 힘
@@ -146,11 +146,12 @@ protected:
 
 	FVector BasicArmLocation;
 	FRotator BasicArmRotation;
+	FVector AdsArmLocation;
 
 	// Weapon Sway
 	FRotator WeaponSwayResultRot;
 	float SwayValue = 2.5f;
-	float MaxSwayDegree = 5.f;
-	float MinSwayDegree = -5.f;
+	float MaxSwayDegree = 2.f;
+	float MinSwayDegree = -2.f;
 
 };

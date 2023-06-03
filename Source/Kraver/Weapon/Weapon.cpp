@@ -121,7 +121,7 @@ int32 AWeapon::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 		return Index;
 	}
 
-	AdditiveWeaponMesh[Index]->SetHiddenInGame(true);
+	AdditiveWeaponMesh[Index]->DestroyComponent();
 	AdditiveWeaponMesh.RemoveAt(Index);
 	return Index;
 }
@@ -264,9 +264,7 @@ void AWeapon::OnAttackStartEvent()
 	if (bCanAttack)
 	{
 		if (!bFirstAttackDelay)
-		{
 			Attack();
-		}
 
 		if (bAutomaticAttack)
 			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, bAutomaticAttack, AttackDelay);
