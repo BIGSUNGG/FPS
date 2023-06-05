@@ -28,9 +28,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual int32 MakeAdditiveWeaponMesh(); // 추가적인 WeaponMesh를 추가 (Return 값은 추가된 WeaponMesh의 인덱스값)
-	virtual int32 RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh); // 추가적인 WeaponMesh를 제거 (Return 값은 제거된 WeaponMesh의 인덱스값)
-	virtual int32 FindAdditiveWeaponMesh(USkeletalMeshComponent* Mesh); // 추가적인 WeaponMesh를 찾음 (Return 값은 찾은 WeaponMesh의 인덱스값 못찾았을 경우 -1)
+	virtual int32 MakeAdditivePrimitiveInfo() final; // 추가적인 PrimitiveInfo를 추가 (Return 값은 추가된 WeaponMesh의 인덱스값)
+	virtual int32 RemoveAdditivePrimitiveInfo(USkeletalMeshComponent* Mesh) final; // 추가적인 PrimitiveInfo를 제거 (Return 값은 제거된 WeaponMesh의 인덱스값)
+	virtual int32 FindAdditivePrimitiveInfo(USkeletalMeshComponent* Mesh) final; // 추가적인 PrimitiveInfo를 찾음 (Return 값은 찾은 WeaponMesh의 인덱스값 못찾았을 경우 -1)
 
 	virtual bool Equipped(ACreature* Character); // Character에게 장착됨 Server에서만 호출됨
 	virtual bool UnEquipped(); // 장착해제됨
@@ -52,6 +52,10 @@ public:
 		virtual void OnSubAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
 	UFUNCTION()
 		virtual void OnSubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
+
+	UFUNCTION()
+		virtual void OnMakeNewPrimitiveInfoEvent(int Index);
+
 protected:
 	// Rpc
 	UFUNCTION(Client, Reliable)
@@ -82,7 +86,8 @@ public:
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
 	USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
-	TArray<USkeletalMeshComponent*> GetAdditiveWeaponMesh() { return AdditiveWeaponMesh; }
+	const FWeaponPrimitiveInfo& GetWeaponPrimitiveInfo() { return WeaponPrimitiveInfo; }
+	const TArray<FWeaponPrimitiveInfo>& GetAdditiveWeaponPrimitiveInfo() { return AdditiveWeaponPrimitiveInfo; }
 
 	UAnimSequence* GetAnimIdleTpp() { return AnimIdleTpp; }
 	UAnimSequence* GetAnimIdleFpp() { return AnimIdleFpp; }
@@ -114,6 +119,8 @@ public:
 
 	FAddOnDele OnAddOnDelegate;
 	FRemoveOnDele OnRemoveOnDelegate;
+
+	FMakeNewPrimitiveInfo OnMakeNewPrimitiveInfo;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Component", Meta = (AllowPrivateAccess = true))
 		TArray<UWeaponComponent*> WeaponComponents;
@@ -162,9 +169,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* WeaponMesh; // 기본적으로 보이는 메쉬
-	TArray<USkeletalMeshComponent*> AdditiveWeaponMesh; // 추가적인 WeaponMesh를 가지는 배열
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
 		FName AttachSocketName = "SOCKET_Weapon_AR_01"; // Weapon을 Attach할 스켈레탈 본 이름
+
+	FWeaponPrimitiveInfo WeaponPrimitiveInfo;
+	TArray<FWeaponPrimitiveInfo> AdditiveWeaponPrimitiveInfo; // 추가적인 WeaponMesh를 가지는 배열
 
 	UPROPERTY(Replicated)
 		bool IsAttacking = false; // 공격중인지

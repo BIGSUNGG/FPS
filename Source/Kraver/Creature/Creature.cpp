@@ -4,7 +4,7 @@
 #include "Creature.h"
 #include "Kraver/Anim/Creature/CreatureAnimInstance.h"
 #include "Kraver/Weapon/Melee/Melee.h"
-#include "Kraver/KraverComponent/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
+#include "Kraver/KraverComponent/Skill/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
 #include "Kraver/KraverComponent/Movement/CreatureMovementComponent.h"
 
 // Sets default values

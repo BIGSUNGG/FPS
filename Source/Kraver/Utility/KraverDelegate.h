@@ -54,6 +54,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FPlayMontageDele, UAnimMontage*, Pl
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAddOnDele, UObject*, Object);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRemoveOnDele, UObject*, Object);
 
+// Make NewWeaponPrimitivaeInfo
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMakeNewPrimitiveInfo, int, Index);
+
 UCLASS()
 class KRAVER_API ACustomDelegate : public AActor
 {

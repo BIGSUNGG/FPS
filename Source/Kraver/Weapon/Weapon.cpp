@@ -4,7 +4,7 @@
 #include "Weapon.h"
 #include "Net/UnrealNetwork.h"
 #include "Kraver/Creature/Creature.h"
-#include "Kraver/KraverComponent/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
+#include "Kraver/KraverComponent/Skill/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
 #include "Engine/EngineTypes.h"
 #include "Engine/DamageEvents.h"
 
@@ -23,6 +23,9 @@ AWeapon::AWeapon()
 	SetRootComponent(WeaponMesh);
 
 	OnAttack.AddDynamic(this, &AWeapon::OnAttackEvent);
+	OnMakeNewPrimitiveInfo.AddDynamic(this, &AWeapon::OnMakeNewPrimitiveInfoEvent);
+
+	WeaponPrimitiveInfo.Add("Root", WeaponMesh);
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -86,34 +89,51 @@ void AWeapon::Tick(float DeltaTime)
 	}
 }
 
-int32 AWeapon::MakeAdditiveWeaponMesh()
+int32 AWeapon::MakeAdditivePrimitiveInfo()
 {
-	USkeletalMeshComponent* MakeMesh = NewObject<USkeletalMeshComponent>(this, USkeletalMeshComponent::StaticClass(), TEXT("Additive Mesh"));
-	MakeMesh->RegisterComponent();
-	MakeMesh->SetSkeletalMesh(WeaponMesh->GetSkeletalMeshAsset());
-	TArray<UMaterialInterface*> MaterialArray = WeaponMesh->GetMaterials();
-	for (int i = 0; i < MaterialArray.Num(); i++)
+	FWeaponPrimitiveInfo NewWeaponPrimitiveInfo;
+	int32 Index = AdditiveWeaponPrimitiveInfo.Add(NewWeaponPrimitiveInfo);
+
+	for (auto& Tuple : WeaponPrimitiveInfo)
 	{
-		MakeMesh->SetMaterial(i, MaterialArray[i]);
+		FString CompStr = "Additive " + Tuple.Key;
+		FName CompName = FName(*CompStr);
+		UPrimitiveComponent* NewPrimitiveComp = NewObject<UPrimitiveComponent>(this, Tuple.Value->GetClass(), CompName);
+		NewPrimitiveComp->RegisterComponent();
+
+		if (Cast<USkeletalMeshComponent>(NewPrimitiveComp))
+		{
+			USkeletalMeshComponent* NewSkeletaComp = dynamic_cast<USkeletalMeshComponent*>(NewPrimitiveComp);
+			USkeletalMeshComponent* OriginSkeletaComp = dynamic_cast<USkeletalMeshComponent*>(Tuple.Value);
+			
+			NewSkeletaComp->SetSkeletalMesh(OriginSkeletaComp->GetSkeletalMeshAsset());
+
+			TArray<UMaterialInterface*> MaterialArray = OriginSkeletaComp->GetMaterials();
+			for (int i = 0; i < MaterialArray.Num(); i++)
+			{
+				NewSkeletaComp->SetMaterial(i, MaterialArray[i]);
+			}
+		}
+		else if (Cast<UNiagaraComponent>(NewPrimitiveComp))
+		{
+			UNiagaraComponent* NewNiagaraComp = dynamic_cast<UNiagaraComponent*>(NewPrimitiveComp);
+			UNiagaraComponent* OriginNiagaraComp = dynamic_cast<UNiagaraComponent*>(Tuple.Value);
+
+			NewNiagaraComp->bAutoActivate = false;
+			NewNiagaraComp->SetAsset(OriginNiagaraComp->GetAsset());
+		}
+
+		AdditiveWeaponPrimitiveInfo[Index].Add(Tuple.Key, NewPrimitiveComp);
 	}
+	KR_LOG(Log,TEXT("Add Mesh to AdditiveWeaponMesh[%d]"), Index);
 
-	int32 Index = AdditiveWeaponMesh.Add(MakeMesh);
-	KR_LOG(Log,TEXT("Add Mesh to AdditiveWeaponMesh[%d]"),Index);
-
+	OnMakeNewPrimitiveInfo.Broadcast(Index);
 	return Index;
 }
 
-int32 AWeapon::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
+int32 AWeapon::RemoveAdditivePrimitiveInfo(USkeletalMeshComponent* RootMesh)
 {
-	int32 Index = -1;
-	for (int i = 0; i < AdditiveWeaponMesh.Num(); i++)
-	{
-		if (AdditiveWeaponMesh[i] == Mesh)
-		{
-			Index = i;
-			break;
-		}
-	}
+	int32 Index = FindAdditivePrimitiveInfo(RootMesh);
 
 	if (Index == -1)
 	{
@@ -121,22 +141,25 @@ int32 AWeapon::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
 		return Index;
 	}
 
-	AdditiveWeaponMesh[Index]->DestroyComponent();
-	AdditiveWeaponMesh.RemoveAt(Index);
+	for(auto& Comp : AdditiveWeaponPrimitiveInfo[Index])
+		Comp.Value->DestroyComponent();
+
+	AdditiveWeaponPrimitiveInfo.RemoveAt(Index);
 	return Index;
 }
 
-int32 AWeapon::FindAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
+int32 AWeapon::FindAdditivePrimitiveInfo(USkeletalMeshComponent* RootMesh)
 {
 	int32 Index = -1;
-	for (int i = 0; i < AdditiveWeaponMesh.Num(); i++)
+	for (int i = 0; i < AdditiveWeaponPrimitiveInfo.Num(); i++)
 	{
-		if (AdditiveWeaponMesh[i] == Mesh)
+		if (AdditiveWeaponPrimitiveInfo[i]["Root"] == RootMesh)
 		{
 			Index = i;
 			break;
 		}
 	}
+
 	return Index;
 }
 
@@ -294,6 +317,11 @@ void AWeapon::OnSubAttackEndEvent()
 {
 	SetIsSubAttacking(false);
 	OnSubAttackEnd.Broadcast();
+}
+
+void AWeapon::OnMakeNewPrimitiveInfoEvent(int Index)
+{
+
 }
 
 void AWeapon::Client_Equipped_Implementation()

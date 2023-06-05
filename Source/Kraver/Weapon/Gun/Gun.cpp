@@ -14,6 +14,8 @@ AGun::AGun() : AWeapon()
 	
 	ImpactEffect = CreateDefaultSubobject<UNiagaraComponent>("ImpactEffect");
 	ImpactEffect->bAutoActivate = false;
+
+	WeaponPrimitiveInfo.Add("FireEffect", FireEffect);
 }
 
 void AGun::Tick(float DeltaTime)
@@ -81,30 +83,6 @@ void AGun::PostInitializeComponents()
 {
 	AWeapon::PostInitializeComponents();
 
-}
-
-int32 AGun::MakeAdditiveWeaponMesh()
-{
-	int32 Index = AWeapon::MakeAdditiveWeaponMesh();
-	UNiagaraComponent* MakeFireEffect = NewObject<UNiagaraComponent>(this, UNiagaraComponent::StaticClass(), TEXT("Additive Fire Effect"));
-	MakeFireEffect->bAutoActivate = false;
-	MakeFireEffect->RegisterComponent();
-	MakeFireEffect->SetAsset(FireEffect->GetAsset());
-	MakeFireEffect->AttachToComponent(AdditiveWeaponMesh[Index], FAttachmentTransformRules::SnapToTargetIncludingScale, FireEffectSocketName);
-	MakeFireEffect->SetRelativeRotation(FireEffect->GetRelativeRotation());
-	AdditiveFireEffect.Push(MakeFireEffect);
-	return Index;
-}
-
-int32 AGun::RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh)
-{
-	int32 Index = AWeapon::RemoveAdditiveWeaponMesh(Mesh);
-	if (Index == -1)
-		return Index;
-
-	AdditiveFireEffect[Index]->DestroyComponent();
-	AdditiveFireEffect.RemoveAt(Index);
-	return Index;
 }
 
 bool AGun::RefillAmmo()
@@ -243,6 +221,15 @@ void AGun::OnAttackEvent()
 	AWeapon::OnAttackEvent();
 }
 
+void AGun::OnMakeNewPrimitiveInfoEvent(int Index)
+{
+	AWeapon::OnMakeNewPrimitiveInfoEvent(Index);
+	UNiagaraComponent* NeweFireEffect = Cast<UNiagaraComponent>(AdditiveWeaponPrimitiveInfo[Index]["FireEffect"]);
+	NeweFireEffect->AttachToComponent(AdditiveWeaponPrimitiveInfo[Index]["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, FireEffectSocketName);
+	NeweFireEffect->SetRelativeRotation(FireEffect->GetRelativeRotation());
+	NeweFireEffect->SetRelativeLocation(FireEffect->GetRelativeLocation());
+}
+
 void AGun::Server_SetTotalAmmo_Implementation(int32 Ammo)
 {
 	TotalAmmo = Ammo;
@@ -264,15 +251,14 @@ void AGun::Server_ShowFireEffect_Implementation()
 }
 
 void AGun::Multicast_ShowFireEffect_Implementation()
-{
-	FireEffect->Activate(true);
-	for (auto& TempFireEffect : AdditiveFireEffect)
-	{
-		if (TempFireEffect)
-		{
-			TempFireEffect->Activate(true);
-		}
-	}
+{	
+	WeaponPrimitiveInfo["FireEffect"]->Activate(true);
+
+	AdditiveWeaponPrimitiveInfo[0]["FireEffect"]->Activate(true);
+	//for (auto& Map : AdditiveWeaponPrimitiveInfo)
+	//{
+	//	Map["FireEffect"]->Activate(true);
+	//}
 }
 
 void AGun::Server_SpawnImpactEffect_Implementation(FVector ImpactPos)

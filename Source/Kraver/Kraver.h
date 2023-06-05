@@ -33,6 +33,9 @@ DECLARE_LOG_CATEGORY_EXTERN(Kraver, Log, All);
 #define KR_LOG_VECTOR(Vector) { KR_LOG(Log, TEXT("X : %f , Y : %f , Z : %f"), Vector.X, Vector.Y, Vector.Z) }
 #define KR_LOG_ROTATOR(Rotator) { KR_LOG(Log, TEXT("Pitch : %f , Yaw : %f , Roll : %f"), Rotator.Pitch, Rotator.Yaw, Rotator.Roll) }
 
+// Typedef
+using FWeaponPrimitiveInfo = TMap<FString, UPrimitiveComponent*>;
+
 // Function
 bool LineTraceMultiByChannel_ExceptWorldObject(UWorld* World, TArray<struct FHitResult>& OutHits, const FVector& Start, const FVector& End, ECollisionChannel TraceChannel, const FCollisionQueryParams& Params = FCollisionQueryParams::DefaultQueryParam, const FCollisionResponseParams& ResponseParam = FCollisionResponseParams::DefaultResponseParam); 
 bool SweepMultiByChannel_ExceptWorldObject(UWorld* World, TArray<struct FHitResult>& OutHits, const FVector& Start, const FVector& End, const FQuat& Rot, ECollisionChannel TraceChannel, const FCollisionShape& CollisionShape, const FCollisionQueryParams& Params = FCollisionQueryParams::DefaultQueryParam, const FCollisionResponseParams& ResponseParam = FCollisionResponseParams::DefaultResponseParam);

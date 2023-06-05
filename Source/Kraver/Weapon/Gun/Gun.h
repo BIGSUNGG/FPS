@@ -23,10 +23,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 
-	virtual int32 MakeAdditiveWeaponMesh() override;
-	virtual int32 RemoveAdditiveWeaponMesh(USkeletalMeshComponent* Mesh) override;
-
 	virtual bool RefillAmmo(); // CurAmmo를 보충함
+
 protected:
 	TArray<FHitResult>  CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread = FVector(0,0,0));
 	virtual void ShowFireEffect(); // FireEffect를 실행하는 함수
@@ -36,6 +34,7 @@ protected:
 protected:
 	// Delegate
 	virtual void OnAttackEvent() override;
+	virtual void OnMakeNewPrimitiveInfoEvent(int Index) override;
 
 	// Rpc
 	UFUNCTION(Server, Reliable)
@@ -54,13 +53,10 @@ public:
 	int32 GetTotalAmmo() { return TotalAmmo; }
 	float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; }
 	UNiagaraComponent* GetFireEffect() { return FireEffect; }
-	TArray<UNiagaraComponent*> GetAdditiveFireEffect() { return AdditiveFireEffect; }
 
 	void AddSpread(float Spread);
 protected:
 	// Additive
-	TArray<UNiagaraComponent*> AdditiveFireEffect;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Effect", meta = (AllowPrivateAccess = "true"))
 		UNiagaraComponent* FireEffect; // 공격하였을때 실행되는 이펙트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Effect", meta = (AllowPrivateAccess = "true"))

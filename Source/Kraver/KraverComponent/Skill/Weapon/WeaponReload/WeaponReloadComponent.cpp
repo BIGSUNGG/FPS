@@ -68,7 +68,7 @@ void UWeaponReloadComponent::OnBeforeAttackEvent()
 {
 	UWeaponComponent::OnBeforeAttackEvent();
 
-	if(GetOwnerCreature()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontageTpp))
+	if(GetOwnerCreature() && GetOwnerCreature()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontageTpp))
 		OwnerGun->AttackCancel();
 }
 

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Kraver/KraverComponent/Weapon/WeaponComponent.h"
+#include "Kraver/KraverComponent/Skill/Weapon/WeaponComponent.h"
 #include "WeaponReloadComponent.generated.h"
 
 /**

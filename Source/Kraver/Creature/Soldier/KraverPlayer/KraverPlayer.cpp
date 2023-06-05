@@ -430,36 +430,27 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	ASoldier::OnClientEquipWeaponSuccessEvent(Weapon);
 
-	int32 Index = Weapon->MakeAdditiveWeaponMesh();
-	ArmWeaponMeshes.Add(Weapon, Weapon->GetAdditiveWeaponMesh()[Index]);
-	Weapon->GetAdditiveWeaponMesh()[Index]->AttachToComponent(ArmMesh,FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetAttachSocketName());
-	Weapon->GetAdditiveWeaponMesh()[Index]->SetCastShadow(false);	
-	Weapon->GetAdditiveWeaponMesh()[Index]->SetOnlyOwnerSee(true);
-	Weapon->GetAdditiveWeaponMesh()[Index]->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	ShowOnlyFirstPerson.Push(Weapon->GetAdditiveWeaponMesh()[Index]);
+	int32 Index = Weapon->MakeAdditivePrimitiveInfo();
 
-	switch (Weapon->GetWeaponType())
-	{
-	case EWeaponType::GUN:
-	{
-		AGun* Gun = Cast<AGun>(Weapon);  
-		ShowOnlyThirdPerson.Push(Gun->GetFireEffect());
-		auto FireEffect = Gun->GetAdditiveFireEffect()[Index];
-		Gun->GetAdditiveFireEffect()[Index]->SetOnlyOwnerSee(true);
-		ShowOnlyFirstPerson.Push(FireEffect);
-	}
-	break;
-	case EWeaponType::MELEE:
-	{
+	ArmWeaponMeshes.Add(Weapon, dynamic_cast<USkeletalMeshComponent*>(Weapon->GetAdditiveWeaponPrimitiveInfo()[Index]["Root"]));
+	Weapon->GetAdditiveWeaponPrimitiveInfo()[Index]["Root"]->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetAttachSocketName());
 
+	for(auto& Map : Weapon->GetAdditiveWeaponPrimitiveInfo()[Index])
+	{
+		Map.Value->SetOnlyOwnerSee(true);
+		Map.Value->SetCastShadow(false);
+		Map.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		ShowOnlyFirstPerson.Push(Map.Value);
 	}
-		break;
-	default:
-		break;
+	
+	for (auto& Map : Weapon->GetWeaponPrimitiveInfo())
+	{
+		ShowOnlyThirdPerson.Push(Map.Value);
 	}
+
 	RefreshCurViewType();
 
-	ShowOnlyThirdPerson.Push(Weapon->GetWeaponMesh());
 }
 
 void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -468,30 +459,20 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
 	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
 
-	int32 Index = Weapon->FindAdditiveWeaponMesh(ArmWeaponMeshes[Weapon]);
-	if (Index != -1)
+	int32 Index = Weapon->FindAdditivePrimitiveInfo(ArmWeaponMeshes[Weapon]);
+
+	for (auto& Map : Weapon->GetAdditiveWeaponPrimitiveInfo()[Index])
 	{
-		switch (Weapon->GetWeaponType())
-		{
-		case EWeaponType::GUN:
-		{
-			AGun* Gun = Cast<AGun>(Weapon);
-			ShowOnlyThirdPerson.Remove(Gun->GetFireEffect());
-			auto FireEffect = Gun->GetAdditiveFireEffect()[Index];
-			Gun->GetAdditiveFireEffect()[Index]->SetOnlyOwnerSee(false);
-			ShowOnlyFirstPerson.Remove(FireEffect);
-		}
-		break;
-		case EWeaponType::MELEE:
-		{
-		}
-		break;
-		default:
-			break;
-		}
+		ShowOnlyFirstPerson.Remove(Map.Value);
 	}
+
+	for (auto& Map : Weapon->GetWeaponPrimitiveInfo())
+	{
+		ShowOnlyThirdPerson.Remove(Map.Value);
+	}
+
 	ThrowWeapon(Weapon);
-	Weapon->RemoveAdditiveWeaponMesh(ArmWeaponMeshes[Weapon]);
+	Weapon->RemoveAdditivePrimitiveInfo(ArmWeaponMeshes[Weapon]);
 	ArmWeaponMeshes.Remove(Weapon);
 	RefreshCurViewType();
 
