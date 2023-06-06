@@ -14,6 +14,11 @@ void AKraverHUD::DrawHUD()
 {
 	Super::DrawHUD();
 
+	if (HitmarkAppearanceTime > 0.f)
+	{
+		HitmarkAppearanceTime -= GetWorld()->GetDeltaSeconds();
+	}
+
 	FVector2D ViewportSize;
 	if (GEngine)
 	{
@@ -49,16 +54,13 @@ void AKraverHUD::DrawHUD()
 				FVector2D Spread(0.f, SpreadScaled);
 				DrawCrosshair(HUDPackage.CrosshairsBottom, ViewportCenter, Spread);
 			}
-		}
-
-		if (HitmarkAppearanceTime > 0.f)
-		{
-			HitmarkAppearanceTime -= GetWorld()->GetDeltaSeconds();
-
-			if(bHitmartCritical)
-				DrawCrosshair(Hitmark, ViewportCenter, FVector2D::ZeroVector, FLinearColor::Red);
-			else
-				DrawCrosshair(Hitmark, ViewportCenter, FVector2D::ZeroVector);
+			if (HitmarkAppearanceTime > 0.f)
+			{
+				if (bHitmartCritical)
+					DrawCrosshair(Hitmark, ViewportCenter, FVector2D::ZeroVector, FLinearColor::Red);
+				else
+					DrawCrosshair(Hitmark, ViewportCenter, FVector2D::ZeroVector);
+			}
 		}
 	}
 }

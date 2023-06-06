@@ -122,9 +122,40 @@ int32 AWeapon::MakeAdditivePrimitiveInfo()
 			NewNiagaraComp->bAutoActivate = false;
 			NewNiagaraComp->SetAsset(OriginNiagaraComp->GetAsset());
 		}
+		else if (Cast<UStaticMeshComponent>(NewPrimitiveComp))
+		{
+			UStaticMeshComponent* NewStaticComp = dynamic_cast<UStaticMeshComponent*>(NewPrimitiveComp);
+			UStaticMeshComponent* OriginStaticComp = dynamic_cast<UStaticMeshComponent*>(Tuple.Value);
+
+			NewStaticComp->SetStaticMesh(OriginStaticComp->GetStaticMesh());
+			TArray<UMaterialInterface*> MaterialArray = OriginStaticComp->GetMaterials();
+			for (int i = 0; i < MaterialArray.Num(); i++)
+			{
+				NewStaticComp->SetMaterial(i, MaterialArray[i]);
+			}
+		}
 
 		AdditiveWeaponPrimitiveInfo[Index].Add(Tuple.Key, NewPrimitiveComp);
 	}
+
+	for (auto& Tuple : WeaponPrimitiveInfo)
+	{
+		if (Tuple.Value->GetAttachParent())
+		{
+			for (auto& CompareTuple : WeaponPrimitiveInfo)
+			{
+				if (Tuple.Value->GetAttachParent() == CompareTuple.Value)
+				{
+					UPrimitiveComponent* NewPrimitiveComp = AdditiveWeaponPrimitiveInfo[Index][Tuple.Key];
+					NewPrimitiveComp->AttachToComponent(AdditiveWeaponPrimitiveInfo[Index][CompareTuple.Key], FAttachmentTransformRules::SnapToTargetIncludingScale, Tuple.Value->GetAttachSocketName());
+					NewPrimitiveComp->SetRelativeRotation(Tuple.Value->GetRelativeRotation());
+					NewPrimitiveComp->SetRelativeLocation(Tuple.Value->GetRelativeLocation());
+					break;
+				}
+			}
+		}
+	}
+
 	KR_LOG(Log,TEXT("Add Mesh to AdditiveWeaponMesh[%d]"), Index);
 
 	OnMakeNewPrimitiveInfo.Broadcast(Index);
@@ -377,6 +408,11 @@ void AWeapon::Attack()
 		return;
 	}
 	OnAttack.Broadcast();
+}
+
+void AWeapon::AddWeaponPrimitive(FString Key, UPrimitiveComponent* Value)
+{
+	WeaponPrimitiveInfo.Add(Key, Value);
 }
 
 void AWeapon::SetOwnerCreature(ACreature* pointer)

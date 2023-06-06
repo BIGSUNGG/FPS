@@ -8,7 +8,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class KRAVER_API UAttachmentWeaponComponent : public UAttachmentComponent
 {
 	GENERATED_BODY()
@@ -26,11 +26,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
-	virtual void OnMakeWeaponPrimitiveInfoDeleEvent(FWeaponPrimitiveInfo& WeaponPrimitiveInfo);
+	UFUNCTION()
+		virtual void OnMakeWeaponPrimitiveInfoEvent(int Index);
 	
 protected:
 	class AWeapon* OwnerWeapon;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
-		USkeletalMeshComponent* ScopeMesh;
 };

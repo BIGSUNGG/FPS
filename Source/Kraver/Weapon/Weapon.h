@@ -41,6 +41,7 @@ public:
 	virtual void RemoveOnOwnerDelegate();
 
 	virtual void AttackCancel();
+	virtual void AddWeaponPrimitive(FString Key, UPrimitiveComponent* Value);
 
 	// Delegate
 	UFUNCTION()
@@ -76,6 +77,7 @@ protected:
 		virtual void OnAttackEvent();
 
 	virtual void Attack() final; // 공격할때 호출되는 함수
+
 public:
 	// Getter Setter
 	bool GetCanInteracted();

@@ -223,6 +223,8 @@ void AGun::OnAttackEvent()
 
 void AGun::OnMakeNewPrimitiveInfoEvent(int Index)
 {
+	return;
+
 	AWeapon::OnMakeNewPrimitiveInfoEvent(Index);
 	UNiagaraComponent* NeweFireEffect = Cast<UNiagaraComponent>(AdditiveWeaponPrimitiveInfo[Index]["FireEffect"]);
 	NeweFireEffect->AttachToComponent(AdditiveWeaponPrimitiveInfo[Index]["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, FireEffectSocketName);
@@ -254,11 +256,10 @@ void AGun::Multicast_ShowFireEffect_Implementation()
 {	
 	WeaponPrimitiveInfo["FireEffect"]->Activate(true);
 
-	AdditiveWeaponPrimitiveInfo[0]["FireEffect"]->Activate(true);
-	//for (auto& Map : AdditiveWeaponPrimitiveInfo)
-	//{
-	//	Map["FireEffect"]->Activate(true);
-	//}
+	for (auto& Map : AdditiveWeaponPrimitiveInfo)
+	{
+		Map["FireEffect"]->Activate(true);
+	}
 }
 
 void AGun::Server_SpawnImpactEffect_Implementation(FVector ImpactPos)

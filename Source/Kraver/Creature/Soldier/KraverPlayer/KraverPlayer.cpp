@@ -546,20 +546,37 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 {
 	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && Cast<AGun>(CombatComponent->GetCurWeapon()))
 	{
-		#if TEST_ADS
 		USkeletalMeshComponent* ArmWeaponMesh = GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()];
-		FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
-		FTransform CameraTransform = Camera->GetComponentTransform();
-		FTransform RelativeTransform = WeaponTransform.GetRelativeTransform(CameraTransform);
-		FRotator RelativeRotation = RelativeTransform.Rotator();
-		FVector RelativeLocation = RelativeTransform.GetLocation();
-
-		KR_LOG_VECTOR(RelativeLocation);
-		KR_LOG_ROTATOR(RelativeRotation);
+		#if TEST_ADS
+		{
+			FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
+			FTransform CameraTransform = Camera->GetComponentTransform();
+			FTransform RelativeTransform = WeaponTransform.GetRelativeTransform(CameraTransform);
+			FRotator RelativeRotation = RelativeTransform.Rotator();
+			FVector RelativeLocation = RelativeTransform.GetLocation();
+	
+			KR_LOG_VECTOR(RelativeLocation);
+			KR_LOG_ROTATOR(RelativeRotation);
+		}
 		#else
 		if (ViewType == EViewType::FIRST_PERSON && HUD)
 			HUD->SetbDrawCrosshair(false);
 		#endif
+
+		const FWeaponPrimitiveInfo& WeaponPrimitiveInfo = CombatComponent->GetCurWeapon()->GetAdditiveWeaponPrimitiveInfo()[CombatComponent->GetCurWeapon()->FindAdditivePrimitiveInfo(ArmWeaponMesh)];
+		UStaticMeshComponent* ScopeMesh = Cast<UStaticMeshComponent>(WeaponPrimitiveInfo["Scope"]);
+		if (ScopeMesh)
+		{
+			FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
+			FTransform ScopeTransform = ScopeMesh->GetSocketTransform("AimOffset", ERelativeTransformSpace::RTS_World);
+			FTransform RelativeTransform = ScopeTransform.GetRelativeTransform(WeaponTransform);
+			FVector RelativeLocation = RelativeTransform.GetLocation();
+
+			AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, -RelativeLocation.Z, DeltaTime, 10.f);
+		}
+		else
+			AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
+
 
 		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, 95.f, DeltaTime, 15.f));
 	}
@@ -568,6 +585,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 		if (HUD)
 			HUD->SetbDrawCrosshair(true);
 
+		AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
 		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, 110.f, DeltaTime, 15.f));
 	}
 

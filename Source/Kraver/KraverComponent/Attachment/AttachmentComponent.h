@@ -8,7 +8,7 @@
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class KRAVER_API UAttachmentComponent : public USceneComponent
+class KRAVER_API UAttachmentComponent : public UActorComponent
 {
 	GENERATED_BODY()
 

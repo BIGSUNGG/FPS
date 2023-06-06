@@ -11,15 +11,24 @@ UAttachmentWeaponComponent::UAttachmentWeaponComponent()
 
 void UAttachmentWeaponComponent::BeginPlay()
 {
+	UAttachmentComponent::BeginPlay();
+
 	OwnerWeapon = Cast<AWeapon>(GetOwner());
+	if (!OwnerWeapon)
+	{
+		KR_LOG(Error, TEXT("Owner is not Weapon"));
+		return;
+	}
+
+	OwnerWeapon->OnMakeNewPrimitiveInfo.AddDynamic(this, &UAttachmentWeaponComponent::OnMakeWeaponPrimitiveInfoEvent);
 }
 
 void UAttachmentWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-
+	UAttachmentComponent::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UAttachmentWeaponComponent::OnMakeWeaponPrimitiveInfoDeleEvent(FWeaponPrimitiveInfo& WeaponPrimitiveInfo)
+void UAttachmentWeaponComponent::OnMakeWeaponPrimitiveInfoEvent(int Index)
 {
 
 }
