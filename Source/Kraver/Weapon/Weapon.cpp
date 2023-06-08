@@ -162,9 +162,9 @@ int32 AWeapon::MakeAdditivePrimitiveInfo()
 	return Index;
 }
 
-int32 AWeapon::RemoveAdditivePrimitiveInfo(USkeletalMeshComponent* RootMesh)
+int32 AWeapon::RemoveAdditivePrimitiveInfo(const FWeaponPrimitiveInfo& Info)
 {
-	int32 Index = FindAdditivePrimitiveInfo(RootMesh);
+	int32 Index = FindAdditivePrimitiveInfo(Info);
 
 	if (Index == -1)
 	{
@@ -179,12 +179,12 @@ int32 AWeapon::RemoveAdditivePrimitiveInfo(USkeletalMeshComponent* RootMesh)
 	return Index;
 }
 
-int32 AWeapon::FindAdditivePrimitiveInfo(USkeletalMeshComponent* RootMesh)
+int32 AWeapon::FindAdditivePrimitiveInfo(const FWeaponPrimitiveInfo& Info)
 {
 	int32 Index = -1;
 	for (int i = 0; i < AdditiveWeaponPrimitiveInfo.Num(); i++)
 	{
-		if (AdditiveWeaponPrimitiveInfo[i]["Root"] == RootMesh)
+		if (AdditiveWeaponPrimitiveInfo[i]["Root"] == Info["Root"])
 		{
 			Index = i;
 			break;

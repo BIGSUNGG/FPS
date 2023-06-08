@@ -7,6 +7,7 @@
 UAttachmentScopeComponent::UAttachmentScopeComponent()
 {
 	ScopeMesh = CreateDefaultSubobject<UStaticMeshComponent>("ScopeMesh");
+	ScopeMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 }
 

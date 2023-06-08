@@ -2,6 +2,7 @@
 
 
 #include "KraverPlayer.h"
+#include "Kraver/Weapon/Weapon.h"
 #include "Kraver/Weapon/Gun/Gun.h"
 #include "Kraver/HUD/KraverHud.h"
 #include "Kraver/PlayerController/KraverPlayerController.h"
@@ -46,7 +47,6 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.f);
 
-	RefreshCurViewType();
 }
 
 void AKraverPlayer::BeginPlay()
@@ -57,7 +57,7 @@ void AKraverPlayer::BeginPlay()
 	BasicArmLocation = ArmMesh->GetRelativeLocation();
 	BasicArmRotation = ArmMesh->GetRelativeRotation();
 
-	if (IsLocallyControlled())
+	if (Controller == GetWorld()->GetFirstPlayerController())
 	{
 		CombatComponent->SetMaxWeaponSlot(3);
 
@@ -361,7 +361,7 @@ void AKraverPlayer::ChangeView()
 
 void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 {
-	USkeletalMeshComponent* ArmWeaponMesh = ArmWeaponMeshes[Weapon];
+	USkeletalMeshComponent* ArmWeaponMesh = dynamic_cast<USkeletalMeshComponent*>(ArmWeaponMeshes[Weapon]->operator[]("Root"));
 	Server_ThrowWeapon(
 		Weapon,
 		ArmWeaponMesh->GetComponentLocation(),
@@ -431,8 +431,9 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 	ASoldier::OnClientEquipWeaponSuccessEvent(Weapon);
 
 	int32 Index = Weapon->MakeAdditivePrimitiveInfo();
-
-	ArmWeaponMeshes.Add(Weapon, dynamic_cast<USkeletalMeshComponent*>(Weapon->GetAdditiveWeaponPrimitiveInfo()[Index]["Root"]));
+	
+	FWeaponPrimitiveInfo* TempInfo = &Weapon->GetAdditiveWeaponPrimitiveInfo()[Index];
+	ArmWeaponMeshes.Add(Weapon, TempInfo);
 	Weapon->GetAdditiveWeaponPrimitiveInfo()[Index]["Root"]->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetAttachSocketName());
 
 	for(auto& Map : Weapon->GetAdditiveWeaponPrimitiveInfo()[Index])
@@ -459,7 +460,7 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
 	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
 
-	int32 Index = Weapon->FindAdditivePrimitiveInfo(ArmWeaponMeshes[Weapon]);
+	int32 Index = Weapon->FindAdditivePrimitiveInfo(*ArmWeaponMeshes[Weapon]);
 
 	for (auto& Map : Weapon->GetAdditiveWeaponPrimitiveInfo()[Index])
 	{
@@ -472,7 +473,7 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	}
 
 	ThrowWeapon(Weapon);
-	Weapon->RemoveAdditivePrimitiveInfo(ArmWeaponMeshes[Weapon]);
+	Weapon->RemoveAdditivePrimitiveInfo(*ArmWeaponMeshes[Weapon]);
 	ArmWeaponMeshes.Remove(Weapon);
 	RefreshCurViewType();
 
@@ -482,7 +483,10 @@ void AKraverPlayer::OnClientHoldWeaponEvent(AWeapon* Weapon)
 {
 	ASoldier::OnClientHoldWeaponEvent(Weapon);
 
-	ArmWeaponMeshes[Weapon]->SetHiddenInGame(false);
+	FWeaponPrimitiveInfo& WeaponPrimitiveInfo = *(ArmWeaponMeshes[Weapon]);
+	for(auto& Tuple : WeaponPrimitiveInfo)
+		Tuple.Value->SetHiddenInGame(false);
+
 	RefreshCurViewType();
 }
 
@@ -490,7 +494,10 @@ void AKraverPlayer::OnClientHolsterWeaponEvent(AWeapon* Weapon)
 {
 	ASoldier::OnClientHolsterWeaponEvent(Weapon);
 	
-	ArmWeaponMeshes[Weapon]->SetHiddenInGame(true);
+	FWeaponPrimitiveInfo& WeaponPrimitiveInfo = *(ArmWeaponMeshes[Weapon]);
+	for (auto& Tuple : WeaponPrimitiveInfo)
+		Tuple.Value->SetHiddenInGame(true);
+
 	ArmMesh->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageFpp());
 	RefreshCurViewType();
 }
@@ -516,8 +523,10 @@ void AKraverPlayer::OnAssassinateEvent(AActor* AssassinatedActor)
 	ArmMesh->SetOwnerNoSee(true);
 
 	CombatComponent->GetCurWeapon()->GetWeaponMesh()->SetOwnerNoSee(false);
-	ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->SetOwnerNoSee(true);
-}	
+	FWeaponPrimitiveInfo& WeaponPrimitiveInfo = *(ArmWeaponMeshes[CombatComponent->GetCurWeapon()]);
+	for (auto& Tuple : WeaponPrimitiveInfo)
+		Tuple.Value->SetHiddenInGame(true);
+}
 
 void AKraverPlayer::OnAssassinateEndEvent()
 {
@@ -527,6 +536,10 @@ void AKraverPlayer::OnAssassinateEndEvent()
 
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
 	ArmMesh->GetAnimInstance()->Montage_Stop(0.f);
+
+	FWeaponPrimitiveInfo& WeaponPrimitiveInfo = *(ArmWeaponMeshes[CombatComponent->GetCurWeapon()]);
+	for (auto& Tuple : WeaponPrimitiveInfo)
+		Tuple.Value->SetHiddenInGame(false);
 }
 
 void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
@@ -546,7 +559,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 {
 	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && Cast<AGun>(CombatComponent->GetCurWeapon()))
 	{
-		USkeletalMeshComponent* ArmWeaponMesh = GetArmWeaponMeshes()[CombatComponent->GetCurWeapon()];
+		USkeletalMeshComponent* ArmWeaponMesh = dynamic_cast<USkeletalMeshComponent*>(ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Root"));
 		#if TEST_ADS
 		{
 			FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
@@ -563,16 +576,21 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 			HUD->SetbDrawCrosshair(false);
 		#endif
 
-		const FWeaponPrimitiveInfo& WeaponPrimitiveInfo = CombatComponent->GetCurWeapon()->GetAdditiveWeaponPrimitiveInfo()[CombatComponent->GetCurWeapon()->FindAdditivePrimitiveInfo(ArmWeaponMesh)];
-		UStaticMeshComponent* ScopeMesh = Cast<UStaticMeshComponent>(WeaponPrimitiveInfo["Scope"]);
-		if (ScopeMesh)
+		const FWeaponPrimitiveInfo& WeaponPrimitiveInfo = *ArmWeaponMeshes[CombatComponent->GetCurWeapon()];
+		if(WeaponPrimitiveInfo.Contains("Scope"))
 		{
-			FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
-			FTransform ScopeTransform = ScopeMesh->GetSocketTransform("AimOffset", ERelativeTransformSpace::RTS_World);
-			FTransform RelativeTransform = ScopeTransform.GetRelativeTransform(WeaponTransform);
-			FVector RelativeLocation = RelativeTransform.GetLocation();
+			UStaticMeshComponent* ScopeMesh = Cast<UStaticMeshComponent>(WeaponPrimitiveInfo["Scope"]);
+			if (ScopeMesh)
+			{
+				FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
+				FTransform ScopeTransform = ScopeMesh->GetSocketTransform("AimOffset", ERelativeTransformSpace::RTS_World);
+				FTransform RelativeTransform = ScopeTransform.GetRelativeTransform(WeaponTransform);
+				FVector RelativeLocation = RelativeTransform.GetLocation();
 
-			AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, -RelativeLocation.Z, DeltaTime, 10.f);
+				AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, -RelativeLocation.Z, DeltaTime, 10.f);
+			}
+			else
+				AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
 		}
 		else
 			AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);

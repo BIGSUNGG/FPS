@@ -29,8 +29,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual int32 MakeAdditivePrimitiveInfo() final; // 추가적인 PrimitiveInfo를 추가 (Return 값은 추가된 WeaponMesh의 인덱스값)
-	virtual int32 RemoveAdditivePrimitiveInfo(USkeletalMeshComponent* Mesh) final; // 추가적인 PrimitiveInfo를 제거 (Return 값은 제거된 WeaponMesh의 인덱스값)
-	virtual int32 FindAdditivePrimitiveInfo(USkeletalMeshComponent* Mesh) final; // 추가적인 PrimitiveInfo를 찾음 (Return 값은 찾은 WeaponMesh의 인덱스값 못찾았을 경우 -1)
+	virtual int32 RemoveAdditivePrimitiveInfo(const FWeaponPrimitiveInfo& Info) final; // 추가적인 PrimitiveInfo를 제거 (Return 값은 제거된 WeaponMesh의 인덱스값)
+	virtual int32 FindAdditivePrimitiveInfo(const FWeaponPrimitiveInfo& Info) final; // 추가적인 PrimitiveInfo를 찾음 (Return 값은 찾은 WeaponMesh의 인덱스값 못찾았을 경우 -1)
 
 	virtual bool Equipped(ACreature* Character); // Character에게 장착됨 Server에서만 호출됨
 	virtual bool UnEquipped(); // 장착해제됨
@@ -88,8 +88,8 @@ public:
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
 	USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
-	const FWeaponPrimitiveInfo& GetWeaponPrimitiveInfo() { return WeaponPrimitiveInfo; }
-	const TArray<FWeaponPrimitiveInfo>& GetAdditiveWeaponPrimitiveInfo() { return AdditiveWeaponPrimitiveInfo; }
+	FWeaponPrimitiveInfo& GetWeaponPrimitiveInfo() { return WeaponPrimitiveInfo; }
+	TArray<FWeaponPrimitiveInfo>& GetAdditiveWeaponPrimitiveInfo() { return AdditiveWeaponPrimitiveInfo; }
 
 	UAnimSequence* GetAnimIdleTpp() { return AnimIdleTpp; }
 	UAnimSequence* GetAnimIdleFpp() { return AnimIdleFpp; }

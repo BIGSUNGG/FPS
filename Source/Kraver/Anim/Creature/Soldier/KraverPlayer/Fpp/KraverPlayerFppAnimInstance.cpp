@@ -12,8 +12,7 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if(KraverPlayer == nullptr) 
 		return;
 
-	if(!KraverPlayer->IsLocallyControlled())
-		return;
+	USkeletalMeshComponent* Fp_WeaponMesh = dynamic_cast<USkeletalMeshComponent*>(KraverPlayer->CombatComponent->GetCurWeapon() ? KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()]->operator[]("Root") : nullptr);
 
 	WeaponSwayResultRot = KraverPlayer->GetWeaponSwayResultRot();
 	if (IsEquippingWeapon)
@@ -31,7 +30,7 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()] && KraverPlayer->GetArmMesh())
 	{
-		FabrikLeftHand(KraverPlayer->GetArmMesh(), KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()], LeftHandFppFabrikTransform);
+		FabrikLeftHand(KraverPlayer->GetArmMesh(), Fp_WeaponMesh, LeftHandFppFabrikTransform);
 	}
 
 	ProceduralAnimResultVec = KraverPlayer->PlayerProceduralAnimComponent->GetProceduralAnimResultVec();

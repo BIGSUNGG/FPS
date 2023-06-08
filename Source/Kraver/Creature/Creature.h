@@ -45,7 +45,7 @@ public:
 
 public:
 	// Getter Setter
-	FORCEINLINE FRotator GetCreatureAngle() { return Camera->GetComponentRotation() - GetMesh()->GetComponentRotation(); }
+	FORCEINLINE FRotator GetCreatureAngle() { return Camera ? Camera->GetComponentRotation() - GetMesh()->GetComponentRotation() : FRotator::ZeroRotator; }
 	FORCEINLINE UCameraComponent* GetCamera() { return Camera; }
 	virtual bool GetCanAttack();
 	FORCEINLINE bool GetbRunButtonPress() { return bRunButtonPress; }
