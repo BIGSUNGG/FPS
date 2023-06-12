@@ -26,9 +26,13 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
+	// Delegate
 	UFUNCTION()
 		virtual void OnMakeWeaponPrimitiveInfoEvent(int Index);
-	
+	UFUNCTION()
+		virtual void OnAddOnDelegateEvent(UObject* Objcet);
+	UFUNCTION()
+		virtual void OnRemoveOnDelegateEvent(UObject* Objcet);
 protected:
 	class AWeapon* OwnerWeapon;
 

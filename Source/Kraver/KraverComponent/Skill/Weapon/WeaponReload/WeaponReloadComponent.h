@@ -35,8 +35,8 @@ public:
 protected:
 	AGun* OwnerGun;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* ReloadMontageTpp;
-	UPROPERTY(BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* ReloadMontageFpp;
 };

@@ -23,5 +23,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-
+	// Delegate
+	UFUNCTION()
+		virtual void OnReload_Grab_MagazineEvent();
+	UFUNCTION()
+		virtual void OnReload_Insert_MagazineEvent();
 };

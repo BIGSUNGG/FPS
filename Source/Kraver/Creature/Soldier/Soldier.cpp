@@ -2,16 +2,22 @@
 
 
 #include "Soldier.h"
+#include "Kraver/Anim/Creature/Soldier/SoldierAnimInstance.h"
+#include "Kraver/KraverComponent/Attachment/Weapon/Magazine/AttachmentMagazineComponent.h"
 
 ASoldier::ASoldier()
 	: ACreature()
 {
+
 }
 
 void ASoldier::BeginPlay()
 {
 	ACreature::BeginPlay();
 
+	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance->OnReload_Grab_Magazine.AddDynamic(this, &ASoldier::OnReload_Grab_MagazineEvent);
+	AnimInstance->OnReload_Insert_Magazine.AddDynamic(this, &ASoldier::OnReload_Insert_MagazineEvent);
 }
 
 void ASoldier::Tick(float DeltaTime)
@@ -27,6 +33,23 @@ void ASoldier::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ASoldier::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	ACreature::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+}
+
+void ASoldier::OnReload_Grab_MagazineEvent()
+{
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo().Contains("Magazine"))
+	{
+		CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo()["Magazine"]->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, "SOCKET_Magazine");
+	}
+}
+
+void ASoldier::OnReload_Insert_MagazineEvent()
+{
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo().Contains("Magazine"))
+	{
+		UAttachmentMagazineComponent* MagazineComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UAttachmentMagazineComponent>();
+		CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo()["Magazine"]->AttachToComponent(CombatComponent->GetCurWeapon()->GetWeaponMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineComp->GetMagazineSocketName());
+	}
 }

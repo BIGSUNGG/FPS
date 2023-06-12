@@ -34,7 +34,7 @@ void UWeaponReloadComponent::OnAddOnDelegateEvent(UObject* Object)
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());
 	if (AnimInstance)
 	{
-		AnimInstance->OnRefillAmmo.AddDynamic(this, &UWeaponReloadComponent::OnRefiilAmmoEvent);
+		AnimInstance->OnReload_Insert_Magazine.AddDynamic(this, &UWeaponReloadComponent::OnRefiilAmmoEvent);
 	}
 }
 
@@ -46,7 +46,7 @@ void UWeaponReloadComponent::OnRemoveOnDelegateEvent(UObject* Object)
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());
 	if (AnimInstance)
 	{
-		AnimInstance->OnRefillAmmo.RemoveDynamic(this, &UWeaponReloadComponent::OnRefiilAmmoEvent);
+		AnimInstance->OnReload_Insert_Magazine.RemoveDynamic(this, &UWeaponReloadComponent::OnRefiilAmmoEvent);
 	}
 }
 

@@ -39,7 +39,9 @@ protected:
 	UFUNCTION()
 		void AnimNotify_Melee_AssassinateEnd();
 	UFUNCTION()
-		void AnimNotify_RefillAmmo();
+		void AnimNotify_Reload_Insert_Magazine();
+	UFUNCTION()
+		void AnimNotify_Reload_Grab_Magazine();
 public:
 	FAnimNotifyDele OnMelee_SwingAttack;
 	FAnimNotifyDele OnMelee_CanInputNextCombo;
@@ -47,7 +49,8 @@ public:
 	FAnimNotifyDele OnMelee_ComboEnd;
 	FAnimNotifyDele OnMelee_AssassinateAttack;
 	FAnimNotifyDele OnMelee_AssassinateEnd;
-	FAnimNotifyDele OnRefillAmmo;
+	FAnimNotifyDele OnReload_Insert_Magazine;
+	FAnimNotifyDele OnReload_Grab_Magazine;
 
 protected:
 	ASoldier* Soldier;

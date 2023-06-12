@@ -14,6 +14,7 @@ DECLARE_LOG_CATEGORY_EXTERN(Kraver, Log, All);
 
 // Test
 #define TEST_ADS false
+#define TEST_RELOAD true
 
 // Coliision
 #define ECC_INTERACTION ECollisionChannel::ECC_GameTraceChannel1

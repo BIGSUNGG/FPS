@@ -80,6 +80,11 @@ protected:
 	virtual void OnAssassinateEndEvent() override;
 	virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed) override;
 
+	UFUNCTION()
+		virtual void OnFP_Reload_Grab_MagazineEvent();
+	UFUNCTION()
+		virtual void OnFP_Reload_Insert_MagazineEvent();
+
 	// Function
 	virtual void PlayLandedMontage() override;
 

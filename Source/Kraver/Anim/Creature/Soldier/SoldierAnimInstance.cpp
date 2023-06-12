@@ -91,7 +91,12 @@ void USoldierAnimInstance::AnimNotify_Melee_AssassinateEnd()
 	OnMelee_AssassinateEnd.Broadcast();
 }
 
-void USoldierAnimInstance::AnimNotify_RefillAmmo()
+void USoldierAnimInstance::AnimNotify_Reload_Insert_Magazine()
 {
-	OnRefillAmmo.Broadcast();
+	OnReload_Insert_Magazine.Broadcast();
+}
+
+void USoldierAnimInstance::AnimNotify_Reload_Grab_Magazine()
+{
+	OnReload_Grab_Magazine.Broadcast();
 }

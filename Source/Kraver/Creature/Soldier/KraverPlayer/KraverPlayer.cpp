@@ -10,6 +10,8 @@
 #include "Kraver/Anim/Creature/CreatureAnimInstance.h"
 #include "Kraver/KraverComponent/Movement/Advance/AdvanceMovementComponent.h"
 #include "Kraver/KraverComponent/ProceduralAnimation/PlayerProceduralAnimComponent.h"
+#include "Kraver/Anim/Creature/Soldier/SoldierAnimInstance.h"
+#include "Kraver/KraverComponent/Attachment/Weapon/Magazine/AttachmentMagazineComponent.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
@@ -52,6 +54,10 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 void AKraverPlayer::BeginPlay()
 {
 	ASoldier::BeginPlay();
+
+	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(ArmMesh->GetAnimInstance());
+	AnimInstance->OnReload_Grab_Magazine.AddDynamic(this, &AKraverPlayer::OnFP_Reload_Grab_MagazineEvent);
+	AnimInstance->OnReload_Insert_Magazine.AddDynamic(this, &AKraverPlayer::OnFP_Reload_Insert_MagazineEvent);
 
 	Fp_SpringArmBasicLocation = Fp_SpringArm->GetRelativeLocation();
 	BasicArmLocation = ArmMesh->GetRelativeLocation();
@@ -545,6 +551,53 @@ void AKraverPlayer::OnAssassinateEndEvent()
 void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
 {
 	ASoldier::OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
+}
+
+void AKraverPlayer::OnFP_Reload_Grab_MagazineEvent()
+{
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo().Contains("Magazine"))
+	{
+#if TEST_RELOAD
+		FTransform BeforeTransform = ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();
+#endif
+
+		ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, "SOCKET_Magazine");
+
+#if TEST_RELOAD
+		FTransform AfterTransform = ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();
+		FTransform RelativeTransform = BeforeTransform.GetRelativeTransform(AfterTransform);
+		FRotator RelativeRotation = RelativeTransform.Rotator();
+		FVector RelativeLocation = RelativeTransform.GetLocation();
+
+		KR_LOG_VECTOR(RelativeLocation);
+		KR_LOG_ROTATOR(RelativeRotation);
+#endif
+	}
+
+
+}
+
+void AKraverPlayer::OnFP_Reload_Insert_MagazineEvent()
+{
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo().Contains("Magazine"))
+	{
+#if TEST_RELOAD
+		FTransform BeforeTransform = ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();
+#endif
+
+		UAttachmentMagazineComponent* MagazineComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UAttachmentMagazineComponent>();
+		ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->AttachToComponent(ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Root"), FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineComp->GetMagazineSocketName());
+
+#if TEST_RELOAD
+		FTransform AfterTransform = ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();
+		FTransform RelativeTransform = BeforeTransform.GetRelativeTransform(AfterTransform);
+		FRotator RelativeRotation = RelativeTransform.Rotator();
+		FVector RelativeLocation = RelativeTransform.GetLocation();
+
+		KR_LOG_VECTOR(RelativeLocation);
+		KR_LOG_ROTATOR(RelativeRotation);
+#endif
+	}
 }
 
 void AKraverPlayer::PlayLandedMontage()
