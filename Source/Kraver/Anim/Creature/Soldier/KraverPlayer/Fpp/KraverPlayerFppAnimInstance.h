@@ -14,9 +14,22 @@ class KRAVER_API UKraverPlayerFppAnimInstance : public UKraverPlayerAnimInstance
 	GENERATED_BODY()
 	
 public:
+	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 protected:
+	void StartProceduralAnim(float Strength);
+	UFUNCTION()
+		void ProceduralAnimEvent();
+
+	UFUNCTION()
+		virtual void OnLandEvent(const FHitResult& Result);
+	UFUNCTION()
+		virtual void OnJumpEvent();
+	UFUNCTION()
+		virtual void OnStartCrouchEvent(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
+	UFUNCTION()
+		virtual void OnEndCrouchEvent(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Data|Fabrik", meta = (AllowPrivateAccess = "true"))
@@ -33,4 +46,9 @@ protected:
 		FRotator WeaponSwayResultRot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|ProceduralAnim", Meta = (AllowPrivateAccess = true))
 		FVector ProceduralAnimResultVec;
+
+	FTimeline ProceduralAnimTimeLine;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Curve", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* ProceduralAnimCurve;
+	float ProceduralAnimStrength = 0.f;
 }; 

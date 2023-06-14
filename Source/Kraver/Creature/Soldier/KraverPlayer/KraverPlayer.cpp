@@ -9,15 +9,12 @@
 #include "Kraver/GameMode/KraverGameMode.h"
 #include "Kraver/Anim/Creature/CreatureAnimInstance.h"
 #include "Kraver/KraverComponent/Movement/Advance/AdvanceMovementComponent.h"
-#include "Kraver/KraverComponent/ProceduralAnimation/PlayerProceduralAnimComponent.h"
 #include "Kraver/Anim/Creature/Soldier/SoldierAnimInstance.h"
 #include "Kraver/KraverComponent/Attachment/Weapon/Magazine/AttachmentMagazineComponent.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
 	NetUpdateFrequency = 300.f;
-
-	PlayerProceduralAnimComponent = CreateDefaultSubobject<UPlayerProceduralAnimComponent>(TEXT("PlayerProceduralAnimComponent"));
 
 	Tp_Root = CreateDefaultSubobject<USceneComponent>(TEXT("Tp_Root"));
 	Tp_SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Tp_SpringArm"));
@@ -48,6 +45,8 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 	GetCharacterMovement()->AirControl = 0.5f;
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.f);
+
+	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 
 }
 
@@ -555,7 +554,7 @@ void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, flo
 
 void AKraverPlayer::OnFP_Reload_Grab_MagazineEvent()
 {
-	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo().Contains("Magazine"))
+	if (CombatComponent->GetCurWeapon() && ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->Contains("Magazine"))
 	{
 #if TEST_RELOAD
 		FTransform BeforeTransform = ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();

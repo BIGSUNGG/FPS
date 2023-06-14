@@ -93,9 +93,6 @@ protected:
 	void SpringArmTick(float DeltaTime);
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Procedural", meta = (AllowPrivateAccess = "true"))
-		class UPlayerProceduralAnimComponent* PlayerProceduralAnimComponent;
-
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 		class UTexture2D* CrosshairsCenter;
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
@@ -155,7 +152,7 @@ protected:
 
 	// Weapon Sway
 	FRotator WeaponSwayResultRot;
-	float SwayValue = 2.5f;
+	float SwayValue = 1.5f;
 	float MaxSwayDegree = 2.f;
 	float MinSwayDegree = -2.f;
 

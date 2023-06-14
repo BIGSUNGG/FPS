@@ -60,6 +60,7 @@ public:
 	virtual USkeletalMeshComponent* GetCurMainMesh() { return GetMesh(); }
 	float GetCurrentInputForward() { return CurrentInputForward; }
 	float GetCurrentInputRight() { return CurrentInputRight; }
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 
 protected:
 	// Axis Input
@@ -220,5 +221,9 @@ protected:
 	bool bJumpButtonPress = false;
 	bool bCrouchButtonPress = false;
 	bool bRunButtonPress = false;
+
+	ETurningInPlace TurningInPlace;
+	void TurnInPlace(float DeltaTime);
+	float InterpAO_Yaw;
 
 }; 

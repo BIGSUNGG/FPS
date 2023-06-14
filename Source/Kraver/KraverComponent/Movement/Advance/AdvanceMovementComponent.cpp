@@ -563,8 +563,7 @@ void UAdvanceMovementComponent::SlideUpdate()
 	SlopePhysics.Z = 0.f;
 	OwnerCreature->GetCharacterMovement()->Velocity += SlopePhysics;
 
-	if(!OwnerCreature->HasAuthority())
-		Server_SlideUpdate();
+	Server_SlideUpdate();
 }
 
 void UAdvanceMovementComponent::Server_WallRunJumpSuccess_Implementation(FVector PendingLaunchVelocity)

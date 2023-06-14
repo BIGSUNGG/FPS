@@ -135,6 +135,6 @@ protected:
 	float SlideSpeed = 2000.f;
 	float SlideDuration = 2.f;
 	float SlideGroundFriction = 0.f;
-	float SlideBrakingDecelerationWalking = 1024.f;
+	float SlideBrakingDecelerationWalking = 1400.f;
 	FTimerHandle SuppressSlideTimer;
 };
