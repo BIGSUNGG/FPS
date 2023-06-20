@@ -27,7 +27,7 @@ FKraverDamageResult UCombatComponent::CalculateDamage(float DamageAmount, FKrave
 
 	if (DamageEvent.bCanHeadShot && DamageEvent.HitInfo.BoneName == "Head")
 	{
-		Result.ActualDamage *= 10.f;
+		Result.ActualDamage *= 3.f;
 		Result.bCritical = true;
 	}
 

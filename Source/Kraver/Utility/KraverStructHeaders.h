@@ -44,7 +44,7 @@ public:
 	UPROPERTY()
 	bool bCritical = false;
 	UPROPERTY()
-	float ActualDamage = 0.f;
+	int ActualDamage = 0.f;
 };
 
 USTRUCT(BlueprintType)

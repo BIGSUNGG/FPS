@@ -54,13 +54,14 @@ void AKraverHUD::DrawHUD()
 				FVector2D Spread(0.f, SpreadScaled);
 				DrawCrosshair(HUDPackage.CrosshairsBottom, ViewportCenter, Spread);
 			}
-			if (HitmarkAppearanceTime > 0.f)
-			{
-				if (bHitmartCritical)
-					DrawCrosshair(Hitmark, ViewportCenter, FVector2D::ZeroVector, FLinearColor::Red);
-				else
-					DrawCrosshair(Hitmark, ViewportCenter, FVector2D::ZeroVector);
-			}
+		}
+
+		if (HitmarkAppearanceTime > 0.f)
+		{
+			if (bHitmartCritical)
+				DrawCrosshair(Hitmark, ViewportCenter, FVector2D::ZeroVector, FLinearColor::Red);
+			else
+				DrawCrosshair(Hitmark, ViewportCenter, FVector2D::ZeroVector);
 		}
 	}
 }

@@ -122,7 +122,7 @@ public:
 	FAddOnDele OnAddOnDelegate;
 	FRemoveOnDele OnRemoveOnDelegate;
 
-	FMakeNewPrimitiveInfo OnMakeNewPrimitiveInfo;
+	FMakeNewPrimitiveInfoDele OnMakeNewPrimitiveInfo;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Component", Meta = (AllowPrivateAccess = true))
 		TArray<UWeaponComponent*> WeaponComponents;

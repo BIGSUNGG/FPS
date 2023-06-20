@@ -19,6 +19,9 @@
 // Niagara
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+
+// Kismet
+#include "Kismet/KismetTextLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Math
@@ -26,3 +29,6 @@
 
 // Debug
 #include "DrawDebugHelpers.h"
+
+// Struct
+#include "Styling/SlateColor.h"

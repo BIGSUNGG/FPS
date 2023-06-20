@@ -11,6 +11,7 @@
 #include "Kraver/KraverComponent/Movement/Advance/AdvanceMovementComponent.h"
 #include "Kraver/Anim/Creature/Soldier/SoldierAnimInstance.h"
 #include "Kraver/KraverComponent/Attachment/Weapon/Magazine/AttachmentMagazineComponent.h"
+#include "Kraver/KraverInstance/FloatingDamageSubsystem.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
@@ -64,6 +65,8 @@ void AKraverPlayer::BeginPlay()
 
 	if (Controller == GetWorld()->GetFirstPlayerController())
 	{
+		GetGameInstance()->GetSubsystem<UFloatingDamageSubsystem>()->OnLocalPlayerBeginPlay(this);
+
 		CombatComponent->SetMaxWeaponSlot(3);
 
 		KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
@@ -554,7 +557,7 @@ void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, flo
 
 void AKraverPlayer::OnFP_Reload_Grab_MagazineEvent()
 {
-	if (CombatComponent->GetCurWeapon() && ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->Contains("Magazine"))
+	if (CombatComponent->GetCurWeapon() && ArmWeaponMeshes.Contains(CombatComponent->GetCurWeapon()) && ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->Contains("Magazine"))
 	{
 #if TEST_RELOAD
 		FTransform BeforeTransform = ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();
@@ -674,10 +677,12 @@ void AKraverPlayer::WeaponSway(float DeltaTime)
 
 	WeaponSwayFinalRot.Roll = LookUpValue * SwayValue;
 	WeaponSwayFinalRot.Yaw = TurnValue * SwayValue;
+	WeaponSwayFinalRot.Pitch = TurnValue * SwayValue;
 
 	FRotator TargetRot;
 	TargetRot.Roll = WeaponSwayInitRot.Roll - WeaponSwayFinalRot.Roll;
 	TargetRot.Yaw = WeaponSwayInitRot.Yaw + WeaponSwayFinalRot.Yaw;
+	TargetRot.Pitch = WeaponSwayInitRot.Pitch + WeaponSwayFinalRot.Pitch;
 
 	WeaponSwayResultRot = FMath::RInterpTo(WeaponSwayResultRot, TargetRot, DeltaTime, 4.f);
 
@@ -690,6 +695,16 @@ void AKraverPlayer::WeaponSway(float DeltaTime)
 		WeaponSwayResultRot.Yaw = MaxSwayDegree;
 	else if (WeaponSwayResultRot.Yaw < MinSwayDegree)
 		WeaponSwayResultRot.Yaw = MinSwayDegree;
+
+	if (WeaponSwayResultRot.Roll > MaxSwayDegree)
+		WeaponSwayResultRot.Roll = MaxSwayDegree;
+	else if (WeaponSwayResultRot.Roll < MinSwayDegree)
+		WeaponSwayResultRot.Roll = MinSwayDegree;
+
+	if (WeaponSwayResultRot.Pitch > MaxSwayDegree)
+		WeaponSwayResultRot.Pitch = MaxSwayDegree;
+	else if (WeaponSwayResultRot.Pitch < MinSwayDegree)
+		WeaponSwayResultRot.Pitch = MinSwayDegree;
 
 	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking())
 		WeaponSwayResultRot *= 0.9f;
