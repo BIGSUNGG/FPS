@@ -11,7 +11,7 @@
 #include "Kraver/KraverComponent/Movement/Advance/AdvanceMovementComponent.h"
 #include "Kraver/Anim/Creature/Soldier/SoldierAnimInstance.h"
 #include "Kraver/KraverComponent/Attachment/Weapon/Magazine/AttachmentMagazineComponent.h"
-#include "Kraver/KraverInstance/FloatingDamageSubsystem.h"
+#include "Kraver/KraverInstance/DamageIndicatorSubsystem.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
@@ -65,7 +65,7 @@ void AKraverPlayer::BeginPlay()
 
 	if (Controller == GetWorld()->GetFirstPlayerController())
 	{
-		GetGameInstance()->GetSubsystem<UFloatingDamageSubsystem>()->OnLocalPlayerBeginPlay(this);
+		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->OnLocalPlayerBeginPlay(this);
 
 		CombatComponent->SetMaxWeaponSlot(3);
 
@@ -575,13 +575,11 @@ void AKraverPlayer::OnFP_Reload_Grab_MagazineEvent()
 		KR_LOG_ROTATOR(RelativeRotation);
 #endif
 	}
-
-
 }
 
 void AKraverPlayer::OnFP_Reload_Insert_MagazineEvent()
 {
-	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo().Contains("Magazine"))
+	if (CombatComponent->GetCurWeapon() && ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->Contains("Magazine"))
 	{
 #if TEST_RELOAD
 		FTransform BeforeTransform = ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();

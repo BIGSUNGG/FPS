@@ -54,12 +54,6 @@ void UWeaponParryComponent::OnServerBeforeTakeDamageEvent(float DamageAmount, FK
 {
 	if(OwnerWeapon == nullptr)
 		return;
-	
-	if (IS_SERVER() == false)
-	{
-		KR_LOG(Error, TEXT("Called on client"));
-		return;
-	}
 
 	if (IsParrying && DamageEvent.bCanParried)
 	{

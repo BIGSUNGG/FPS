@@ -449,12 +449,6 @@ void ACreature::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 void ACreature::OnServerEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	if (IS_SERVER() == false)
-	{
-		KR_LOG(Error, TEXT("Called on client"));
-		return;
-	}
-
 	Weapon->SetOwner(this);
 
 	Weapon->GetWeaponMesh()->AttachToComponent
@@ -467,12 +461,6 @@ void ACreature::OnServerEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 void ACreature::OnServerUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	if (IS_SERVER() == false)
-	{
-		KR_LOG(Error, TEXT("Called on client"));
-		return;
-	}
-
 	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
 
 	Multicast_OnUnEquipWeaponSuccessEvent(Weapon);
@@ -736,12 +724,6 @@ void ACreature::PlayLandedMontage()
 
 void ACreature::SimulateMesh()
 {
-	if (IS_SERVER() == false)
-	{
-		KR_LOG(Error, TEXT("Called on server"));
-		return;
-	}
-
 	Client_SimulateMesh();
 	Multicast_SimulateMesh();
 }

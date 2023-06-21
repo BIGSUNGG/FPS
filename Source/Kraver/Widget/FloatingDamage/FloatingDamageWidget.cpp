@@ -9,9 +9,10 @@ void UFloatingDamageWidget::NativeTick(const FGeometry& MyGeometry, float DeltaT
 
 }
 
-void UFloatingDamageWidget::SetDamage(int32 Damage)
+void UFloatingDamageWidget::AddDamage(int32 Damage)
 {
-	DamageText->SetText(UKismetTextLibrary::Conv_IntToText(Damage));
+	CurDamage += Damage;
+	DamageText->SetText(UKismetTextLibrary::Conv_IntToText(CurDamage));
 }
 
 void UFloatingDamageWidget::SetColor(const FColor Color)

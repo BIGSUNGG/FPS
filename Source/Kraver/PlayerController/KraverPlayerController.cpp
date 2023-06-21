@@ -3,7 +3,7 @@
 
 #include "KraverPlayerController.h"
 #include "Kraver/Creature/Soldier/KraverPlayer/KraverPlayer.h"
-#include "Kraver/KraverInstance/FloatingDamageSubsystem.h"
+#include "Kraver/KraverInstance/DamageIndicatorSubsystem.h"
 
 void AKraverPlayerController::OnPossess(APawn* aPawn)
 {

@@ -47,7 +47,7 @@ void AFloatingDamage::ShowFloatingDamage(AActor* DamagedActor, FKraverDamageEven
 	InchargeActor = Cast<ACreature>(DamagedActor);
 
 	UFloatingDamageWidget* Widget = Cast<UFloatingDamageWidget>(FloatingWidgetComp->GetWidget());
-	Widget->SetDamage(DamageResult.ActualDamage);
+	Widget->AddDamage(DamageResult.ActualDamage);
 	Widget->SetColor(DamageResult.bCritical ? FColor::Red : FColor::White);
 
 

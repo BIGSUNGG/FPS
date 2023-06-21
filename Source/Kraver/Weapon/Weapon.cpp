@@ -196,12 +196,6 @@ int32 AWeapon::FindAdditivePrimitiveInfo(const FWeaponPrimitiveInfo& Info)
 
 bool AWeapon::Equipped(ACreature* Character)
 {
-	if (IS_SERVER() == false)
-	{
-		KR_LOG(Error, TEXT("Called on client"));
-		return false;
-	}
-
 	if (GetCanInteracted() == false)
 		return false;
 
@@ -232,13 +226,6 @@ bool AWeapon::GetCanInteracted()
 
 bool AWeapon::UnEquipped()
 {
-	if (IS_SERVER() == false)
-	{
-		KR_LOG(Error, TEXT("Called on client"));
-		return false;
-	}
-
-
 	ACreature* CreaturePtr = OwnerCreature;
 	SetOwnerCreature(nullptr);
 

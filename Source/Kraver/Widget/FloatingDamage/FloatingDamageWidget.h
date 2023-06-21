@@ -15,9 +15,11 @@ class KRAVER_API UFloatingDamageWidget : public UUserWidget
 public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float DeltaTime) override;
 
-	virtual void SetDamage(int32 Damage);
+	virtual void AddDamage(int32 Damage);
 	virtual void SetColor(const FColor Color);
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		UTextBlock* DamageText;
+
+	int32 CurDamage = 0;
 };
