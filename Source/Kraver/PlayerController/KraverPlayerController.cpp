@@ -2,8 +2,8 @@
 
 
 #include "KraverPlayerController.h"
-#include "Kraver/Creature/Soldier/KraverPlayer/KraverPlayer.h"
-#include "Kraver/KraverInstance/DamageIndicatorSubsystem.h"
+#include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
+#include "Kraver/SubSystem/DamageIndicatorSubsystem.h"
 
 void AKraverPlayerController::OnPossess(APawn* aPawn)
 {
