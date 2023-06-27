@@ -73,6 +73,15 @@ void UMenu::OnCreateSession(bool bWasSuccessful)
 		if (World)
 		{
 			World->ServerTravel(PathToLobby);
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					15.f,
+					FColor::Red,
+					FString(TEXT("Success to create session!"))
+				);
+			}
 		}
 	}
 	else
@@ -128,6 +137,15 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 			if (PlayerController)
 			{
 				PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+				if (GEngine)
+				{
+					GEngine->AddOnScreenDebugMessage(
+						-1,
+						15.f,
+						FColor::Red,
+						FString(TEXT("Success to join session!"))
+					);
+				}
 			}
 		}
 	}
