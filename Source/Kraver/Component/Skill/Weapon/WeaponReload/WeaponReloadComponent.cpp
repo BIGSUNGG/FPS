@@ -80,5 +80,8 @@ bool UWeaponReloadComponent::GetCanReload()
 	if (OwnerGun->GetTotalAmmo() == 0)
 		return false;
 
+	if (GetOwnerCreature() && GetOwnerCreature()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontageTpp))
+		return false;
+
 	return true;
 }

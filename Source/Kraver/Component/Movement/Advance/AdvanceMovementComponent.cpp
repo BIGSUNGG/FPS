@@ -552,7 +552,7 @@ void UAdvanceMovementComponent::SlideUpdate()
 		return;
 
 	float Speed = OwnerCreature->GetVelocity().Size();
-	if (Speed < OwnerCreature->GetCharacterMovement()->MaxWalkSpeedCrouched) 
+	if (Speed < 20.f) 
 	{
 		SlideEnd(false);
 		return;
@@ -563,7 +563,7 @@ void UAdvanceMovementComponent::SlideUpdate()
 	SlopePhysics.Z = 0.f;
 	OwnerCreature->GetCharacterMovement()->Velocity += SlopePhysics;
 
-	Server_SlideUpdate();
+	Server_SlideUpdate(OwnerCreature->GetCharacterMovement()->Velocity);
 }
 
 void UAdvanceMovementComponent::Server_WallRunJumpSuccess_Implementation(FVector PendingLaunchVelocity)
@@ -637,12 +637,9 @@ void UAdvanceMovementComponent::Server_SlideEnd_Implementation()
 	OwnerCreature->GetCharacterMovement()->BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
 }
 
-void UAdvanceMovementComponent::Server_SlideUpdate_Implementation()
+void UAdvanceMovementComponent::Server_SlideUpdate_Implementation(FVector Velocity)
 {
-	FVector Slope = OwnerCreature->CaclulateCurrentFllorSlopeVector();
-	FVector SlopePhysics = Slope * SlideSlopeSpeed;
-	SlopePhysics.Z = 0.f;
-	OwnerCreature->GetCharacterMovement()->Velocity += SlopePhysics;
+	OwnerCreature->GetCharacterMovement()->Velocity = Velocity;
 }
 
 void UAdvanceMovementComponent::SetCurWallRunState(EWallRunState Value)

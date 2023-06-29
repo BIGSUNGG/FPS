@@ -254,8 +254,7 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 		TArray<FHitResult> HitResults;
 		FCollisionQueryParams Params(NAME_None, false, this);
 
-		bool bResult = LineTraceMultiByChannel_ExceptWorldObject(
-			GetWorld(),
+		bool bResult = GetWorld()->LineTraceMultiByChannel(
 			HitResults,
 			Camera->GetComponentLocation(),
 			Camera->GetComponentLocation() + Camera->GetForwardVector() * Distance,
@@ -579,7 +578,7 @@ void AKraverPlayer::OnFP_Reload_Grab_MagazineEvent()
 
 void AKraverPlayer::OnFP_Reload_Insert_MagazineEvent()
 {
-	if (CombatComponent->GetCurWeapon() && ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->Contains("Magazine"))
+	if (CombatComponent->GetCurWeapon() && ArmWeaponMeshes.Contains(CombatComponent->GetCurWeapon()) &&ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->Contains("Magazine"))
 	{
 #if TEST_RELOAD
 		FTransform BeforeTransform = ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();

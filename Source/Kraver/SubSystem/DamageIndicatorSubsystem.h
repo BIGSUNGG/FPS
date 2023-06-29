@@ -34,8 +34,11 @@ protected:
 
 protected:
 	class AKraverPlayer* KraverPlayer;
+
 	TMap<class ACreature*, class AFloatingDamage*> FloatingWidgets;
-	bool DuplicationDamage = true;
+	bool DuplicationFloatingDamage = true;
+
+	TMap<class ACreature*, class UDamageDirectionWidget*> DamagedDirectionWidgets;
 
 	class UClass* DamagedDirectionClass;
 

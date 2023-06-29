@@ -86,7 +86,7 @@ protected:
 	UFUNCTION(Server, Reliable)
 		virtual void Server_SlideEnd();
 	UFUNCTION(Server, Reliable)
-		virtual void Server_SlideUpdate();
+		virtual void Server_SlideUpdate(FVector Velocity);
 
 public:
 	// Getter Setter
@@ -131,7 +131,7 @@ protected:
 
 	bool bSlideSupressed = false;
 	float MinSlideRequireSpeed = 900.f;
-	float SlideSlopeSpeed = 20.f;
+	float SlideSlopeSpeed = 40.f;
 	float SlideSpeed = 2000.f;
 	float SlideDuration = 2.f;
 	float SlideGroundFriction = 0.f;

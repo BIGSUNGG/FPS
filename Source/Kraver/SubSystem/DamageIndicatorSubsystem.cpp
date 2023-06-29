@@ -4,11 +4,11 @@
 #include "DamageIndicatorSubsystem.h"
 #include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
 #include "Kraver/Actor/FloatingDamage/FloatingDamage.h"
-#include "Kraver/Ui/Widget/DamageDirection/DamageDirection.h"
+#include "Kraver/Ui/Widget/DamageDirection/DamageDirectionWidget.h"
 
 UDamageIndicatorSubsystem::UDamageIndicatorSubsystem()
 {
-	static ConstructorHelpers::FClassFinder<UDamageDirection> DamagedDirectionFinder(TEXT("/Game/ProjectFile/Widget/WBP_DamagedDirection.WBP_DamagedDirection_C"));
+	static ConstructorHelpers::FClassFinder<UDamageDirectionWidget> DamagedDirectionFinder(TEXT("/Game/ProjectFile/Widget/WBP_DamagedDirection.WBP_DamagedDirection_C"));
 	if(DamagedDirectionFinder.Succeeded())
 		DamagedDirectionClass = DamagedDirectionFinder.Class;
 }
@@ -21,6 +21,12 @@ void UDamageIndicatorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UDamageIndicatorSubsystem::OnLocalPlayerBeginPlay(AKraverPlayer* Player)
 {
+	if (!Player->IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Error, TEXT("UDamageIndicatorSubsystem : Player is not LocallyControlled"));
+		return;
+	}
+
 	KraverPlayer = Player;
 	Player->CombatComponent->OnClientGiveDamageSuccess.AddDynamic(this, &UDamageIndicatorSubsystem::OnClientGiveDamageSuccessEvent);
 	Player->CombatComponent->OnClientAfterTakeDamageSuccess.AddDynamic(this, &UDamageIndicatorSubsystem::OnClientAfterTakeDamageEvent);
@@ -37,7 +43,7 @@ void UDamageIndicatorSubsystem::OnClientGiveDamageSuccessEvent(AActor* DamagedAc
 
 	AFloatingDamage* DamageWidget;
 
-	if (!DuplicationDamage && FloatingWidgets.Contains(Creature))
+	if (!DuplicationFloatingDamage && FloatingWidgets.Contains(Creature))
 		DamageWidget = FloatingWidgets[Creature];
 	else
 	{
@@ -47,7 +53,7 @@ void UDamageIndicatorSubsystem::OnClientGiveDamageSuccessEvent(AActor* DamagedAc
 		DamageWidget = GetWorld()->SpawnActor<AFloatingDamage>(SpawnParams);
 		DamageWidget->OnDestroy.AddDynamic(this, &UDamageIndicatorSubsystem::OnDestroyEvent);
 
-		if(!DuplicationDamage)
+		if(!DuplicationFloatingDamage)
 			FloatingWidgets.Add(Creature, DamageWidget);	
 	}
 	
@@ -56,10 +62,35 @@ void UDamageIndicatorSubsystem::OnClientGiveDamageSuccessEvent(AActor* DamagedAc
 
 void UDamageIndicatorSubsystem::OnClientAfterTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
-	UDamageDirection* Widget = Cast<UDamageDirection>(CreateWidget<UDamageDirection>(GetWorld(), DamagedDirectionClass));
-	Widget->Initialize(KraverPlayer, DamageEvent.HitInfo.TraceStart);	
+	if (DamageResult.bAlreadyDead)
+		return;
+
+	ACreature* Creature;
+	AActor* FindActor = DamageCauser;
+	while (true)
+	{
+		Creature = Cast<ACreature>(FindActor);
+		if(Creature)
+			break;
+
+		if(!FindActor->GetOwner())
+			return;
+		
+		FindActor = FindActor->GetOwner();
+	}
+
+	if (DamagedDirectionWidgets.Contains(Creature))
+	{
+		UDamageDirectionWidget* ExistWidget = DamagedDirectionWidgets[Creature];
+		if(ExistWidget)
+			ExistWidget->EndWidget();
+	}
+
+	UDamageDirectionWidget* Widget = Cast<UDamageDirectionWidget>(CreateWidget<UDamageDirectionWidget>(GetWorld(), DamagedDirectionClass));
+	Widget->Initialize(KraverPlayer, DamageEvent.HitInfo.TraceStart);
 	Widget->AddToViewport();
-}
+	DamagedDirectionWidgets.Add(Creature, Widget);
+}	
 
 void UDamageIndicatorSubsystem::OnDestroyEvent(AActor* Actor)
 {
@@ -67,6 +98,6 @@ void UDamageIndicatorSubsystem::OnDestroyEvent(AActor* Actor)
 	if(!FloatingDamage)
 		return;
 
-	if(!DuplicationDamage)
+	if(!DuplicationFloatingDamage)
 		FloatingWidgets.Remove(FloatingDamage->GetInchargeActor());
 }
