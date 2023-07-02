@@ -26,7 +26,7 @@ bool LineTraceMultiByChannel_ExceptWorldObject(UWorld* World, TArray<struct FHit
 			{
 				// 오브젝트 사이에 다른 월드 오브젝트가 있는지
 				FHitResult ObjectHitResult;
-				bool bObjectResult = World->LineTraceSingleByObjectType(
+				bool bObjectResult = World->LineTraceSingleByChannel(
 					ObjectHitResult,
 					Start,
 					Result.ImpactPoint,

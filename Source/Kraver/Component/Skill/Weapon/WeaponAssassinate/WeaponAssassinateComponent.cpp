@@ -146,6 +146,7 @@ void UWeaponAssassinateComponent::Multicast_Assassinate_Implementation(AActor* A
 void UWeaponAssassinateComponent::Server_OnAssassinateAttackEvent_Implementation()
 {
 	FKraverDamageEvent AssassinateDamageEvent;
+	AssassinateDamageEvent.DamageType = EKraverDamageType::ASSASSINATION;
 	AssassinateDamageEvent.bCanSimulate = false;
 	GetOwnerCreature()->CombatComponent->GiveDamage(CurAssassinatedCreature, AssassinationDamage, AssassinateDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
 }

@@ -72,20 +72,20 @@ void UKraverPlayerFppAnimInstance::ProceduralAnimEvent()
 
 void UKraverPlayerFppAnimInstance::OnLandEvent(const FHitResult& Result)
 {
-	StartProceduralAnim(0.75f);
+	StartProceduralAnim(0.35f);
 }
 
 void UKraverPlayerFppAnimInstance::OnJumpEvent()
 {
-	StartProceduralAnim(-0.75f);
+	StartProceduralAnim(-0.4f);
 }
 
 void UKraverPlayerFppAnimInstance::OnStartCrouchEvent(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
 {
-	StartProceduralAnim(-0.5f);
+	StartProceduralAnim(-0.25f);
 }
 
 void UKraverPlayerFppAnimInstance::OnEndCrouchEvent(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
 {
-	StartProceduralAnim(0.5f);
+	StartProceduralAnim(0.25f);
 }

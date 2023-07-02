@@ -34,7 +34,7 @@ void UDamageIndicatorSubsystem::OnLocalPlayerBeginPlay(AKraverPlayer* Player)
 
 void UDamageIndicatorSubsystem::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
-	if(DamageResult.bAlreadyDead)
+	if(DamageResult.bAlreadyDead || DamageEvent.DamageType == EKraverDamageType::ASSASSINATION)
 		return;
 
 	ACreature* Creature = Cast<ACreature>(DamagedActor);

@@ -54,6 +54,7 @@ enum class EKraverDamageType : uint8
 	SWING		UMETA(DisplayName = "SWING"),
 	BULLET		UMETA(DisplayName = "BULLET"),
 	EXPLOSION	UMETA(DisplayName = "EXPLOSION"),
+	ASSASSINATION	UMETA(DisplayName = "ASSASSINATION"),
 };
 
 UCLASS()
