@@ -439,7 +439,7 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	int32 Index = Weapon->MakeAdditivePrimitiveInfo();
 	
-	FWeaponPrimitiveInfo* TempInfo = &Weapon->GetAdditiveWeaponPrimitiveInfo()[Index];
+	TMap<FString, UPrimitiveComponent*>* TempInfo = &Weapon->GetAdditiveWeaponPrimitiveInfo()[Index];
 	ArmWeaponMeshes.Add(Weapon, TempInfo);
 	Weapon->GetAdditiveWeaponPrimitiveInfo()[Index]["Root"]->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetAttachSocketName());
 
@@ -490,7 +490,7 @@ void AKraverPlayer::OnClientHoldWeaponEvent(AWeapon* Weapon)
 {
 	ASoldier::OnClientHoldWeaponEvent(Weapon);
 
-	FWeaponPrimitiveInfo& WeaponPrimitiveInfo = *(ArmWeaponMeshes[Weapon]);
+	TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = *(ArmWeaponMeshes[Weapon]);
 	for(auto& Tuple : WeaponPrimitiveInfo)
 		Tuple.Value->SetHiddenInGame(false);
 
@@ -501,7 +501,7 @@ void AKraverPlayer::OnClientHolsterWeaponEvent(AWeapon* Weapon)
 {
 	ASoldier::OnClientHolsterWeaponEvent(Weapon);
 	
-	FWeaponPrimitiveInfo& WeaponPrimitiveInfo = *(ArmWeaponMeshes[Weapon]);
+	TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = *(ArmWeaponMeshes[Weapon]);
 	for (auto& Tuple : WeaponPrimitiveInfo)
 		Tuple.Value->SetHiddenInGame(true);
 
@@ -530,7 +530,7 @@ void AKraverPlayer::OnAssassinateEvent(AActor* AssassinatedActor)
 	ArmMesh->SetOwnerNoSee(true);
 
 	CombatComponent->GetCurWeapon()->GetWeaponMesh()->SetOwnerNoSee(false);
-	FWeaponPrimitiveInfo& WeaponPrimitiveInfo = *(ArmWeaponMeshes[CombatComponent->GetCurWeapon()]);
+	TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = *(ArmWeaponMeshes[CombatComponent->GetCurWeapon()]);
 	for (auto& Tuple : WeaponPrimitiveInfo)
 		Tuple.Value->SetHiddenInGame(true);
 }
@@ -544,7 +544,7 @@ void AKraverPlayer::OnAssassinateEndEvent()
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
 	ArmMesh->GetAnimInstance()->Montage_Stop(0.f);
 
-	FWeaponPrimitiveInfo& WeaponPrimitiveInfo = *(ArmWeaponMeshes[CombatComponent->GetCurWeapon()]);
+	TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = *(ArmWeaponMeshes[CombatComponent->GetCurWeapon()]);
 	for (auto& Tuple : WeaponPrimitiveInfo)
 		Tuple.Value->SetHiddenInGame(false);
 }
@@ -628,7 +628,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 			HUD->SetbDrawCrosshair(false);
 		#endif
 
-		const FWeaponPrimitiveInfo& WeaponPrimitiveInfo = *ArmWeaponMeshes[CombatComponent->GetCurWeapon()];
+		const TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = *ArmWeaponMeshes[CombatComponent->GetCurWeapon()];
 		if(WeaponPrimitiveInfo.Contains("Scope"))
 		{
 			UStaticMeshComponent* ScopeMesh = Cast<UStaticMeshComponent>(WeaponPrimitiveInfo["Scope"]);

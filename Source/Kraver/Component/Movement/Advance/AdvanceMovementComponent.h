@@ -131,7 +131,7 @@ protected:
 
 	bool bSlideSupressed = false;
 	float MinSlideRequireSpeed = 900.f;
-	float SlideSlopeSpeed = 40.f;
+	float SlideSlopeSpeed = 20.f;
 	float SlideSpeed = 2000.f;
 	float SlideDuration = 2.f;
 	float SlideGroundFriction = 0.f;

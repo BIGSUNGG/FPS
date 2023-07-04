@@ -110,6 +110,7 @@ void ACreature::BeginPlay()
 {
 	Super::BeginPlay();
 
+	StartingAimRotation = GetActorRotation();
 }
 
 void ACreature::PostInitializeComponents()
@@ -410,7 +411,7 @@ void ACreature::TurnInPlace(float DeltaTime)
 	{
 		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
 		AO_Yaw = InterpAO_Yaw;
-		if (FMath::Abs(AO_Yaw) < 15.f)
+		if (FMath::Abs(AO_Yaw) <= 2.f)
 		{
 			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);

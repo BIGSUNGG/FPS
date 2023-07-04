@@ -7,15 +7,10 @@
 AGun::AGun() : AWeapon()
 {
 	WeaponType = EWeaponType::GUN;
-
-	FireEffect = CreateDefaultSubobject<UNiagaraComponent>("FireEffect");
-	FireEffect->SetupAttachment(WeaponMesh, FireEffectSocketName);
-	FireEffect->bAutoActivate = false;
 	
 	ImpactEffect = CreateDefaultSubobject<UNiagaraComponent>("ImpactEffect");
 	ImpactEffect->bAutoActivate = false;
 
-	WeaponPrimitiveInfo.Add("FireEffect", FireEffect);
 }
 
 void AGun::Tick(float DeltaTime)
@@ -75,8 +70,6 @@ void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProp
 	DOREPLIFETIME(AGun, MaxAmmo);
 	DOREPLIFETIME(AGun, CurAmmo);
 	DOREPLIFETIME(AGun, TotalAmmo);
-	DOREPLIFETIME(AGun, BulletDistance);
-	DOREPLIFETIME(AGun, BulletRadius);
 }
 
 void AGun::PostInitializeComponents()
@@ -110,28 +103,6 @@ bool AGun::RefillAmmo()
 	return true;
 }
 
-TArray<FHitResult> AGun::CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread /*= FVector(0,0,0)*/)
-{
-	FVector EndPoint = OwnerCreature->GetCamera()->GetForwardVector() + Spread;
-	EndPoint.Normalize();
-	EndPoint *= BulletDistance;
-	EndPoint += OwnerCreature->GetCamera()->GetComponentLocation();
-
-	TArray<FHitResult> BulletHitResults;
-	FCollisionQueryParams BulletParams(NAME_None, false, OwnerCreature);
-	bool bResult = GetWorld()->SweepMultiByChannel(
-		BulletHitResults,
-		OwnerCreature->GetCamera()->GetComponentLocation(),
-		EndPoint,
-		FQuat::Identity,
-		BulletChannel,
-		FCollisionShape::MakeSphere(BulletRadius),
-		BulletParams
-	);
-
-	return BulletHitResults;
-}
-
 void AGun::ShowFireEffect()
 {
 	if(HasAuthority())
@@ -148,43 +119,7 @@ void AGun::AddRecoil()
 
 void AGun::FireBullet()
 {
-	float SpreadX;
-	float SpreadY;
-	float SpreadZ;
-	if (GetbApplySpread())
-	{
-		float Spread = CalculateCurSpread();
-		SpreadX = FMath::RandRange(-Spread, Spread);
-		SpreadY = FMath::RandRange(-Spread, Spread);
-		SpreadZ = FMath::RandRange(-Spread, Spread);
-	}
-	else
-	{
-		SpreadX = 0.f;
-		SpreadY = 0.f;
-		SpreadZ = 0.f;
-	}
 
-	TArray<FHitResult> BulletHitResults = CalculateFireHit(ECC_BULLET, FVector(SpreadX, SpreadY, SpreadZ));
-
-	for (auto& Result : BulletHitResults)
-	{
-		auto Creature = Cast<ACreature>(Result.GetActor());
-		if (IsValid(Result.GetActor()))
-		{
-			FKraverDamageEvent DamageEvent;
-			DamageEvent.bCanHeadShot = true;
-			DamageEvent.bCanParried = true;
-			DamageEvent.DamageImpulse = AttackImpulse;
-			DamageEvent.HitInfo = Result;
-			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
-			if (Result.bBlockingHit)
-			{
-				FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
-				Server_SpawnImpactEffect(ImpaceEffectPos);
-			}
-		}
-	}
 }
 
 void AGun::OnAttackEvent()
@@ -223,13 +158,7 @@ void AGun::OnAttackEvent()
 
 void AGun::OnMakeNewPrimitiveInfoEvent(int Index)
 {
-	return;
 
-	AWeapon::OnMakeNewPrimitiveInfoEvent(Index);
-	UNiagaraComponent* NeweFireEffect = Cast<UNiagaraComponent>(AdditiveWeaponPrimitiveInfo[Index]["FireEffect"]);
-	NeweFireEffect->AttachToComponent(AdditiveWeaponPrimitiveInfo[Index]["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, FireEffectSocketName);
-	NeweFireEffect->SetRelativeRotation(FireEffect->GetRelativeRotation());
-	NeweFireEffect->SetRelativeLocation(FireEffect->GetRelativeLocation());
 }
 
 void AGun::Server_SetTotalAmmo_Implementation(int32 Ammo)
@@ -254,6 +183,9 @@ void AGun::Server_ShowFireEffect_Implementation()
 
 void AGun::Multicast_ShowFireEffect_Implementation()
 {	
+	if(!WeaponPrimitiveInfo.Contains("FireEffect"))
+		return;
+
 	WeaponPrimitiveInfo["FireEffect"]->Activate(true);
 
 	for (auto& Map : AdditiveWeaponPrimitiveInfo)

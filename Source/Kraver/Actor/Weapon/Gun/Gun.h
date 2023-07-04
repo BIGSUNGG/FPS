@@ -26,7 +26,6 @@ public:
 	virtual bool RefillAmmo(); // CurAmmo를 보충함
 
 protected:
-	TArray<FHitResult>  CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread = FVector(0,0,0));
 	virtual void ShowFireEffect(); // FireEffect를 실행하는 함수
 	virtual void AddRecoil();
 	virtual void FireBullet();
@@ -52,19 +51,12 @@ public:
 	int32 GetMaxAmmo() { return MaxAmmo; }
 	int32 GetTotalAmmo() { return TotalAmmo; }
 	float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; }
-	UNiagaraComponent* GetFireEffect() { return FireEffect; }
 
 	void AddSpread(float Spread);
 protected:
 	// Additive
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Effect", meta = (AllowPrivateAccess = "true"))
-		UNiagaraComponent* FireEffect; // 공격하였을때 실행되는 이펙트
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Effect", meta = (AllowPrivateAccess = "true"))
 		UNiagaraComponent* ImpactEffect; // Bullet이 Block되었을때 실행되는 이펙트
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Effect", meta = (AllowPrivateAccess = "true"))
-		FName FireEffectSocketName = "SOCKET_Muzzle"; // FireEffect가 붙을 WeaponMesh의 소켓이름
-
 
 	// Ammo
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
@@ -79,10 +71,6 @@ protected:
 		int32 TotalAmmo = 30.f; // 총 총알 갯수
 	UFUNCTION(Server, Reliable)
 		void Server_SetTotalAmmo(int32 Ammo);
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
-		float BulletDistance = 10000.f; // 총알 길이
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
-		float BulletRadius = 0.f; // 총알 범위
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
 		bool bInfinityAmmo = false;
 

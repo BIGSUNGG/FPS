@@ -12,6 +12,3 @@
 using namespace std;
 
 DECLARE_LOG_CATEGORY_EXTERN(Kraver, Log, All);
-
-// Typedef
-using FWeaponPrimitiveInfo = TMap<FString, UPrimitiveComponent*>;

@@ -32,7 +32,7 @@ public:
 	// Getter Setter
 	FORCEINLINE AWeapon* GetCanInteractWeapon() { return CanInteractWeapon; }
 	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
-	FORCEINLINE TMap<AWeapon*, FWeaponPrimitiveInfo*> GetArmWeaponMeshes() { return ArmWeaponMeshes; }
+	FORCEINLINE TMap<AWeapon*, TMap<FString, UPrimitiveComponent*>*> GetArmWeaponMeshes() { return ArmWeaponMeshes; }
 	virtual bool GetCanAttack() override;
 	virtual USkeletalMeshComponent* GetCurMainMesh() override;
 	FRotator GetWeaponSwayResultRot() { return WeaponSwayResultRot; }
@@ -122,7 +122,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* ArmMesh;
 
-	TMap<AWeapon*, FWeaponPrimitiveInfo*> ArmWeaponMeshes; // 각 Weapon들의 WeaponMesh를 1인칭 시점에 맞게 복사한 매쉬들의 맵
+	TMap<AWeapon*, TMap<FString, UPrimitiveComponent*>*> ArmWeaponMeshes; // 각 Weapon들의 WeaponMesh를 1인칭 시점에 맞게 복사한 매쉬들의 맵
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
 		AWeapon* CanInteractWeapon;

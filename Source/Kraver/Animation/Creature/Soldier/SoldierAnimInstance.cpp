@@ -50,8 +50,11 @@ void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}	
 }
 
-void USoldierAnimInstance::FabrikLeftHand(USkeletalMeshComponent* HandMesh, USkeletalMeshComponent* WeaponMesh, FTransform& Transform)
+void USoldierAnimInstance::FabrikLeftHand(USkeletalMeshComponent* HandMesh, UPrimitiveComponent* WeaponMesh, FTransform& Transform)
 {
+	if(!WeaponMesh)
+		return;
+
 	Transform = WeaponMesh->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
 	FVector OutPosition;
 	FRotator OutRotation;

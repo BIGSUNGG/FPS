@@ -22,7 +22,7 @@ public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	virtual void FabrikLeftHand(USkeletalMeshComponent* HandMesh, USkeletalMeshComponent* WeaponMesh, FTransform& Transform);
+	virtual void FabrikLeftHand(USkeletalMeshComponent* HandMesh, UPrimitiveComponent* WeaponMesh, FTransform& Transform);
 
 protected:
 	// Animation Notify

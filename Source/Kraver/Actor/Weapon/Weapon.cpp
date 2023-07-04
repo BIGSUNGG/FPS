@@ -16,16 +16,12 @@ AWeapon::AWeapon()
 	bReplicates = true;
 	SetReplicateMovement(true);
 
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
-	WeaponMesh->SetCollisionProfileName(FName("WeaponMesh"));
-	WeaponMesh->SetSimulatePhysics(true);
-	WeaponMesh->bReplicatePhysicsToAutonomousProxy = true;
-	SetRootComponent(WeaponMesh);
+	RootComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
+	SetRootComponent(RootComponent);
 
 	OnAttack.AddDynamic(this, &AWeapon::OnAttackEvent);
 	OnMakeNewPrimitiveInfo.AddDynamic(this, &AWeapon::OnMakeNewPrimitiveInfoEvent);
 
-	WeaponPrimitiveInfo.Add("Root", WeaponMesh);
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -49,7 +45,7 @@ float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 		{
 			FVector Direction = KraverDamageEvent->GetHitDirection();
 			Server_TakeImpulseAtLocation(
-				Direction * KraverDamageEvent->DamageImpulse * WeaponMesh->GetMass(),
+				Direction * KraverDamageEvent->DamageImpulse * GetWeaponMesh()->GetMass(),
 				KraverDamageEvent->HitInfo.ImpactPoint
 			);
 		}
@@ -91,7 +87,7 @@ void AWeapon::Tick(float DeltaTime)
 
 int32 AWeapon::MakeAdditivePrimitiveInfo()
 {
-	FWeaponPrimitiveInfo NewWeaponPrimitiveInfo;
+	TMap<FString, UPrimitiveComponent*> NewWeaponPrimitiveInfo;
 	int32 Index = AdditiveWeaponPrimitiveInfo.Add(NewWeaponPrimitiveInfo);
 
 	for (auto& Tuple : WeaponPrimitiveInfo)
@@ -162,7 +158,7 @@ int32 AWeapon::MakeAdditivePrimitiveInfo()
 	return Index;
 }
 
-int32 AWeapon::RemoveAdditivePrimitiveInfo(const FWeaponPrimitiveInfo& Info)
+int32 AWeapon::RemoveAdditivePrimitiveInfo(const TMap<FString, UPrimitiveComponent*>& Info)
 {
 	int32 Index = FindAdditivePrimitiveInfo(Info);
 
@@ -179,7 +175,7 @@ int32 AWeapon::RemoveAdditivePrimitiveInfo(const FWeaponPrimitiveInfo& Info)
 	return Index;
 }
 
-int32 AWeapon::FindAdditivePrimitiveInfo(const FWeaponPrimitiveInfo& Info)
+int32 AWeapon::FindAdditivePrimitiveInfo(const TMap<FString, UPrimitiveComponent*>& Info)
 {
 	int32 Index = -1;
 	for (int i = 0; i < AdditiveWeaponPrimitiveInfo.Num(); i++)
@@ -203,8 +199,8 @@ bool AWeapon::Equipped(ACreature* Character)
 	SetOwnerCreature(Character);
 	WeaponState = EWeaponState::EQUIPPED;
 
-	WeaponMesh->SetSimulatePhysics(false);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetWeaponMesh()->SetSimulatePhysics(false);
+	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	Multicast_Equipped(Character);
 
@@ -230,8 +226,8 @@ bool AWeapon::UnEquipped()
 	SetOwnerCreature(nullptr);
 
 	WeaponState = EWeaponState::NONE;
-	WeaponMesh->SetSimulatePhysics(true);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetWeaponMesh()->SetSimulatePhysics(true);
+	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	Client_UnEquipped();
 	Multicast_UnEquipped();
@@ -358,14 +354,14 @@ void AWeapon::Client_UnEquipped_Implementation()
 
 void AWeapon::Multicast_Equipped_Implementation(ACreature* Character)
 {
-	WeaponMesh->SetSimulatePhysics(false);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetWeaponMesh()->SetSimulatePhysics(false);
+	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AWeapon::Multicast_UnEquipped_Implementation()
 {
-	WeaponMesh->SetSimulatePhysics(true);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetWeaponMesh()->SetSimulatePhysics(true);
+	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AWeapon::Server_TakeImpulseAtLocation_Implementation(FVector Impulse, FVector ImpactPoint)
@@ -375,7 +371,7 @@ void AWeapon::Server_TakeImpulseAtLocation_Implementation(FVector Impulse, FVect
 
 void AWeapon::Multicast_TakeImpulseAtLocation_Implementation(FVector Impulse, FVector ImpactPoint)
 {
-	WeaponMesh->AddImpulseAtLocation(Impulse,ImpactPoint);
+	GetWeaponMesh()->AddImpulseAtLocation(Impulse,ImpactPoint);
 }
 
 void AWeapon::OnAttackEvent()
