@@ -16,24 +16,16 @@ void AHitscanGun::FireBullet()
 {
 	AGun::FireBullet();
 
-	float SpreadX;
-	float SpreadY;
-	float SpreadZ;
+	FVector Spread;
 	if (GetbApplySpread())
 	{
-		float Spread = CalculateCurSpread();
-		SpreadX = FMath::RandRange(-Spread, Spread);
-		SpreadY = FMath::RandRange(-Spread, Spread);
-		SpreadZ = FMath::RandRange(-Spread, Spread);
-	}
-	else
-	{
-		SpreadX = 0.f;
-		SpreadY = 0.f;
-		SpreadZ = 0.f;
+		float CurSpread = CalculateCurSpread();
+		Spread.X = FMath::RandRange(-CurSpread, CurSpread);
+		Spread.Y = FMath::RandRange(-CurSpread, CurSpread);
+		Spread.Z = FMath::RandRange(-CurSpread, CurSpread);
 	}
 
-	TArray<FHitResult> BulletHitResults = CalculateFireHit(ECC_BULLET, FVector(SpreadX, SpreadY, SpreadZ));
+	TArray<FHitResult> BulletHitResults = CalculateFireHit(ECC_BULLET, Spread);
 
 	for (auto& Result : BulletHitResults)
 	{

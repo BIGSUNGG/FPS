@@ -18,6 +18,6 @@ protected:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))
-		UClass* BulletClass = nullptr; // ÃÑ¾Ë ±æÀÌ
+		UClass* BulletClass = nullptr; // ÃÑ¾Ë Å¬·¡½º
 
 };

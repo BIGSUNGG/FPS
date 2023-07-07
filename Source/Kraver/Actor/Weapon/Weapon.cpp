@@ -63,6 +63,16 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UPrimitiveComponent* WeaponMesh = GetWeaponMesh();
+
+	if (WeaponMesh)
+	{
+		WeaponMesh->SetCollisionProfileName("WeaponMesh");
+		WeaponMesh->SetSimulatePhysics(true);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+	else
+		KR_LOG(Error, TEXT("WeaponMesh is nullptr"));
 }
 
 // Called every frame

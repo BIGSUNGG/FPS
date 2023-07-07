@@ -368,9 +368,15 @@ void AKraverPlayer::ChangeView()
 
 void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 {
+	if(!ArmWeaponMeshes.Contains(Weapon))
+		return;
+
+	if(!ArmWeaponMeshes[Weapon]->Contains("Root"))
+		return;
+
 	USkeletalMeshComponent* ArmWeaponMesh = dynamic_cast<USkeletalMeshComponent*>(ArmWeaponMeshes[Weapon]->operator[]("Root"));
 	Server_ThrowWeapon(
-		Weapon,
+		Weapon, 
 		ArmWeaponMesh->GetComponentLocation(),
 		ArmWeaponMesh->GetComponentRotation(),
 		Camera->GetForwardVector()
