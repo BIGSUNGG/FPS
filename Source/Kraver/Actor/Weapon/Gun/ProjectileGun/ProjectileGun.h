@@ -16,6 +16,9 @@ class KRAVER_API AProjectileGun : public AHitscanGun
 protected:
 	virtual void FireBullet() override;
 
+	UFUNCTION()
+		virtual void OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))
 		UClass* BulletClass = nullptr; // ÃÑ¾Ë Å¬·¡½º

@@ -18,6 +18,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
 
 public:	
 	// Called every frame
@@ -27,9 +28,24 @@ public:
 	void FireBullet(FVector& Direction, AActor* Target = nullptr);
 
 protected:
+	virtual void HitEvent(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);
+	
+	UFUNCTION()
+		virtual void OnCollisionEvent(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) final;
+
+	virtual void GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);
+
+public:
+	FImpactDele OnImpact;
+
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* BulletMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
 		UProjectileMovementComponent* ProjectileMovementComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
+		float BulletDamage;
 
+	int16 MaxHitCount = 1;
+	int16 HitCount = 0;
 };

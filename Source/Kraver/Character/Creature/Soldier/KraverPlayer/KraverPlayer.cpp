@@ -375,10 +375,10 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 		return;
 
 	USkeletalMeshComponent* ArmWeaponMesh = dynamic_cast<USkeletalMeshComponent*>(ArmWeaponMeshes[Weapon]->operator[]("Root"));
+
 	Server_ThrowWeapon(
 		Weapon, 
-		ArmWeaponMesh->GetComponentLocation(),
-		ArmWeaponMesh->GetComponentRotation(),
+		ArmWeaponMesh->GetComponentTransform(),
 		Camera->GetForwardVector()
 		);
 }
@@ -404,23 +404,17 @@ void AKraverPlayer::Multicast_RefreshSpringArm_Implementation(FVector Vector, fl
 	Fp_SpringArm->TargetArmLength = Length;
 }
 
-void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction)
+void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FTransform Transform, FVector Direction)
 {
-	Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
-	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	Weapon->GetWeaponMesh()->SetWorldLocation(Location);
-	Weapon->GetWeaponMesh()->SetWorldRotation(Rotation);
-	GetWorldTimerManager().SetTimer(
-		UnEquipWeaponTimerHandle,
-		[=]() {
-			Weapon->GetWeaponMesh()->SetSimulatePhysics(true);
-			Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
-			Weapon->GetWeaponMesh()->AddImpulse(Direction * WeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
-			Weapon->GetWeaponMesh()->AddAngularImpulseInDegrees(Direction * WeaponThrowAngularPower, NAME_None, true);
-		},
-		0.000001f,
-			false);
+	Multicast_ThrowWeapon(Weapon, Transform, Direction);
+}
 
+void AKraverPlayer::Multicast_ThrowWeapon_Implementation(AWeapon* Weapon, FTransform Transform, FVector Direction)
+{
+	Weapon->GetWeaponMesh()->SetWorldTransform(Transform, false, nullptr, ETeleportType::TeleportPhysics);
+	Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
+	Weapon->GetWeaponMesh()->AddImpulse(Direction * WeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
+	Weapon->GetWeaponMesh()->AddAngularImpulseInDegrees(Direction * WeaponThrowAngularPower, NAME_None, true);
 }
 
 void AKraverPlayer::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
@@ -470,6 +464,9 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	ASoldier::OnClientUnEquipWeaponSuccessEvent(Weapon);
+
+	ThrowWeapon(Weapon);
+
 	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
 	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
 
@@ -485,11 +482,9 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 		ShowOnlyThirdPerson.Remove(Map.Value);
 	}
 
-	ThrowWeapon(Weapon);
 	Weapon->RemoveAdditivePrimitiveInfo(*ArmWeaponMeshes[Weapon]);
 	ArmWeaponMeshes.Remove(Weapon);
 	RefreshCurViewType();
-
 }
 
 void AKraverPlayer::OnClientHoldWeaponEvent(AWeapon* Weapon)

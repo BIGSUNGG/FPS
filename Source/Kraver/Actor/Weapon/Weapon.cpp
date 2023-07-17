@@ -63,13 +63,13 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UPrimitiveComponent* WeaponMesh = GetWeaponMesh();
+	RootMesh = *(WeaponPrimitiveInfo.Find("Root"));
 
-	if (WeaponMesh)
+	if (RootMesh)
 	{
-		WeaponMesh->SetCollisionProfileName("WeaponMesh");
-		WeaponMesh->SetSimulatePhysics(true);
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		RootMesh->SetCollisionProfileName("WeaponMesh");
+		RootMesh->SetSimulatePhysics(true);
+		RootMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
 	else
 		KR_LOG(Error, TEXT("WeaponMesh is nullptr"));

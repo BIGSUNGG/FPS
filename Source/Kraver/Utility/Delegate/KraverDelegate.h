@@ -60,6 +60,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMakeNewPrimitiveInfoDele, int, Inde
 // Destroy Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDestroyDele, AActor*, Actor);
 
+// Impact Delegate
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FImpactDele, AActor*, Bullet, AActor*, OtherActor, UPrimitiveComponent*, OtherComponent, const FHitResult&, Hit);
+
 UCLASS()
 class KRAVER_API ACustomDelegate : public AActor
 {

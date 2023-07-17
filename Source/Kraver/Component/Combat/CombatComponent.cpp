@@ -334,7 +334,6 @@ void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 	bool Success = Weapon->UnEquipped();
 	if (Success)
 	{
-		Weapon->SetOwner(nullptr);
 		KR_LOG(Log, TEXT("UnEquipWeapon %s"), *Weapon->GetName());
 
 		OnServerUnEquipWeaponSuccess.Broadcast(Weapon);
@@ -346,6 +345,8 @@ void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 
 void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
 {
+	Weapon->SetOwner(OwnerCreature);
+
 	HolsterWeapon(CurWeapon);
 
 	SetCurWeapon(Weapon);
@@ -388,7 +389,7 @@ void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FKra
 		return;
 	}
 
-	KR_LOG(Log, TEXT("Take %f Damage by %s"), DamageResult.ActualDamage, *DamageCauser->GetName());
+	KR_LOG(Log, TEXT("Take %d Damage by %s"), DamageResult.ActualDamage, *DamageCauser->GetName());
 	CurHp -= DamageResult.ActualDamage;
 	if (CurHp <= 0)
 	{
@@ -412,6 +413,9 @@ void UCombatComponent::Client_TakeDamageSuccess_Implementation(float DamageAmoun
 
 void UCombatComponent::Server_GiveDamage_Implementation(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if(DamageEvent.DamageType == EKraverDamageType::UNKWOWN)
+		KR_LOG(Error, TEXT("Damage Type is UNKWON"));
+
 	float Damage = DamagedActor->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	FKraverDamageResult DamageResult;

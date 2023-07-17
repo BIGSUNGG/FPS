@@ -118,13 +118,13 @@ void AMelee::SwingAttack()
 	TArray<FHitResult> HitResults;
 	FCollisionQueryParams Params(NAME_None, false, OwnerCreature);
 
-	bool bResult = SweepMultiByChannel_ExceptWorldObject(
+	bool bResult = SweepMultiByProfile_ExceptWorldObject(
 		GetWorld(),
 		HitResults,
 		OwnerCreature->GetCamera()->GetComponentLocation(),
 		OwnerCreature->GetCamera()->GetComponentLocation() + OwnerCreature->GetCamera()->GetForwardVector() * 200.f,
 		FQuat::Identity,
-		ECC_SWING,
+		PROFILE_Swing,
 		FCollisionShape::MakeSphere(20.f),
 		Params
 	);
@@ -135,6 +135,7 @@ void AMelee::SwingAttack()
 		if (IsValid(Result.GetActor()))
 		{
 			FKraverDamageEvent DamageEvent;
+			DamageEvent.DamageType = EKraverDamageType::SWING;
 			DamageEvent.bCanParried = true;
 			DamageEvent.DamageImpulse = AttackImpulse;
 			DamageEvent.HitInfo = Result;
@@ -154,10 +155,7 @@ void AMelee::NextComboAttack()
 	KR_LOG(Log, TEXT("NextComboAttack"));
 	++CurComboAttack;
 	if (CurComboAttack > MaxComboAttack)
-	{
-		KR_LOG(Error, TEXT("CurComboAttack > MaxComboAttack"))
 		return;
-	}
 
 	Attack();
 }

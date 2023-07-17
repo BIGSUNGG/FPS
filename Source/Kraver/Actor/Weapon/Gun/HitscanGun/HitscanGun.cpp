@@ -25,7 +25,7 @@ void AHitscanGun::FireBullet()
 		Spread.Z = FMath::RandRange(-CurSpread, CurSpread);
 	}
 
-	TArray<FHitResult> BulletHitResults = CalculateFireHit(ECC_BULLET, Spread);
+	TArray<FHitResult> BulletHitResults = CalculateFireHit(PROFILE_Bullet, Spread);
 
 	for (auto& Result : BulletHitResults)
 	{
@@ -33,6 +33,7 @@ void AHitscanGun::FireBullet()
 		if (IsValid(Result.GetActor()))
 		{
 			FKraverDamageEvent DamageEvent;
+			DamageEvent.DamageType = EKraverDamageType::BULLET;
 			DamageEvent.bCanHeadShot = true;
 			DamageEvent.bCanParried = true;
 			DamageEvent.DamageImpulse = AttackImpulse;
@@ -47,7 +48,7 @@ void AHitscanGun::FireBullet()
 	}
 }
 
-TArray<FHitResult> AHitscanGun::CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread /*= FVector(0, 0, 0)*/)
+TArray<FHitResult> AHitscanGun::CalculateFireHit(FName ProfileName, FVector Spread /*= FVector(0, 0, 0)*/)
 {
 	FVector EndPoint = OwnerCreature->GetCamera()->GetForwardVector() + Spread;
 	EndPoint.Normalize();
@@ -56,12 +57,12 @@ TArray<FHitResult> AHitscanGun::CalculateFireHit(ECollisionChannel BulletChannel
 
 	TArray<FHitResult> BulletHitResults;
 	FCollisionQueryParams BulletParams(NAME_None, false, OwnerCreature);
-	bool bResult = GetWorld()->SweepMultiByChannel(
+	bool bResult = GetWorld()->SweepMultiByProfile(
 		BulletHitResults,
 		OwnerCreature->GetCamera()->GetComponentLocation(),
 		EndPoint,
 		FQuat::Identity,
-		BulletChannel,
+		ProfileName,
 		FCollisionShape::MakeSphere(BulletRadius),
 		BulletParams
 	);

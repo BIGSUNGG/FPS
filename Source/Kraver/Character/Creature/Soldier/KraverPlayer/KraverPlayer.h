@@ -63,7 +63,9 @@ protected:
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
 	UFUNCTION(Server, reliable)
-		void Server_ThrowWeapon(AWeapon* Weapon, FVector Location, FRotator Rotation, FVector Direction);
+		void Server_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
+	UFUNCTION(NetMulticast, reliable)
+		void Multicast_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
 	virtual void Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed);
 
 	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
@@ -127,7 +129,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
 		AWeapon* CanInteractWeapon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
-		float InteractionDistance = 300.f; // 장착가능한 무기를 찾는 거리
+		float InteractionDistance = 500.f; // 장착가능한 무기를 찾는 거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
 		float InteractionRadius = 25.f; // 장착가능한 무기를 찾는 범위의 반지름
 

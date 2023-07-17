@@ -5,14 +5,18 @@
 #define TEST_RELOAD true
 
 // Coliision
+
+// Channel
 #define ECC_INTERACTION ECollisionChannel::ECC_GameTraceChannel1
 #define ECC_ONLY_OBJECT ECollisionChannel::ECC_GameTraceChannel2
-#define ECC_BULLET ECollisionChannel::ECC_GameTraceChannel3
-#define ECC_SWING ECollisionChannel::ECC_GameTraceChannel4
+#define ECC_CharacterMesh ECollisionChannel::ECC_GameTraceChannel3
 #define ECC_ASSASSINATION ECollisionChannel::ECC_GameTraceChannel5
 
+#define PROFILE_Swing "Swing"
+#define PROFILE_Bullet "Bullet"
+
 // Server
-#define IS_SERVER() GetWorld()->IsNetMode(ENetMode::NM_DedicatedServer) || GetWorld()->IsNetMode(ENetMode::NM_ListenServer)
+#define IS_SERVER() GetWorld()->IsNetMode(ENetMode::NM_DedicatedServer) || GetWorld()->IsNetMode(ENetMode::NM_ListenServer) || GetWorld()->IsNetMode(ENetMode::NM_Standalone)
 
 // Loga
 #define KR_CALLINFO ((IS_SERVER() ? TEXT("Server :") : TEXT("Client :")) + FString(__FUNCTION__) + TEXT("(") + FString::FromInt(__LINE__) + TEXT(")"))

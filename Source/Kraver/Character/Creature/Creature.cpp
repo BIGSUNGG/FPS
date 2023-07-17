@@ -53,6 +53,9 @@ ACreature::ACreature()
 	Camera->bUsePawnControlRotation = true;
 	Camera->SetFieldOfView(110.f);
 
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetGenerateOverlapEvents(true);
+
 	GetCharacterMovement()->AirControl = 0.25f;
 	GetCharacterMovement()->MaxWalkSpeed = CreatureMovementComponent->GetWalkSpeed();
 	GetCharacterMovement()->MaxWalkSpeedCrouched = CreatureMovementComponent->GetCrouchWalkSpeed();
@@ -446,6 +449,12 @@ void ACreature::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 	if (Weapon == nullptr)
 		return;
 
+	Weapon->GetWeaponMesh()->AttachToComponent
+	(
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetIncludingScale,
+		Weapon->GetAttachSocketName()
+	);
 }
 
 void ACreature::OnServerEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -458,18 +467,19 @@ void ACreature::OnServerEquipWeaponSuccessEvent(AWeapon* Weapon)
 		FAttachmentTransformRules::SnapToTargetIncludingScale,
 		Weapon->GetAttachSocketName()
 	);
+
+	Multicast_OnEquipWeaponSuccessEvent(Weapon);
 }
 
 void ACreature::OnServerUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
-
 	Multicast_OnUnEquipWeaponSuccessEvent(Weapon);
 }
 
 void ACreature::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
+	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
 void ACreature::OnClientHoldWeaponEvent(AWeapon* Weapon)
@@ -633,9 +643,20 @@ void ACreature::Client_Assassinated_Implementation(ACreature* Attacker, FAssassi
 	DisableInput(PlayerController);
 }
 
+void ACreature::Multicast_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
+{
+	Weapon->GetWeaponMesh()->AttachToComponent
+	(
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetIncludingScale,
+		Weapon->GetAttachSocketName()
+	);
+}
+
 void ACreature::Multicast_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
 	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
+	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
 void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

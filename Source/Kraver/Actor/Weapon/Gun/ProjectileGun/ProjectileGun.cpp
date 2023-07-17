@@ -26,7 +26,7 @@ void AProjectileGun::FireBullet()
 
 	FHitResult HitResult;
 	FCollisionQueryParams HitParams(NAME_None, false, OwnerCreature);
-	bool bHitSuccess = GetWorld()->LineTraceSingleByProfile(HitResult, OwnerCreature->GetCamera()->GetComponentLocation(), EndPoint, "BlockAll", HitParams);
+	bool bHitSuccess = GetWorld()->LineTraceSingleByProfile(HitResult, OwnerCreature->GetCamera()->GetComponentLocation(), EndPoint, "BulletShape", HitParams);
 
 	FVector BulletDirection;
 	if (bHitSuccess)
@@ -45,5 +45,19 @@ void AProjectileGun::FireBullet()
 	else
 		MuzzleLocation = WeaponPrimitiveInfo["Root"]->GetSocketLocation("SOCKET_Muzzle");
 
-	GetWorld()->SpawnActor<ABullet>(BulletClass, MuzzleLocation, BulletDirection.Rotation());
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(BulletClass, MuzzleLocation, BulletDirection.Rotation(), SpawnParams);
+	Bullet->SetOwner(this);
+	Bullet->OnImpact.AddDynamic(this, &ThisClass::OnBulletImpactEvent);
+}
+
+void AProjectileGun::OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit)
+{
+	if(!Hit.bBlockingHit)
+		return;
+
+	Server_SpawnImpactEffect(Hit.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f);
+
+
 }

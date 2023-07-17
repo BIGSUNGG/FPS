@@ -143,6 +143,8 @@ protected:
 	UFUNCTION(Client, Reliable)
 		virtual void Client_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(NetMulticast, reliable)
+		void Multicast_OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
+	UFUNCTION(NetMulticast, reliable)
 		void Multicast_OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_OnDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 모든 클라이언트에서 호출되는 함수

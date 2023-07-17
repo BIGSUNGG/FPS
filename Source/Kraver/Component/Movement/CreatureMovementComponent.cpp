@@ -55,6 +55,9 @@ void UCreatureMovementComponent::Landed(const FHitResult& Hit)
 
 void UCreatureMovementComponent::MoveForward(float NewAxisValue)
 {
+	if(!OwnerCreature)
+		return;
+
 	NewAxisValue *= InputForwardRatio;
 	if (!OwnerCreature->GetMovementComponent()->IsFalling())
 	{
@@ -79,6 +82,9 @@ void UCreatureMovementComponent::MoveForward(float NewAxisValue)
 
 void UCreatureMovementComponent::MoveRight(float NewAxisValue)
 {
+	if (!OwnerCreature)
+		return;
+
 	NewAxisValue *= InputRightRatio;
 	if (NewAxisValue == 0 || OwnerCreature->Controller == nullptr || NewAxisValue == 0)
 		return;

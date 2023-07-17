@@ -87,7 +87,7 @@ public:
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
-	UPrimitiveComponent* GetWeaponMesh() { return WeaponPrimitiveInfo.Contains("Root") ? WeaponPrimitiveInfo["Root"] : nullptr; }
+	UPrimitiveComponent* GetWeaponMesh() { return RootMesh; }
 	TMap<FString, UPrimitiveComponent*>& GetWeaponPrimitiveInfo() { return WeaponPrimitiveInfo; }
 	TArray<TMap<FString, UPrimitiveComponent*>>& GetAdditiveWeaponPrimitiveInfo() { return AdditiveWeaponPrimitiveInfo; }
 
@@ -175,6 +175,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
 		FName AttachSocketName = "SOCKET_Weapon_AR_01"; // Weapon을 Attach할 스켈레탈 본 이름
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Component|Info", meta = (AllowPrivateAccess = "true"))
+		UPrimitiveComponent* RootMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Info", meta = (AllowPrivateAccess = "true"))
 		TMap<FString, UPrimitiveComponent*> WeaponPrimitiveInfo;
 	TArray<TMap<FString, UPrimitiveComponent*>> AdditiveWeaponPrimitiveInfo; // 추가적인 WeaponMesh를 가지는 배열

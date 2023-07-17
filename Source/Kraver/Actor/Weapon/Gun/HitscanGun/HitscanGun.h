@@ -18,7 +18,7 @@ public:
 
 protected:
 	virtual void FireBullet() override;
-	TArray<FHitResult>  CalculateFireHit(ECollisionChannel BulletChannel, FVector Spread = FVector(0, 0, 0));
+	TArray<FHitResult>  CalculateFireHit(FName ProfileName, FVector Spread = FVector(0, 0, 0));
 
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))

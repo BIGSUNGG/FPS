@@ -51,6 +51,7 @@ enum class EMovementState : uint8
 UENUM(BlueprintType)
 enum class EKraverDamageType : uint8
 {
+	UNKWOWN		UMETA(DisplayName = "UNKWOWN"),
 	SWING		UMETA(DisplayName = "SWING"),
 	BULLET		UMETA(DisplayName = "BULLET"),
 	EXPLOSION	UMETA(DisplayName = "EXPLOSION"),

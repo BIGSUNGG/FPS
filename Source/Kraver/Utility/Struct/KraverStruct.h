@@ -2,6 +2,7 @@
 
 #include "EngineMinimal.h"
 #include "Engine/DamageEvents.h"
+#include "Kraver/Utility/Enum/KraverEnum.h"
 #include "KraverStruct.generated.h"
 
 enum class EKraverDamageType : uint8;
@@ -56,7 +57,7 @@ public:
 	UPROPERTY()
 	FHitResult HitInfo;
 	UPROPERTY()
-	EKraverDamageType DamageType;
+	EKraverDamageType DamageType = EKraverDamageType::UNKWOWN;
 
 	UPROPERTY()
 	float DamageImpulse = 0.f;
