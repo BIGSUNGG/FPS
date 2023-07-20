@@ -43,9 +43,12 @@ protected:
 		UStaticMeshComponent* BulletMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
 		UProjectileMovementComponent* ProjectileMovementComponent;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
-		float BulletDamage;
 
-	int16 MaxHitCount = 1;
-	int16 HitCount = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))
+		float BulletDamage = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))
+		int32 MaxHitCount = 1;
+
+	int32 HitCount = 0;
 };

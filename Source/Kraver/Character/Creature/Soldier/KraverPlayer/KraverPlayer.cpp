@@ -254,7 +254,8 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 		TArray<FHitResult> HitResults;
 		FCollisionQueryParams Params(NAME_None, false, this);
 
-		bool bResult = GetWorld()->LineTraceMultiByChannel(
+		bool bResult = LineTraceMultiByChannel_ExceptWorldObject(
+			GetWorld(),
 			HitResults,
 			Camera->GetComponentLocation(),
 			Camera->GetComponentLocation() + Camera->GetForwardVector() * Distance,

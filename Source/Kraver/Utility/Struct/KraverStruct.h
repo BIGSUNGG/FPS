@@ -81,3 +81,17 @@ public:
 	virtual int32 GetTypeID() const override { return FKraverDamageEvent::ClassID; };
 	virtual bool IsOfType(int32 InID) const override { return (FKraverDamageEvent::ClassID == InID) || FDamageEvent::IsOfType(InID); };
 };
+
+USTRUCT(BlueprintType)
+struct FKraverRadialDamageEvent : public FKraverDamageEvent
+{
+	GENERATED_BODY()
+
+public:
+
+public:
+	static const int32 ClassID = 4;
+
+	virtual int32 GetTypeID() const override { return FKraverRadialDamageEvent::ClassID; };
+	virtual bool IsOfType(int32 InID) const override { return (FKraverRadialDamageEvent::ClassID == InID) || FKraverDamageEvent::IsOfType(InID) || FDamageEvent::IsOfType(InID); };
+};
