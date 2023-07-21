@@ -36,6 +36,10 @@ protected:
 	virtual void GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);
 
 public:
+	FORCEINLINE void SetDamageType(TSubclassOf<UDamageType> InDamageType) { DamageType = InDamageType; }
+
+
+public:
 	FImpactDele OnImpact;
 
 protected:
@@ -51,4 +55,5 @@ protected:
 		int32 MaxHitCount = 1;
 
 	int32 HitCount = 0;
+	TSubclassOf<UKraverDamageType> DamageType;
 };

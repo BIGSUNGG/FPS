@@ -50,12 +50,14 @@ void UWeaponParryComponent::OnSubAttackStartEvent()
 	ParryStart();
 }
 
-void UWeaponParryComponent::OnServerBeforeTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void UWeaponParryComponent::OnServerBeforeTakeDamageEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	if(OwnerWeapon == nullptr)
 		return;
 
-	if (IsParrying && DamageEvent.bCanParried)
+	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
+
+	if (IsParrying && DamageType->bCanParried)
 	{
 		ParrySuccess();
 	}

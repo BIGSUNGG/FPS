@@ -78,17 +78,8 @@ float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	float Damage;
-	if (DamageEvent.IsOfType(FKraverDamageEvent::ClassID))
-	{
-		const FKraverDamageEvent* KraverDamageEvent = static_cast<const FKraverDamageEvent*>(&DamageEvent);
-		Damage = CombatComponent->TakeDamage(DamageAmount, *KraverDamageEvent, EventInstigator, DamageCauser);
-	}
-	else
-	{
-		Damage = 0.f;
-		KR_LOG(Error, TEXT("Use only FKraverDamageEvent"));
-	}
+	float Damage = CombatComponent->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
 	return Damage;
 }
 
@@ -549,7 +540,7 @@ void ACreature::OnServerHolsterWeaponEvent(AWeapon* Weapon)
 	Multicast_HolsterWeaponEvent(Weapon);
 }
 
-void ACreature::OnClientDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void ACreature::OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	DisableInput(GetController<APlayerController>());
 	if (CombatComponent->GetCurWeapon() != nullptr)
@@ -558,9 +549,11 @@ void ACreature::OnClientDeathEvent(float DamageAmount, FKraverDamageEvent const&
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
 }
 
-void ACreature::OnServerDeathEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void ACreature::OnServerDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
-	if (DamageEvent.bCanSimulate)
+	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
+
+	if (DamageType->bCanSimulate)
 	{
 		SimulateMesh();
 	}
@@ -600,7 +593,7 @@ void ACreature::OnJumped_Implementation()
 	OnJump.Broadcast();
 }
 
-void ACreature::OnClientAfterTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void ACreature::OnClientAfterTakeDamageEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	Server_OnAfterTakeDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
@@ -659,26 +652,43 @@ void ACreature::Multicast_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* We
 	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
-void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
+
+	if (DamageType->bCanSimulate)
+	{
+		SimulateMesh();
+	}
+
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
 }
 
-void ACreature::Server_OnAfterTakeDamageEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::Server_OnAfterTakeDamageEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Multicast_OnAfterTakeDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
-void ACreature::Multicast_OnAfterTakeDamageEvent_Implementation(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::Multicast_OnAfterTakeDamageEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (GetMesh()->IsSimulatingPhysics())
 	{
-		FVector Direction = DamageEvent.GetHitDirection();
+		UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
+		if (!DamageType)
+		{
+			KR_LOG(Error, TEXT("Damage Type is not UKraverDamageType Class"));
+			return;
+		}
 
-		GetMesh()->AddImpulseAtLocation(
-			Direction * DamageEvent.DamageImpulse * GetMesh()->GetMass() * ImpulseResistanceRatio,
-			DamageEvent.HitInfo.ImpactPoint
-		);
+		if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+		{
+			FPointDamageEvent const& PointDamageEvent = static_cast<FPointDamageEvent const&>(DamageEvent);
+
+			GetMesh()->AddImpulseAtLocation(
+				PointDamageEvent.ShotDirection * DamageType->DamageImpulse * GetMesh()->GetMass() * ImpulseResistanceRatio,
+				PointDamageEvent.HitInfo.ImpactPoint
+			);
+		}
 	}
 }
 

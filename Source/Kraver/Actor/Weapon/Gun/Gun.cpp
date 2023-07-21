@@ -61,6 +61,7 @@ void AGun::BeginPlay()
 {
 	AWeapon::BeginPlay();
 	CurBulletSpread = MinSpread;
+
 }
 
 void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -40,7 +40,7 @@ void AFloatingDamage::Tick(float DeltaTime)
 	SetActorLocation(GetActorLocation() + (UpVector * FloatingUpSpeed) + (RightVector * FloatingRightSpeed));
 }
 
-void AFloatingDamage::ShowFloatingDamage(AActor* DamagedActor, FKraverDamageEvent const& DamageEvent, FKraverDamageResult const& DamageResult)
+void AFloatingDamage::ShowFloatingDamage(AActor* DamagedActor, FDamageEvent const& DamageEvent, FKraverDamageResult const& DamageResult)
 {
 	GetWorldTimerManager().ClearTimer(DestroyTimer);
 
@@ -50,12 +50,19 @@ void AFloatingDamage::ShowFloatingDamage(AActor* DamagedActor, FKraverDamageEven
 	Widget->AddDamage(DamageResult.ActualDamage);
 	Widget->SetColor(DamageResult.bCritical ? FColor::Red : FColor::White);
 
+	FVector ForwardVector;
+	FVector ImpactPoint;
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		FPointDamageEvent const& PointDamageEvent = static_cast<FPointDamageEvent const&>(DamageEvent);
+		ForwardVector = PointDamageEvent.ShotDirection;
+		ImpactPoint = PointDamageEvent.HitInfo.ImpactPoint;
+	}
 
-	FVector ForwardVector = DamageEvent.GetHitDirection();
 	RightVector = -FVector::CrossProduct(ForwardVector, FVector(0.0f, 0.0f, 1.0f));
 	UpVector = FVector::UpVector;
 
-	SetActorLocation(DamageEvent.HitInfo.ImpactPoint + (RightVector * 15.f) + (UpVector * 15.f));
+	SetActorLocation(ImpactPoint + (RightVector * 15.f) + (UpVector * 15.f));
 	GetWorldTimerManager().SetTimer(DestroyTimer, this, &AFloatingDamage::OnDestroyTimerEvent, LifeTime, false, LifeTime);
 }
 

@@ -32,9 +32,11 @@ void UDamageIndicatorSubsystem::OnLocalPlayerBeginPlay(AKraverPlayer* Player)
 	Player->CombatComponent->OnClientAfterTakeDamageSuccess.AddDynamic(this, &UDamageIndicatorSubsystem::OnClientAfterTakeDamageEvent);
 }
 
-void UDamageIndicatorSubsystem::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void UDamageIndicatorSubsystem::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
-	if(DamageResult.bAlreadyDead || DamageEvent.DamageType == EKraverDamageType::ASSASSINATION)
+	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
+
+	if(DamageResult.bAlreadyDead || DamageType->AttackType == EKraverDamageType::ASSASSINATION)
 		return;
 
 	ACreature* Creature = Cast<ACreature>(DamagedActor);
@@ -60,7 +62,7 @@ void UDamageIndicatorSubsystem::OnClientGiveDamageSuccessEvent(AActor* DamagedAc
 	DamageWidget->ShowFloatingDamage(DamagedActor, DamageEvent, DamageResult);
 }
 
-void UDamageIndicatorSubsystem::OnClientAfterTakeDamageEvent(float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void UDamageIndicatorSubsystem::OnClientAfterTakeDamageEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	if (DamageResult.bAlreadyDead)
 		return;
@@ -87,7 +89,13 @@ void UDamageIndicatorSubsystem::OnClientAfterTakeDamageEvent(float DamageAmount,
 	}
 
 	UDamageDirectionWidget* Widget = Cast<UDamageDirectionWidget>(CreateWidget<UDamageDirectionWidget>(GetWorld(), DamagedDirectionClass));
-	Widget->Initialize(KraverPlayer, DamageEvent.HitInfo.TraceStart);
+
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		FPointDamageEvent const& PointDamageEvent = static_cast<FPointDamageEvent const&>(DamageEvent);
+		Widget->Initialize(KraverPlayer, PointDamageEvent.HitInfo.TraceStart);
+	}
+
 	Widget->AddToViewport();
 	DamagedDirectionWidgets.Add(Creature, Widget);
 }	

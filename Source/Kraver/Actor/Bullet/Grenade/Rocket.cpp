@@ -3,13 +3,11 @@
 
 #include "Rocket.h"
 #include "Kraver/Component/Combat/CombatComponent.h"
-#include "Kraver/Subsystem/ExpolosionSubsystem.h"
+#include "GameFramework/DamageType.h"
 
 void ARocket::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit)
 {
 	Super::GiveDamage(OtherActor, OtherComponent, Hit);
-
-	UExpolosionSubsystem* ExpolosionSubsystem = GetGameInstance()->GetSubsystem<UExpolosionSubsystem>();
 
 	TArray<AActor*> IgnoreActors;
 	UCombatComponent* CombatComp = nullptr;
@@ -23,7 +21,6 @@ void ARocket::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 		CurActor = CurActor->GetOwner();
 	}
 
-
 	UGameplayStatics::ApplyRadialDamageWithFalloff(
 		this, // World context object
 		ExplosionDamage, // BaseDamage
@@ -32,7 +29,7 @@ void ARocket::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 		200.f, // DamageInnerRadius
 		500.f, // DamageOuterRadius
 		1.f, // DamageFalloff
-		UDamageType::StaticClass(), // DamageTypeClass
+		UKraverDamageType::StaticClass(), // DamageTypeClass
 		TArray<AActor*>(), // IgnoreActors
 		this // DamageCauser
 		);

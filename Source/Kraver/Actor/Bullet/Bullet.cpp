@@ -89,10 +89,10 @@ void ABullet::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 		CurActor = CurActor->GetOwner();
 	}
 
-	FKraverDamageEvent DamageEvent;
-	DamageEvent.DamageType = EKraverDamageType::BULLET;
-	DamageEvent.HitInfo = Hit;
-	DamageEvent.bCanHeadShot = true;
+	FVector ShotDirection = GetVelocity();
+	ShotDirection.Normalize();
+
+	FPointDamageEvent DamageEvent(BulletDamage, Hit, ShotDirection, DamageType);
 	CombatComp->GiveDamage(OtherActor, BulletDamage, DamageEvent, CurActor->GetInstigatorController(), GetOwner());
 
 	OnImpact.Broadcast(this, OtherActor, OtherComponent, Hit);

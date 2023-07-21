@@ -32,12 +32,13 @@ void AHitscanGun::FireBullet()
 		auto Creature = Cast<ACreature>(Result.GetActor());
 		if (IsValid(Result.GetActor()))
 		{
-			FKraverDamageEvent DamageEvent;
-			DamageEvent.DamageType = EKraverDamageType::BULLET;
-			DamageEvent.bCanHeadShot = true;
-			DamageEvent.bCanParried = true;
-			DamageEvent.DamageImpulse = AttackImpulse;
-			DamageEvent.HitInfo = Result;
+			FVector Direction = Result.TraceEnd - Result.TraceStart;
+			Direction.Normalize();
+
+			//FPointDamageEvent DamageEvent(AttackDamage, Result, Direction, AttackDamageType);
+			//OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
+
+			FDamageEvent DamageEvent(AttackDamageType);
 			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
 			if (Result.bBlockingHit)
 			{

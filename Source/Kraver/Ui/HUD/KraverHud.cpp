@@ -107,7 +107,7 @@ void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FV
 	);
 }
 
-void AKraverHUD::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FKraverDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void AKraverHUD::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	if(DamageResult.bAlreadyDead)
 		return;
@@ -116,7 +116,7 @@ void AKraverHUD::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float Dama
 	if(Creature)
 		HitmarkAppearanceTime = 0.05f;
 
-	bHitmartCritical = DamageEvent.HitInfo.BoneName == "head";
+	bHitmartCritical = DamageResult.bCritical;
 }
 
 void AKraverHUD::SetInteractWidget(bool value)

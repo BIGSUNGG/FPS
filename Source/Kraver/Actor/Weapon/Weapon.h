@@ -210,6 +210,8 @@ protected:
 		float AttackDamage = 10.f; // 공격을 하였을때 주는 데미지	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 		float AttackImpulse = 150.f; // 공격을 하였을때 주는 충격량
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<UKraverDamageType> AttackDamageType;
 
 	FTimerHandle AutomaticAttackHandle; // 연사공격을 담당하는 TimerHandle
 

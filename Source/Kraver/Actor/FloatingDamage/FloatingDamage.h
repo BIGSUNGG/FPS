@@ -22,7 +22,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void ShowFloatingDamage(AActor* DamagedActor, FKraverDamageEvent const& DamageEvent, FKraverDamageResult const& DamageResult);
+	void ShowFloatingDamage(AActor* DamagedActor, FDamageEvent const& DamageEvent, FKraverDamageResult const& DamageResult);
 
 	virtual void OnDestroyTimerEvent();
 

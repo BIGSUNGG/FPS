@@ -134,11 +134,7 @@ void AMelee::SwingAttack()
 		auto Creature = Cast<ACreature>(Result.GetActor());
 		if (IsValid(Result.GetActor()))
 		{
-			FKraverDamageEvent DamageEvent;
-			DamageEvent.DamageType = EKraverDamageType::SWING;
-			DamageEvent.bCanParried = true;
-			DamageEvent.DamageImpulse = AttackImpulse;
-			DamageEvent.HitInfo = Result;
+			FDamageEvent DamageEvent;
 			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
 		}
 	}

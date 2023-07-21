@@ -48,50 +48,19 @@ public:
 	int ActualDamage = 0.f;
 };
 
-USTRUCT(BlueprintType)
-struct FKraverDamageEvent : public FDamageEvent
+UCLASS(MinimalAPI, const, Blueprintable, BlueprintType)
+class UKraverDamageType : public UDamageType
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
-	FHitResult HitInfo;
-	UPROPERTY()
-	EKraverDamageType DamageType = EKraverDamageType::UNKWOWN;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AttackType)
+	EKraverDamageType AttackType = EKraverDamageType::UNKWOWN;
 
-	UPROPERTY()
-	float DamageImpulse = 0.f;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AttackType)
 	bool bCanParried = false;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AttackType)
 	bool bCanHeadShot = false;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AttackType)
 	bool bCanSimulate = true;
-
-public:
-	FVector GetHitDirection() const
-	{ 
-		FVector Result = (HitInfo.TraceEnd - HitInfo.TraceStart); 
-		Result.Normalize();
-		return Result; 
-	}
-
-	static const int32 ClassID = 3;
-
-	virtual int32 GetTypeID() const override { return FKraverDamageEvent::ClassID; };
-	virtual bool IsOfType(int32 InID) const override { return (FKraverDamageEvent::ClassID == InID) || FDamageEvent::IsOfType(InID); };
-};
-
-USTRUCT(BlueprintType)
-struct FKraverRadialDamageEvent : public FKraverDamageEvent
-{
-	GENERATED_BODY()
-
-public:
-
-public:
-	static const int32 ClassID = 4;
-
-	virtual int32 GetTypeID() const override { return FKraverRadialDamageEvent::ClassID; };
-	virtual bool IsOfType(int32 InID) const override { return (FKraverRadialDamageEvent::ClassID == InID) || FKraverDamageEvent::IsOfType(InID) || FDamageEvent::IsOfType(InID); };
 };
