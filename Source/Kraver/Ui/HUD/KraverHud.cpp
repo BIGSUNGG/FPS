@@ -81,7 +81,7 @@ void AKraverHUD::BeginPlay()
 	OwnerCreature = Cast<ACreature>(PlayerController->GetCharacter());
 	if (OwnerCreature)
 	{
-		OwnerCreature->CombatComponent->OnClientGiveDamageSuccess.AddDynamic(this, &AKraverHUD::OnClientGiveDamageSuccessEvent);
+		OwnerCreature->CombatComponent->OnClientGiveAnyDamageSuccess.AddDynamic(this, &AKraverHUD::OnClientGiveDamageSuccessEvent);
 	}
 }
 

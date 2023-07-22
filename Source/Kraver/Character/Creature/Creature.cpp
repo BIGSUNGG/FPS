@@ -31,7 +31,7 @@ ACreature::ACreature()
 	CombatComponent->OnClientUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnClientUnEquipWeaponSuccessEvent);	
 	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnServerUnEquipWeaponSuccessEvent);
 
-	CombatComponent->OnClientAfterTakeDamageSuccess.AddDynamic(this, &ACreature::OnClientAfterTakeDamageEvent);
+	CombatComponent->OnClientAfterTakePointDamageSuccess.AddDynamic(this, &ACreature::OnClientAfterTakePointDamageEvent);
 
 	CombatComponent->OnClientHoldWeapon.AddDynamic(this, &ACreature::OnClientHoldWeaponEvent);
 	CombatComponent->OnServerHoldWeapon.AddDynamic(this, &ACreature::OnServerHoldWeaponEvent);
@@ -593,9 +593,9 @@ void ACreature::OnJumped_Implementation()
 	OnJump.Broadcast();
 }
 
-void ACreature::OnClientAfterTakeDamageEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void ACreature::OnClientAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
-	Server_OnAfterTakeDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Server_OnAfterTakePointDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ACreature::OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
@@ -664,12 +664,12 @@ void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamag
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
 }
 
-void ACreature::Server_OnAfterTakeDamageEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::Server_OnAfterTakePointDamageEvent_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	Multicast_OnAfterTakeDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Multicast_OnAfterTakePointDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
-void ACreature::Multicast_OnAfterTakeDamageEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACreature::Multicast_OnAfterTakePointDamageEvent_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (GetMesh()->IsSimulatingPhysics())
 	{
@@ -680,15 +680,10 @@ void ACreature::Multicast_OnAfterTakeDamageEvent_Implementation(float DamageAmou
 			return;
 		}
 
-		if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
-		{
-			FPointDamageEvent const& PointDamageEvent = static_cast<FPointDamageEvent const&>(DamageEvent);
-
-			GetMesh()->AddImpulseAtLocation(
-				PointDamageEvent.ShotDirection * DamageType->DamageImpulse * GetMesh()->GetMass() * ImpulseResistanceRatio,
-				PointDamageEvent.HitInfo.ImpactPoint
-			);
-		}
+		GetMesh()->AddImpulseAtLocation(
+			DamageEvent.ShotDirection * DamageType->DamageImpulse * GetMesh()->GetMass() * ImpulseResistanceRatio,
+			DamageEvent.HitInfo.ImpactPoint
+		);
 	}
 }
 

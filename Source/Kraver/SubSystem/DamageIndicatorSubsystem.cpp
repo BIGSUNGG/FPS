@@ -28,11 +28,11 @@ void UDamageIndicatorSubsystem::OnLocalPlayerBeginPlay(AKraverPlayer* Player)
 	}
 
 	KraverPlayer = Player;
-	Player->CombatComponent->OnClientGiveDamageSuccess.AddDynamic(this, &UDamageIndicatorSubsystem::OnClientGiveDamageSuccessEvent);
-	Player->CombatComponent->OnClientAfterTakeDamageSuccess.AddDynamic(this, &UDamageIndicatorSubsystem::OnClientAfterTakeDamageEvent);
+	Player->CombatComponent->OnClientGivePointDamageSuccess.AddDynamic(this, &UDamageIndicatorSubsystem::OnClientGiveDamagePointSuccessEvent);
+	Player->CombatComponent->OnClientAfterTakePointDamageSuccess.AddDynamic(this, &UDamageIndicatorSubsystem::OnClientAfterTakePointDamageEvent);
 }
 
-void UDamageIndicatorSubsystem::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void UDamageIndicatorSubsystem::OnClientGiveDamagePointSuccessEvent(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
 
@@ -62,7 +62,7 @@ void UDamageIndicatorSubsystem::OnClientGiveDamageSuccessEvent(AActor* DamagedAc
 	DamageWidget->ShowFloatingDamage(DamagedActor, DamageEvent, DamageResult);
 }
 
-void UDamageIndicatorSubsystem::OnClientAfterTakeDamageEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void UDamageIndicatorSubsystem::OnClientAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	if (DamageResult.bAlreadyDead)
 		return;

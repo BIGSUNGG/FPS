@@ -83,7 +83,7 @@ void ABullet::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 	while (CurActor)
 	{
 		CombatComp = CurActor->FindComponentByClass<UCombatComponent>();
-		if(CombatComp)
+		if (CombatComp)
 			break;
 
 		CurActor = CurActor->GetOwner();

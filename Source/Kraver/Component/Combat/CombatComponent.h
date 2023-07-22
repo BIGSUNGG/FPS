@@ -47,11 +47,11 @@ public:
 	// Damage Event
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
 	virtual float GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 주는 함수 (클라이언트에서 서버로 GiveDamage이벤트 호출)
-	UFUNCTION(Client, reliable)
-		void Client_GiveDamageSuccess(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+
 	virtual void CancelTakeDamage();
 
 protected:
+
 	// Equip Weapon
 	UFUNCTION(Server, reliable)
 		virtual void Server_EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
@@ -72,16 +72,37 @@ protected:
 	// Take Damage
 	UFUNCTION(Server, reliable)
 		void Server_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(Server, reliable)
+		void Server_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(Server, reliable)
+		void Server_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+
 	UFUNCTION(Client, reliable)
-		void Client_TakeDamageSuccess(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+		void Client_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	UFUNCTION(Client, reliable)
+		void Client_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	UFUNCTION(Client, reliable)
+		void Client_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	// Give Damage
 	UFUNCTION(Server, reliable)
 		void Server_GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(Server, reliable)
+		void Server_GivePointDamage(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(Server, reliable)
+		void Server_GiveRadialDamage(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+
+	UFUNCTION(Client, reliable)
+		void Client_GiveDamageSuccess(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	UFUNCTION(Client, reliable)
+		void Client_GivePointDamageSuccess(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	UFUNCTION(Client, reliable)
+		void Client_GiveRadialDamageSuccess(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	// Death
 	UFUNCTION(Server, reliable)
 		void Server_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
+
 	UFUNCTION(Client, reliable)
 		void Client_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
 
@@ -99,25 +120,38 @@ public:
 	bool GetIsDead();
 
 public:
+	// Attack
 	FAttackStartDele OnAttackStartDelegate; // 공격을 시작할때 호출
 	FAttackEndDele OnAttackEndDelegate; // 공격을 멈출때 호출
 	FAttackStartDele OnSubAttackStartDelegate; // 공격을 시작할때 호출
 	FAttackEndDele OnSubAttackEndDelegate; // 공격을 멈출때 호출
 
+	// Equip
 	FEquipWeaponSuccessDele OnServerEquipWeaponSuccess; // 무기를 장착했을때 호출
 	FEquipWeaponSuccessDele OnClientEquipWeaponSuccess; // 무기를 장착했을때 호출
 	FUnEquipWeaponSuccessDele OnServerUnEquipWeaponSuccess; // 무기를 해제했을때 호출
 	FUnEquipWeaponSuccessDele OnClientUnEquipWeaponSuccess; // 무기를 해제했을때 호출
 
+	// Hold Holster
 	FHoldWeaponDele OnClientHoldWeapon;
 	FHoldWeaponDele OnServerHoldWeapon;
 	FHolsterWeaponDele OnClientHolsterWeapon;
 	FHolsterWeaponDele OnServerHolsterWeapon;
 
+	// Take Damage
 	FTakeDamageDele OnServerBeforeTakeDamage; // 데미지를 받았을때 호출
 
+	FTakeDamageDele OnClientAfterTakeAnyDamageSuccess; // 데미지를 받았을때 호출
 	FTakeDamageDele OnClientAfterTakeDamageSuccess; // 데미지를 받았을때 호출
+	FTakePointDamageDele OnClientAfterTakePointDamageSuccess; // 데미지를 받았을때 호출
+	FTakeRadialDamageDele OnClientAfterTakeRadialDamageSuccess; // 데미지를 받았을때 호출
+
+	FGiveDamageDele OnClientGiveAnyDamageSuccess; // 데미지를 주었을때 호출
 	FGiveDamageDele OnClientGiveDamageSuccess; // 데미지를 주었을때 호출
+	FGivePointDamageDele OnClientGivePointDamageSuccess; // 데미지를 주었을때 호출
+	FGiveRadialDamageDele OnClientGiveRadialDamageSuccess; // 데미지를 주었을때 호출
+
+	// Death
 	FDeathDele OnClientDeath; // 죽었을때 호출
 	FDeathDele OnServerDeath; // 죽었을때 호출
 

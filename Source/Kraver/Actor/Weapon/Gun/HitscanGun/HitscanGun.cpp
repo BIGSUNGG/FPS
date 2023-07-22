@@ -35,10 +35,7 @@ void AHitscanGun::FireBullet()
 			FVector Direction = Result.TraceEnd - Result.TraceStart;
 			Direction.Normalize();
 
-			//FPointDamageEvent DamageEvent(AttackDamage, Result, Direction, AttackDamageType);
-			//OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
-
-			FDamageEvent DamageEvent(AttackDamageType);
+			FPointDamageEvent DamageEvent(AttackDamage, Result, Direction, AttackDamageType);
 			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
 			if (Result.bBlockingHit)
 			{
