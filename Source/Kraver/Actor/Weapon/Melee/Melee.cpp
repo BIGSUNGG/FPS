@@ -134,7 +134,7 @@ void AMelee::SwingAttack()
 		auto Creature = Cast<ACreature>(Result.GetActor());
 		if (IsValid(Result.GetActor()))
 		{
-			FDamageEvent DamageEvent;
+			FPointDamageEvent DamageEvent(AttackDamage, Result, OwnerCreature->GetCamera()->GetForwardVector(), AttackDamageType);
 			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
 		}
 	}

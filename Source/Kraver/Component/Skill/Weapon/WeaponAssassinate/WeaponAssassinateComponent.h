@@ -67,4 +67,7 @@ protected:
 		UAnimMontage* AssassinatedMontagesTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
 		UAnimMontage* AssassinatedMontagesFpp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<UKraverDamageType> AssassinateDamageType;
 };

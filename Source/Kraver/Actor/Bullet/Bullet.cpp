@@ -92,7 +92,7 @@ void ABullet::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 	FVector ShotDirection = GetVelocity();
 	ShotDirection.Normalize();
 
-	FPointDamageEvent DamageEvent(BulletDamage, Hit, ShotDirection, DamageType);
+	FPointDamageEvent DamageEvent(BulletDamage, Hit, ShotDirection, HitDamageType);
 	CombatComp->GiveDamage(OtherActor, BulletDamage, DamageEvent, CurActor->GetInstigatorController(), GetOwner());
 
 	OnImpact.Broadcast(this, OtherActor, OtherComponent, Hit);

@@ -72,6 +72,9 @@ void AWeapon::BeginPlay()
 	}
 	else
 		KR_LOG(Error, TEXT("WeaponMesh is nullptr"));
+
+	if (!AttackDamageType)
+		KR_LOG(Error, TEXT("AttackDamageType is null"));
 }
 
 // Called every frame

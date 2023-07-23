@@ -145,7 +145,7 @@ void UWeaponAssassinateComponent::Multicast_Assassinate_Implementation(AActor* A
 
 void UWeaponAssassinateComponent::Server_OnAssassinateAttackEvent_Implementation()
 {
-	FDamageEvent AssassinateDamageEvent;
+	FDamageEvent AssassinateDamageEvent(AssassinateDamageType);
 	GetOwnerCreature()->CombatComponent->GiveDamage(CurAssassinatedCreature, AssassinationDamage, AssassinateDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
 }
 

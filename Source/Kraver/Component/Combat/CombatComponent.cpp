@@ -36,6 +36,14 @@ FKraverDamageResult UCombatComponent::CalculateDamage(float DamageAmount, FDamag
 			Result.bCritical = true;
 		}
 	}
+	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	{
+		FRadialDamageEvent const& RadialDamageEvent = static_cast<FRadialDamageEvent const&>(DamageEvent);
+		FHitResult HitResult = RadialDamageEvent.ComponentHits[0];
+		float Distance = (RadialDamageEvent.Origin - HitResult.ImpactPoint).Size();
+		Result.ActualDamage *= RadialDamageEvent.Params.GetDamageScale(Distance);
+
+	}
 
 	if(CurHp - Result.ActualDamage <= 0.f)
 		Result.bCreatureDead = true;

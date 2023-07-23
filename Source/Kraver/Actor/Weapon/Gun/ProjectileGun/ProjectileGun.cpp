@@ -49,8 +49,8 @@ void AProjectileGun::FireBullet()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(BulletClass, MuzzleLocation, BulletDirection.Rotation(), SpawnParams);
 	Bullet->SetOwner(this);
-	Bullet->SetDamageType(AttackDamageType);
 	Bullet->OnImpact.AddDynamic(this, &ThisClass::OnBulletImpactEvent);
+
 }
 
 void AProjectileGun::OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit)

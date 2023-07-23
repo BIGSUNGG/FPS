@@ -23,14 +23,14 @@ void ARocket::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 
 	UGameplayStatics::ApplyRadialDamageWithFalloff(
 		this, // World context object
-		ExplosionDamage, // BaseDamage
-		10.f, // MinimumDamage
+		ExplosionMaxDamage, // BaseDamage
+		ExplosionMinDamage, // MinimumDamage
 		GetActorLocation(), // Origin
-		200.f, // DamageInnerRadius
-		500.f, // DamageOuterRadius
-		1.f, // DamageFalloff
-		UKraverDamageType::StaticClass(), // DamageTypeClass
-		TArray<AActor*>(), // IgnoreActors
+		ExplosionInnerRadius, // DamageInnerRadius
+		ExplosionOuterRadius, // DamageOuterRadius
+		ExplosionFalloff, // DamageFalloff
+		ExplosionDamageType, // DamageTypeClass
+		IgnoreActors, // IgnoreActors
 		this // DamageCauser
 		);
 }
