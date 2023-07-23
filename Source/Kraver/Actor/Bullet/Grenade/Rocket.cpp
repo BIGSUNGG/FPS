@@ -21,6 +21,10 @@ void ARocket::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 		CurActor = CurActor->GetOwner();
 	}
 
+	ECollisionChannel TraceChannel;
+	FCollisionResponseParams ResponseParam;
+	UCollisionProfile::GetChannelAndResponseParams("Explosion", TraceChannel, ResponseParam);
+
 	UGameplayStatics::ApplyRadialDamageWithFalloff(
 		this, // World context object
 		ExplosionMaxDamage, // BaseDamage
@@ -31,6 +35,8 @@ void ARocket::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 		ExplosionFalloff, // DamageFalloff
 		ExplosionDamageType, // DamageTypeClass
 		IgnoreActors, // IgnoreActors
-		this // DamageCauser
+		this, // DamageCauser
+		GetInstigatorController(),
+		TraceChannel
 		);
 }
