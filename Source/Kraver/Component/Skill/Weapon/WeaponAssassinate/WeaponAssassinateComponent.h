@@ -5,8 +5,6 @@
 #include "Kraver/Component/Skill/Weapon/WeaponComponent.h"
 #include "WeaponAssassinateComponent.generated.h"
 
-class AMelee;
-
 /**
  * 
  */
@@ -50,7 +48,7 @@ public:
 	FAssassinateEndDele OnAssassinateEnd;
 
 protected:
-	AMelee* OwnerMelee = nullptr;
+	class AMelee* OwnerMelee = nullptr;
 
 	bool IsAssassinating = false;
 	UPROPERTY(Replicated)

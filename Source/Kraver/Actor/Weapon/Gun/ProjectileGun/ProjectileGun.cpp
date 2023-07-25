@@ -45,11 +45,7 @@ void AProjectileGun::FireBullet()
 	else
 		MuzzleLocation = WeaponPrimitiveInfo["Root"]->GetSocketLocation("SOCKET_Muzzle");
 
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(BulletClass, MuzzleLocation, BulletDirection.Rotation(), SpawnParams);
-	Bullet->SetOwner(this);
-	Bullet->OnImpact.AddDynamic(this, &ThisClass::OnBulletImpactEvent);
+	Server_SpawnBullet(MuzzleLocation, BulletDirection.Rotation());
 
 }
 
@@ -59,6 +55,21 @@ void AProjectileGun::OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPr
 		return;
 
 	Server_SpawnImpactEffect(Hit.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f);
+}
 
+void AProjectileGun::Server_SpawnBullet_Implementation(FVector Location, FRotator Rotation)
+{
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(BulletClass, Location, Rotation, SpawnParams);
+	Bullet->SetOwner(this);
+
+	Client_SpawnBulletSuccess(Bullet, Location, Rotation);
+}
+
+void AProjectileGun::Client_SpawnBulletSuccess_Implementation(ABullet* Bullet, FVector Location, FRotator Rotation)
+{
+	Bullet->SetOwner(this);
+	Bullet->OnImpact.AddDynamic(this, &ThisClass::OnBulletImpactEvent);
 
 }

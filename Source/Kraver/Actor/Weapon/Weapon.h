@@ -193,6 +193,9 @@ protected:
 	UFUNCTION(Server, Reliable)
 		void Server_SetIsSubAttacking(bool Value);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
+		bool bCanSubAttack = true;
+
 	bool bAttackCanceled = false;
 	bool bCanAttack = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))

@@ -53,6 +53,10 @@ public:
 	float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; }
 
 	void AddSpread(float Spread);
+
+public:
+	FAttackDele OnFire;
+
 protected:
 	// Additive
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Effect", meta = (AllowPrivateAccess = "true"))

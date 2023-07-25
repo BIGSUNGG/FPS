@@ -18,6 +18,7 @@ public:
 
 	virtual void BeginPlay() override;
 
+	// Tick
 	virtual void Tick(float DeltaTime) override;
 	virtual void CameraTick(float DeletaTime) override;
 	virtual void ArmMeshTick(float DeletaTime);
@@ -25,6 +26,8 @@ public:
 	virtual void ClientTick(float DeltaTime);
 	virtual void ServerClientTick(float DeltaTime);
 	virtual void LocallyControlTick(float DeltaTime);
+
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -50,6 +53,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		virtual void ChangeWeapon3Pressed() final;
 
+	// Ect Function
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
 	virtual void ThrowWeapon(AWeapon* Weapon);
@@ -71,15 +75,22 @@ protected:
 	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
 
 	// Delegate Event
+		// Equip
 	virtual void OnClientEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
+		
+		// Hold Holster
 	virtual void OnClientHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	virtual void OnClientHolsterWeaponEvent(AWeapon* Weapon); // 무기를 넣을때 호출되는 함수
 	
+		// Simulate Mesh
 	virtual void Client_SimulateMesh_Implementation() override;
 
+		// Assassinate
 	virtual void OnAssassinateEvent(AActor* AssassinatedActor) override;
 	virtual void OnAssassinateEndEvent() override;
+
+		// Montage
 	virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed) override;
 
 	UFUNCTION()
@@ -90,6 +101,7 @@ protected:
 	// Function
 	virtual void PlayLandedMontage() override;
 
+	// Anim
 	void WeaponADS(float DeltaTime);
 	void WeaponSway(float DeltaTime);
 	void SpringArmTick(float DeltaTime);

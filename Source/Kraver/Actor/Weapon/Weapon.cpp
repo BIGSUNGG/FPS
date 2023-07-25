@@ -40,16 +40,27 @@ float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 
 	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
 
-	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	if(RootMesh->IsSimulatingPhysics())
 	{
-		FPointDamageEvent const& PointDamageEvent = static_cast<FPointDamageEvent const&>(DamageEvent);
-		AWeapon* Weapon = Cast<AWeapon>(DamageCauser);
-		if(Weapon)
+		if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 		{
-			FVector Direction = PointDamageEvent.ShotDirection;
+			FPointDamageEvent const& PointDamageEvent = static_cast<FPointDamageEvent const&>(DamageEvent);
+
+			Server_TakeImpulseAtLocation(
+				PointDamageEvent.ShotDirection * DamageType->DamageImpulse * GetWeaponMesh()->GetMass(),
+				PointDamageEvent.HitInfo.ImpactPoint
+			);	
+		}
+		else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+		{
+			FRadialDamageEvent const& RadialDamageEvent = static_cast<FRadialDamageEvent const&>(DamageEvent);
+
+			FVector Direction = RadialDamageEvent.ComponentHits[0].ImpactPoint - RadialDamageEvent.Origin;
+			Direction.Normalize();
+
 			Server_TakeImpulseAtLocation(
 				Direction * DamageType->DamageImpulse * GetWeaponMesh()->GetMass(),
-				PointDamageEvent.HitInfo.ImpactPoint
+				RadialDamageEvent.ComponentHits[0].ImpactPoint
 			);
 		}
 	}
@@ -73,8 +84,6 @@ void AWeapon::BeginPlay()
 	else
 		KR_LOG(Error, TEXT("WeaponMesh is nullptr"));
 
-	if (!AttackDamageType)
-		KR_LOG(Error, TEXT("AttackDamageType is null"));
 }
 
 // Called every frame
@@ -335,6 +344,9 @@ void AWeapon::OnAttackEndEvent()
 
 void AWeapon::OnSubAttackStartEvent()
 {
+	if(!bCanSubAttack)
+		return;
+
 	SetIsSubAttacking(true);
 	OnSubAttackStart.Broadcast();
 }

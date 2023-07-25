@@ -45,7 +45,7 @@ public:
 	UPROPERTY()
 	bool bCritical = false;
 	UPROPERTY()
-	int ActualDamage = 0.f;
+	int ActualDamage = 0;
 };
 
 UCLASS(MinimalAPI, const, Blueprintable, BlueprintType)

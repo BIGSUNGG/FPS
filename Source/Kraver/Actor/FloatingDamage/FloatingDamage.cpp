@@ -58,6 +58,13 @@ void AFloatingDamage::ShowFloatingDamage(AActor* DamagedActor, FDamageEvent cons
 		ForwardVector = PointDamageEvent.ShotDirection;
 		ImpactPoint = PointDamageEvent.HitInfo.ImpactPoint;
 	}
+	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	{
+		FRadialDamageEvent const& RadialDamageEvent = static_cast<FRadialDamageEvent const&>(DamageEvent);
+		ForwardVector = DamagedActor->GetActorLocation() - RadialDamageEvent.Origin;
+		ForwardVector.Normalize();
+		ImpactPoint = DamagedActor->GetActorLocation();
+	}
 
 	RightVector = -FVector::CrossProduct(ForwardVector, FVector(0.0f, 0.0f, 1.0f));
 	UpVector = FVector::UpVector;

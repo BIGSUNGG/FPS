@@ -5,12 +5,19 @@
 #include "Kraver/Kraver.h"
 #include "GameFramework/Character.h"
 #include "Kraver/Component/Combat/CombatComponent.h"
+#include "Kraver/Component/Skill/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
 #include "Creature.generated.h"
+
+class UWeaponAssassinateComponent;
 
 UCLASS()
 class KRAVER_API ACreature : public ACharacter
 {
 	GENERATED_BODY()
+
+	// Friend
+	friend void UWeaponAssassinateComponent::Server_Assassinate_Implementation(AActor* Actor);
+	friend void UWeaponAssassinateComponent::Server_OnAssassinateEndEvent_Implementation();
 
 public:
 	// Sets default values for this character's properties
@@ -18,9 +25,6 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
-	virtual void Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
-	virtual void AssassinatedEnd();
 
 	void OwnOtherActor(AActor* Actor);
 protected:
@@ -129,6 +133,8 @@ protected:
 	UFUNCTION()
 		virtual void OnClientAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION()
+		virtual void OnClientAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	UFUNCTION()
 		virtual void OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 	UFUNCTION()
 		virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
@@ -136,26 +142,46 @@ protected:
 	// RPC
 	UFUNCTION(Server, Reliable)
 		void Server_OwnOtherActor(AActor* Actor);
+		
+		// Assassinate
 	UFUNCTION(Server, Reliable)
 		virtual void Server_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(Client, Reliable)
 		virtual void Client_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
+	UFUNCTION(Server, reliable)
+		virtual void Server_OnAssassinatedEndEvent();
+
+		// Equip
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
+
+		// Death
 	UFUNCTION(NetMulticast, reliable)
 		void Multicast_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 모든 클라이언트에서 호출되는 함수
+
+		// TakeDamage
 	UFUNCTION(Server, reliable)
 		virtual void Server_OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 	UFUNCTION(NetMulticast, reliable)
 		virtual void Multicast_OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+
+
+	UFUNCTION(Server, reliable)
+		virtual void Server_OnAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(NetMulticast, reliable)
+		virtual void Multicast_OnAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+
+		// Jump
 	UFUNCTION(Server, reliable)
 		virtual void Server_Jump();
 	UFUNCTION(NetMulticast, reliable)
 		virtual void Multicast_Jump();
+
+		// Montage
 	UFUNCTION(Server, reliable)
 		virtual void Server_OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 	UFUNCTION(NetMulticast, reliable)
@@ -164,22 +190,26 @@ protected:
 		virtual void Server_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 	UFUNCTION(NetMulticast, reliable)
 		virtual void Multicast_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+
+		// Hold Holster
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_HoldWeaponEvent(AWeapon* Weapon);
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_HolsterWeaponEvent(AWeapon* Weapon);
+
+		// SimulateMesh
 	UFUNCTION(Client, reliable)
 		virtual void Client_SimulateMesh();
 	UFUNCTION(NetMulticast, reliable)
 		virtual void Multicast_SimulateMesh();
-	UFUNCTION(Server, reliable)
-		virtual void Server_OnAssassinatedEndEvent();
 
 	// Function
 	virtual void PlayLandedMontage();
 
 	virtual void SimulateMesh();
 
+	virtual void Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
+	virtual void AssassinatedEnd();
 public:
 	// Delegate
 	FCrouchDele OnCrouchStart;

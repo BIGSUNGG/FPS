@@ -120,7 +120,7 @@ void AGun::AddRecoil()
 
 void AGun::FireBullet()
 {
-
+	OnFire.Broadcast();
 }
 
 void AGun::OnAttackEvent()

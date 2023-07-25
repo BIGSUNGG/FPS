@@ -16,8 +16,15 @@ class KRAVER_API AProjectileGun : public AHitscanGun
 protected:
 	virtual void FireBullet() override;
 
+	// Delegate
 	UFUNCTION()
 		virtual void OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);
+
+	// Rpc
+	UFUNCTION(Server, Reliable)
+		virtual void Server_SpawnBullet(FVector Location, FRotator Rotation);
+	UFUNCTION(Client, Reliable)
+		virtual void Client_SpawnBulletSuccess(ABullet* Bullet, FVector Location, FRotator Rotation);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))
