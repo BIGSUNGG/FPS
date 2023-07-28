@@ -19,8 +19,7 @@ public:
 
 protected:
 	void StartProceduralAnim(float Strength);
-	UFUNCTION()
-		void ProceduralAnimEvent();
+	void ProceduralAnimEvent();
 
 	UFUNCTION()
 		virtual void OnLandEvent(const FHitResult& Result);
@@ -47,8 +46,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|ProceduralAnim", Meta = (AllowPrivateAccess = true))
 		FVector ProceduralAnimResultVec;
 
-	FTimeline ProceduralAnimTimeLine;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Curve", meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* ProceduralAnimCurve;
-	float ProceduralAnimStrength = 0.f;
+	TArray<TTuple<FTimeline, float>> ProceduralAnimStates;
 }; 

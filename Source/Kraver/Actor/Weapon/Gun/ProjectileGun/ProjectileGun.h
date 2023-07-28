@@ -23,8 +23,6 @@ protected:
 	// Rpc
 	UFUNCTION(Server, Reliable)
 		virtual void Server_SpawnBullet(FVector Location, FRotator Rotation);
-	UFUNCTION(Client, Reliable)
-		virtual void Client_SpawnBulletSuccess(ABullet* Bullet, FVector Location, FRotator Rotation);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))

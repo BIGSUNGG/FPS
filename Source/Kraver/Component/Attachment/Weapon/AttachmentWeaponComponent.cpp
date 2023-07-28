@@ -35,12 +35,12 @@ void UAttachmentWeaponComponent::OnMakeWeaponPrimitiveInfoEvent(int Index)
 
 }
 
-void UAttachmentWeaponComponent::OnAddOnDelegateEvent(UObject* Objcet)
+void UAttachmentWeaponComponent::OnAddOnDelegateEvent(UObject* Object)
 {
 
 }
 
-void UAttachmentWeaponComponent::OnRemoveOnDelegateEvent(UObject* Objcet)
+void UAttachmentWeaponComponent::OnRemoveOnDelegateEvent(UObject* Object)
 {
 
 }

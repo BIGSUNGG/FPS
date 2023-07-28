@@ -66,6 +66,8 @@ public:
 	float GetCurrentInputRight() { return CurrentInputRight; }
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 
+	virtual void SetWeaponVisibility(class AWeapon* Weapon, bool Value);
+
 protected:
 	// Axis Input
 	virtual void MoveForward(float NewAxisValue);
@@ -210,6 +212,7 @@ protected:
 
 	virtual void Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	virtual void AssassinatedEnd();
+
 public:
 	// Delegate
 	FCrouchDele OnCrouchStart;
@@ -231,16 +234,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
 		USpringArmComponent* Fp_SpringArm;
 
-	UPROPERTY(Replicated)
-		float AO_Yaw;
-	void SetAO_Yaw(float value);
-	UFUNCTION(Server, reliable)
-		void Server_SetAO_Yaw(float value);
-	UPROPERTY(Replicated)
-		float AO_Pitch;
-	void SetAO_Pitch(float value);
-	UFUNCTION(Server, reliable)
-		void Server_SetAO_Pitch(float value);
+	float AO_Yaw;
+	float AO_Pitch;
+
 	FRotator StartingAimRotation;
 	FVector TargetCameraRelativeLocation;
 

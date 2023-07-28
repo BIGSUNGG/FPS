@@ -71,8 +71,6 @@ void ACreature::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ACreature, AO_Pitch);
-	DOREPLIFETIME(ACreature, AO_Yaw);
 }
 
 float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -255,6 +253,14 @@ FVector ACreature::CaclulateCurrentFllorSlopeVector()
 	return FVector::ZeroVector;
 }
 
+void ACreature::SetWeaponVisibility(class AWeapon* Weapon, bool Value)
+{
+	for (auto& Tuple : Weapon->GetWeaponPrimitiveInfo())
+	{
+		Tuple.Value->SetVisibility(Value);
+	}
+}
+
 void ACreature::MoveForward(float NewAxisValue)
 {
 	CurrentInputForward = NewAxisValue;
@@ -355,9 +361,6 @@ void ACreature::HolsterWeaponPressed()
 
 void ACreature::AimOffset(float DeltaTime)
 {
-	if(!IsLocallyControlled())
-		return;
-
 	FVector Velocity = GetVelocity();
 	Velocity.Z = 0.f;
 	float Speed = Velocity.Size();
@@ -366,7 +369,7 @@ void ACreature::AimOffset(float DeltaTime)
 	{
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
-		SetAO_Yaw(DeltaAimRotation.Yaw);
+		AO_Yaw = (DeltaAimRotation.Yaw);
 		bUseControllerRotationYaw = false;
 		if (TurningInPlace == ETurningInPlace::ETIP_NotTurning)
 		{
@@ -378,17 +381,17 @@ void ACreature::AimOffset(float DeltaTime)
 	if (Speed > 0.f || bIsInAir) // running, or jumping
 	{
 		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		SetAO_Yaw(0.f);
+		AO_Yaw = (0.f);
 		bUseControllerRotationYaw = true;
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
-	SetAO_Pitch(GetBaseAimRotation().Pitch);
+	AO_Pitch = (GetBaseAimRotation().Pitch);
 	if (AO_Pitch > 90.f && !IsLocallyControlled())
 	{
 		// map pitch from [270, 360) to [-90, 0)
 		FVector2D InRange(270.f, 360.f);
 		FVector2D OutRange(-90.f, 0.f);
-		SetAO_Pitch(FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch));
+		AO_Pitch = (FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch));
 	}
 }
 
@@ -412,28 +415,6 @@ void ACreature::TurnInPlace(float DeltaTime)
 			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		}
 	}
-}
-
-void ACreature::SetAO_Yaw(float value)
-{
-	AO_Yaw = value;
-	Server_SetAO_Yaw(value);
-}
-
-void ACreature::Server_SetAO_Yaw_Implementation(float value)
-{
-	AO_Yaw = value;
-}
-
-void ACreature::SetAO_Pitch(float value)
-{
-	AO_Pitch = value;
-	Server_SetAO_Pitch(value);
-}
-
-void ACreature::Server_SetAO_Pitch_Implementation(float value)
-{
-	AO_Pitch = value;
 }
 
 void ACreature::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -470,13 +451,13 @@ void ACreature::OnServerUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 void ACreature::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
+	SetWeaponVisibility(Weapon, true);
 	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
 void ACreature::OnClientHoldWeaponEvent(AWeapon* Weapon)
 {
-	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
+	SetWeaponVisibility(Weapon, true);
 	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.AddDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 
@@ -513,7 +494,7 @@ void ACreature::OnClientHolsterWeaponEvent(AWeapon* Weapon)
 	Weapon->OnPlayTppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 
-	Weapon->GetWeaponMesh()->SetHiddenInGame(true);
+	SetWeaponVisibility(Weapon, false);
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageTpp());
 
 	switch (Weapon->GetWeaponType())
@@ -655,18 +636,13 @@ void ACreature::Multicast_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weap
 
 void ACreature::Multicast_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
 {
-	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
+	SetWeaponVisibility(Weapon, true);
 	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
 void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
-
-	if (DamageType->bCanSimulate)
-	{
-		SimulateMesh();
-	}
 
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
 }
@@ -754,17 +730,16 @@ void ACreature::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontag
 
 void ACreature::Multicast_HoldWeaponEvent_Implementation(AWeapon* Weapon)
 {
-	Weapon->GetWeaponMesh()->SetHiddenInGame(false);
+	SetWeaponVisibility(Weapon, true);
 }
 
 void ACreature::Multicast_HolsterWeaponEvent_Implementation(AWeapon* Weapon)
 {
-	Weapon->GetWeaponMesh()->SetHiddenInGame(true);
+	SetWeaponVisibility(Weapon, false);
 }
 
 void ACreature::Client_SimulateMesh_Implementation()
 {
-
 }
 
 void ACreature::Multicast_SimulateMesh_Implementation()

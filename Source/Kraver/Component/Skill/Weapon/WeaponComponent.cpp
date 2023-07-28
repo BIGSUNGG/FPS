@@ -42,12 +42,12 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-void UWeaponComponent::OnAddOnDelegateEvent(UObject* Objcet)
+void UWeaponComponent::OnAddOnDelegateEvent(UObject* Object)
 {
 
 }
 
-void UWeaponComponent::OnRemoveOnDelegateEvent(UObject* Objcet)
+void UWeaponComponent::OnRemoveOnDelegateEvent(UObject* Object)
 {
 
 }

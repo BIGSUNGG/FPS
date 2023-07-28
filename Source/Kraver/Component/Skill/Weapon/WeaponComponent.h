@@ -25,9 +25,9 @@ protected:
 
 	// Delegate
 	UFUNCTION()
-		virtual void OnAddOnDelegateEvent(UObject* Objcet);
+		virtual void OnAddOnDelegateEvent(UObject* Object);
 	UFUNCTION()
-		virtual void OnRemoveOnDelegateEvent(UObject* Objcet);
+		virtual void OnRemoveOnDelegateEvent(UObject* Object);
 	UFUNCTION()
 		virtual void OnBeforeAttackEvent();
 

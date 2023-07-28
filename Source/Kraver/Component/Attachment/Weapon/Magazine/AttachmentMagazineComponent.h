@@ -18,7 +18,7 @@ public:
 	UAttachmentMagazineComponent();
 
 protected:
-	// Called when the game starts
+	// Called when the game starts	
 	virtual void BeginPlay() override;
 
 public:

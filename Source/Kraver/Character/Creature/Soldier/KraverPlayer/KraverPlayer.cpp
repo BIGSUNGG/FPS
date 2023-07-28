@@ -12,6 +12,7 @@
 #include "Kraver/Animation/Creature/Soldier/SoldierAnimInstance.h"
 #include "Kraver/Component/Attachment/Weapon/Magazine/AttachmentMagazineComponent.h"
 #include "Kraver/SubSystem/DamageIndicatorSubsystem.h"
+#include "Kraver/Component/Skill/Weapon/WeaponReload/WeaponReloadComponent.h"
 
 AKraverPlayer::AKraverPlayer() : ASoldier()
 {
@@ -191,6 +192,19 @@ USkeletalMeshComponent* AKraverPlayer::GetCurMainMesh()
 		return nullptr;
 		break;
 	}
+}
+
+void AKraverPlayer::SetWeaponVisibility(class AWeapon* Weapon, bool Value)
+{
+	Super::SetWeaponVisibility(Weapon, Value);
+
+	TMap<FString, UPrimitiveComponent*>** Map = ArmWeaponMeshes.Find(Weapon);
+	if(!Map)
+		return;
+
+	TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = **(Map);
+	for (auto& Tuple : WeaponPrimitiveInfo)
+		Tuple.Value->SetVisibility(Value);
 }
 
 void AKraverPlayer::SetViewType(EViewType Type)
@@ -375,7 +389,7 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 	if(!ArmWeaponMeshes[Weapon]->Contains("Root"))
 		return;
 
-	USkeletalMeshComponent* ArmWeaponMesh = dynamic_cast<USkeletalMeshComponent*>(ArmWeaponMeshes[Weapon]->operator[]("Root"));
+	UPrimitiveComponent* ArmWeaponMesh = ArmWeaponMeshes[Weapon]->operator[]("Root");
 
 	Server_ThrowWeapon(
 		Weapon, 
@@ -492,20 +506,12 @@ void AKraverPlayer::OnClientHoldWeaponEvent(AWeapon* Weapon)
 {
 	ASoldier::OnClientHoldWeaponEvent(Weapon);
 
-	TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = *(ArmWeaponMeshes[Weapon]);
-	for(auto& Tuple : WeaponPrimitiveInfo)
-		Tuple.Value->SetHiddenInGame(false);
-
 	RefreshCurViewType();
 }
 
 void AKraverPlayer::OnClientHolsterWeaponEvent(AWeapon* Weapon)
 {
 	ASoldier::OnClientHolsterWeaponEvent(Weapon);
-	
-	TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = *(ArmWeaponMeshes[Weapon]);
-	for (auto& Tuple : WeaponPrimitiveInfo)
-		Tuple.Value->SetHiddenInGame(true);
 
 	ArmMesh->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageFpp());
 	RefreshCurViewType();
@@ -532,9 +538,7 @@ void AKraverPlayer::OnAssassinateEvent(AActor* AssassinatedActor)
 	ArmMesh->SetOwnerNoSee(true);
 
 	CombatComponent->GetCurWeapon()->GetWeaponMesh()->SetOwnerNoSee(false);
-	TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = *(ArmWeaponMeshes[CombatComponent->GetCurWeapon()]);
-	for (auto& Tuple : WeaponPrimitiveInfo)
-		Tuple.Value->SetHiddenInGame(true);
+
 }
 
 void AKraverPlayer::OnAssassinateEndEvent()
@@ -546,9 +550,6 @@ void AKraverPlayer::OnAssassinateEndEvent()
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
 	ArmMesh->GetAnimInstance()->Montage_Stop(0.f);
 
-	TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = *(ArmWeaponMeshes[CombatComponent->GetCurWeapon()]);
-	for (auto& Tuple : WeaponPrimitiveInfo)
-		Tuple.Value->SetHiddenInGame(false);
 }
 
 void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
@@ -564,8 +565,12 @@ void AKraverPlayer::OnFP_Reload_Grab_MagazineEvent()
 		FTransform BeforeTransform = ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();
 #endif
 
-		ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, "SOCKET_Magazine");
+		UPrimitiveComponent* MagazineComp = ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine");
+		UWeaponReloadComponent* ReloadComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponReloadComponent>();
 
+		MagazineComp->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, "SOCKET_Magazine");
+		MagazineComp->SetRelativeLocation(ReloadComp->GetGrabRelativeLocation());
+		MagazineComp->SetRelativeRotation(ReloadComp->GetGrabRelativeRotation());
 #if TEST_RELOAD
 		FTransform AfterTransform = ArmWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();
 		FTransform RelativeTransform = BeforeTransform.GetRelativeTransform(AfterTransform);

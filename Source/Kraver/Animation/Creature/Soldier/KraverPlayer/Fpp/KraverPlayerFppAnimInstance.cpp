@@ -24,7 +24,11 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (!KraverPlayer->IsLocallyControlled())
 		return;
 
-	ProceduralAnimTimeLine.TickTimeline(DeltaSeconds);
+	for (auto& State : ProceduralAnimStates)
+	{
+		State.Key.TickTimeline(DeltaSeconds);
+	}
+
 	USkeletalMeshComponent* Fp_WeaponMesh = dynamic_cast<USkeletalMeshComponent*>(KraverPlayer->CombatComponent->GetCurWeapon() ? KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()]->operator[]("Root") : nullptr);
 
 	WeaponSwayResultRot = KraverPlayer->GetWeaponSwayResultRot();
@@ -46,26 +50,42 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		FabrikLeftHand(KraverPlayer->GetArmMesh(), Fp_WeaponMesh, LeftHandFppFabrikTransform);
 	}
 
+	ProceduralAnimEvent();
 }
 
 void UKraverPlayerFppAnimInstance::StartProceduralAnim(float Strength)
 {
-	ProceduralAnimStrength = Strength;
+	for (int i = 0; i < ProceduralAnimStates.Num(); i++)
+	{
+		float TimelineValue = ProceduralAnimStates[i].Key.GetPlaybackPosition();
+
+		if (TimelineValue >= ProceduralAnimStates[i].Key.GetTimelineLength())
+			ProceduralAnimStates.RemoveAt(i);
+	}
+
+	int Index = ProceduralAnimStates.Add(TTuple<FTimeline, float>());
+
+	ProceduralAnimStates[Index].Value = Strength;
 
 	FOnTimelineFloat TimelineCallback;
-	TimelineCallback.BindUFunction(this, FName("ProceduralAnimEvent"));
 
-	ProceduralAnimTimeLine.AddInterpFloat(ProceduralAnimCurve, TimelineCallback);
-	ProceduralAnimTimeLine.PlayFromStart();
+	ProceduralAnimStates[Index].Key.AddInterpFloat(ProceduralAnimCurve, TimelineCallback);
+	ProceduralAnimStates[Index].Key.PlayFromStart();
+
 }
 
 void UKraverPlayerFppAnimInstance::ProceduralAnimEvent()
 {
-	float TimelineValue = ProceduralAnimTimeLine.GetPlaybackPosition();
-	float CurveFloatValue = ProceduralAnimCurve->GetFloatValue(TimelineValue);
+	ProceduralAnimResultVec = FVector::ZeroVector;
 
-	ProceduralAnimResultVec.Z = UKismetMathLibrary::Lerp(0.f, -10.f, CurveFloatValue * ProceduralAnimStrength);
+	for(int i = 0; i < ProceduralAnimStates.Num(); i++)
+	{
+		float TimelineValue = ProceduralAnimStates[i].Key.GetPlaybackPosition();
+		float CurveFloatValue = ProceduralAnimCurve->GetFloatValue(TimelineValue);
 
+		ProceduralAnimResultVec.Z += UKismetMathLibrary::Lerp(0.f, -10.f, CurveFloatValue * ProceduralAnimStates[i].Value);
+
+	}
 	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->CombatComponent->GetCurWeapon()->GetIsSubAttacking())
 		ProceduralAnimResultVec.Z *= 0.1f;
 }

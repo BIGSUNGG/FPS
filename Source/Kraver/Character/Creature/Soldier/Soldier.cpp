@@ -4,6 +4,7 @@
 #include "Soldier.h"
 #include "Kraver/Animation/Creature/Soldier/SoldierAnimInstance.h"
 #include "Kraver/Component/Attachment/Weapon/Magazine/AttachmentMagazineComponent.h"
+#include "Kraver/Component/Skill/Weapon/WeaponReload/WeaponReloadComponent.h"
 
 ASoldier::ASoldier()
 	: ACreature()
@@ -41,7 +42,12 @@ void ASoldier::OnReload_Grab_MagazineEvent()
 {
 	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo().Contains("Magazine"))
 	{
-		CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo()["Magazine"]->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, "SOCKET_Magazine");
+		UPrimitiveComponent* MagazineComp = CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo()["Magazine"];
+		UWeaponReloadComponent* ReloadComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponReloadComponent>();
+
+		MagazineComp->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, "SOCKET_Magazine");
+		MagazineComp->SetRelativeLocation(ReloadComp->GetGrabRelativeLocation());
+		MagazineComp->SetRelativeRotation(ReloadComp->GetGrabRelativeRotation());
 	}
 }
 

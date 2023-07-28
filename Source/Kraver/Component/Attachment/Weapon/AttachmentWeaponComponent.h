@@ -30,9 +30,9 @@ protected:
 	UFUNCTION()
 		virtual void OnMakeWeaponPrimitiveInfoEvent(int Index);
 	UFUNCTION()
-		virtual void OnAddOnDelegateEvent(UObject* Objcet);
+		virtual void OnAddOnDelegateEvent(UObject* Object);
 	UFUNCTION()
-		virtual void OnRemoveOnDelegateEvent(UObject* Objcet);
+		virtual void OnRemoveOnDelegateEvent(UObject* Object);
 protected:
 	class AWeapon* OwnerWeapon;
 

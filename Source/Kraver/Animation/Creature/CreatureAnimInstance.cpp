@@ -30,10 +30,10 @@ void UCreatureAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Velocity = MovementComp->Velocity;
 	UpDownSpeed = Velocity.Z;
 
-	FVector Right = Creature->GetControlRotation().Vector().GetSafeNormal2D().RotateAngleAxis(-90.0f, FVector::UpVector);
+	FVector Right = Creature->GetBaseAimRotation().Vector().GetSafeNormal2D().RotateAngleAxis(-90.0f, FVector::UpVector);
 	RightSpeed = -FVector::DotProduct(Velocity, Right) / Right.Size2D();
 
-	FVector Forward = Creature->GetControlRotation().Vector().GetSafeNormal2D();
+	FVector Forward = Creature->GetBaseAimRotation().Vector().GetSafeNormal2D();
 	ForwardSpeed = FVector::DotProduct(Velocity, Forward) / Forward.Size2D();
 
 	FVector TempVelocity = Velocity;

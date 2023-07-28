@@ -40,6 +40,8 @@ public:
 	virtual USkeletalMeshComponent* GetCurMainMesh() override;
 	FRotator GetWeaponSwayResultRot() { return WeaponSwayResultRot; }
 
+	virtual void SetWeaponVisibility(class AWeapon* Weapon, bool Value) override;
+
 protected:
 	// input event
 	UFUNCTION(BlueprintCallable)

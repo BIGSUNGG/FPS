@@ -31,10 +31,18 @@ protected:
 	virtual void OnBeforeAttackEvent() override;
 public:
 	bool GetCanReload();
+	const FVector& GetGrabRelativeLocation() { return GrabRelativeLocation; }
+	const FRotator& GetGrabRelativeRotation() { return GrabRelativeRotation; }
 
 protected:
 	AGun* OwnerGun;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Attachment", Meta = (AllowPrivateAccess = true))
+		FVector GrabRelativeLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Attachment", Meta = (AllowPrivateAccess = true))
+		FRotator GrabRelativeRotation;
+
+	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* ReloadMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
