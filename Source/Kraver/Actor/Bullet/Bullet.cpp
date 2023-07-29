@@ -21,6 +21,8 @@ ABullet::ABullet()
 	BulletMesh->SetCollisionProfileName("BulletShape");
 	BulletMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	BulletMesh->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
+
+	ProjectileMovementComponent->bRotationFollowsVelocity = true;
 }
 
 // Called when the game starts or when spawned
@@ -28,6 +30,7 @@ void ABullet::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	BulletMesh->IgnoreActorWhenMoving(GetInstigator(), true);
 }
 
 void ABullet::PostInitializeComponents()

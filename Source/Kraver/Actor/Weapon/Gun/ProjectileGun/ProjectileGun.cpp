@@ -64,8 +64,9 @@ void AProjectileGun::Server_SpawnBullet_Implementation(FVector Location, FRotato
 {
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = OwnerCreature;
 	ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(BulletClass, Location, Rotation, SpawnParams);
-	Bullet->SetOwner(this);
 	Bullet->OnImpact.AddDynamic(this, &ThisClass::OnBulletImpactEvent);
 
 }
