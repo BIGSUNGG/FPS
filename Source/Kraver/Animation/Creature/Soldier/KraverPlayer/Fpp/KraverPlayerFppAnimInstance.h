@@ -16,6 +16,7 @@ class KRAVER_API UKraverPlayerFppAnimInstance : public UKraverPlayerAnimInstance
 public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+	virtual void WeaponSway(float DeltaSeconds);
 
 protected:
 	void StartProceduralAnim(float Strength);
@@ -46,7 +47,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|ProceduralAnim", Meta = (AllowPrivateAccess = true))
 		FVector ProceduralAnimResultVec;
 
+	// ProceduralAnim
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Curve", meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* ProceduralAnimCurve;
 	TArray<TTuple<FTimeline, float>> ProceduralAnimStates;
+
+	// Weapon Sway
+	float SwayValue = 1.5f;
+	float MaxSwayDegree = 2.f;
+	float MinSwayDegree = -2.f;
 }; 

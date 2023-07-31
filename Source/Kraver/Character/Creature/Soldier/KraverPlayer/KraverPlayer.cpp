@@ -147,7 +147,6 @@ void AKraverPlayer::LocallyControlTick(float DeltaTime)
 	CheckCanInteractionWeapon();
 	
 	WeaponADS(DeltaTime);
-	WeaponSway(DeltaTime);
 
 	SpringArmTick(DeltaTime);
 	ArmMeshTick(DeltaTime);
@@ -665,53 +664,6 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 		AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
 		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, 110.f, DeltaTime, 15.f));
 	}
-
-}
-
-void AKraverPlayer::WeaponSway(float DeltaTime)
-{
-	#if TEST_ADS
-	return;
-	#endif
-
-	float TurnValue = GetInputAxisValue("Turn") * SwayValue;
-	float LookUpValue = GetInputAxisValue("LookUp") * SwayValue;
-	FRotator WeaponSwayFinalRot;
-	FRotator WeaponSwayInitRot;
-
-	WeaponSwayFinalRot.Roll = LookUpValue * SwayValue;
-	WeaponSwayFinalRot.Yaw = TurnValue * SwayValue;
-	WeaponSwayFinalRot.Pitch = TurnValue * SwayValue;
-
-	FRotator TargetRot;
-	TargetRot.Roll = WeaponSwayInitRot.Roll - WeaponSwayFinalRot.Roll;
-	TargetRot.Yaw = WeaponSwayInitRot.Yaw + WeaponSwayFinalRot.Yaw;
-	TargetRot.Pitch = WeaponSwayInitRot.Pitch + WeaponSwayFinalRot.Pitch;
-
-	WeaponSwayResultRot = FMath::RInterpTo(WeaponSwayResultRot, TargetRot, DeltaTime, 4.f);
-
-	if(WeaponSwayResultRot.Roll > MaxSwayDegree)
-		WeaponSwayResultRot.Roll = MaxSwayDegree;
-	else if(WeaponSwayResultRot.Roll < MinSwayDegree)
-		WeaponSwayResultRot.Roll = MinSwayDegree;
-
-	if (WeaponSwayResultRot.Yaw > MaxSwayDegree)
-		WeaponSwayResultRot.Yaw = MaxSwayDegree;
-	else if (WeaponSwayResultRot.Yaw < MinSwayDegree)
-		WeaponSwayResultRot.Yaw = MinSwayDegree;
-
-	if (WeaponSwayResultRot.Roll > MaxSwayDegree)
-		WeaponSwayResultRot.Roll = MaxSwayDegree;
-	else if (WeaponSwayResultRot.Roll < MinSwayDegree)
-		WeaponSwayResultRot.Roll = MinSwayDegree;
-
-	if (WeaponSwayResultRot.Pitch > MaxSwayDegree)
-		WeaponSwayResultRot.Pitch = MaxSwayDegree;
-	else if (WeaponSwayResultRot.Pitch < MinSwayDegree)
-		WeaponSwayResultRot.Pitch = MinSwayDegree;
-
-	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking())
-		WeaponSwayResultRot *= 0.9f;
 
 }
 

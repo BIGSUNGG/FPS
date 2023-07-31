@@ -31,7 +31,6 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	USkeletalMeshComponent* Fp_WeaponMesh = dynamic_cast<USkeletalMeshComponent*>(KraverPlayer->CombatComponent->GetCurWeapon() ? KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()]->operator[]("Root") : nullptr);
 
-	WeaponSwayResultRot = KraverPlayer->GetWeaponSwayResultRot();
 	if (IsEquippingWeapon)
 	{
 		AnimWeaponIdleFpp = CurWeapon->GetAnimIdleFpp();
@@ -51,7 +50,57 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 
 	ProceduralAnimEvent();
+	WeaponSway(DeltaSeconds);
+
 }
+
+void UKraverPlayerFppAnimInstance::WeaponSway(float DeltaSeconds)
+{
+#if TEST_ADS
+	return;
+#endif
+
+	float TurnValue = KraverPlayer->GetInputAxisValue("Turn") * SwayValue;
+	float LookUpValue = KraverPlayer->GetInputAxisValue("LookUp") * SwayValue;
+	FRotator WeaponSwayFinalRot;
+	FRotator WeaponSwayInitRot;
+
+	WeaponSwayFinalRot.Roll = LookUpValue * SwayValue;
+	WeaponSwayFinalRot.Yaw = TurnValue * SwayValue;
+	WeaponSwayFinalRot.Pitch = TurnValue * SwayValue;
+
+	FRotator TargetRot;
+	TargetRot.Roll = WeaponSwayInitRot.Roll - WeaponSwayFinalRot.Roll;
+	TargetRot.Yaw = WeaponSwayInitRot.Yaw + WeaponSwayFinalRot.Yaw;
+	TargetRot.Pitch = WeaponSwayInitRot.Pitch + WeaponSwayFinalRot.Pitch;
+
+	WeaponSwayResultRot = FMath::RInterpTo(WeaponSwayResultRot, TargetRot, DeltaSeconds, 4.f);
+
+	if (WeaponSwayResultRot.Roll > MaxSwayDegree)
+		WeaponSwayResultRot.Roll = MaxSwayDegree;
+	else if (WeaponSwayResultRot.Roll < MinSwayDegree)
+		WeaponSwayResultRot.Roll = MinSwayDegree;
+
+	if (WeaponSwayResultRot.Yaw > MaxSwayDegree)
+		WeaponSwayResultRot.Yaw = MaxSwayDegree;
+	else if (WeaponSwayResultRot.Yaw < MinSwayDegree)
+		WeaponSwayResultRot.Yaw = MinSwayDegree;
+
+	if (WeaponSwayResultRot.Roll > MaxSwayDegree)
+		WeaponSwayResultRot.Roll = MaxSwayDegree;
+	else if (WeaponSwayResultRot.Roll < MinSwayDegree)
+		WeaponSwayResultRot.Roll = MinSwayDegree;
+
+	if (WeaponSwayResultRot.Pitch > MaxSwayDegree)
+		WeaponSwayResultRot.Pitch = MaxSwayDegree;
+	else if (WeaponSwayResultRot.Pitch < MinSwayDegree)
+		WeaponSwayResultRot.Pitch = MinSwayDegree;
+
+	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->CombatComponent->GetCurWeapon()->GetIsSubAttacking())
+		WeaponSwayResultRot *= 0.9f;
+
+}
+
 
 void UKraverPlayerFppAnimInstance::StartProceduralAnim(float Strength)
 {

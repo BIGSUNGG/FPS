@@ -38,7 +38,6 @@ public:
 	FORCEINLINE TMap<AWeapon*, TMap<FString, UPrimitiveComponent*>*> GetArmWeaponMeshes() { return ArmWeaponMeshes; }
 	virtual bool GetCanAttack() override;
 	virtual USkeletalMeshComponent* GetCurMainMesh() override;
-	FRotator GetWeaponSwayResultRot() { return WeaponSwayResultRot; }
 
 	virtual void SetWeaponVisibility(class AWeapon* Weapon, bool Value) override;
 
@@ -105,7 +104,6 @@ protected:
 
 	// Anim
 	void WeaponADS(float DeltaTime);
-	void WeaponSway(float DeltaTime);
 	void SpringArmTick(float DeltaTime);
 
 public:
@@ -165,11 +163,5 @@ protected:
 	FVector BasicArmLocation;
 	FRotator BasicArmRotation;
 	FVector AdsArmLocation;
-
-	// Weapon Sway
-	FRotator WeaponSwayResultRot;
-	float SwayValue = 1.5f;
-	float MaxSwayDegree = 2.f;
-	float MinSwayDegree = -2.f;
 
 };
