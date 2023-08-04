@@ -314,7 +314,6 @@ void AKraverPlayer::ChangeWeapon3Pressed()
 
 void AKraverPlayer::HolsterWeaponPressed()
 {
-	UnholsterIndex = -1;
 	HolsterWeapon();
 }
 

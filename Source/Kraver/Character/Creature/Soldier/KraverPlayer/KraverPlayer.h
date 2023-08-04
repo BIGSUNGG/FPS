@@ -20,13 +20,15 @@ public:
 
 	// Tick
 	virtual void Tick(float DeltaTime) override;
-	virtual void CameraTick(float DeletaTime) override;
-	virtual void ArmMeshTick(float DeletaTime);
-	virtual void CameraTilt(float TargetRoll);
-	virtual void ClientTick(float DeltaTime);
 	virtual void ServerClientTick(float DeltaTime);
 	virtual void LocallyControlTick(float DeltaTime);
+	virtual void ClientTick(float DeltaTime);
 
+	virtual void CameraTilt(float TargetRoll);
+	virtual void CameraTick(float DeletaTime) override;
+	virtual void SpringArmTick(float DeltaTime);
+	virtual void ArmMeshTick(float DeletaTime);
+	virtual void WeaponADS(float DeltaTime);
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -35,7 +37,7 @@ public:
 	// Getter Setter
 	FORCEINLINE AWeapon* GetCanInteractWeapon() { return CanInteractWeapon; }
 	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
-	FORCEINLINE TMap<AWeapon*, TMap<FString, UPrimitiveComponent*>*> GetArmWeaponMeshes() { return ArmWeaponMeshes; }
+	FORCEINLINE TMap<AWeapon*, TMap<FString, UPrimitiveComponent*>*> GetArmWeaponMeshes() { return FppWeaponMeshes; }
 	virtual bool GetCanAttack() override;
 	virtual USkeletalMeshComponent* GetCurMainMesh() override;
 
@@ -53,6 +55,8 @@ protected:
 		virtual void ChangeWeapon2Pressed() final;
 	UFUNCTION(BlueprintCallable)
 		virtual void ChangeWeapon3Pressed() final;
+	UFUNCTION(BlueprintCallable)
+		virtual void HolsterWeaponPressed() final;
 
 	// Ect Function
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
@@ -80,9 +84,9 @@ protected:
 	virtual void OnClientEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 	virtual void OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 		
-		// Hold Holster
-	virtual void OnClientHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+		// Holster Unholster
 	virtual void OnClientHolsterWeaponEvent(AWeapon* Weapon); // 무기를 넣을때 호출되는 함수
+	virtual void OnClientUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	
 		// Simulate Mesh
 	virtual void Client_SimulateMesh_Implementation() override;
@@ -98,13 +102,14 @@ protected:
 		virtual void OnFP_Reload_Grab_MagazineEvent();
 	UFUNCTION()
 		virtual void OnFP_Reload_Insert_MagazineEvent();
+	UFUNCTION()
+		virtual void OnTp_Weapon_HolsterEvent();
 
 	// Function
 	virtual void PlayLandedMontage() override;
-
-	// Anim
-	void WeaponADS(float DeltaTime);
-	void SpringArmTick(float DeltaTime);
+	void ChangeWeapon(int8 Index);
+	void HolsterWeapon();
+	void UnHolsterWeapon();
 
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
@@ -122,22 +127,26 @@ protected:
 	class AKraverPlayerController* KraverController;
 	class AKraverHUD* HUD;
 
+	// Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Third person", meta = (AllowPrivateAccess = "true"))
 		USceneComponent* Tp_Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Third person", meta = (AllowPrivateAccess = "true"))
 		USpringArmComponent* Tp_SpringArm;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
+		USkeletalMeshComponent* ArmMesh;
+	TMap<AWeapon*, TMap<FString, UPrimitiveComponent*>*> FppWeaponMeshes; // 각 Weapon들의 WeaponMesh를 1인칭 시점에 맞게 복사한 매쉬들의 맵
 
+
+	// ViewType
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 		EViewType ViewType = EViewType::FIRST_PERSON;
 	void SetViewType(EViewType Type);
 	UFUNCTION(Server, reliable)
 		void Server_SetViewType(EViewType Type);
+	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
+	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
-		USkeletalMeshComponent* ArmMesh;
-
-	TMap<AWeapon*, TMap<FString, UPrimitiveComponent*>*> ArmWeaponMeshes; // 각 Weapon들의 WeaponMesh를 1인칭 시점에 맞게 복사한 매쉬들의 맵
-
+	// Interaction
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
 		AWeapon* CanInteractWeapon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
@@ -145,14 +154,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
 		float InteractionRadius = 25.f; // 장착가능한 무기를 찾는 범위의 반지름
 
+	// Crouch
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 		float CrouchCameraHeight = -40.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 		float UnCrouchCameraHeight = 0.f;
 
 
-	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
-	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트
 	FVector Fp_SpringArmBasicLocation; // 기본적으로 적용할 SprintArm의 RelativeLocation
 	FVector FP_SpringArmCrouchLocation; // 추가적으로 적용할 SprintArm의 RelativeLocation
 
@@ -164,4 +172,5 @@ protected:
 	FRotator BasicArmRotation;
 	FVector AdsArmLocation;
 
+	int8 UnholsterIndex = -1;
 };

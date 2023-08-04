@@ -22,6 +22,23 @@ AWeapon::AWeapon()
 	OnAttack.AddDynamic(this, &AWeapon::OnAttackEvent);
 	OnMakeNewPrimitiveInfo.AddDynamic(this, &AWeapon::OnMakeNewPrimitiveInfoEvent);
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> HolsterMontage(TEXT("Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_FP_PCH_AR_01_Holster_Smooth.AM_FP_PCH_AR_01_Holster_Smooth"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> UnholsterMontage(TEXT("Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_FP_PCH_AR_01_Unholster.AM_FP_PCH_AR_01_Unholster"));
+
+	if (HolsterMontage.Succeeded())
+	{
+		HolsterMontageFpp = HolsterMontage.Object;
+		HolsterMontageTpp = HolsterMontage.Object;
+	}
+	if (UnholsterMontage.Succeeded())
+	{
+		UnholsterMontageFpp = UnholsterMontage.Object;
+		UnholsterMontageTpp = UnholsterMontage.Object;
+	}
+	else
+	{
+		int temp = 0;
+	}
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

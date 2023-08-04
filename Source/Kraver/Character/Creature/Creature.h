@@ -98,8 +98,6 @@ protected:
 		virtual void JumpingButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
 		virtual void JumpingButtonReleased() final;
-	UFUNCTION(BlueprintCallable)
-		virtual void HolsterWeaponPressed() final;
 
 	// Tick함수에서 호출될 함수
 	virtual void AimOffset(float DeltaTime);
@@ -115,9 +113,9 @@ protected:
 		virtual void OnServerUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
 
 	UFUNCTION()
-		virtual void OnClientHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+		virtual void OnClientUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
-		virtual void OnServerHoldWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+		virtual void OnServerUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
 		virtual void OnClientHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
@@ -193,9 +191,9 @@ protected:
 	UFUNCTION(NetMulticast, reliable)
 		virtual void Multicast_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 
-		// Hold Holster
+		// Holster Unholster
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_HoldWeaponEvent(AWeapon* Weapon);
+		virtual void Multicast_UnholsterWeaponEvent(AWeapon* Weapon);
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_HolsterWeaponEvent(AWeapon* Weapon);
 

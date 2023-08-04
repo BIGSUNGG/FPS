@@ -34,7 +34,7 @@ public:
 
 	virtual bool Equipped(ACreature* Character); // Character에게 장착됨 Server에서만 호출됨
 	virtual bool UnEquipped(); // 장착해제됨
-	virtual bool Hold(); // Character 손에 들려짐
+	virtual bool Unholster(); // Character 손에 들려짐
 	virtual bool Holster(); // Character 손에서 집어넣어짐
 
 	virtual void AddOnOwnerDelegate();
@@ -100,6 +100,10 @@ public:
 
 	virtual UAnimMontage* GetAttackMontageTpp() { return AttackMontageTpp; }
 	virtual UAnimMontage* GetAttackMontageFpp() { return AttackMontageFpp; }
+	virtual UAnimMontage* GetUnholsterMontageTpp() { return UnholsterMontageTpp; }
+	virtual UAnimMontage* GetUnholsterMontageFpp() { return UnholsterMontageFpp; }
+	virtual UAnimMontage* GetHolsterMontageTpp() { return HolsterMontageTpp; }
+	virtual UAnimMontage* GetHolsterMontageFpp() { return HolsterMontageFpp; }
 
 	void SetOwnerCreature(ACreature* pointer);
 
@@ -157,6 +161,14 @@ protected:
 		UAnimMontage* AttackMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontageFpp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* HolsterMontageTpp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* HolsterMontageFpp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* UnholsterMontageTpp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* UnholsterMontageFpp;
 	
 	// Anim
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))

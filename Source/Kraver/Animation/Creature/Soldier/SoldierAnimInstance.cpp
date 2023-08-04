@@ -64,6 +64,16 @@ void USoldierAnimInstance::FabrikLeftHand(USkeletalMeshComponent* HandMesh, UPri
 
 }
 
+void USoldierAnimInstance::AnimNotify_Weapon_Holster()
+{
+	OnWeapon_Holster.Broadcast();
+}
+
+void USoldierAnimInstance::AnimNotify_Weapon_Unholster()
+{
+	OnWeapon_Unholster.Broadcast();
+}
+
 void USoldierAnimInstance::AnimNotify_Melee_SwingAttack()
 {
 	OnMelee_SwingAttack.Broadcast();

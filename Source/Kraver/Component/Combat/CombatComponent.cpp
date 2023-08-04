@@ -145,6 +145,17 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, MaxHp);
 }
 
+int8 UCombatComponent::GetCurWeaponSlotIndex()
+{
+	for (int i = 0; i < WeaponSlot.Num(); i++)
+	{
+		if(CurWeapon == WeaponSlot[i])
+			return i;
+	}
+
+	return -1;
+}
+
 bool UCombatComponent::GetCanEquipWeapon()
 {
 	if (WeaponSlot.Num() < MaxWeaponSlotSize)
@@ -235,7 +246,7 @@ void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
 	Server_UnEquipWeapon(Weapon);
 }
 
-bool UCombatComponent::HoldWeapon(int32 WeaponIndex)
+bool UCombatComponent::UnholsterWeapon(int32 WeaponIndex)
 {
 	if (WeaponIndex >= WeaponSlot.Num())
 	{
@@ -260,11 +271,11 @@ bool UCombatComponent::HoldWeapon(int32 WeaponIndex)
 		return false;
 	}
 
-	HoldWeapon(WeaponSlot[WeaponIndex]);
+	UnholsterWeapon(WeaponSlot[WeaponIndex]);
 	return true;
 }
 
-void UCombatComponent::HoldWeapon(AWeapon* Weapon)
+void UCombatComponent::UnholsterWeapon(AWeapon* Weapon)
 {
 	if (Weapon == nullptr)
 	{
@@ -272,13 +283,13 @@ void UCombatComponent::HoldWeapon(AWeapon* Weapon)
 		return;
 	}
 	
-	KR_LOG(Log,TEXT("Hold Weapon %s"),*Weapon->GetName());
+	KR_LOG(Log,TEXT("Unholster Weapon %s"),*Weapon->GetName());
 	HolsterWeapon(CurWeapon);
 	SetCurWeapon(Weapon);
-	Weapon->Hold();
-	OnClientHoldWeapon.Broadcast(Weapon);
+	Weapon->Unholster();
+	OnClientUnholsterWeapon.Broadcast(Weapon);
 
-	Server_HoldWeapon(Weapon);
+	Server_UnholsterWeapon(Weapon);
 }
 
 bool UCombatComponent::HolsterWeapon(AWeapon* Weapon)
@@ -411,7 +422,7 @@ void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
 
 	OnClientEquipWeaponSuccess.Broadcast(Weapon);
 
-	HoldWeapon(Weapon);
+	UnholsterWeapon(Weapon);
 }
 
 void UCombatComponent::Client_UnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
@@ -422,9 +433,9 @@ void UCombatComponent::Client_UnEquipWeaponSuccess_Implementation(AWeapon* Weapo
 	OnClientUnEquipWeaponSuccess.Broadcast(Weapon);
 }
 
-void UCombatComponent::Server_HoldWeapon_Implementation(AWeapon* Weapon)
+void UCombatComponent::Server_UnholsterWeapon_Implementation(AWeapon* Weapon)
 {
-	OnServerHoldWeapon.Broadcast(Weapon);
+	OnServerUnholsterWeapon.Broadcast(Weapon);
 }
 
 void UCombatComponent::Server_HolsterWeapon_Implementation(AWeapon* Weapon)

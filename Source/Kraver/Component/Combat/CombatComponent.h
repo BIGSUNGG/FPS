@@ -39,9 +39,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수
 
-	// Hold Holster
-	virtual bool HoldWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
-	virtual void HoldWeapon(AWeapon* Weapon); // Weapon을 드는 함수
+	// Holster Unholster
+	virtual bool UnholsterWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
+	virtual void UnholsterWeapon(AWeapon* Weapon); // Weapon을 드는 함수
 	virtual bool HolsterWeapon(AWeapon* Weapon); // CurWeapon을 집어넣는 함수
 
 	// Damage Event
@@ -64,7 +64,7 @@ protected:
 		virtual void Client_UnEquipWeaponSuccess(AWeapon* Weapon);
 
 	UFUNCTION(Server, reliable)
-		virtual void Server_HoldWeapon(AWeapon* Weapon);
+		virtual void Server_UnholsterWeapon(AWeapon* Weapon);
 	UFUNCTION(Server, reliable)
 		virtual void Server_HolsterWeapon(AWeapon* Weapon); // CurWeapon을 집어넣는 함수
 
@@ -116,8 +116,10 @@ public:
 	AWeapon* GetCurWeapon() { return CurWeapon; }
 	int32 GetCurHp() { return CurHp; }
 	int32 GetMaxHp() { return MaxHp; }
+	int8 GetCurWeaponSlotIndex();
 	bool GetCanEquipWeapon();
 	bool GetIsDead();
+	const TArray<AWeapon*>& GetWeaponSlot() { return WeaponSlot; }
 
 public:
 	// Attack
@@ -132,9 +134,9 @@ public:
 	FUnEquipWeaponSuccessDele OnServerUnEquipWeaponSuccess; // 무기를 해제했을때 호출
 	FUnEquipWeaponSuccessDele OnClientUnEquipWeaponSuccess; // 무기를 해제했을때 호출
 
-	// Hold Holster
-	FHoldWeaponDele OnClientHoldWeapon;
-	FHoldWeaponDele OnServerHoldWeapon;
+	// Holster Holster
+	FHolsterWeaponDele OnClientUnholsterWeapon;
+	FHolsterWeaponDele OnServerUnholsterWeapon;
 	FHolsterWeaponDele OnClientHolsterWeapon;
 	FHolsterWeaponDele OnServerHolsterWeapon;
 

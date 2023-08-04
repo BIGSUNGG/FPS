@@ -58,9 +58,9 @@ bool AMelee::UnEquipped()
 	return bSuccess;
 }
 
-bool AMelee::Hold()
+bool AMelee::Unholster()
 {
-	bool bSuccess = AWeapon::Hold();
+	bool bSuccess = AWeapon::Unholster();
 	return bSuccess;
 }
 

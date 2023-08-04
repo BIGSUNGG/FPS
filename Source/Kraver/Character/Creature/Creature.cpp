@@ -34,8 +34,8 @@ ACreature::ACreature()
 	CombatComponent->OnClientAfterTakePointDamageSuccess.AddDynamic(this, &ACreature::OnClientAfterTakePointDamageEvent);
 	CombatComponent->OnClientAfterTakeRadialDamageSuccess.AddDynamic(this, &ACreature::OnClientAfterTakeRadialDamageEvent);
 
-	CombatComponent->OnClientHoldWeapon.AddDynamic(this, &ACreature::OnClientHoldWeaponEvent);
-	CombatComponent->OnServerHoldWeapon.AddDynamic(this, &ACreature::OnServerHoldWeaponEvent);
+	CombatComponent->OnClientUnholsterWeapon.AddDynamic(this, &ACreature::OnClientUnholsterWeaponEvent);
+	CombatComponent->OnServerUnholsterWeapon.AddDynamic(this, &ACreature::OnServerUnholsterWeaponEvent);
 	CombatComponent->OnClientHolsterWeapon.AddDynamic(this, &ACreature::OnClientHolsterWeaponEvent);
 	CombatComponent->OnServerHolsterWeapon.AddDynamic(this, &ACreature::OnServerHolsterWeaponEvent);
 
@@ -152,7 +152,6 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACreature::JumpingButtonReleased);
 	PlayerInputComponent->BindAction(TEXT("SubAttack"), EInputEvent::IE_Pressed, this, &ACreature::SubAttackButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("SubAttack"), EInputEvent::IE_Released, this, &ACreature::SubAttackButtonReleased);
-	PlayerInputComponent->BindAction(TEXT("HolsterWeapon"), EInputEvent::IE_Pressed, this, &ACreature::HolsterWeaponPressed);
 
 }
 
@@ -353,12 +352,6 @@ void ACreature::JumpingButtonReleased()
 	CreatureMovementComponent->JumpEnd();
 }
 
-void ACreature::HolsterWeaponPressed()
-{
-	if(CombatComponent->GetCurWeapon())
-		CombatComponent->HolsterWeapon(CombatComponent->GetCurWeapon());
-}
-
 void ACreature::AimOffset(float DeltaTime)
 {
 	FVector Velocity = GetVelocity();
@@ -455,7 +448,7 @@ void ACreature::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
-void ACreature::OnClientHoldWeaponEvent(AWeapon* Weapon)
+void ACreature::OnClientUnholsterWeaponEvent(AWeapon* Weapon)
 {
 	SetWeaponVisibility(Weapon, true);
 	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
@@ -481,9 +474,9 @@ void ACreature::OnClientHoldWeaponEvent(AWeapon* Weapon)
 	}
 }
 
-void ACreature::OnServerHoldWeaponEvent(AWeapon* Weapon)
+void ACreature::OnServerUnholsterWeaponEvent(AWeapon* Weapon)
 {
-	Multicast_HoldWeaponEvent(Weapon);
+	Multicast_UnholsterWeaponEvent(Weapon);
 }
 
 void ACreature::OnClientHolsterWeaponEvent(AWeapon* Weapon)
@@ -728,7 +721,7 @@ void ACreature::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontag
 
 }
 
-void ACreature::Multicast_HoldWeaponEvent_Implementation(AWeapon* Weapon)
+void ACreature::Multicast_UnholsterWeaponEvent_Implementation(AWeapon* Weapon)
 {
 	SetWeaponVisibility(Weapon, true);
 }

@@ -27,6 +27,11 @@ public:
 protected:
 	// Animation Notify
 	UFUNCTION()
+		void AnimNotify_Weapon_Holster();
+	UFUNCTION()
+		void AnimNotify_Weapon_Unholster();
+
+	UFUNCTION()
 		void AnimNotify_Melee_SwingAttack();
 	UFUNCTION()
 		void AnimNotify_Melee_CanInputNextCombo();
@@ -38,17 +43,23 @@ protected:
 		void AnimNotify_Melee_AssassinateAttack();
 	UFUNCTION()
 		void AnimNotify_Melee_AssassinateEnd();
+
 	UFUNCTION()
 		void AnimNotify_Reload_Insert_Magazine();
 	UFUNCTION()
 		void AnimNotify_Reload_Grab_Magazine();
+
 public:
+	FAnimNotifyDele OnWeapon_Holster;
+	FAnimNotifyDele OnWeapon_Unholster;
+
 	FAnimNotifyDele OnMelee_SwingAttack;
 	FAnimNotifyDele OnMelee_CanInputNextCombo;
 	FAnimNotifyDele OnMelee_AttackNextCombo;
 	FAnimNotifyDele OnMelee_ComboEnd;
 	FAnimNotifyDele OnMelee_AssassinateAttack;
 	FAnimNotifyDele OnMelee_AssassinateEnd;
+
 	FAnimNotifyDele OnReload_Insert_Magazine;
 	FAnimNotifyDele OnReload_Grab_Magazine;
 
