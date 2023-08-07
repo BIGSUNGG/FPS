@@ -109,7 +109,7 @@ protected:
 	virtual void PlayLandedMontage() override;
 	void ChangeWeapon(int8 Index);
 	void HolsterWeapon();
-	void UnHolsterWeapon();
+	void UnholsterWeapon();
 
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
@@ -173,4 +173,5 @@ protected:
 	FVector AdsArmLocation;
 
 	int8 UnholsterIndex = -1;
+
 };

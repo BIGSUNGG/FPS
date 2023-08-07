@@ -292,7 +292,7 @@ void AKraverPlayer::EquipButtonPressed()
 
 void AKraverPlayer::UnEquipButtonPressed()
 {
-	if (CombatComponent->GetCurWeapon() != nullptr)
+	if (CombatComponent->GetCurWeapon() != nullptr && CombatComponent->CountWeapon() > 1)
 		CombatComponent->UnEquipWeapon(CombatComponent->GetCurWeapon());
 
 }
@@ -523,7 +523,7 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 		return;
 
 	ASoldier::OnClientEquipWeaponSuccessEvent(Weapon);
-	UnHolsterWeapon();
+	UnholsterWeapon();
 
 	int32 Index = Weapon->MakeAdditivePrimitiveInfo();
 	
@@ -579,6 +579,16 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	Weapon->RemoveAdditivePrimitiveInfo(*FppWeaponMeshes[Weapon]);
 	FppWeaponMeshes.Remove(Weapon);
 	RefreshCurViewType();
+
+	for (int i = 0; i < CombatComponent->GetWeaponSlot().Num(); i++)
+	{
+		if (CombatComponent->GetWeaponSlot()[i])
+		{
+			ChangeWeapon(i);
+			break;
+		}
+	}
+
 }
 
 void AKraverPlayer::OnClientUnholsterWeaponEvent(AWeapon* Weapon)
@@ -691,7 +701,7 @@ void AKraverPlayer::OnTp_Weapon_HolsterEvent()
 	if(UnholsterIndex == -1)
 		return;
 
-	UnHolsterWeapon();
+	UnholsterWeapon();
 
 	UnholsterIndex = -1;
 }
@@ -717,7 +727,7 @@ void AKraverPlayer::ChangeWeapon(int8 Index)
 	if (CombatComponent->GetCurWeapon())
 		HolsterWeapon();
 	else
-		UnHolsterWeapon();
+		UnholsterWeapon();
 
 }
 
@@ -731,7 +741,7 @@ void AKraverPlayer::HolsterWeapon()
 
 }
 
-void AKraverPlayer::UnHolsterWeapon()
+void AKraverPlayer::UnholsterWeapon()
 {
 	if(UnholsterIndex != -1)
 		CombatComponent->UnholsterWeapon(UnholsterIndex);

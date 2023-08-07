@@ -158,9 +158,14 @@ int8 UCombatComponent::GetCurWeaponSlotIndex()
 
 bool UCombatComponent::GetCanEquipWeapon()
 {
-	if (WeaponSlot.Num() < MaxWeaponSlotSize)
-		return true;
-
+	for (auto& Value : WeaponSlot)
+	{
+		if (Value == nullptr)
+		{
+			return true;
+		}
+	}
+	
 	return false;
 }
 
@@ -170,6 +175,18 @@ bool UCombatComponent::GetIsDead()
 		return true;
 
 	return false;
+}
+
+int UCombatComponent::CountWeapon()
+{
+	int WeaponCount = 0;
+	for (auto& Value : WeaponSlot)
+	{
+		if(Value)
+			++WeaponCount;
+	}
+
+	return WeaponCount;
 }
 
 // Called every frame
@@ -284,7 +301,9 @@ void UCombatComponent::UnholsterWeapon(AWeapon* Weapon)
 	}
 	
 	KR_LOG(Log,TEXT("Unholster Weapon %s"),*Weapon->GetName());
-	HolsterWeapon(CurWeapon);
+	if (CurWeapon)
+		HolsterWeapon(CurWeapon);
+
 	SetCurWeapon(Weapon);
 	Weapon->Unholster();
 	OnClientUnholsterWeapon.Broadcast(Weapon);
@@ -343,6 +362,7 @@ void UCombatComponent::SetIsSubAttacking(bool bAttack)
 
 void UCombatComponent::SetMaxWeaponSlot(int32 size)
 {
+	WeaponSlot.SetNum(size);
 	MaxWeaponSlotSize = size;
 }
 
@@ -416,7 +436,14 @@ void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
 
 	SetCurWeapon(Weapon);
 	Weapon->SetOwnerCreature(OwnerCreature);
-	WeaponSlot.Add(Weapon);
+	for (auto& Value : WeaponSlot)
+	{
+		if (Value == nullptr)
+		{
+			Value = Weapon;
+			break;
+		}
+	}
 	if (WeaponSlot.Num() > MaxWeaponSlotSize)
 		KR_LOG(Error, TEXT("WeaponSlot size is bigger than MaxWeaponSlot"));
 
@@ -428,8 +455,14 @@ void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
 void UCombatComponent::Client_UnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
 {
 	HolsterWeapon(Weapon);
-	WeaponSlot.Remove(Weapon);
-
+	for (auto& Value : WeaponSlot)
+	{
+		if (Value == Weapon)
+		{
+			Value = nullptr;
+			break;
+		}
+	}
 	OnClientUnEquipWeaponSuccess.Broadcast(Weapon);
 }
 
