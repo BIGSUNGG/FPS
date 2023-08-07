@@ -17,7 +17,6 @@ ABullet::ABullet()
 
 	SetRootComponent(BulletMesh);
 
-	BulletMesh->SetupAttachment(BulletMesh);
 	BulletMesh->SetCollisionProfileName("BulletShape");
 	BulletMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	BulletMesh->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;

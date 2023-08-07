@@ -12,7 +12,6 @@ UCreatureMovementComponent::UCreatureMovementComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
-	SetIsReplicated(true);
 }
 
 void UCreatureMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

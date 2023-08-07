@@ -56,6 +56,8 @@ ACreature::ACreature()
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetGenerateOverlapEvents(true);
+	
+	CreatureMovementComponent->SetIsReplicated(true);
 
 	GetCharacterMovement()->AirControl = 0.25f;
 	GetCharacterMovement()->MaxWalkSpeed = CreatureMovementComponent->GetWalkSpeed();
