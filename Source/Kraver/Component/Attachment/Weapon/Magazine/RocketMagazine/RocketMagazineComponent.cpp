@@ -36,11 +36,7 @@ void URocketMagazineComponent::SetMagazineVisibility(bool Value)
 		return;
 
 	MagazineMesh->SetVisibility(Value);
-	
-	for (auto& Info : OwnerGun->GetAdditiveWeaponPrimitiveInfo())
-	{
-		Info["Magazine"]->SetVisibility(Value);
-	}
+	OwnerGun->GetFppWeaponPrimitiveInfo()["Magazine"]->SetVisibility(Value);
 }
 
 void URocketMagazineComponent::OnAddOnDelegateEvent(UObject* Object)

@@ -16,7 +16,7 @@ void UAttachmentMagazineComponent::BeginPlay()
 	UAttachmentWeaponComponent::BeginPlay();
 
 	MagazineMesh->SetStaticMesh(MagazineStaticMesh);
-	MagazineMesh->AttachToComponent(OwnerWeapon->GetWeaponPrimitiveInfo()["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineSocketName);
+	MagazineMesh->AttachToComponent(OwnerWeapon->GetTppWeaponPrimitiveInfo()["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineSocketName);
 	MagazineMesh->SetRelativeLocation(MagazineRelativeLocation);
 
 	OwnerWeapon->AddWeaponPrimitive("Magazine", MagazineMesh);

@@ -256,7 +256,7 @@ FVector ACreature::CaclulateCurrentFllorSlopeVector()
 
 void ACreature::SetWeaponVisibility(class AWeapon* Weapon, bool Value)
 {
-	for (auto& Tuple : Weapon->GetWeaponPrimitiveInfo())
+	for (auto& Tuple : Weapon->GetTppWeaponPrimitiveInfo())
 	{
 		Tuple.Value->SetVisibility(Value);
 	}

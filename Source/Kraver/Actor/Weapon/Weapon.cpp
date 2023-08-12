@@ -20,7 +20,6 @@ AWeapon::AWeapon()
 	SetRootComponent(RootComponent);
 
 	OnAttack.AddDynamic(this, &AWeapon::OnAttackEvent);
-	OnMakeNewPrimitiveInfo.AddDynamic(this, &AWeapon::OnMakeNewPrimitiveInfoEvent);
 
 }
 
@@ -84,6 +83,8 @@ void AWeapon::BeginPlay()
 	else
 		KR_LOG(Error, TEXT("WeaponMesh is nullptr"));
 
+	MakeFppPrimitiveInfo();
+
 }
 
 // Called every frame
@@ -104,111 +105,6 @@ void AWeapon::Tick(float DeltaTime)
 			}
 		}
 	}
-}
-
-int32 AWeapon::MakeAdditivePrimitiveInfo()
-{
-	TMap<FString, UPrimitiveComponent*> NewWeaponPrimitiveInfo;
-	int32 Index = AdditiveWeaponPrimitiveInfo.Add(NewWeaponPrimitiveInfo);
-
-	for (auto& Tuple : WeaponPrimitiveInfo)
-	{
-		FString CompStr = "Additive " + Tuple.Key;
-		FName CompName = FName(*CompStr);
-		UPrimitiveComponent* NewPrimitiveComp = NewObject<UPrimitiveComponent>(this, Tuple.Value->GetClass(), CompName);
-		NewPrimitiveComp->RegisterComponent();
-
-		if (Cast<USkeletalMeshComponent>(NewPrimitiveComp))
-		{
-			USkeletalMeshComponent* NewSkeletaComp = dynamic_cast<USkeletalMeshComponent*>(NewPrimitiveComp);
-			USkeletalMeshComponent* OriginSkeletaComp = dynamic_cast<USkeletalMeshComponent*>(Tuple.Value);
-			
-			NewSkeletaComp->SetSkeletalMesh(OriginSkeletaComp->GetSkeletalMeshAsset());
-
-			TArray<UMaterialInterface*> MaterialArray = OriginSkeletaComp->GetMaterials();
-			for (int i = 0; i < MaterialArray.Num(); i++)
-			{
-				NewSkeletaComp->SetMaterial(i, MaterialArray[i]);
-			}
-		}
-		else if (Cast<UNiagaraComponent>(NewPrimitiveComp))
-		{
-			UNiagaraComponent* NewNiagaraComp = dynamic_cast<UNiagaraComponent*>(NewPrimitiveComp);
-			UNiagaraComponent* OriginNiagaraComp = dynamic_cast<UNiagaraComponent*>(Tuple.Value);
-
-			NewNiagaraComp->bAutoActivate = false;
-			NewNiagaraComp->SetAsset(OriginNiagaraComp->GetAsset());
-		}
-		else if (Cast<UStaticMeshComponent>(NewPrimitiveComp))
-		{
-			UStaticMeshComponent* NewStaticComp = dynamic_cast<UStaticMeshComponent*>(NewPrimitiveComp);
-			UStaticMeshComponent* OriginStaticComp = dynamic_cast<UStaticMeshComponent*>(Tuple.Value);
-
-			NewStaticComp->SetStaticMesh(OriginStaticComp->GetStaticMesh());
-			TArray<UMaterialInterface*> MaterialArray = OriginStaticComp->GetMaterials();
-			for (int i = 0; i < MaterialArray.Num(); i++)
-			{
-				NewStaticComp->SetMaterial(i, MaterialArray[i]);
-			}
-		}
-
-		AdditiveWeaponPrimitiveInfo[Index].Add(Tuple.Key, NewPrimitiveComp);
-	}
-
-	for (auto& Tuple : WeaponPrimitiveInfo)
-	{
-		if (Tuple.Value->GetAttachParent())
-		{
-			for (auto& CompareTuple : WeaponPrimitiveInfo)
-			{
-				if (Tuple.Value->GetAttachParent() == CompareTuple.Value)
-				{
-					UPrimitiveComponent* NewPrimitiveComp = AdditiveWeaponPrimitiveInfo[Index][Tuple.Key];
-					NewPrimitiveComp->AttachToComponent(AdditiveWeaponPrimitiveInfo[Index][CompareTuple.Key], FAttachmentTransformRules::SnapToTargetIncludingScale, Tuple.Value->GetAttachSocketName());
-					NewPrimitiveComp->SetRelativeRotation(Tuple.Value->GetRelativeRotation());
-					NewPrimitiveComp->SetRelativeLocation(Tuple.Value->GetRelativeLocation());
-					break;
-				}
-			}
-		}
-	}
-
-	KR_LOG(Log,TEXT("Add Mesh to AdditiveWeaponMesh[%d]"), Index);
-
-	OnMakeNewPrimitiveInfo.Broadcast(Index);
-	return Index;
-}
-
-int32 AWeapon::RemoveAdditivePrimitiveInfo(const TMap<FString, UPrimitiveComponent*>& Info)
-{
-	int32 Index = FindAdditivePrimitiveInfo(Info);
-
-	if (Index == -1)
-	{
-		KR_LOG(Warning, TEXT("Failed to find AdditiveWeaponMesh"));
-		return Index;
-	}
-
-	for(auto& Comp : AdditiveWeaponPrimitiveInfo[Index])
-		Comp.Value->DestroyComponent();
-
-	AdditiveWeaponPrimitiveInfo.RemoveAt(Index);
-	return Index;
-}
-
-int32 AWeapon::FindAdditivePrimitiveInfo(const TMap<FString, UPrimitiveComponent*>& Info)
-{
-	int32 Index = -1;
-	for (int i = 0; i < AdditiveWeaponPrimitiveInfo.Num(); i++)
-	{
-		if (AdditiveWeaponPrimitiveInfo[i]["Root"] == Info["Root"])
-		{
-			Index = i;
-			break;
-		}
-	}
-
-	return Index;
 }
 
 bool AWeapon::Equipped(ACreature* Character)
@@ -357,11 +253,6 @@ void AWeapon::OnSubAttackEndEvent()
 	OnSubAttackEnd.Broadcast();
 }
 
-void AWeapon::OnMakeNewPrimitiveInfoEvent(int Index)
-{
-
-}
-
 void AWeapon::Client_Equipped_Implementation()
 {
 	OnAttackEndEvent();
@@ -383,7 +274,7 @@ void AWeapon::Multicast_Equipped_Implementation(ACreature* Character)
 }
 
 void AWeapon::Multicast_UnEquipped_Implementation()
-{
+{	
 	GetWeaponMesh()->SetSimulatePhysics(true);
 	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
@@ -415,6 +306,80 @@ void AWeapon::Attack()
 		return;
 	}
 	OnAttack.Broadcast();
+}
+
+void AWeapon::MakeFppPrimitiveInfo()
+{
+	for (auto& Tuple : WeaponPrimitiveInfo)
+	{
+		FString CompStr = "Additive " + Tuple.Key;
+		FName CompName = FName(*CompStr);
+		UPrimitiveComponent* NewPrimitiveComp = NewObject<UPrimitiveComponent>(this, Tuple.Value->GetClass(), CompName);
+		NewPrimitiveComp->RegisterComponent();
+
+		if (Cast<USkeletalMeshComponent>(NewPrimitiveComp))
+		{
+			USkeletalMeshComponent* NewSkeletaComp = dynamic_cast<USkeletalMeshComponent*>(NewPrimitiveComp);
+			USkeletalMeshComponent* OriginSkeletaComp = dynamic_cast<USkeletalMeshComponent*>(Tuple.Value);
+
+			NewSkeletaComp->SetSkeletalMesh(OriginSkeletaComp->GetSkeletalMeshAsset());
+
+			TArray<UMaterialInterface*> MaterialArray = OriginSkeletaComp->GetMaterials();
+			for (int i = 0; i < MaterialArray.Num(); i++)
+			{
+				NewSkeletaComp->SetMaterial(i, MaterialArray[i]);
+			}
+		}
+		else if (Cast<UNiagaraComponent>(NewPrimitiveComp))
+		{
+			UNiagaraComponent* NewNiagaraComp = dynamic_cast<UNiagaraComponent*>(NewPrimitiveComp);
+			UNiagaraComponent* OriginNiagaraComp = dynamic_cast<UNiagaraComponent*>(Tuple.Value);
+
+			NewNiagaraComp->bAutoActivate = false;
+			NewNiagaraComp->SetAsset(OriginNiagaraComp->GetAsset());
+		}
+		else if (Cast<UStaticMeshComponent>(NewPrimitiveComp))
+		{
+			UStaticMeshComponent* NewStaticComp = dynamic_cast<UStaticMeshComponent*>(NewPrimitiveComp);
+			UStaticMeshComponent* OriginStaticComp = dynamic_cast<UStaticMeshComponent*>(Tuple.Value);
+
+			NewStaticComp->SetStaticMesh(OriginStaticComp->GetStaticMesh());
+			TArray<UMaterialInterface*> MaterialArray = OriginStaticComp->GetMaterials();
+			for (int i = 0; i < MaterialArray.Num(); i++)
+			{
+				NewStaticComp->SetMaterial(i, MaterialArray[i]);
+			}
+		}
+
+		WeaponFppPrimitiveInfo.Add(Tuple.Key, NewPrimitiveComp);
+	}
+
+	for (auto& Tuple : WeaponPrimitiveInfo)
+	{
+		if (Tuple.Value->GetAttachParent())
+		{
+			for (auto& CompareTuple : WeaponPrimitiveInfo)
+			{
+				if (Tuple.Value->GetAttachParent() == CompareTuple.Value)
+				{
+					UPrimitiveComponent* NewPrimitiveComp = WeaponFppPrimitiveInfo[Tuple.Key];
+					NewPrimitiveComp->AttachToComponent(WeaponFppPrimitiveInfo[CompareTuple.Key], FAttachmentTransformRules::SnapToTargetIncludingScale, Tuple.Value->GetAttachSocketName());
+					NewPrimitiveComp->SetRelativeRotation(Tuple.Value->GetRelativeRotation());
+					NewPrimitiveComp->SetRelativeLocation(Tuple.Value->GetRelativeLocation());
+					break;
+				}
+			}
+		}
+	}
+
+	for (auto& Tuple : WeaponFppPrimitiveInfo)
+	{
+		Tuple.Value->SetOnlyOwnerSee(true);
+		Tuple.Value->SetOwnerNoSee(false);
+		Tuple.Value->SetCastShadow(false);
+		Tuple.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	return;
 }
 
 void AWeapon::AddWeaponPrimitive(FString Key, UPrimitiveComponent* Value)

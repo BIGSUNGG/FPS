@@ -16,7 +16,7 @@ void UAttachmentScopeComponent::BeginPlay()
 	UAttachmentWeaponComponent::BeginPlay();
 
 	ScopeMesh->SetStaticMesh(ScopeStaticMesh);
-	ScopeMesh->AttachToComponent(OwnerWeapon->GetWeaponPrimitiveInfo()["Root"],FAttachmentTransformRules::SnapToTargetIncludingScale, ScopeSocketName);
+	ScopeMesh->AttachToComponent(OwnerWeapon->GetTppWeaponPrimitiveInfo()["Root"],FAttachmentTransformRules::SnapToTargetIncludingScale, ScopeSocketName);
 	ScopeMesh->SetRelativeLocation(ScopeRelativeLocation);
 
 	OwnerWeapon->AddWeaponPrimitive("Scope", ScopeMesh);

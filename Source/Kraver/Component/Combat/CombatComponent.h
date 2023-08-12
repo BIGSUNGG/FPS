@@ -111,8 +111,6 @@ public:
 	void SetIsAttacking(bool bAttack);
 	void SetIsSubAttacking(bool bAttack);
 
-	void SetMaxWeaponSlot(int32 size);
-
 	AWeapon* GetCurWeapon() { return CurWeapon; }
 	int32 GetCurHp() { return CurHp; }
 	int32 GetMaxHp() { return MaxHp; }
@@ -173,7 +171,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
-		int32 MaxWeaponSlotSize = 1; // WeaponSlot 사이즈
+		int32 MaxWeaponSlotSize = 3; // WeaponSlot 사이즈
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
 		int32 CurHp = 100.f; // 현재 Hp
@@ -188,4 +186,5 @@ protected:
 		void Server_SetMaxHp(int32 value);
 
 	bool bCanceledTakeDamage = false; // Server에서만 사용
+
 };

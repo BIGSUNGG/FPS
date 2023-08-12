@@ -33,7 +33,6 @@ protected:
 protected:
 	// Delegate
 	virtual void OnAttackEvent() override;
-	virtual void OnMakeNewPrimitiveInfoEvent(int Index) override;
 
 	// Rpc
 	UFUNCTION(Server, Reliable)

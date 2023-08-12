@@ -157,11 +157,6 @@ void AGun::OnAttackEvent()
 	AWeapon::OnAttackEvent();
 }
 
-void AGun::OnMakeNewPrimitiveInfoEvent(int Index)
-{
-
-}
-
 void AGun::Server_SetTotalAmmo_Implementation(int32 Ammo)
 {
 	TotalAmmo = Ammo;
@@ -188,11 +183,7 @@ void AGun::Multicast_ShowFireEffect_Implementation()
 		return;
 
 	WeaponPrimitiveInfo["FireEffect"]->Activate(true);
-
-	for (auto& Map : AdditiveWeaponPrimitiveInfo)
-	{
-		Map["FireEffect"]->Activate(true);
-	}
+	WeaponFppPrimitiveInfo["FireEffect"]->Activate(true);
 }
 
 void AGun::Server_SpawnImpactEffect_Implementation(FVector ImpactPos)

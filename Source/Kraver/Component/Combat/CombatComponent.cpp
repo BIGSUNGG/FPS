@@ -15,6 +15,7 @@ UCombatComponent::UCombatComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	// ...
+	WeaponSlot.SetNum(3);
 }
 
 FKraverDamageResult UCombatComponent::CalculateDamage(float DamageAmount, FDamageEvent const& DamageEvent)
@@ -358,12 +359,6 @@ void UCombatComponent::SetIsSubAttacking(bool bAttack)
 	{
 		OnSubAttackEndDelegate.Broadcast();
 	}
-}
-
-void UCombatComponent::SetMaxWeaponSlot(int32 size)
-{
-	WeaponSlot.SetNum(size);
-	MaxWeaponSlotSize = size;
 }
 
 void UCombatComponent::SetCurWeapon(AWeapon* Weapon)

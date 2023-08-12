@@ -37,7 +37,6 @@ public:
 	// Getter Setter
 	FORCEINLINE AWeapon* GetCanInteractWeapon() { return CanInteractWeapon; }
 	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
-	FORCEINLINE TMap<AWeapon*, TMap<FString, UPrimitiveComponent*>*> GetArmWeaponMeshes() { return FppWeaponMeshes; }
 	virtual bool GetCanAttack() override;
 	virtual USkeletalMeshComponent* GetCurMainMesh() override;
 
@@ -134,8 +133,6 @@ protected:
 		USpringArmComponent* Tp_SpringArm;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
 		USkeletalMeshComponent* ArmMesh;
-	TMap<AWeapon*, TMap<FString, UPrimitiveComponent*>*> FppWeaponMeshes; // 각 Weapon들의 WeaponMesh를 1인칭 시점에 맞게 복사한 매쉬들의 맵
-
 
 	// ViewType
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))

@@ -40,9 +40,9 @@ void ASoldier::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 
 void ASoldier::OnReload_Grab_MagazineEvent()
 {
-	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo().Contains("Magazine"))
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetTppWeaponPrimitiveInfo().Contains("Magazine"))
 	{
-		UPrimitiveComponent* MagazineComp = CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo()["Magazine"];
+		UPrimitiveComponent* MagazineComp = CombatComponent->GetCurWeapon()->GetTppWeaponPrimitiveInfo()["Magazine"];
 		UWeaponReloadComponent* ReloadComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponReloadComponent>();
 
 		MagazineComp->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, "SOCKET_Magazine");
@@ -53,9 +53,9 @@ void ASoldier::OnReload_Grab_MagazineEvent()
 
 void ASoldier::OnReload_Insert_MagazineEvent()
 {
-	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo().Contains("Magazine"))
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetTppWeaponPrimitiveInfo().Contains("Magazine"))
 	{
 		UAttachmentMagazineComponent* MagazineComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UAttachmentMagazineComponent>();
-		CombatComponent->GetCurWeapon()->GetWeaponPrimitiveInfo()["Magazine"]->AttachToComponent(CombatComponent->GetCurWeapon()->GetWeaponMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineComp->GetMagazineSocketName());
+		CombatComponent->GetCurWeapon()->GetTppWeaponPrimitiveInfo()["Magazine"]->AttachToComponent(CombatComponent->GetCurWeapon()->GetWeaponMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineComp->GetMagazineSocketName());
 	}
 }

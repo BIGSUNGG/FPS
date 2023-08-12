@@ -29,7 +29,7 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		State.Key.TickTimeline(DeltaSeconds);
 	}
 
-	USkeletalMeshComponent* Fp_WeaponMesh = dynamic_cast<USkeletalMeshComponent*>(KraverPlayer->CombatComponent->GetCurWeapon() ? KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()]->operator[]("Root") : nullptr);
+	USkeletalMeshComponent* Fp_WeaponMesh = dynamic_cast<USkeletalMeshComponent*>(KraverPlayer->CombatComponent->GetCurWeapon() ? KraverPlayer->CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo()["Root"] : nullptr);
 
 	if (IsEquippingWeapon)
 	{
@@ -44,7 +44,7 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		AnimWeaponMovementFpp = nullptr;
 	}
 
-	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->GetArmWeaponMeshes()[KraverPlayer->CombatComponent->GetCurWeapon()] && KraverPlayer->GetArmMesh())
+	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->GetArmMesh())
 	{
 		FabrikLeftHand(KraverPlayer->GetArmMesh(), Fp_WeaponMesh, LeftHandFppFabrikTransform);
 	}

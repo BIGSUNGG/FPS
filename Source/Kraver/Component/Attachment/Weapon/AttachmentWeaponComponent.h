@@ -28,8 +28,6 @@ public:
 protected:
 	// Delegate
 	UFUNCTION()
-		virtual void OnMakeWeaponPrimitiveInfoEvent(int Index);
-	UFUNCTION()
 		virtual void OnAddOnDelegateEvent(UObject* Object);
 	UFUNCTION()
 		virtual void OnRemoveOnDelegateEvent(UObject* Object);

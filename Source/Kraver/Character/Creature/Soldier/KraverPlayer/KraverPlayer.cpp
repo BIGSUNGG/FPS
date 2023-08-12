@@ -76,8 +76,6 @@ void AKraverPlayer::BeginPlay()
 	{
 		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->OnLocalPlayerBeginPlay(this);
 
-		CombatComponent->SetMaxWeaponSlot(3);
-
 		KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
 		if (KraverController)
 			HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
@@ -138,7 +136,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 {
 	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && Cast<AGun>(CombatComponent->GetCurWeapon()))
 	{
-		USkeletalMeshComponent* ArmWeaponMesh = dynamic_cast<USkeletalMeshComponent*>(FppWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Root"));
+		USkeletalMeshComponent* ArmWeaponMesh = dynamic_cast<USkeletalMeshComponent*>(CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo()["Root"]);
 #if TEST_ADS
 		{
 			FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
@@ -155,7 +153,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 			HUD->SetbDrawCrosshair(false);
 #endif
 
-		const TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = *FppWeaponMeshes[CombatComponent->GetCurWeapon()];
+		const TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo();
 		if (WeaponPrimitiveInfo.Contains("Scope"))
 		{
 			UStaticMeshComponent* ScopeMesh = Cast<UStaticMeshComponent>(WeaponPrimitiveInfo["Scope"]);
@@ -271,12 +269,7 @@ void AKraverPlayer::SetWeaponVisibility(class AWeapon* Weapon, bool Value)
 {
 	Super::SetWeaponVisibility(Weapon, Value);
 
-	TMap<FString, UPrimitiveComponent*>** Map = FppWeaponMeshes.Find(Weapon);
-	if(!Map)
-		return;
-
-	TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = **(Map);
-	for (auto& Tuple : WeaponPrimitiveInfo)
+	for (auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 		Tuple.Value->SetVisibility(Value);
 }
 
@@ -462,17 +455,11 @@ void AKraverPlayer::ChangeView()
 
 void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 {
-	if(!FppWeaponMeshes.Contains(Weapon))
-		return;
-
-	if(!FppWeaponMeshes[Weapon]->Contains("Root"))
-		return;
-
-	UPrimitiveComponent* ArmWeaponMesh = FppWeaponMeshes[Weapon]->operator[]("Root");
+	UPrimitiveComponent* FppWeaponMesh = Weapon->GetFppWeaponPrimitiveInfo()["Root"];
 
 	Server_ThrowWeapon(
 		Weapon, 
-		ArmWeaponMesh->GetComponentTransform(),
+		FppWeaponMesh->GetComponentTransform(),
 		Camera->GetForwardVector()
 		);
 }
@@ -531,23 +518,20 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	ASoldier::OnClientEquipWeaponSuccessEvent(Weapon);
 	UnholsterWeapon();
-
-	int32 Index = Weapon->MakeAdditivePrimitiveInfo();
 	
-	TMap<FString, UPrimitiveComponent*>* TempInfo = &Weapon->GetAdditiveWeaponPrimitiveInfo()[Index];
-	FppWeaponMeshes.Add(Weapon, TempInfo);
-	Weapon->GetAdditiveWeaponPrimitiveInfo()[Index]["Root"]->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetAttachSocketName());
+	Weapon->GetFppWeaponPrimitiveInfo()["Root"]->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetAttachSocketName());
 
-	for(auto& Map : Weapon->GetAdditiveWeaponPrimitiveInfo()[Index])
+	for(auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 	{
-		Map.Value->SetOnlyOwnerSee(true);
-		Map.Value->SetCastShadow(false);
-		Map.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Tuple.Value->SetVisibility(true);
+		Tuple.Value->SetOnlyOwnerSee(true);
+		Tuple.Value->SetCastShadow(false);
+		Tuple.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-		ShowOnlyFirstPerson.Push(Map.Value);
+		ShowOnlyFirstPerson.Push(Tuple.Value);
 	}
 	
-	for (auto& Map : Weapon->GetWeaponPrimitiveInfo())
+	for (auto& Map : Weapon->GetTppWeaponPrimitiveInfo())
 	{
 		ShowOnlyThirdPerson.Push(Map.Value);
 	}
@@ -564,17 +548,16 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
 	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
 
-	int32 Index = Weapon->FindAdditivePrimitiveInfo(*FppWeaponMeshes[Weapon]);
-
-	for (auto& Map : Weapon->GetAdditiveWeaponPrimitiveInfo()[Index])
+	for (auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 	{
-		Map.Value->SetOnlyOwnerSee(false);
-		Map.Value->SetOwnerNoSee(false);
+		Tuple.Value->SetVisibility(false);
+		Tuple.Value->SetOnlyOwnerSee(false);
+		Tuple.Value->SetOwnerNoSee(false);
 
-		ShowOnlyFirstPerson.Remove(Map.Value);
+		ShowOnlyFirstPerson.Remove(Tuple.Value);
 	}
 
-	for (auto& Map : Weapon->GetWeaponPrimitiveInfo())
+	for (auto& Map : Weapon->GetTppWeaponPrimitiveInfo())
 	{
 		Map.Value->SetOnlyOwnerSee(false);
 		Map.Value->SetOwnerNoSee(false);
@@ -582,8 +565,6 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 		ShowOnlyThirdPerson.Remove(Map.Value);
 	}
 
-	Weapon->RemoveAdditivePrimitiveInfo(*FppWeaponMeshes[Weapon]);
-	FppWeaponMeshes.Remove(Weapon);
 	RefreshCurViewType();
 
 	for (int i = 0; i < CombatComponent->GetWeaponSlot().Num(); i++)
@@ -654,20 +635,22 @@ void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, flo
 
 void AKraverPlayer::OnFP_Reload_Grab_MagazineEvent()
 {
-	if (CombatComponent->GetCurWeapon() && FppWeaponMeshes.Contains(CombatComponent->GetCurWeapon()) && FppWeaponMeshes[CombatComponent->GetCurWeapon()]->Contains("Magazine"))
+	UPrimitiveComponent** MagazineCompPtr = CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo().Find("Magazine");
+	UPrimitiveComponent* MagazineComp = MagazineCompPtr ? *MagazineCompPtr : nullptr;
+
+	if (CombatComponent->GetCurWeapon() && MagazineComp)
 	{
 #if TEST_RELOAD
-		FTransform BeforeTransform = FppWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();
+		FTransform BeforeTransform = MagazineComp->GetComponentTransform();
 #endif
 
-		UPrimitiveComponent* MagazineComp = FppWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine");
 		UWeaponReloadComponent* ReloadComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponReloadComponent>();
 
 		MagazineComp->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, "SOCKET_Magazine");
 		MagazineComp->SetRelativeLocation(ReloadComp->GetGrabRelativeLocation());
 		MagazineComp->SetRelativeRotation(ReloadComp->GetGrabRelativeRotation());
 #if TEST_RELOAD
-		FTransform AfterTransform = FppWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();
+		FTransform AfterTransform = MagazineComp->GetComponentTransform();
 		FTransform RelativeTransform = BeforeTransform.GetRelativeTransform(AfterTransform);
 		FRotator RelativeRotation = RelativeTransform.Rotator();
 		FVector RelativeLocation = RelativeTransform.GetLocation();
@@ -680,17 +663,19 @@ void AKraverPlayer::OnFP_Reload_Grab_MagazineEvent()
 
 void AKraverPlayer::OnFP_Reload_Insert_MagazineEvent()
 {
-	if (CombatComponent->GetCurWeapon() && FppWeaponMeshes.Contains(CombatComponent->GetCurWeapon()) &&FppWeaponMeshes[CombatComponent->GetCurWeapon()]->Contains("Magazine"))
+	UPrimitiveComponent** MagazineCompPtr = CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo().Find("Magazine");
+	UPrimitiveComponent* MagazineComp = MagazineCompPtr ? *MagazineCompPtr : nullptr;
+
+	if (CombatComponent->GetCurWeapon() && MagazineComp)
 	{
 #if TEST_RELOAD
-		FTransform BeforeTransform = FppWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();
+		FTransform BeforeTransform = MagazineComp->GetComponentTransform();
 #endif
 
-		UAttachmentMagazineComponent* MagazineComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UAttachmentMagazineComponent>();
-		FppWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->AttachToComponent(FppWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Root"), FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineComp->GetMagazineSocketName());
+		MagazineComp->AttachToComponent(CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo()["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->FindComponentByClass<UAttachmentMagazineComponent>()->GetMagazineSocketName());
 
 #if TEST_RELOAD
-		FTransform AfterTransform = FppWeaponMeshes[CombatComponent->GetCurWeapon()]->operator[]("Magazine")->GetComponentTransform();
+		FTransform AfterTransform = MagazineComp->GetComponentTransform();
 		FTransform RelativeTransform = BeforeTransform.GetRelativeTransform(AfterTransform);
 		FRotator RelativeRotation = RelativeTransform.Rotator();
 		FVector RelativeLocation = RelativeTransform.GetLocation();

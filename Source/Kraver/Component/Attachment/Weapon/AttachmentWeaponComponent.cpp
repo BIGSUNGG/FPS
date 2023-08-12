@@ -20,7 +20,6 @@ void UAttachmentWeaponComponent::BeginPlay()
 		return;
 	}
 
-	OwnerWeapon->OnMakeNewPrimitiveInfo.AddDynamic(this, &UAttachmentWeaponComponent::OnMakeWeaponPrimitiveInfoEvent);
 	OwnerWeapon->OnAddOnDelegate.AddDynamic(this, &UAttachmentWeaponComponent::OnAddOnDelegateEvent);
 	OwnerWeapon->OnRemoveOnDelegate.AddDynamic(this, &UAttachmentWeaponComponent::OnRemoveOnDelegateEvent);
 }
@@ -28,11 +27,6 @@ void UAttachmentWeaponComponent::BeginPlay()
 void UAttachmentWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	UAttachmentComponent::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
-
-void UAttachmentWeaponComponent::OnMakeWeaponPrimitiveInfoEvent(int Index)
-{
-
 }
 
 void UAttachmentWeaponComponent::OnAddOnDelegateEvent(UObject* Object)

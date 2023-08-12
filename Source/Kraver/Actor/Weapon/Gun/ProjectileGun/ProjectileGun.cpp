@@ -41,7 +41,7 @@ void AProjectileGun::FireBullet()
 
 	AKraverPlayer* Player = Cast<AKraverPlayer>(OwnerCreature);
 	if (Player)
-		MuzzleLocation = Player->GetArmWeaponMeshes()[this]->operator[]("Root")->GetSocketLocation("SOCKET_Muzzle");
+		MuzzleLocation = WeaponFppPrimitiveInfo["Root"]->GetSocketLocation("SOCKET_Muzzle");
 	else
 		MuzzleLocation = WeaponPrimitiveInfo["Root"]->GetSocketLocation("SOCKET_Muzzle");
 

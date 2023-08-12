@@ -15,7 +15,7 @@ void UAttachmentSilencerComponent::BeginPlay()
 	UAttachmentWeaponComponent::BeginPlay();
 
 	SilencerMesh->SetStaticMesh(SilencerStaticMesh);
-	SilencerMesh->AttachToComponent(OwnerWeapon->GetWeaponPrimitiveInfo()["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, SilencerSocketName);
+	SilencerMesh->AttachToComponent(OwnerWeapon->GetTppWeaponPrimitiveInfo()["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, SilencerSocketName);
 	SilencerMesh->SetRelativeLocation(SilencerRelativeLocation);
 
 	OwnerWeapon->AddWeaponPrimitive("Silencer", SilencerMesh);

@@ -28,10 +28,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual int32 MakeAdditivePrimitiveInfo() final; // 추가적인 PrimitiveInfo를 추가 (Return 값은 추가된 WeaponMesh의 인덱스값)
-	virtual int32 RemoveAdditivePrimitiveInfo(const TMap<FString, UPrimitiveComponent*>& Info) final; // 추가적인 PrimitiveInfo를 제거 (Return 값은 제거된 WeaponMesh의 인덱스값)
-	virtual int32 FindAdditivePrimitiveInfo(const TMap<FString, UPrimitiveComponent*>& Info) final; // 추가적인 PrimitiveInfo를 찾음 (Return 값은 찾은 WeaponMesh의 인덱스값 못찾았을 경우 -1)
-
 	virtual bool Equipped(ACreature* Character); // Character에게 장착됨 Server에서만 호출됨
 	virtual bool UnEquipped(); // 장착해제됨
 	virtual bool Unholster(); // Character 손에 들려짐
@@ -54,9 +50,6 @@ public:
 	UFUNCTION()
 		virtual void OnSubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
 
-	UFUNCTION()
-		virtual void OnMakeNewPrimitiveInfoEvent(int Index);
-
 protected:
 	// Rpc
 	UFUNCTION(Client, Reliable)
@@ -78,6 +71,9 @@ protected:
 
 	virtual void Attack() final; // 공격할때 호출되는 함수
 
+	// Func
+	virtual void MakeFppPrimitiveInfo() final; // 1인칭 PrimitiveInfo를 추가
+
 public:
 	// Getter Setter
 	bool GetCanInteracted();
@@ -88,8 +84,8 @@ public:
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
 	UPrimitiveComponent* GetWeaponMesh() { return RootMesh; }
-	TMap<FString, UPrimitiveComponent*>& GetWeaponPrimitiveInfo() { return WeaponPrimitiveInfo; }
-	TArray<TMap<FString, UPrimitiveComponent*>>& GetAdditiveWeaponPrimitiveInfo() { return AdditiveWeaponPrimitiveInfo; }
+	TMap<FString, UPrimitiveComponent*>& GetTppWeaponPrimitiveInfo() { return WeaponPrimitiveInfo; }
+	TMap<FString, UPrimitiveComponent*>& GetFppWeaponPrimitiveInfo() { return WeaponFppPrimitiveInfo; }
 
 	UAnimSequence* GetAnimIdleTpp() { return AnimIdleTpp; }
 	UAnimSequence* GetAnimIdleFpp() { return AnimIdleFpp; }
@@ -125,8 +121,6 @@ public:
 
 	FAddOnDele OnAddOnDelegate;
 	FRemoveOnDele OnRemoveOnDelegate;
-
-	FMakeNewPrimitiveInfoDele OnMakeNewPrimitiveInfo;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Component", Meta = (AllowPrivateAccess = true))
 		TArray<UWeaponComponent*> WeaponComponents;
@@ -191,7 +185,7 @@ protected:
 		UPrimitiveComponent* RootMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Info", meta = (AllowPrivateAccess = "true"))
 		TMap<FString, UPrimitiveComponent*> WeaponPrimitiveInfo;
-	TArray<TMap<FString, UPrimitiveComponent*>> AdditiveWeaponPrimitiveInfo; // 추가적인 WeaponMesh를 가지는 배열
+	TMap<FString, UPrimitiveComponent*> WeaponFppPrimitiveInfo; // 추가적인 WeaponMesh를 가지는 배열
 
 	UPROPERTY(Replicated)
 		bool IsAttacking = false; // 공격중인지
