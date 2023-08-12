@@ -16,7 +16,7 @@
 #define PROFILE_Bullet "Bullet"
 
 // Server
-#define IS_SERVER() GetWorld()->IsNetMode(ENetMode::NM_DedicatedServer) || GetWorld()->IsNetMode(ENetMode::NM_ListenServer) || GetWorld()->IsNetMode(ENetMode::NM_Standalone)
+#define IS_SERVER() UKismetSystemLibrary::IsServer(this)
 
 // Loga
 #define KR_CALLINFO ((IS_SERVER() ? TEXT("Server :") : TEXT("Client :")) + FString(__FUNCTION__) + TEXT("(") + FString::FromInt(__LINE__) + TEXT(")"))

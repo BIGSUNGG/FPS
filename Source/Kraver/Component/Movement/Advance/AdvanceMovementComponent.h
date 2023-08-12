@@ -65,9 +65,9 @@ protected:
 	void ResetSlideSuppression();
 
 	// Rpc
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_WallRunJumpSuccess(FVector PendingLaunchVelocity);
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_WallRunJumpSuccess(FVector PendingLaunchVelocity);
 	UFUNCTION(Server, Reliable)
 		virtual void Server_WallRunEnd();
@@ -107,7 +107,7 @@ protected:
 	UPROPERTY(Replicated)
 		EWallRunState CurWallRunState;
 	void SetCurWallRunState(EWallRunState Value);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_SetCurWallRunState(EWallRunState Value);
 
 	bool bWallRunHorizonSupressed = false;

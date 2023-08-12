@@ -67,13 +67,13 @@ protected:
 	virtual void RefreshSpringArm(); // SpringArm의 RelativeLocation을 새로고침하는 함수
 
 	// Rpc
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
 	virtual void Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed);
 
@@ -141,7 +141,7 @@ protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 		EViewType ViewType = EViewType::FIRST_PERSON;
 	void SetViewType(EViewType Type);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_SetViewType(EViewType Type);
 	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
 	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트

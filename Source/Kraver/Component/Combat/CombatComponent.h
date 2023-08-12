@@ -53,57 +53,57 @@ public:
 protected:
 
 	// Equip Weapon
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
 
-	UFUNCTION(Client, reliable)
+	UFUNCTION(Client, Reliable)
 		virtual void Client_EquipWeaponSuccess(AWeapon* Weapon);		
-	UFUNCTION(Client, reliable)
+	UFUNCTION(Client, Reliable)
 		virtual void Client_UnEquipWeaponSuccess(AWeapon* Weapon);
 
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_UnholsterWeapon(AWeapon* Weapon);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_HolsterWeapon(AWeapon* Weapon); // CurWeapon을 집어넣는 함수
 
 
 	// Take Damage
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
-	UFUNCTION(Client, reliable)
+	UFUNCTION(Client, Reliable)
 		void Client_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
-	UFUNCTION(Client, reliable)
+	UFUNCTION(Client, Reliable)
 		void Client_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
-	UFUNCTION(Client, reliable)
+	UFUNCTION(Client, Reliable)
 		void Client_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	// Give Damage
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_GivePointDamage(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_GiveRadialDamage(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
-	UFUNCTION(Client, reliable)
+	UFUNCTION(Client, Reliable)
 		void Client_GiveDamageSuccess(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
-	UFUNCTION(Client, reliable)
+	UFUNCTION(Client, Reliable)
 		void Client_GivePointDamageSuccess(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
-	UFUNCTION(Client, reliable)
+	UFUNCTION(Client, Reliable)
 		void Client_GiveRadialDamageSuccess(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	// Death
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
 
-	UFUNCTION(Client, reliable)
+	UFUNCTION(Client, Reliable)
 		void Client_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
 
 public:
@@ -168,7 +168,7 @@ protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		AWeapon* CurWeapon = nullptr; // 현재 무기
 	void SetCurWeapon(AWeapon* Weapon);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_SetCurWeapon(AWeapon* Weapon);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
@@ -177,14 +177,14 @@ protected:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
 		int32 CurHp = 100.f; // 현재 Hp
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_SetCurHp(int32 value);
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_SetCurHp(int32 value);
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
 		int32 MaxHp = 100.f; // 최대 Hp
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_SetMaxHp(int32 value);
 
 	bool bCanceledTakeDamage = false; // Server에서만 사용

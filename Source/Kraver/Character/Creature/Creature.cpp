@@ -42,7 +42,7 @@ ACreature::ACreature()
 	Fp_Root->SetupAttachment(GetCapsuleComponent());
 
 	Fp_SpringArm->SetupAttachment(Fp_Root);
-	Fp_SpringArm->SetRelativeLocation(FVector(0.f, 0.f, 80.f));
+	Fp_SpringArm->SetRelativeLocation(FVector(0.f, 0.f, 75.f));
 	Fp_SpringArm->bUsePawnControlRotation = true;
 	Fp_SpringArm->bInheritPitch = true;
 	Fp_SpringArm->bInheritRoll = true;

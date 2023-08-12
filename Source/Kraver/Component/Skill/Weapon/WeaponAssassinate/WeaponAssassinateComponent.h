@@ -27,13 +27,13 @@ protected:
 	virtual std::pair<bool, FHitResult> CalculateCanAssassinate();
 
 	// Rpc
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_Assassinate(AActor* Actor);
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_Assassinate(AActor* Actor);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_OnAssassinateAttackEvent();
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_OnAssassinateEndEvent();
 
 	// Delegate

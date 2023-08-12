@@ -301,7 +301,7 @@ void UCombatComponent::UnholsterWeapon(AWeapon* Weapon)
 	}
 	
 	KR_LOG(Log,TEXT("Unholster Weapon %s"),*Weapon->GetName());
-	if (CurWeapon)
+	if (CurWeapon != Weapon)
 		HolsterWeapon(CurWeapon);
 
 	SetCurWeapon(Weapon);

@@ -321,7 +321,6 @@ bool UAdvanceMovementComponent::WallRunHorizonMovement(FVector Start, FVector En
 			OwnerCreature->LaunchCharacter(WallRunVec, true, !bWallRunGravity);
 
 			FRotator Temp = WallRunVec.Rotation();
-			KR_LOG(Log, TEXT("%f %f %f"), Temp.Pitch, Temp.Roll, Temp.Yaw);
 			return true;
 		}
 	}

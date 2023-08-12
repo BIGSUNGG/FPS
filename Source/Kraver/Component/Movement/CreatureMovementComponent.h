@@ -53,13 +53,13 @@ protected:
 	UPROPERTY(Replicated , VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
 		bool IsJumping	 = false;
 	void SetIsJumping(bool value);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_SetIsJumping(bool value);
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
 		EMovementState MovementState = EMovementState::WALK;
 	virtual void SetMovementState(EMovementState value) final;
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		void Server_SetMovementState(EMovementState value);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))

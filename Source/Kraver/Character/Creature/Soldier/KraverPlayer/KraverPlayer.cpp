@@ -57,9 +57,16 @@ void AKraverPlayer::BeginPlay()
 	ASoldier::BeginPlay();
 
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(ArmMesh->GetAnimInstance());
-	AnimInstance->OnReload_Grab_Magazine.AddDynamic(this, &AKraverPlayer::OnFP_Reload_Grab_MagazineEvent);
-	AnimInstance->OnReload_Insert_Magazine.AddDynamic(this, &AKraverPlayer::OnFP_Reload_Insert_MagazineEvent);
-	AnimInstance->OnWeapon_Holster.AddDynamic(this, &ThisClass::OnTp_Weapon_HolsterEvent);
+	if((AnimInstance))
+	{
+		AnimInstance->OnReload_Grab_Magazine.AddDynamic(this, &AKraverPlayer::OnFP_Reload_Grab_MagazineEvent);
+		AnimInstance->OnReload_Insert_Magazine.AddDynamic(this, &AKraverPlayer::OnFP_Reload_Insert_MagazineEvent);
+		AnimInstance->OnWeapon_Holster.AddDynamic(this, &ThisClass::OnTp_Weapon_HolsterEvent);
+	}
+	else
+	{
+		KR_LOG(Error ,TEXT("AnimInstance is not USoldierAnimInstance class"));
+	}
 
 	Fp_SpringArmBasicLocation = Fp_SpringArm->GetRelativeLocation();
 	BasicArmLocation = ArmMesh->GetRelativeLocation();
@@ -395,7 +402,7 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 
 	if (CanInteractWeapon && GEngine)
 	{
-		FString Text = "CanInteractWeapon : " + CanInteractWeapon->GetName();
+		FString Text = "Can Interact Weapon : " + CanInteractWeapon->GetName();
 		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::White, Text);
 	}
 
@@ -554,7 +561,6 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	ASoldier::OnClientUnEquipWeaponSuccessEvent(Weapon);
 
 	ThrowWeapon(Weapon);
-
 	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
 	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
 

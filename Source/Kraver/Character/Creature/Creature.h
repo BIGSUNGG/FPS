@@ -150,45 +150,45 @@ protected:
 		virtual void Multicast_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(Client, Reliable)
 		virtual void Client_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_OnAssassinatedEndEvent();
 
 		// Equip
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
 
 		// Death
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_OnDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // Hp가 0이하가 되었을때 모든 클라이언트에서 호출되는 함수
 
 		// TakeDamage
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_OnAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_OnAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_OnAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 		// Jump
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_Jump();
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_Jump();
 
 		// Montage
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, Reliable)
 		virtual void Server_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 
 		// Holster Unholster
@@ -198,9 +198,9 @@ protected:
 		virtual void Multicast_HolsterWeaponEvent(AWeapon* Weapon);
 
 		// SimulateMesh
-	UFUNCTION(Client, reliable)
+	UFUNCTION(Client, Reliable)
 		virtual void Client_SimulateMesh();
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_SimulateMesh();
 
 	// Function
