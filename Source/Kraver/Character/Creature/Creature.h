@@ -103,6 +103,7 @@ protected:
 	virtual void AimOffset(float DeltaTime);
 
 	// Delegate Event
+		// Equip Success
 	UFUNCTION()
 		virtual void OnClientEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 호출되는 함수
 	UFUNCTION()
@@ -111,7 +112,8 @@ protected:
 		virtual void OnServerEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 서버에서 호출되는 함수
 	UFUNCTION()
 		virtual void OnServerUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
-
+			
+		// Holster
 	UFUNCTION()
 		virtual void OnClientUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
@@ -120,6 +122,8 @@ protected:
 		virtual void OnClientHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
 		virtual void OnServerHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+
+		// Death
 	UFUNCTION()
 		virtual void OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을때 호출되는 함수
 	UFUNCTION()
@@ -130,14 +134,23 @@ protected:
 	virtual void OnEndCrouch(float HeightAdjust, float ScaledHeightAdjust) override; // 일어났을때 호출되는 함수
 	virtual void OnJumped_Implementation() override;
 
+		// Take Damage
 	UFUNCTION()
 		virtual void OnClientAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION()
 		virtual void OnClientAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+
+		// Montage
 	UFUNCTION()
 		virtual void OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 	UFUNCTION()
 		virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+	
+		// OnRep
+	UFUNCTION() 
+		virtual void OnRepCurWeaponEvent(AWeapon* PrevWeapon, AWeapon* CurWeapon);
+	UFUNCTION()
+		virtual void OnRepWeaponSlotEvent(const TArray<AWeapon*>& PrevWeaponSlot, const TArray<AWeapon*>& CurWeaponSlot);
 
 	// RPC
 	UFUNCTION(Server, Reliable)
@@ -152,12 +165,6 @@ protected:
 		virtual void Client_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(Server, Reliable)
 		virtual void Server_OnAssassinatedEndEvent();
-
-		// Equip
-	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
-	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
 
 		// Death
 	UFUNCTION(NetMulticast, Reliable)
@@ -191,12 +198,6 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 
-		// Holster Unholster
-	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_UnholsterWeaponEvent(AWeapon* Weapon);
-	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_HolsterWeaponEvent(AWeapon* Weapon);
-
 		// SimulateMesh
 	UFUNCTION(Client, Reliable)
 		virtual void Client_SimulateMesh();
@@ -210,6 +211,11 @@ protected:
 
 	virtual void Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	virtual void AssassinatedEnd();
+
+	virtual void EquipEvent(AWeapon* Weapon);
+	virtual void UnEquipEvent(AWeapon* Weapon);
+	virtual void HolsterEvent(AWeapon* Weapon);
+	virtual void UnholsterEvent(AWeapon* Weapon);
 
 public:
 	// Delegate

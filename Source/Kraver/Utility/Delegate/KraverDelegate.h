@@ -8,6 +8,10 @@
 #include "Kraver/Utility/Struct/KraverStruct.h"
 #include "KraverDelegate.generated.h"
 
+// On Replcated
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRepWeapon, AWeapon*, PrevWeapon, AWeapon*, CurWeapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRepWeaponSlot, const TArray<AWeapon*>&, PrevWeaponSlot, const TArray<AWeapon*>&, CurWeaponSlot);
+
 // Crouch Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCrouchDele, float, HalfHeightAdjust, float, ScaledHalfHeightAdjust);
 

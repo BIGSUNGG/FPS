@@ -141,8 +141,9 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UCombatComponent, CurWeapon); 
-	DOREPLIFETIME(UCombatComponent, CurHp);
+	DOREPLIFETIME(UCombatComponent, CurWeapon);
+	DOREPLIFETIME(UCombatComponent, WeaponSlot);
+	DOREPLIFETIME(UCombatComponent, CurHp); 
 	DOREPLIFETIME(UCombatComponent, MaxHp);
 }
 
@@ -317,7 +318,7 @@ bool UCombatComponent::HolsterWeapon(AWeapon* Weapon)
 	if(CurWeapon == nullptr)
 		return false;
 
-	KR_LOG(Log, TEXT("Holster Weapon %s"), *CurWeapon->GetName());
+	KR_LOG(Log, TEXT("Holster Weapon %s"), *Weapon->GetName());
 	bool Success = Weapon->Holster();
 	if(Success)
 	{
@@ -399,6 +400,9 @@ void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
 		Weapon->SetOwner(OwnerCreature);
 		KR_LOG(Log, TEXT("Success to equip weapon %s"), *Weapon->GetName());
 
+		if (!AddWeapon(Weapon))
+			KR_LOG(Error, TEXT("Failed to AddWeapon"));
+
 		OnServerEquipWeaponSuccess.Broadcast(Weapon);
 		Client_EquipWeaponSuccess(Weapon);
 	}
@@ -416,6 +420,9 @@ void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 	{
 		KR_LOG(Log, TEXT("UnEquipWeapon %s"), *Weapon->GetName());
 
+		if (!RemoveWeapon(Weapon))
+			KR_LOG(Error, TEXT("Failed to RemoveWeapon"));
+
 		OnServerUnEquipWeaponSuccess.Broadcast(Weapon);
 		Client_UnEquipWeaponSuccess(Weapon);
 	}
@@ -431,16 +438,6 @@ void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
 
 	SetCurWeapon(Weapon);
 	Weapon->SetOwnerCreature(OwnerCreature);
-	for (auto& Value : WeaponSlot)
-	{
-		if (Value == nullptr)
-		{
-			Value = Weapon;
-			break;
-		}
-	}
-	if (WeaponSlot.Num() > MaxWeaponSlotSize)
-		KR_LOG(Error, TEXT("WeaponSlot size is bigger than MaxWeaponSlot"));
 
 	OnClientEquipWeaponSuccess.Broadcast(Weapon);
 
@@ -450,14 +447,7 @@ void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
 void UCombatComponent::Client_UnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
 {
 	HolsterWeapon(Weapon);
-	for (auto& Value : WeaponSlot)
-	{
-		if (Value == Weapon)
-		{
-			Value = nullptr;
-			break;
-		}
-	}
+
 	OnClientUnEquipWeaponSuccess.Broadcast(Weapon);
 }
 
@@ -652,4 +642,42 @@ void UCombatComponent::Client_Death_Implementation(float DamageAmount, FDamageEv
 	KR_LOG(Log, TEXT("Dead By %s"), *DamageCauser->GetName());
 	Server_SetCurHp(CurHp);
 	OnClientDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+}
+
+void UCombatComponent::OnRepCurWeaponEvent(AWeapon* PrevWeapon)
+{
+	OnRepCurWeapon.Broadcast(PrevWeapon, CurWeapon);
+}
+
+void UCombatComponent::OnRepWeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot)
+{
+	OnRepWeaponSlot.Broadcast(PrevWeaponSlot, WeaponSlot);
+}
+
+bool UCombatComponent::AddWeapon(AWeapon* Weapon)
+{
+	for (auto& Value : WeaponSlot)
+	{
+		if (Value == nullptr)
+		{
+			Value = Weapon;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool UCombatComponent::RemoveWeapon(AWeapon* Weapon)
+{
+	for (auto& Value : WeaponSlot)
+	{
+		if (Value == Weapon)
+		{
+			Value = nullptr;
+			return true;
+		}
+	}
+
+	return false;
 }

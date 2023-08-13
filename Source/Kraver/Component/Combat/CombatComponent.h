@@ -51,7 +51,6 @@ public:
 	virtual void CancelTakeDamage();
 
 protected:
-
 	// Equip Weapon
 	UFUNCTION(Server, Reliable)
 		virtual void Server_EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
@@ -102,9 +101,18 @@ protected:
 	// Death
 	UFUNCTION(Server, Reliable)
 		void Server_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
-
 	UFUNCTION(Client, Reliable)
 		void Client_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
+
+	// OnRep
+	UFUNCTION()
+		void OnRepCurWeaponEvent(AWeapon* PrevWeapon);
+	UFUNCTION()
+		void OnRepWeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot);
+
+	// Func
+	bool AddWeapon(AWeapon* Weapon);
+	bool RemoveWeapon(AWeapon* Weapon);
 
 public:
 	// Getter Setter
@@ -157,20 +165,24 @@ public:
 	FDeathDele OnClientDeath; // 죽었을때 호출
 	FDeathDele OnServerDeath; // 죽었을때 호출
 
+	// OnRep
+	FRepWeapon OnRepCurWeapon;
+	FRepWeaponSlot OnRepWeaponSlot;
+
 protected:
 	ACreature* OwnerCreature;
 	AKraverPlayer* OwnerPlayer;
 	AKraverPlayerController* Controller;
 	AKraverHUD* HUD;
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(ReplicatedUsing = OnRepCurWeaponEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		AWeapon* CurWeapon = nullptr; // 현재 무기
 	void SetCurWeapon(AWeapon* Weapon);
 	UFUNCTION(Server, Reliable)
 		void Server_SetCurWeapon(AWeapon* Weapon);
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(ReplicatedUsing = OnRepWeaponSlotEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		int32 MaxWeaponSlotSize = 3; // WeaponSlot 사이즈
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))

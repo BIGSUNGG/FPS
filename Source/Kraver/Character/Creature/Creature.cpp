@@ -39,6 +39,9 @@ ACreature::ACreature()
 	CombatComponent->OnClientHolsterWeapon.AddDynamic(this, &ACreature::OnClientHolsterWeaponEvent);
 	CombatComponent->OnServerHolsterWeapon.AddDynamic(this, &ACreature::OnServerHolsterWeaponEvent);
 
+	CombatComponent->OnRepCurWeapon.AddDynamic(this, &ThisClass::OnRepCurWeaponEvent);
+	CombatComponent->OnRepWeaponSlot.AddDynamic(this, &ThisClass::OnRepWeaponSlotEvent);
+
 	Fp_Root->SetupAttachment(GetCapsuleComponent());
 
 	Fp_SpringArm->SetupAttachment(Fp_Root);
@@ -92,6 +95,44 @@ void ACreature::Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateIn
 void ACreature::AssassinatedEnd()
 {
 	Server_OnAssassinatedEndEvent();
+}
+
+void ACreature::EquipEvent(AWeapon* Weapon)
+{
+	if(!IsValid(Weapon))
+		return;
+
+	Weapon->GetWeaponMesh()->AttachToComponent
+	(
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetIncludingScale,
+		Weapon->GetAttachSocketName()
+	);
+}
+
+void ACreature::UnEquipEvent(AWeapon* Weapon)
+{
+	if (!IsValid(Weapon))
+		return;
+
+	SetWeaponVisibility(Weapon, true);
+	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+}
+
+void ACreature::HolsterEvent(AWeapon* Weapon)
+{
+	if (!IsValid(Weapon))
+		return;
+
+	SetWeaponVisibility(Weapon, false);
+}
+
+void ACreature::UnholsterEvent(AWeapon* Weapon)
+{
+	if (!IsValid(Weapon))
+		return;
+
+	SetWeaponVisibility(Weapon, true);
 }
 
 void ACreature::OwnOtherActor(AActor* Actor)
@@ -417,42 +458,29 @@ void ACreature::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 	if (Weapon == nullptr)
 		return;
 
-	Weapon->GetWeaponMesh()->AttachToComponent
-	(
-		GetMesh(),
-		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		Weapon->GetAttachSocketName()
-	);
+	EquipEvent(Weapon);
 }
 
 void ACreature::OnServerEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	Weapon->SetOwner(this);
-
-	Weapon->GetWeaponMesh()->AttachToComponent
-	(
-		GetMesh(),
-		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		Weapon->GetAttachSocketName()
-	);
-
-	Multicast_OnEquipWeaponSuccessEvent(Weapon);
+	EquipEvent(Weapon);
 }
 
 void ACreature::OnServerUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	Multicast_OnUnEquipWeaponSuccessEvent(Weapon);
+	UnEquipEvent(Weapon);
 }
 
 void ACreature::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	SetWeaponVisibility(Weapon, true);
-	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	UnEquipEvent(Weapon);
 }
 
 void ACreature::OnClientUnholsterWeaponEvent(AWeapon* Weapon)
 {
-	SetWeaponVisibility(Weapon, true);
+	UnholsterEvent(Weapon);
+
 	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.AddDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 
@@ -478,7 +506,7 @@ void ACreature::OnClientUnholsterWeaponEvent(AWeapon* Weapon)
 
 void ACreature::OnServerUnholsterWeaponEvent(AWeapon* Weapon)
 {
-	Multicast_UnholsterWeaponEvent(Weapon);
+	UnholsterEvent(Weapon);
 }
 
 void ACreature::OnClientHolsterWeaponEvent(AWeapon* Weapon)
@@ -486,10 +514,11 @@ void ACreature::OnClientHolsterWeaponEvent(AWeapon* Weapon)
 	if(!Weapon)
 		return;
 
+	HolsterEvent(Weapon);
+
 	Weapon->OnPlayTppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 
-	SetWeaponVisibility(Weapon, false);
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageTpp());
 
 	switch (Weapon->GetWeaponType())
@@ -514,7 +543,7 @@ void ACreature::OnClientHolsterWeaponEvent(AWeapon* Weapon)
 
 void ACreature::OnServerHolsterWeaponEvent(AWeapon* Weapon)
 {
-	Multicast_HolsterWeaponEvent(Weapon);
+	HolsterEvent(Weapon);
 }
 
 void ACreature::OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
@@ -591,6 +620,36 @@ void ACreature::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float S
 	Server_OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
 }
 
+void ACreature::OnRepCurWeaponEvent(AWeapon* PrevWeapon, AWeapon* CurWeapon)
+{
+	if(IsLocallyControlled())
+		return;
+
+	if(PrevWeapon)
+		HolsterEvent(PrevWeapon);
+
+	if (CurWeapon)
+		UnholsterEvent(CurWeapon);
+}
+
+void ACreature::OnRepWeaponSlotEvent(const TArray<AWeapon*>& PrevWeaponSlot, const TArray<AWeapon*>& CurWeaponSlot)
+{
+	if (IsLocallyControlled())
+		return;
+
+	for (int i = 0; i < CurWeaponSlot.Num(); i++)
+	{
+		if (CurWeaponSlot[i] && !PrevWeaponSlot[i]) // 장착한 경우
+		{
+			EquipEvent(CurWeaponSlot[i]);
+		}
+		else if (!CurWeaponSlot[i] && PrevWeaponSlot[i]) // 장착해제한 경우
+		{
+			UnEquipEvent(PrevWeaponSlot[i]);
+		}
+	}
+}
+
 void ACreature::Server_OwnOtherActor_Implementation(AActor* Actor)
 {
 	Actor->SetOwner(this);
@@ -617,22 +676,6 @@ void ACreature::Client_Assassinated_Implementation(ACreature* Attacker, FAssassi
 {
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	DisableInput(PlayerController);
-}
-
-void ACreature::Multicast_OnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
-{
-	Weapon->GetWeaponMesh()->AttachToComponent
-	(
-		GetMesh(),
-		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		Weapon->GetAttachSocketName()
-	);
-}
-
-void ACreature::Multicast_OnUnEquipWeaponSuccessEvent_Implementation(AWeapon* Weapon)
-{
-	SetWeaponVisibility(Weapon, true);
-	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
 void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -721,16 +764,6 @@ void ACreature::Server_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* 
 void ACreature::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
 {
 
-}
-
-void ACreature::Multicast_UnholsterWeaponEvent_Implementation(AWeapon* Weapon)
-{
-	SetWeaponVisibility(Weapon, true);
-}
-
-void ACreature::Multicast_HolsterWeaponEvent_Implementation(AWeapon* Weapon)
-{
-	SetWeaponVisibility(Weapon, false);
 }
 
 void ACreature::Client_SimulateMesh_Implementation()
