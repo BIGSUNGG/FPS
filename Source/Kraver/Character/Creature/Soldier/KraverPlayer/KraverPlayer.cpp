@@ -4,17 +4,17 @@
 #include "KraverPlayer.h"
 #include "Kraver/Actor/Weapon/Weapon.h"
 #include "Kraver/Actor/Weapon/Gun/Gun.h"
-#include "Kraver/Ui/HUD/KraverHUD.h"
-#include "Kraver/PlayerController/KraverPlayerController.h"
-#include "Kraver/GameMode/KraverGameMode.h"
+#include "Kraver/GameBase/Ui/HUD/KraverHUD.h"
+#include "Kraver/GameBase/PlayerController/KraverPlayerController.h"
+#include "Kraver/GameBase/GameMode/KraverGameMode.h"
 #include "Kraver/Animation/Creature/CreatureAnimInstance.h"
 #include "Kraver/Component/Movement/Advance/AdvanceMovementComponent.h"
 #include "Kraver/Animation/Creature/Soldier/SoldierAnimInstance.h"
 #include "Kraver/Component/Attachment/Weapon/Magazine/AttachmentMagazineComponent.h"
-#include "Kraver/SubSystem/DamageIndicatorSubsystem.h"
+#include "Kraver/GameBase/SubSystem/DamageIndicatorSubsystem.h"
 #include "Kraver/Component/Skill/Weapon/WeaponReload/WeaponReloadComponent.h"
 
-AKraverPlayer::AKraverPlayer() : ASoldier()
+AKraverPlayer::AKraverPlayer() : Super()
 {
 	NetUpdateFrequency = 300.f;
 
@@ -54,7 +54,7 @@ AKraverPlayer::AKraverPlayer() : ASoldier()
 
 void AKraverPlayer::BeginPlay()
 {
-	ASoldier::BeginPlay();
+	Super::BeginPlay();
 
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(ArmMesh->GetAnimInstance());
 	if((AnimInstance))
@@ -72,20 +72,19 @@ void AKraverPlayer::BeginPlay()
 	BasicArmLocation = ArmMesh->GetRelativeLocation();
 	BasicArmRotation = ArmMesh->GetRelativeRotation();
 
-	if (Controller == GetWorld()->GetFirstPlayerController())
+	if (IsLocallyControlled())
 	{
-		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->OnLocalPlayerBeginPlay(this);
-
 		KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
 		if (KraverController)
 			HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
+
 		RefreshCurViewType();
 	}
 }
 
 void AKraverPlayer::Tick(float DeltaTime)
 {
-	ASoldier::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
 
 	KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
 	if (KraverController)
@@ -101,7 +100,7 @@ void AKraverPlayer::Tick(float DeltaTime)
 
 void AKraverPlayer::CameraTick(float DeletaSeconds)
 {
-	ASoldier::CameraTick(DeletaSeconds);
+	Super::CameraTick(DeletaSeconds);
 	
 	UAdvanceMovementComponent* AdvanceMovementComp = Cast<UAdvanceMovementComponent>(CreatureMovementComponent);
 
@@ -225,7 +224,7 @@ void AKraverPlayer::LocallyControlTick(float DeltaTime)
 
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	ASoldier::SetupPlayerInputComponent(PlayerInputComponent);
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
 	PlayerInputComponent->BindAction(TEXT("ChangeView"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeView);
 	PlayerInputComponent->BindAction(TEXT("Equip"), EInputEvent::IE_Pressed, this, &AKraverPlayer::EquipButtonPressed);
@@ -238,7 +237,7 @@ void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	ASoldier::GetLifetimeReplicatedProps(OutLifetimeProps);
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AKraverPlayer, ViewType);
 
@@ -500,7 +499,7 @@ void AKraverPlayer::Multicast_ThrowWeapon_Implementation(AWeapon* Weapon, FTrans
 
 void AKraverPlayer::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
 {
-	ASoldier::Multicast_OnPlayWeaponFppMontageEvent_Implementation(PlayedMontage, Speed);
+	Super::Multicast_OnPlayWeaponFppMontageEvent_Implementation(PlayedMontage, Speed);
 
 	ArmMesh->GetAnimInstance()->Montage_Play(PlayedMontage, Speed);
 }
@@ -516,7 +515,7 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 	if(!Weapon)
 		return;
 
-	ASoldier::OnClientEquipWeaponSuccessEvent(Weapon);
+	Super::OnClientEquipWeaponSuccessEvent(Weapon);
 	UnholsterWeapon();
 	
 	Weapon->GetFppWeaponPrimitiveInfo()["Root"]->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetAttachSocketName());
@@ -542,7 +541,7 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	ASoldier::OnClientUnEquipWeaponSuccessEvent(Weapon);
+	Super::OnClientUnEquipWeaponSuccessEvent(Weapon);
 
 	ThrowWeapon(Weapon);
 	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
@@ -580,24 +579,25 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 void AKraverPlayer::OnClientUnholsterWeaponEvent(AWeapon* Weapon)
 {
-	ASoldier::OnClientUnholsterWeaponEvent(Weapon);
+	Super::OnClientUnholsterWeaponEvent(Weapon);
 
-	RefreshCurViewType();
 }
 
 void AKraverPlayer::OnClientHolsterWeaponEvent(AWeapon* Weapon)
 {
-	ASoldier::OnClientHolsterWeaponEvent(Weapon);
+	Super::OnClientHolsterWeaponEvent(Weapon);
 
 	ArmMesh->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageFpp());
-	RefreshCurViewType();
 }
 
 void AKraverPlayer::Client_SimulateMesh_Implementation()
 {
-	ASoldier::Client_SimulateMesh_Implementation();
+	Super::Client_SimulateMesh_Implementation();
 
 	GetMesh()->SetOwnerNoSee(false);
+	GetMesh()->SetOnlyOwnerSee(false);
+	GetMesh()->SetVisibility(true);
+	GetMesh()->SetHiddenInGame(false);
 	ArmMesh->SetOwnerNoSee(true);
 
 	FAttachmentTransformRules TransformRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
@@ -608,7 +608,7 @@ void AKraverPlayer::Client_SimulateMesh_Implementation()
 
 void AKraverPlayer::OnAssassinateEvent(AActor* AssassinatedActor)
 {
-	ASoldier::OnAssassinateEvent(AssassinatedActor);
+	Super::OnAssassinateEvent(AssassinatedActor);
 
 	GetMesh()->SetOwnerNoSee(false);
 	ArmMesh->SetOwnerNoSee(true);
@@ -619,7 +619,7 @@ void AKraverPlayer::OnAssassinateEvent(AActor* AssassinatedActor)
 
 void AKraverPlayer::OnAssassinateEndEvent()
 {
-	ASoldier::OnAssassinateEndEvent();
+	Super::OnAssassinateEndEvent();
 
 	RefreshCurViewType();
 
@@ -630,7 +630,7 @@ void AKraverPlayer::OnAssassinateEndEvent()
 
 void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
 {
-	ASoldier::OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
+	Super::OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
 }
 
 void AKraverPlayer::OnFP_Reload_Grab_MagazineEvent()
@@ -699,7 +699,7 @@ void AKraverPlayer::OnTp_Weapon_HolsterEvent()
 
 void AKraverPlayer::PlayLandedMontage()
 {
-	ASoldier::PlayLandedMontage();
+	Super::PlayLandedMontage();
 
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(ArmMesh->GetAnimInstance());
 	CreatureAnim->PlayLandedMontage();

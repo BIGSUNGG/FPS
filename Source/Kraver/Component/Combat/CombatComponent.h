@@ -106,9 +106,9 @@ protected:
 
 	// OnRep
 	UFUNCTION()
-		void OnRepCurWeaponEvent(AWeapon* PrevWeapon);
+		void OnRep_CurWeaponEvent(AWeapon* PrevWeapon);
 	UFUNCTION()
-		void OnRepWeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot);
+		void OnRep_WeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot);
 
 	// Func
 	bool AddWeapon(AWeapon* Weapon);
@@ -175,12 +175,12 @@ protected:
 	AKraverPlayerController* Controller;
 	AKraverHUD* HUD;
 
-	UPROPERTY(ReplicatedUsing = OnRepCurWeaponEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(ReplicatedUsing = OnRep_CurWeaponEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		AWeapon* CurWeapon = nullptr; // 현재 무기
 	void SetCurWeapon(AWeapon* Weapon);
 	UFUNCTION(Server, Reliable)
 		void Server_SetCurWeapon(AWeapon* Weapon);
-	UPROPERTY(ReplicatedUsing = OnRepWeaponSlotEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponSlotEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 		int32 MaxWeaponSlotSize = 3; // WeaponSlot 사이즈

@@ -4,8 +4,8 @@
 #include "CombatComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
-#include "Kraver/PlayerController/KraverPlayerController.h"
-#include "Kraver/Ui/HUD/KraverHUD.h"
+#include "Kraver/GameBase/PlayerController/KraverPlayerController.h"
+#include "Kraver/GameBase/Ui/HUD/KraverHUD.h"
 #include "Kraver/Actor/Weapon/Gun/Gun.h"
 
 // Sets default values for this component's properties
@@ -203,7 +203,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
-	if (OwnerCreature == nullptr || OwnerCreature->Controller == nullptr)
+	if (OwnerCreature == nullptr || OwnerCreature->IsLocallyControlled() == false)
 		return;
 
 	Controller = Controller == nullptr ? Cast<AKraverPlayerController>(OwnerCreature->Controller) : Controller;
@@ -644,12 +644,12 @@ void UCombatComponent::Client_Death_Implementation(float DamageAmount, FDamageEv
 	OnClientDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
-void UCombatComponent::OnRepCurWeaponEvent(AWeapon* PrevWeapon)
+void UCombatComponent::OnRep_CurWeaponEvent(AWeapon* PrevWeapon)
 {
 	OnRepCurWeapon.Broadcast(PrevWeapon, CurWeapon);
 }
 
-void UCombatComponent::OnRepWeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot)
+void UCombatComponent::OnRep_WeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot)
 {
 	OnRepWeaponSlot.Broadcast(PrevWeaponSlot, WeaponSlot);
 }

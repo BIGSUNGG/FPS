@@ -3,6 +3,7 @@
 // Engine
 #include "Engine/EngineTypes.h"
 #include "Engine/DamageEvents.h"
+#include "GenericPlatform/GenericPlatformProcess.h"
 
 // GameFramework
 #include "GameFramework/ProjectileMovementComponent.h"

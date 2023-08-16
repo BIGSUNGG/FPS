@@ -550,7 +550,7 @@ void ACreature::OnClientDeathEvent(float DamageAmount, FDamageEvent const& Damag
 {
 	DisableInput(GetController<APlayerController>());
 	if (CombatComponent->GetCurWeapon() != nullptr)
-		CombatComponent->UnEquipWeapon(CombatComponent->GetCurWeapon());
+		CombatComponent->HolsterWeapon(CombatComponent->GetCurWeapon());
 
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
 }
@@ -768,6 +768,7 @@ void ACreature::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontag
 
 void ACreature::Client_SimulateMesh_Implementation()
 {
+	GetMesh()->SetSimulatePhysics(true);
 }
 
 void ACreature::Multicast_SimulateMesh_Implementation()

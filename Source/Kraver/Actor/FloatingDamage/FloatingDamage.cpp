@@ -2,7 +2,7 @@
 
 
 #include "FloatingDamage.h"
-#include "Kraver/Ui/Widget/FloatingDamage/FloatingDamageWidget.h"
+#include "Kraver/GameBase/Ui/Widget/FloatingDamage/FloatingDamageWidget.h"
 #include "Kraver/Character/Creature/Creature.h"
 
 // Sets default values
