@@ -22,7 +22,7 @@ void UDamageIndicatorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UDamageIndicatorSubsystem::OnLocalPlayerBeginPlay(AKraverPlayer* Player)
 {
-	if(!Player)
+	if(!IsValid(Player))
 		return;
 
 	if (!Player->IsLocallyControlled())

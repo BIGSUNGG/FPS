@@ -7,6 +7,7 @@
 
 // GameFramework
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "GameFramework/GameState.h"
 
 // Components
 #include "Components/DecalComponent.h"

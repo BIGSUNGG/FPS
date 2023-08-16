@@ -27,7 +27,7 @@ void UAdvanceMovementComponent::BeginPlay()
 
 void UAdvanceMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	UCreatureMovementComponent::GetLifetimeReplicatedProps(OutLifetimeProps);
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UAdvanceMovementComponent, CurWallRunState);
 	DOREPLIFETIME(UAdvanceMovementComponent, IsSliding);
@@ -52,7 +52,7 @@ void UAdvanceMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 
 void UAdvanceMovementComponent::Landed(const FHitResult& Hit)
 {
-	UCreatureMovementComponent::Landed(Hit);
+	Super::Landed(Hit);
 
 	ResetWallRunVerticalSuppression();
 	ResetWallRunHorizonSuppression();

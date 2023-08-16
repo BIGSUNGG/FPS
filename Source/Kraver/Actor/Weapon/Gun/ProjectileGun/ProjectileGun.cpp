@@ -8,7 +8,7 @@
 
 void AProjectileGun::FireBullet()
 {
-	AGun::FireBullet();
+	Super::FireBullet();
 
 	FVector Spread;
 	if (GetbApplySpread())

@@ -7,6 +7,6 @@ void AShotGun::FireBullet()
 {
 	for (int i = 0; i < NumberOfBullet; i++)
 	{
-		AHitscanGun::FireBullet();
+		Super::FireBullet();
 	}
 }

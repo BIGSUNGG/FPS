@@ -13,7 +13,7 @@ UAttachmentScopeComponent::UAttachmentScopeComponent()
 
 void UAttachmentScopeComponent::BeginPlay()
 {
-	UAttachmentWeaponComponent::BeginPlay();
+	Super::BeginPlay();
 
 	ScopeMesh->SetStaticMesh(ScopeStaticMesh);
 	ScopeMesh->AttachToComponent(OwnerWeapon->GetTppWeaponPrimitiveInfo()["Root"],FAttachmentTransformRules::SnapToTargetIncludingScale, ScopeSocketName);
@@ -24,5 +24,5 @@ void UAttachmentScopeComponent::BeginPlay()
 
 void UAttachmentScopeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	UAttachmentWeaponComponent::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }

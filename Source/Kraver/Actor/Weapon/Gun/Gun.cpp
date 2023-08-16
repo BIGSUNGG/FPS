@@ -4,7 +4,7 @@
 #include "Gun.h"
 #include "Kraver/Character/Creature/Creature.h"
 
-AGun::AGun() : AWeapon()
+AGun::AGun() : Super()
 {
 	WeaponType = EWeaponType::GUN;
 	
@@ -15,7 +15,7 @@ AGun::AGun() : AWeapon()
 
 void AGun::Tick(float DeltaTime)
 {
-	AWeapon::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
 
 	if (OwnerCreature)
 	{
@@ -59,14 +59,14 @@ void AGun::Tick(float DeltaTime)
 
 void AGun::BeginPlay()
 {
-	AWeapon::BeginPlay();
+	Super::BeginPlay();
 	CurBulletSpread = MinSpread;
 
 }
 
 void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	AWeapon::GetLifetimeReplicatedProps(OutLifetimeProps);
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AGun, MaxAmmo);
 	DOREPLIFETIME(AGun, CurAmmo);
@@ -75,7 +75,7 @@ void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProp
 
 void AGun::PostInitializeComponents()
 {
-	AWeapon::PostInitializeComponents();
+	Super::PostInitializeComponents();
 
 }
 
@@ -154,7 +154,7 @@ void AGun::OnAttackEvent()
 		OnAttackEndEvent();
 	}
 
-	AWeapon::OnAttackEvent();
+	Super::OnAttackEvent();
 }
 
 void AGun::Server_SetTotalAmmo_Implementation(int32 Ammo)

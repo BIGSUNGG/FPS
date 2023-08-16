@@ -7,14 +7,14 @@
 #include "Kraver/Component/Skill/Weapon/WeaponReload/WeaponReloadComponent.h"
 
 ASoldier::ASoldier()
-	: ACreature()
+	: Super()
 {
 
 }
 
 void ASoldier::BeginPlay()
 {
-	ACreature::BeginPlay();
+	Super::BeginPlay();
 
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInstance->OnReload_Grab_Magazine.AddDynamic(this, &ASoldier::OnReload_Grab_MagazineEvent);
@@ -23,18 +23,18 @@ void ASoldier::BeginPlay()
 
 void ASoldier::Tick(float DeltaTime)
 {
-	ACreature::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
 }
 
 void ASoldier::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	ACreature::SetupPlayerInputComponent(PlayerInputComponent);
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
 
 void ASoldier::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	ACreature::GetLifetimeReplicatedProps(OutLifetimeProps);
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 }
 

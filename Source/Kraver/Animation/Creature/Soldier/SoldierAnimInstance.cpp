@@ -4,20 +4,20 @@
 #include "SoldierAnimInstance.h"
 #include "Kraver/Character/Creature/Soldier/Soldier.h"
 
-USoldierAnimInstance::USoldierAnimInstance() : UCreatureAnimInstance()
+USoldierAnimInstance::USoldierAnimInstance() : Super()
 {
 }
 
 void USoldierAnimInstance::NativeBeginPlay()
 {
-	UCreatureAnimInstance::NativeBeginPlay();
+	Super::NativeBeginPlay();
 
 	Soldier = Cast<ASoldier>(Creature);
 }
 
 void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds) 
 {
-	UCreatureAnimInstance::NativeUpdateAnimation(DeltaSeconds);
+	Super::NativeUpdateAnimation(DeltaSeconds);
 
 	if (Soldier == nullptr)
 		return;

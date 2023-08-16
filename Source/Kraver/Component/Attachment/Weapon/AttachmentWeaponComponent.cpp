@@ -11,7 +11,7 @@ UAttachmentWeaponComponent::UAttachmentWeaponComponent()
 
 void UAttachmentWeaponComponent::BeginPlay()
 {
-	UAttachmentComponent::BeginPlay();
+	Super::BeginPlay();
 
 	OwnerWeapon = Cast<AWeapon>(GetOwner());
 	if (!OwnerWeapon)
@@ -26,7 +26,7 @@ void UAttachmentWeaponComponent::BeginPlay()
 
 void UAttachmentWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	UAttachmentComponent::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 void UAttachmentWeaponComponent::OnAddOnDelegateEvent(UObject* Object)

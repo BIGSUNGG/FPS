@@ -7,14 +7,14 @@
 
 void UKraverPlayerAnimInstance::NativeBeginPlay()
 {
-	USoldierAnimInstance::NativeBeginPlay();
+	Super::NativeBeginPlay();
 
 	KraverPlayer = Cast<AKraverPlayer>(Soldier);
 }
 
 void UKraverPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
-	USoldierAnimInstance::NativeUpdateAnimation(DeltaSeconds);
+	Super::NativeUpdateAnimation(DeltaSeconds);
 
 	if (KraverPlayer == nullptr)
 		return;

@@ -12,7 +12,7 @@ UAttachmentSilencerComponent::UAttachmentSilencerComponent()
 
 void UAttachmentSilencerComponent::BeginPlay()
 {
-	UAttachmentWeaponComponent::BeginPlay();
+	Super::BeginPlay();
 
 	SilencerMesh->SetStaticMesh(SilencerStaticMesh);
 	SilencerMesh->AttachToComponent(OwnerWeapon->GetTppWeaponPrimitiveInfo()["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, SilencerSocketName);

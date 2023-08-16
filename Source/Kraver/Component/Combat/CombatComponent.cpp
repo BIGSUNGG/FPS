@@ -432,6 +432,12 @@ void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 
 void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
 {
+	if (IsValid(Weapon) == false)
+	{
+		GetWorld()->GetTimerManager().SetTimerForNextTick([=](){ Client_EquipWeaponSuccess(Weapon); });
+		return;
+	}
+
 	Weapon->SetOwner(OwnerCreature);
 
 	HolsterWeapon(CurWeapon);

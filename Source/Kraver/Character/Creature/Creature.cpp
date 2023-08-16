@@ -102,6 +102,13 @@ void ACreature::EquipEvent(AWeapon* Weapon)
 	if(!IsValid(Weapon))
 		return;
 
+	if (IsValid(Weapon->GetWeaponMesh()) == false || IsValid(GetMesh()) == false)
+	{
+		GetWorld()->GetTimerManager().SetTimerForNextTick([=](){ EquipEvent(Weapon); });
+		return;
+	}
+
+	Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
 	Weapon->GetWeaponMesh()->AttachToComponent
 	(
 		GetMesh(),

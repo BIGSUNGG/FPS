@@ -14,7 +14,7 @@ void AHitscanGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void AHitscanGun::FireBullet()
 {
-	AGun::FireBullet();
+	Super::FireBullet();
 
 	FVector Spread;
 	if (GetbApplySpread())

@@ -6,7 +6,7 @@
 
 void UKraverPlayerFppAnimInstance::NativeBeginPlay()
 {
-	UKraverPlayerAnimInstance::NativeBeginPlay();
+	Super::NativeBeginPlay();
 
 	KraverPlayer->OnLand.AddDynamic(this, &ThisClass::OnLandEvent);
 	KraverPlayer->OnJump.AddDynamic(this, &ThisClass::OnJumpEvent);
@@ -16,7 +16,7 @@ void UKraverPlayerFppAnimInstance::NativeBeginPlay()
 
 void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
-	UKraverPlayerAnimInstance::NativeUpdateAnimation(DeltaSeconds);
+	Super::NativeUpdateAnimation(DeltaSeconds);
 
 	if(KraverPlayer == nullptr) 
 		return;

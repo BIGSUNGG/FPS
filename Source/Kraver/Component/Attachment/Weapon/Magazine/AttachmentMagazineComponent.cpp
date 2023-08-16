@@ -13,7 +13,7 @@ UAttachmentMagazineComponent::UAttachmentMagazineComponent()
 
 void UAttachmentMagazineComponent::BeginPlay()
 {
-	UAttachmentWeaponComponent::BeginPlay();
+	Super::BeginPlay();
 
 	MagazineMesh->SetStaticMesh(MagazineStaticMesh);
 	MagazineMesh->AttachToComponent(OwnerWeapon->GetTppWeaponPrimitiveInfo()["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineSocketName);
@@ -24,6 +24,6 @@ void UAttachmentMagazineComponent::BeginPlay()
 
 void UAttachmentMagazineComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	UAttachmentWeaponComponent::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 }

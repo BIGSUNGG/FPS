@@ -14,7 +14,7 @@ AMelee::AMelee()
 
 void AMelee::BeginPlay()
 {
-	AWeapon::BeginPlay();
+	Super::BeginPlay();
 
 	if (bAutomaticAttack)
 	{
@@ -31,7 +31,7 @@ void AMelee::BeginPlay()
 
 void AMelee::Tick(float DeltaTime)
 {
-	AWeapon::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
 
 	if(bInputNextCombo)
 	{
@@ -47,26 +47,26 @@ void AMelee::Tick(float DeltaTime)
 
 bool AMelee::Equipped(ACreature* Character)
 {
-	bool bSuccess = AWeapon::Equipped(Character);
+	bool bSuccess = Super::Equipped(Character);
 	return bSuccess;
 }
 
 bool AMelee::UnEquipped()
 {
-	bool bSuccess = AWeapon::UnEquipped();
+	bool bSuccess = Super::UnEquipped();
 	ComboEnd();
 	return bSuccess;
 }
 
 bool AMelee::Unholster()
 {
-	bool bSuccess = AWeapon::Unholster();
+	bool bSuccess = Super::Unholster();
 	return bSuccess;
 }
 
 bool AMelee::Holster()
 {
-	bool bSuccess = AWeapon::Holster();
+	bool bSuccess = Super::Holster();
 	ComboEnd();
 	return bSuccess;
 }
@@ -76,7 +76,7 @@ void AMelee::AddOnOwnerDelegate()
 	if (OwnerCreature == nullptr)
 		return;
 
-	AWeapon::AddOnOwnerDelegate();
+	Super::AddOnOwnerDelegate();
 
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(OwnerCreature->GetMesh()->GetAnimInstance());
 	if (AnimInstance)
@@ -93,7 +93,7 @@ void AMelee::RemoveOnOwnerDelegate()
 	if (OwnerCreature == nullptr)
 		return;
 
-	AWeapon::RemoveOnOwnerDelegate();
+	Super::RemoveOnOwnerDelegate();
 
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(OwnerCreature->GetMesh()->GetAnimInstance());
 	if (AnimInstance)
@@ -110,7 +110,7 @@ void AMelee::OnAttackStartEvent()
 	if(bCanInputNextCombo)
 		bInputNextCombo = true;
 
-	AWeapon::OnAttackStartEvent();
+	Super::OnAttackStartEvent();
 }
 
 void AMelee::SwingAttack()
@@ -207,5 +207,5 @@ void AMelee::OnAttackEvent()
 	OnPlayTppMontage.Broadcast(AttackMontagesTpp[CurComboAttack], 1.f);
 	OnPlayFppMontage.Broadcast(AttackMontagesFpp[CurComboAttack], 1.f);
 
-	AWeapon::OnAttackEvent();
+	Super::OnAttackEvent();
 }
