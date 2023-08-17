@@ -57,10 +57,8 @@ protected:
 	UFUNCTION(Server, Reliable)
 		virtual void Server_UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
 
-	UFUNCTION(Client, Reliable)
-		virtual void Client_EquipWeaponSuccess(AWeapon* Weapon);		
-	UFUNCTION(Client, Reliable)
-		virtual void Client_UnEquipWeaponSuccess(AWeapon* Weapon);
+	virtual void Client_EquipWeaponSuccess(AWeapon* Weapon);		
+	virtual void Client_UnEquipWeaponSuccess(AWeapon* Weapon);
 
 	UFUNCTION(Server, Reliable)
 		virtual void Server_UnholsterWeapon(AWeapon* Weapon);

@@ -614,6 +614,7 @@ void AKraverPlayer::OnAssassinateEvent(AActor* AssassinatedActor)
 	ArmMesh->SetOwnerNoSee(true);
 
 	CombatComponent->GetCurWeapon()->GetWeaponMesh()->SetOwnerNoSee(false);
+	CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo()["Root"]->SetOwnerNoSee(true);
 
 }
 

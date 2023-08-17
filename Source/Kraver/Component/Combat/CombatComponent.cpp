@@ -404,7 +404,9 @@ void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
 			KR_LOG(Error, TEXT("Failed to AddWeapon"));
 
 		OnServerEquipWeaponSuccess.Broadcast(Weapon);
-		Client_EquipWeaponSuccess(Weapon);
+
+		if(OwnerCreature->IsLocallyControlled())
+			Client_EquipWeaponSuccess(Weapon);
 	}
 	else
 		KR_LOG(Warning, TEXT("Failed to equip weapon"));
@@ -424,14 +426,22 @@ void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 			KR_LOG(Error, TEXT("Failed to RemoveWeapon"));
 
 		OnServerUnEquipWeaponSuccess.Broadcast(Weapon);
-		Client_UnEquipWeaponSuccess(Weapon);
+
+		if (OwnerCreature->IsLocallyControlled())
+			Client_UnEquipWeaponSuccess(Weapon);
 	}
 	else
 		KR_LOG(Warning, TEXT("Failed to unequip weapon"));
 }
 
-void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
+void UCombatComponent::Client_EquipWeaponSuccess(AWeapon* Weapon)
 {
+	if (!OwnerCreature->IsLocallyControlled())
+	{
+		KR_LOG(Error, TEXT("Func isn't called on client"));
+		return;
+	}
+
 	if (IsValid(Weapon) == false)
 	{
 		GetWorld()->GetTimerManager().SetTimerForNextTick([=](){ Client_EquipWeaponSuccess(Weapon); });
@@ -450,8 +460,14 @@ void UCombatComponent::Client_EquipWeaponSuccess_Implementation(AWeapon* Weapon)
 	UnholsterWeapon(Weapon);
 }
 
-void UCombatComponent::Client_UnEquipWeaponSuccess_Implementation(AWeapon* Weapon)
+void UCombatComponent::Client_UnEquipWeaponSuccess(AWeapon* Weapon)
 {
+	if (!OwnerCreature->IsLocallyControlled())
+	{
+		KR_LOG(Error, TEXT("Func isn't called on client"));
+		return;
+	}
+
 	HolsterWeapon(Weapon);
 
 	OnClientUnEquipWeaponSuccess.Broadcast(Weapon);
@@ -657,6 +673,27 @@ void UCombatComponent::OnRep_CurWeaponEvent(AWeapon* PrevWeapon)
 
 void UCombatComponent::OnRep_WeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot)
 {
+	if (!OwnerCreature)
+	{
+		GetWorld()->GetTimerManager().SetTimerForNextTick([=](){ OnRep_WeaponSlotEvent(PrevWeaponSlot); });
+		return;
+	}
+
+	if(OwnerCreature->IsLocallyControlled())
+	{
+		for (int i = 0; i < WeaponSlot.Num(); i++)
+		{
+			if (WeaponSlot[i] && !PrevWeaponSlot[i]) // 장착한 경우
+			{
+				Client_EquipWeaponSuccess(WeaponSlot[i]);
+			}
+			else if (!WeaponSlot[i] && PrevWeaponSlot[i]) // 장착해제한 경우
+			{
+				Client_UnEquipWeaponSuccess(PrevWeaponSlot[i]);
+			}
+		}
+	}
+
 	OnRepWeaponSlot.Broadcast(PrevWeaponSlot, WeaponSlot);
 }
 
