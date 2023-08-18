@@ -20,5 +20,5 @@ protected:
 		void OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn);
 
 protected:
-	class AKraverPlayer* KraverPlayer = nullptr;
+	class AKraverPlayer* LocalPlayer = nullptr;
 };

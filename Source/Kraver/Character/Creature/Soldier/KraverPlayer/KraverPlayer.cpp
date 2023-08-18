@@ -322,7 +322,16 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 	if (IsLocallyControlled() == false)
 		return;
 
-	CanInteractWeapon = nullptr;
+	if(CanInteractWeapon)
+	{
+		for (auto& Comp : CanInteractWeapon->GetTppWeaponPrimitiveInfo())
+		{
+			Comp.Value->SetRenderCustomDepth(false);
+		}
+
+		CanInteractWeapon = nullptr;
+	}
+
 	if (CombatComponent->GetCanEquipWeapon() == false)
 	{
 		if (HUD)
@@ -334,33 +343,6 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 
 	float Radius = InteractionRadius;
 	float Distance = InteractionDistance + Fp_SpringArm->TargetArmLength;
-
-	{
-		TArray<FHitResult> HitResults;
-		FCollisionQueryParams Params(NAME_None, false, this);
-
-		bool bResult = LineTraceMultiByChannel_ExceptWorldObject(
-			GetWorld(),
-			HitResults,
-			Camera->GetComponentLocation(),
-			Camera->GetComponentLocation() + Camera->GetForwardVector() * Distance,
-			ECC_INTERACTION,
-			Params
-		);
-
-		if (bResult)
-		{
-			for (auto& Result : HitResults)
-			{
-				AWeapon* Weapon = Cast<AWeapon>(Result.GetActor());
-				if (Result.bBlockingHit && Weapon && Weapon->GetCanInteracted())
-				{
-					CanInteractWeapon = Weapon;
-					break;
-				}
-			}
-		}
-	}
 
 	if (CanInteractWeapon == nullptr)
 	{
@@ -396,6 +378,7 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 	{
 		FString Text = "Can Interact Weapon : " + CanInteractWeapon->GetName();
 		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::White, Text);
+
 	}
 
 	if (HUD)
@@ -403,6 +386,10 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 		if (CanInteractWeapon)
 		{
 			HUD->SetInteractWidget(true);
+			for (auto& Comp : CanInteractWeapon->GetTppWeaponPrimitiveInfo())
+			{
+				Comp.Value->SetRenderCustomDepth(true);
+			}
 		}
 		else
 		{

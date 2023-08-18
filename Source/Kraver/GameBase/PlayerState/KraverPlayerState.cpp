@@ -12,9 +12,12 @@ AKraverPlayerState::AKraverPlayerState()
 
 void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn)
 {
+	if(!NewPawn)
+		return;
+
 	if(NewPawn->IsLocallyControlled())
 	{
-		KraverPlayer = Cast<AKraverPlayer>(NewPawn);
-		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->OnLocalPlayerBeginPlay(KraverPlayer);
+		LocalPlayer = Cast<AKraverPlayer>(NewPawn);
+		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->OnLocalPlayerBeginPlay(LocalPlayer);
 	}
 }

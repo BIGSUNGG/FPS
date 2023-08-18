@@ -147,9 +147,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
 		AWeapon* CanInteractWeapon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
-		float InteractionDistance = 500.f; // 장착가능한 무기를 찾는 거리
+		float InteractionDistance = 700.f; // 장착가능한 무기를 찾는 거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
-		float InteractionRadius = 25.f; // 장착가능한 무기를 찾는 범위의 반지름
+		float InteractionRadius = 5.f; // 장착가능한 무기를 찾는 범위의 반지름
 
 	// Crouch
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
