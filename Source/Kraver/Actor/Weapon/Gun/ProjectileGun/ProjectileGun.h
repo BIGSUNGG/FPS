@@ -9,7 +9,7 @@
  * 
  */
 UCLASS()
-class KRAVER_API AProjectileGun : public AHitscanGun
+class KRAVER_API AProjectileGun : public AGun
 {
 	GENERATED_BODY()
 	

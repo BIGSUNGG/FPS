@@ -9,6 +9,9 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "GameFramework/GameState.h"
 
+// Sound
+#include "Sound/SoundCue.h"
+
 // Components
 #include "Components/DecalComponent.h"
 #include "Components/WidgetComponent.h"

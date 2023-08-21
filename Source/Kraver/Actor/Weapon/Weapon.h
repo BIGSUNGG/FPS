@@ -178,6 +178,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
 		UBlendSpace* AnimMovementFpp;	
 
+	// Sound
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Sound", Meta = (AllowPrivateAccess = true))
+		class USoundCue* AttackSound;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
 		FName AttachSocketName = "SOCKET_Weapon_AR_01"; // Weapon을 Attach할 스켈레탈 본 이름
 

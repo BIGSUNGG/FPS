@@ -26,7 +26,6 @@ public:
 	virtual bool RefillAmmo(); // CurAmmo를 보충함
 
 protected:
-	virtual void ShowFireEffect(); // FireEffect를 실행하는 함수
 	virtual void AddRecoil();
 	virtual void FireBullet();
 
@@ -36,9 +35,10 @@ protected:
 
 	// Rpc
 	UFUNCTION(Server, Reliable)
-		virtual void Server_ShowFireEffect();
+		virtual void Server_FireBullet();
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_ShowFireEffect();
+		virtual void Multicast_FireBullet();
+
 	UFUNCTION(Server, Reliable)
 		virtual void Server_SpawnImpactEffect(FVector ImpactPos);
 	UFUNCTION(NetMulticast, Reliable)

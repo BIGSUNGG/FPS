@@ -3,6 +3,7 @@
 
 #include "Gun.h"
 #include "Kraver/Character/Creature/Creature.h"
+#include "Kraver/Component/Attachment/Weapon/Silencer/AttachmentSilencerComponent.h"
 
 AGun::AGun() : Super()
 {
@@ -95,21 +96,13 @@ bool AGun::RefillAmmo()
 		CurAmmo += TotalAmmo;
 		TotalAmmo = 0;
 	}
-	if (!HasAuthority())
+	if (!HasAuthority())	
 	{
 		Server_SetCurAmmo(CurAmmo);
 		Server_SetTotalAmmo(TotalAmmo);
 	}
 	OnAttackEndEvent();
 	return true;
-}
-
-void AGun::ShowFireEffect()
-{
-	if(HasAuthority())
-		Multicast_ShowFireEffect();
-	else
-		Server_ShowFireEffect();
 }
 
 void AGun::AddRecoil()
@@ -120,7 +113,28 @@ void AGun::AddRecoil()
 
 void AGun::FireBullet()
 {
+	UAttachmentSilencerComponent* Silencer = FindComponentByClass<UAttachmentSilencerComponent>();
+
+	if (!Silencer || Silencer->GetbFireEffect())
+	{
+		WeaponPrimitiveInfo["FireEffect"]->Activate(true);
+		WeaponFppPrimitiveInfo["FireEffect"]->Activate(true);
+	}
+
+	if (AttackSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation
+		(
+			this,
+			Silencer ? Silencer->GetSilencerFireSound() : AttackSound,
+			GetActorLocation()
+		);
+	}
+
+	AddRecoil();
 	OnFire.Broadcast();
+
+	Server_FireBullet();
 }
 
 void AGun::OnAttackEvent()
@@ -144,8 +158,6 @@ void AGun::OnAttackEvent()
 		}
 
 		FireBullet();
-		AddRecoil();
-		ShowFireEffect();
 		OnPlayTppMontage.Broadcast(AttackMontageTpp, 1.f);
 		OnPlayFppMontage.Broadcast(AttackMontageFpp, 1.f);
 	}
@@ -172,18 +184,36 @@ void AGun::Server_SetMaxAmmo_Implementation(int32 Ammo)
 	MaxAmmo = Ammo;
 }
 
-void AGun::Server_ShowFireEffect_Implementation()
+void AGun::Server_FireBullet_Implementation()
 {
-	Multicast_ShowFireEffect();
+	Multicast_FireBullet();
 }
 
-void AGun::Multicast_ShowFireEffect_Implementation()
+void AGun::Multicast_FireBullet_Implementation()
 {	
 	if(!WeaponPrimitiveInfo.Contains("FireEffect"))
 		return;
 
-	WeaponPrimitiveInfo["FireEffect"]->Activate(true);
-	WeaponFppPrimitiveInfo["FireEffect"]->Activate(true);
+	if(!OwnerCreature->IsLocallyControlled())
+	{
+		UAttachmentSilencerComponent* Silencer = FindComponentByClass<UAttachmentSilencerComponent>();
+
+		if (!Silencer || Silencer->GetbFireEffect())
+		{
+			WeaponPrimitiveInfo["FireEffect"]->Activate(true);
+			WeaponFppPrimitiveInfo["FireEffect"]->Activate(true);
+		}
+
+		if (AttackSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation
+			(
+				this,
+				Silencer ? Silencer->GetSilencerFireSound() : AttackSound,
+				GetActorLocation()
+			);
+		}
+	}
 }
 
 void AGun::Server_SpawnImpactEffect_Implementation(FVector ImpactPos)

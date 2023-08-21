@@ -28,6 +28,8 @@ public:
 public:
 	// Getter Setter
 	const FName& GetSilencerSocketName() { return SilencerSocketName; }
+	bool GetbFireEffect() { return bFireEffect; }
+	class USoundCue* GetSilencerFireSound() { return SilencerFireSound; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
@@ -38,4 +40,9 @@ protected:
 		FName SilencerSocketName = "SOCKET_Muzzle";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component|Attach", meta = (AllowPrivateAccess = "true"))
 		FVector SilencerRelativeLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		bool bFireEffect = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+		class USoundCue* SilencerFireSound;
 };
