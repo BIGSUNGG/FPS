@@ -97,7 +97,7 @@ void UKraverPlayerFppAnimInstance::WeaponSway(float DeltaSeconds)
 		WeaponSwayResultRot.Pitch = MinSwayDegree;
 
 	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->CombatComponent->GetCurWeapon()->GetIsSubAttacking())
-		WeaponSwayResultRot *= 0.9f;
+		WeaponSwayResultRot *= 0.4f;
 
 }
 
