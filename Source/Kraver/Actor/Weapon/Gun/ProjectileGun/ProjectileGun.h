@@ -23,6 +23,7 @@ protected:
 	// Rpc
 	UFUNCTION(Server, Reliable)
 		virtual void Server_SpawnBullet(FVector Location, FRotator Rotation);
+	virtual void Multicast_SpawnImpactEffect_Implementation(FVector ImpactPos) override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))

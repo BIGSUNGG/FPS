@@ -37,14 +37,19 @@ public:
 protected:
 	AGun* OwnerGun;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Attachment", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attachment", Meta = (AllowPrivateAccess = true))
 		FVector GrabRelativeLocation;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Attachment", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attachment", Meta = (AllowPrivateAccess = true))
 		FRotator GrabRelativeRotation;
 
 	// Montage
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* ReloadMontageTpp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* ReloadMontageFpp;
+
+	// Sound
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", Meta = (AllowPrivateAccess = true))
+		class USoundCue* ReloadSound;
+
 };

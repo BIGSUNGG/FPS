@@ -55,8 +55,16 @@ void UWeaponReloadComponent::OnSkillFirstEvent()
 	if(!GetCanReload())
 		return;
 
-	OwnerGun->OnPlayFppMontage.Broadcast(ReloadMontageFpp, 1.5f);
-	OwnerGun->OnPlayTppMontage.Broadcast(ReloadMontageTpp, 1.5f);
+	OwnerGun->OnPlayFppMontage.Broadcast(ReloadMontageFpp, 1.f);
+	OwnerGun->OnPlayTppMontage.Broadcast(ReloadMontageTpp, 1.f);
+	if (ReloadSound)
+	{
+		UGameplayStatics::PlaySound2D
+		(
+			this,
+			ReloadSound
+		);
+	}
 }
 
 void UWeaponReloadComponent::OnRefiilAmmoEvent()

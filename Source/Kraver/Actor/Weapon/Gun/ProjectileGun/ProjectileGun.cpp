@@ -71,3 +71,16 @@ void AProjectileGun::Server_SpawnBullet_Implementation(FVector Location, FRotato
 
 }
 
+void AProjectileGun::Multicast_SpawnImpactEffect_Implementation(FVector ImpactPos)
+{
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpactPos);
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			ImpactSound,
+			ImpactPos
+		);
+	}
+}
+

@@ -109,6 +109,12 @@ void AWeapon::Tick(float DeltaTime)
 
 bool AWeapon::Equipped(ACreature* Character)
 {
+	if (!IS_SERVER())
+	{
+		KR_LOG(Error, TEXT("Called on client"));
+		return false;
+	}
+
 	if (GetCanInteracted() == false)
 		return false;
 
@@ -139,6 +145,12 @@ bool AWeapon::GetCanInteracted()
 
 bool AWeapon::UnEquipped()
 {
+	if (!IS_SERVER())
+	{
+		KR_LOG(Error, TEXT("Called on client"));
+		return false;
+	}
+
 	ACreature* CreaturePtr = OwnerCreature;
 	SetOwnerCreature(nullptr);
 

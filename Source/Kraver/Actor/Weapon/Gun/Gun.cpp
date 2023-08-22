@@ -137,6 +137,21 @@ void AGun::FireBullet()
 	Server_FireBullet();
 }
 
+void AGun::SpawnImpactEffect(FVector ImpactPos)
+{
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpactPos);
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			ImpactSound,
+			ImpactPos
+		);
+	}
+
+	Server_SpawnImpactEffect(ImpactPos);
+}
+
 void AGun::OnAttackEvent()
 {
 	if (!IsAttacking)
@@ -223,7 +238,18 @@ void AGun::Server_SpawnImpactEffect_Implementation(FVector ImpactPos)
 
 void AGun::Multicast_SpawnImpactEffect_Implementation(FVector ImpactPos)
 {
+	if(OwnerCreature->IsLocallyControlled())
+		return;
+
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpactPos);
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			ImpactSound,
+			ImpactPos
+		);
+	}
 }
 
 void AGun::AddSpread(float Spread)

@@ -28,6 +28,7 @@ public:
 protected:
 	virtual void AddRecoil();
 	virtual void FireBullet();
+	virtual void SpawnImpactEffect(FVector ImpactPos);
 
 protected:
 	// Delegate
@@ -38,7 +39,7 @@ protected:
 		virtual void Server_FireBullet();
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_FireBullet();
-
+	
 	UFUNCTION(Server, Reliable)
 		virtual void Server_SpawnImpactEffect(FVector ImpactPos);
 	UFUNCTION(NetMulticast, Reliable)
@@ -57,7 +58,10 @@ public:
 	FAttackDele OnFire;
 
 protected:
-	// Additive
+	// Sound
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Sound", meta = (AllowPrivateAccess = "true"))
+		class USoundCue* ImpactSound;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Effect", meta = (AllowPrivateAccess = "true"))
 		UNiagaraComponent* ImpactEffect; // Bullet이 Block되었을때 실행되는 이펙트
 
