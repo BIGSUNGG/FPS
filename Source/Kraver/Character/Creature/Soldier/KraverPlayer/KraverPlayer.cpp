@@ -505,7 +505,7 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 	Super::OnClientEquipWeaponSuccessEvent(Weapon);
 	UnholsterWeapon();
 	
-	Weapon->GetFppWeaponPrimitiveInfo()["Root"]->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetAttachSocketName());
+	Weapon->GetFppWeaponPrimitiveInfo()["Root"]->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetFppHandSocketName());
 
 	for(auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 	{

@@ -27,6 +27,8 @@ protected:
 		virtual void OnSkillFirstEvent();
 	UFUNCTION()
 		virtual void OnRefiilAmmoEvent();
+	UFUNCTION()
+		virtual void OnSubAttackStartEvent();
 
 	virtual void OnBeforeAttackEvent() override;
 public:

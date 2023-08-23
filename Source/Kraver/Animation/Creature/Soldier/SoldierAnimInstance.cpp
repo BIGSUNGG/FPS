@@ -44,24 +44,6 @@ void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		AnimWeaponMovementTpp = nullptr;
 		CurWeaponType = EWeaponType::NONE;
 	}
-	if (Soldier->CombatComponent->GetCurWeapon() && Soldier->GetMesh())
-	{
-		FabrikLeftHand(Soldier->GetMesh(), Soldier->CombatComponent->GetCurWeapon()->GetWeaponMesh(), LeftHandFabrikTransform);
-	}	
-}
-
-void USoldierAnimInstance::FabrikLeftHand(USkeletalMeshComponent* HandMesh, UPrimitiveComponent* WeaponMesh, FTransform& Transform)
-{
-	if(!WeaponMesh)
-		return;
-
-	Transform = WeaponMesh->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
-	FVector OutPosition;
-	FRotator OutRotation;
-	HandMesh->TransformToBoneSpace("hand_r", Transform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
-	Transform.SetLocation(OutPosition);
-	Transform.SetRotation(FQuat(OutRotation));
-
 }
 
 void USoldierAnimInstance::AnimNotify_Weapon_Holster()

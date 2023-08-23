@@ -57,7 +57,7 @@ void AProjectileGun::OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPr
 	FVector Direction = Bullet->GetVelocity();
 	Direction.Normalize();
 
-	Server_SpawnImpactEffect(Hit.ImpactPoint - Direction * 15.f);
+	Server_ImpactBullet(Hit.ImpactPoint - Direction * 15.f);
 }
 
 void AProjectileGun::Server_SpawnBullet_Implementation(FVector Location, FRotator Rotation)
@@ -71,7 +71,7 @@ void AProjectileGun::Server_SpawnBullet_Implementation(FVector Location, FRotato
 
 }
 
-void AProjectileGun::Multicast_SpawnImpactEffect_Implementation(FVector ImpactPos)
+void AProjectileGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)
 {
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpactPos);
 	if (ImpactSound)

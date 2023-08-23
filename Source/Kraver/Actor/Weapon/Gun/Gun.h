@@ -28,7 +28,7 @@ public:
 protected:
 	virtual void AddRecoil();
 	virtual void FireBullet();
-	virtual void SpawnImpactEffect(FVector ImpactPos);
+	virtual void ImpactBullet(FVector ImpactPos);
 
 protected:
 	// Delegate
@@ -41,9 +41,9 @@ protected:
 		virtual void Multicast_FireBullet();
 	
 	UFUNCTION(Server, Reliable)
-		virtual void Server_SpawnImpactEffect(FVector ImpactPos);
+		virtual void Server_ImpactBullet(FVector ImpactPos);
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_SpawnImpactEffect(FVector ImpactPos);
+		virtual void Multicast_ImpactBullet(FVector ImpactPos);
 public:
 	// Getter Setter
 	virtual bool GetbApplySpread() { return !IsSubAttacking; }

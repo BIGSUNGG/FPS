@@ -22,8 +22,6 @@ public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	virtual void FabrikLeftHand(USkeletalMeshComponent* HandMesh, UPrimitiveComponent* WeaponMesh, FTransform& Transform);
-
 protected:
 	// Animation Notify
 	UFUNCTION()
@@ -76,9 +74,6 @@ protected:
 		bool IsAttacking; // 캐릭터 무기가 공격하고 있는지 여부
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Weapon", Meta = (AllowPrivateAccess = true))
 		bool IsSubAttacking; // 캐릭터 무기가 보조 공격하고 있는지 여부
-
-	UPROPERTY(BlueprintReadOnly, Category = "Data|Fabrik", meta = (AllowPrivateAccess = "true"))
-		FTransform LeftHandFabrikTransform; // 왼쪽손에 적용할 트랜스폼
 
 	// Animation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Animation", Meta = (AllowPrivateAccess = true))

@@ -32,9 +32,6 @@ protected:
 		virtual void OnEndCrouchEvent(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
 
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Data|Fabrik", meta = (AllowPrivateAccess = "true"))
-		FTransform LeftHandFppFabrikTransform; // 왼쪽손에 적용할 트랜스폼
-
 	// Animation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Animation", Meta = (AllowPrivateAccess = true))
 		UAnimSequence* AnimWeaponIdleFpp;	

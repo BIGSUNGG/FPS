@@ -109,12 +109,17 @@ void ACreature::EquipEvent(AWeapon* Weapon)
 	}
 
 	Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
-	Weapon->GetWeaponMesh()->AttachToComponent
-	(
-		GetMesh(),
-		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		Weapon->GetAttachSocketName()
+	GetWorld()->GetTimerManager().SetTimerForNextTick([=]() 
+	{ 	
+			Weapon->GetWeaponMesh()->AttachToComponent
+			(
+				GetMesh(),
+				FAttachmentTransformRules::SnapToTargetIncludingScale,
+				Weapon->GetTppHandSocketName()
+			);
+	}
 	);
+
 }
 
 void ACreature::UnEquipEvent(AWeapon* Weapon)

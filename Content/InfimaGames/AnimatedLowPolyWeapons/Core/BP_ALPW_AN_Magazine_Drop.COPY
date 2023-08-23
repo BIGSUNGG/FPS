@@ -1,0 +1,270 @@
+Begin Object Class=/Script/Engine.Blueprint Name="BP_ALPW_AN_Magazine_Drop"
+   Begin Object Class=/Script/Engine.EdGraph Name="GetNotifyName"
+      Begin Object Class=/Script/BlueprintGraph.K2Node_FunctionEntry Name="K2Node_FunctionEntry_0"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_FunctionResult Name="K2Node_FunctionResult_0"
+      End Object
+   End Object
+   Begin Object Class=/Script/Engine.EdGraph Name="Received_Notify"
+      Begin Object Class=/Script/BlueprintGraph.K2Node_FunctionEntry Name="K2Node_FunctionEntry_0"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_FunctionResult Name="K2Node_FunctionResult_0"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallFunction_0"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_ExecutionSequence Name="K2Node_ExecutionSequence_0"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_VariableGet Name="K2Node_VariableGet_0"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_VariableSet Name="K2Node_VariableSet_7"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_VariableGet Name="K2Node_VariableGet_9"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_Message Name="K2Node_Message_0"
+      End Object
+      Begin Object Class=/Script/UnrealEd.EdGraphNode_Comment Name="EdGraphNode_Comment_0"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_VariableGet Name="K2Node_VariableGet_6"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_Message Name="K2Node_Message_2"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_VariableGet Name="K2Node_VariableGet_10"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_IfThenElse Name="K2Node_IfThenElse_1"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_VariableGet Name="K2Node_VariableGet_11"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_Knot Name="K2Node_Knot_1"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_Knot Name="K2Node_Knot_6"
+      End Object
+      Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallFunction_7"
+      End Object
+      Begin Object Class=/Script/UnrealEd.EdGraphNode_Comment Name="EdGraphNode_Comment_2"
+      End Object
+   End Object
+   Begin Object Name="GetNotifyName"
+      Begin Object Name="K2Node_FunctionEntry_0"
+         ExtraFlags=1073741824
+         FunctionReference=(MemberParent=Class'"/Script/Engine.AnimNotify"',MemberName="GetNotifyName")
+         NodeGuid=E2573486454F87C4AC6D3EB7641BBD08
+         CustomProperties Pin (PinId=DF1ED7254DC0013BA530728A858C30E9,PinName="then",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_FunctionResult_0 603E66174EBBC4C825F6D9A54A1C7BBB,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_FunctionResult_0"
+         FunctionReference=(MemberParent=Class'"/Script/Engine.AnimNotify"',MemberName="GetNotifyName")
+         NodePosX=256
+         NodeGuid=AED5F6A64D5DE6763737599B637962B6
+         CustomProperties Pin (PinId=603E66174EBBC4C825F6D9A54A1C7BBB,PinName="execute",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_FunctionEntry_0 DF1ED7254DC0013BA530728A858C30E9,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=DE66B17C402FB2B1F3010CBD3C525DB7,PinName="ReturnValue",PinToolTip="Return Value\nString\n\nImplementable event to get a custom name for the notify",PinType.PinCategory="string",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,DefaultValue="ALPW - Drop Magazine",PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Schema=Class'"/Script/BlueprintGraph.EdGraphSchema_K2"'
+      Nodes(0)=K2Node_FunctionEntry'"K2Node_FunctionEntry_0"'
+      Nodes(1)=K2Node_FunctionResult'"K2Node_FunctionResult_0"'
+      GraphGuid=986E821D4C97BB59E3B75A802B55B618
+   End Object
+   Begin Object Name="Received_Notify"
+      Begin Object Name="K2Node_FunctionEntry_0"
+         LocalVariables(0)=(VarName="Actor Weapon",VarGuid=3F91D32E44927A1BDDE15ABB096B8C4C,VarType=(PinCategory="object",PinSubCategoryObject=Class'"/Script/Engine.Actor"',bIsUObjectWrapper=True),FriendlyName="Actor Weapon",Category=NSLOCTEXT("KismetSchema", "Default", "Default"),PropertyFlags=2053)
+         ExtraFlags=1073741824
+         FunctionReference=(MemberParent=Class'"/Script/Engine.AnimNotify"',MemberName="Received_Notify")
+         NodePosX=-1552
+         NodePosY=-92
+         NodeGuid=0D9CE2A84CDFEB1608EC7AB35F26284E
+         CustomProperties Pin (PinId=391EFE8147F195752C0FD0B3C20697AA,PinName="then",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_ExecutionSequence_0 750117064A040B18E9E06F900DAE727E,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=0E12ABE84C98C5DFC1CB61AE8EE1B585,PinName="MeshComp",PinToolTip="Mesh Comp\nSkeletal Mesh Component Object Reference",Direction="EGPD_Output",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/Engine.SkeletalMeshComponent"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=A9947137401B0226E7B99B97EE6ED082,PinName="Animation",PinToolTip="Animation\nAnim Sequence Base Object Reference",Direction="EGPD_Output",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/Engine.AnimSequenceBase"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_FunctionResult_0"
+         FunctionReference=(MemberParent=Class'"/Script/Engine.AnimNotify"',MemberName="Received_Notify")
+         NodePosX=-1152
+         NodePosY=-64
+         NodeGuid=5015710C4C70D72DE21AA2815F87ABFE
+         CustomProperties Pin (PinId=9380333F42AF317F9A32C592A3E4653D,PinName="execute",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_ExecutionSequence_0 C22798CE4282CDF8F30305A60FB2F019,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=6526DCC4484193126433B089A4E0DA97,PinName="ReturnValue",PinToolTip="Return Value\nBoolean\n\nReceived Notify",PinType.PinCategory="bool",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,DefaultValue="true",AutogeneratedDefaultValue="false",PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_CallFunction_0"
+         bIsPureFunc=True
+         bIsConstFunc=True
+         FunctionReference=(MemberParent=Class'"/Script/Engine.ActorComponent"',MemberName="GetOwner")
+         NodePosX=-788
+         NodePosY=12
+         NodeGuid=C8C7D6E740FC1FCA92F6928412028069
+         CustomProperties Pin (PinId=7984AC9544FB2A6DE5A1118B68B1A4E8,PinName="self",PinFriendlyName=NSLOCTEXT("K2Node", "Target", "Target"),PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/Engine.ActorComponent"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_VariableGet_0 722E88F2496BC7298ACA5C8DBED15EBA,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=9B8279294DDEE195BAB77CBA34D84397,PinName="ReturnValue",Direction="EGPD_Output",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/Engine.Actor"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_VariableSet_7 4B4F8B764150BE41255DF3BDB9E6024B,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_ExecutionSequence_0"
+         NodePosX=-1295
+         NodePosY=-92
+         NodeGuid=632BCE1C4CE087E9303B4285376ABC4A
+         CustomProperties Pin (PinId=750117064A040B18E9E06F900DAE727E,PinName="execute",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_FunctionEntry_0 391EFE8147F195752C0FD0B3C20697AA,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=5C40C3394528824CF702B8ACD5A53BD9,PinName="then_0",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,LinkedTo=(K2Node_Knot_1 D43BF10148B17989B63A63A0B7C9EF56,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=C22798CE4282CDF8F30305A60FB2F019,PinName="then_1",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,LinkedTo=(K2Node_FunctionResult_0 9380333F42AF317F9A32C592A3E4653D,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_VariableGet_0"
+         VariableReference=(MemberScope="Received_Notify",MemberName="MeshComp")
+         NodePosX=-960
+         NodePosY=51
+         NodeGuid=816BC05049CA3E687C3D6990A98039C7
+         CustomProperties Pin (PinId=722E88F2496BC7298ACA5C8DBED15EBA,PinName="MeshComp",Direction="EGPD_Output",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/Engine.SkeletalMeshComponent"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_CallFunction_0 7984AC9544FB2A6DE5A1118B68B1A4E8,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_VariableSet_7"
+         VariableReference=(MemberScope="Received_Notify",MemberName="Actor Weapon",MemberGuid=3F91D32E44927A1BDDE15ABB096B8C4C)
+         NodePosX=-538
+         NodePosY=16
+         bCommentBubblePinned=True
+         bCommentBubbleVisible=True
+         NodeComment="Cache Weapon."
+         NodeGuid=BF07A43B43727396741D07BFCC737FDF
+         CustomProperties Pin (PinId=CC5D8BC441F2C5A961DB5CA8CB43582E,PinName="execute",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_Knot_1 B16928D24F7CFE753F6AA6AD8089806F,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=2AAA361A443A0269CC7BA087F86F2D20,PinName="then",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_Message_2 BCC34F4E4A6E7313CB59E3B8EE1AF959,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=4B4F8B764150BE41255DF3BDB9E6024B,PinName="Actor Weapon",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/Engine.Actor"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,LinkedTo=(K2Node_CallFunction_0 9B8279294DDEE195BAB77CBA34D84397,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=1B355DBA41C0467B6CE175801137894D,PinName="Output_Get",PinToolTip="Retrieves the value of the variable, can use instead of a separate Get node",Direction="EGPD_Output",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/Engine.Actor"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_VariableGet_9"
+         VariableReference=(MemberScope="Received_Notify",MemberName="Actor Weapon",MemberGuid=3F91D32E44927A1BDDE15ABB096B8C4C)
+         NodePosX=960
+         NodePosY=19
+         NodeGuid=4D0E26CD4DECD0178490E08CE39E06FD
+         CustomProperties Pin (PinId=C5FB770144E1137A5F5C2C84462DDF3B,PinName="Actor Weapon",Direction="EGPD_Output",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/Engine.Actor"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,LinkedTo=(K2Node_Message_0 F3E51B194462863EBE16E6BDB5B0E545,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_Message_0"
+         bIsInterfaceCall=True
+         FunctionReference=(MemberParent=BlueprintGeneratedClass'"/Game/InfimaGames/AnimatedLowPolyWeapons/Core/BPI_ALPW_Droppable_Magazine_Target.BPI_ALPW_Droppable_Magazine_Target_C"',MemberName="ALPW: Drop Magazine",MemberGuid=335B93D8456FF8CF44423AB6B7D46F36)
+         NodePosX=1132
+         NodePosY=-48
+         NodeGuid=853C933B458E26614F179CBD7A3A2F17
+         CustomProperties Pin (PinId=3974399247471BA0B625ADB94B24C7F0,PinName="execute",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_IfThenElse_1 990497D94A8449B6642587987025DF96,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=74AF4FB74C5B02D7F757D0A8D034A1E7,PinName="then",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=F3E51B194462863EBE16E6BDB5B0E545,PinName="self",PinFriendlyName=NSLOCTEXT("K2Node", "Target", "Target"),PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/CoreUObject.Object"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,LinkedTo=(K2Node_VariableGet_9 C5FB770144E1137A5F5C2C84462DDF3B,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=True,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="EdGraphNode_Comment_0"
+         CommentColor=(R=1.000000,G=0.000000,B=0.468750,A=1.000000)
+         NodePosX=910
+         NodePosY=-111
+         NodeWidth=383
+         NodeHeight=193
+         NodeComment="TODO"
+         NodeGuid=8F4BB03345A8053971AD3D83FD70F794
+      End Object
+      Begin Object Name="K2Node_VariableGet_6"
+         VariableReference=(MemberScope="Received_Notify",MemberName="Actor Weapon",MemberGuid=3F91D32E44927A1BDDE15ABB096B8C4C)
+         NodePosX=-266
+         NodePosY=51
+         NodeGuid=801624BB4FF3BECBA5581883266FF2C7
+         CustomProperties Pin (PinId=C5FB770144E1137A5F5C2C84462DDF3B,PinName="Actor Weapon",Direction="EGPD_Output",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/Engine.Actor"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,LinkedTo=(K2Node_Message_2 6FA8DA3340C68AB980EAFDB3ACC5FFC2,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_Message_2"
+         bIsInterfaceCall=True
+         FunctionReference=(MemberParent=BlueprintGeneratedClass'"/Game/InfimaGames/AnimatedLowPolyWeapons/Core/BPI_ALPW_Droppable_Magazine_Target.BPI_ALPW_Droppable_Magazine_Target_C"',MemberName="ALPW: Set Magazine Visibility",MemberGuid=3F0950114C841095C4E9029C7B88F423)
+         NodePosX=98
+         NodePosY=-16
+         NodeGuid=E33DED3D4F2C15ED86C4D6940DD54050
+         CustomProperties Pin (PinId=BCC34F4E4A6E7313CB59E3B8EE1AF959,PinName="execute",PinToolTip="\nExec",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_VariableSet_7 2AAA361A443A0269CC7BA087F86F2D20,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=A668F55345BF757B58BCAE8433174D50,PinName="then",PinToolTip="\nExec",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_Knot_6 59C9D8484A0321FC8BF11E90F740383A,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=6FA8DA3340C68AB980EAFDB3ACC5FFC2,PinName="self",PinFriendlyName=NSLOCTEXT("K2Node", "Target", "Target"),PinToolTip="Target\nObject Reference",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/CoreUObject.Object"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,LinkedTo=(K2Node_VariableGet_6 C5FB770144E1137A5F5C2C84462DDF3B,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=True,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=84CAA18A45FB4655BB88F5A5ABCCFFCA,PinName="Visibility",PinToolTip="Visibility\nBoolean",PinType.PinCategory="bool",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,DefaultValue="false",AutogeneratedDefaultValue="false",LinkedTo=(K2Node_CallFunction_7 F7D8C2EA4728AA4174A1B384F5BEDA35,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_VariableGet_10"
+         VariableReference=(MemberName="Drop",MemberGuid=DFF743C745A1D7B44450C4A41D484DC0,bSelfContext=True)
+         NodePosX=-266
+         NodePosY=77
+         NodeGuid=AB3D0BEB49B3D47244C607AB1AAA2A2A
+         CustomProperties Pin (PinId=AAD26D8C459E02FD433125A6D7503F24,PinName="Drop",Direction="EGPD_Output",PinType.PinCategory="bool",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,DefaultValue="false",AutogeneratedDefaultValue="false",LinkedTo=(K2Node_CallFunction_7 55C55D6D412770880C71418F29B03CC6,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=042582744253078BD419188478E9C5BF,PinName="self",PinFriendlyName=NSLOCTEXT("K2Node", "Target", "Target"),PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=BlueprintGeneratedClass'"/Game/InfimaGames/AnimatedLowPolyWeapons/Core/BP_ALPW_AN_Magazine_Drop.BP_ALPW_AN_Magazine_Drop_C"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PersistentGuid=00000000000000000000000000000000,bHidden=True,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_IfThenElse_1"
+         NodePosX=688
+         NodePosY=-32
+         NodeGuid=14FBCA294879DDDD7DAB849C0094C971
+         CustomProperties Pin (PinId=49D3F09E4C3F7EAD6AACF69F946C20E8,PinName="execute",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,LinkedTo=(K2Node_Knot_6 24186D5545109218FBA52A90C2C8C0E8,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=D25551804E838C8C32CE98BCB2FCE466,PinName="Condition",PinType.PinCategory="bool",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,DefaultValue="true",AutogeneratedDefaultValue="true",LinkedTo=(K2Node_VariableGet_11 770BA20B4BE5DA8F25DB60B24961B4DB,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=990497D94A8449B6642587987025DF96,PinName="then",PinFriendlyName=NSLOCTEXT("K2Node", "true", "true"),Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_Message_0 3974399247471BA0B625ADB94B24C7F0,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=CAF37FE6482E14C3A85075BAE9641800,PinName="else",PinFriendlyName=NSLOCTEXT("K2Node", "false", "false"),Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_VariableGet_11"
+         VariableReference=(MemberName="Drop",MemberGuid=DFF743C745A1D7B44450C4A41D484DC0,bSelfContext=True)
+         NodePosX=516
+         NodePosY=19
+         NodeGuid=D00D08A841B9327892DF2D8F9008949E
+         CustomProperties Pin (PinId=770BA20B4BE5DA8F25DB60B24961B4DB,PinName="Drop",Direction="EGPD_Output",PinType.PinCategory="bool",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,DefaultValue="false",AutogeneratedDefaultValue="false",LinkedTo=(K2Node_IfThenElse_1 D25551804E838C8C32CE98BCB2FCE466,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=11F4005845F923B4D2C49A90ADDCED9E,PinName="self",PinFriendlyName=NSLOCTEXT("K2Node", "Target", "Target"),PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=BlueprintGeneratedClass'"/Game/InfimaGames/AnimatedLowPolyWeapons/Core/BP_ALPW_AN_Magazine_Drop.BP_ALPW_AN_Magazine_Drop_C"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PersistentGuid=00000000000000000000000000000000,bHidden=True,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_Knot_1"
+         NodePosX=-1008
+         NodePosY=33
+         NodeGuid=C8B23F584F7150672F4099B409FD8AD8
+         CustomProperties Pin (PinId=D43BF10148B17989B63A63A0B7C9EF56,PinName="InputPin",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,LinkedTo=(K2Node_ExecutionSequence_0 5C40C3394528824CF702B8ACD5A53BD9,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=True,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=B16928D24F7CFE753F6AA6AD8089806F,PinName="OutputPin",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=True,LinkedTo=(K2Node_VariableSet_7 CC5D8BC441F2C5A961DB5CA8CB43582E,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="K2Node_Knot_6"
+         NodePosX=448
+         NodePosY=1
+         NodeGuid=9E8989334A3DFCDFD000F4BC7E5500D8
+         CustomProperties Pin (PinId=59C9D8484A0321FC8BF11E90F740383A,PinName="InputPin",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_Message_2 A668F55345BF757B58BCAE8433174D50,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=True,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=24186D5545109218FBA52A90C2C8C0E8,PinName="OutputPin",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_IfThenElse_1 49D3F09E4C3F7EAD6AACF69F946C20E8,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Class=K2Node_CallFunction Name="K2Node_CallFunction_8"
+         FunctionReference=(MemberParent=Class'"/Script/Engine.KismetSystemLibrary"',MemberName="PrintString")
+         NodePosX=1089
+         NodePosY=-128
+         NodeGuid=25C7E2284B3F93B40ABACDAE3B46DDC9
+         CustomProperties Pin (PinId=C0A01FA44B63006A447E72A492A8D2C2,PinName="execute",PinToolTip="\nExec",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,LinkedTo=(K2Node_ExecutionSequence_0 9C978BAE45ED7550F8B0E8827DCD3BFB,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=40A75A894AA7756919A6E282A8A1F4AA,PinName="then",PinToolTip="\nExec",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=BC5DC5A94D5A5A95B5E4D19EBF1DCB75,PinName="self",PinFriendlyName=NSLOCTEXT("K2Node", "Target", "Target"),PinToolTip="Target\nKismet System Library Object Reference",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/Engine.KismetSystemLibrary"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,DefaultObject="/Script/Engine.Default__KismetSystemLibrary",PersistentGuid=00000000000000000000000000000000,bHidden=True,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=6AFDB344402FB74D66C5069FF238D5E1,PinName="WorldContextObject",PinToolTip="World Context Object\nObject Reference",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/CoreUObject.Object"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType
+      End Object
+      Begin Object Name="K2Node_CallFunction_7"
+         bIsPureFunc=True
+         FunctionReference=(MemberParent=Class'"/Script/Engine.KismetMathLibrary"',MemberName="Not_PreBool")
+         NodePosX=-112
+         NodePosY=75
+         NodeGuid=0DC5941941898F0635977D8683580A0D
+         CustomProperties Pin (PinId=38A5B4A04B7D9D113FAEF8AFF4C850BC,PinName="self",PinFriendlyName=NSLOCTEXT("K2Node", "Target", "Target"),PinToolTip="Target\nKismet Math Library Object Reference",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject=Class'"/Script/Engine.KismetMathLibrary"',PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,DefaultObject="/Script/Engine.Default__KismetMathLibrary",PersistentGuid=00000000000000000000000000000000,bHidden=True,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=55C55D6D412770880C71418F29B03CC6,PinName="A",PinToolTip="A\nBoolean",PinType.PinCategory="bool",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,DefaultValue="false",AutogeneratedDefaultValue="false",LinkedTo=(K2Node_VariableGet_10 AAD26D8C459E02FD433125A6D7503F24,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+         CustomProperties Pin (PinId=F7D8C2EA4728AA4174A1B384F5BEDA35,PinName="ReturnValue",PinToolTip="Return Value\nBoolean\n\nReturns the logical complement of the Boolean value (NOT A)",Direction="EGPD_Output",PinType.PinCategory="bool",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,DefaultValue="false",AutogeneratedDefaultValue="false",LinkedTo=(K2Node_Message_2 84CAA18A45FB4655BB88F5A5ABCCFFCA,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+      End Object
+      Begin Object Name="EdGraphNode_Comment_2"
+         CommentColor=(R=0.968750,G=1.000000,B=0.000000,A=1.000000)
+         FontSize=12
+         NodePosX=930
+         NodePosY=-122
+         NodeWidth=555
+         NodeHeight=205
+         NodeComment="Calling this will make sure that the magazine is spawned and dropped appropiately."
+         NodeGuid=67838C47418F20C1EEE1D2A0F70E6CEB
+      End Object
+      Schema=Class'"/Script/BlueprintGraph.EdGraphSchema_K2"'
+      Nodes(0)=K2Node_FunctionEntry'"K2Node_FunctionEntry_0"'
+      Nodes(1)=K2Node_FunctionResult'"K2Node_FunctionResult_0"'
+      Nodes(2)=K2Node_CallFunction'"K2Node_CallFunction_0"'
+      Nodes(3)=K2Node_ExecutionSequence'"K2Node_ExecutionSequence_0"'
+      Nodes(4)=K2Node_VariableGet'"K2Node_VariableGet_0"'
+      Nodes(5)=K2Node_VariableSet'"K2Node_VariableSet_7"'
+      Nodes(6)=K2Node_VariableGet'"K2Node_VariableGet_9"'
+      Nodes(7)=K2Node_Message'"K2Node_Message_0"'
+      Nodes(8)=K2Node_VariableGet'"K2Node_VariableGet_6"'
+      Nodes(9)=K2Node_Message'"K2Node_Message_2"'
+      Nodes(10)=K2Node_VariableGet'"K2Node_VariableGet_10"'
+      Nodes(11)=K2Node_IfThenElse'"K2Node_IfThenElse_1"'
+      Nodes(12)=K2Node_VariableGet'"K2Node_VariableGet_11"'
+      Nodes(13)=K2Node_Knot'"K2Node_Knot_1"'
+      Nodes(14)=K2Node_Knot'"K2Node_Knot_6"'
+      Nodes(15)=K2Node_CallFunction'"K2Node_CallFunction_7"'
+      Nodes(16)=EdGraphNode_Comment'"EdGraphNode_Comment_2"'
+      GraphGuid=A93C87574D1D230DF0803DA16B6E3577
+   End Object
+   ParentClass=Class'"/Script/Engine.AnimNotify"'
+   BlueprintType=BPTYPE_Const
+   BlueprintSystemVersion=2
+   FunctionGraphs(0)=EdGraph'"GetNotifyName"'
+   FunctionGraphs(1)=EdGraph'"Received_Notify"'
+   NewVariables(0)=(VarName="Drop",VarGuid=DFF743C745A1D7B44450C4A41D484DC0,VarType=(PinCategory="bool"),FriendlyName="Drop",Category=NSLOCTEXT("", "179B01654B3C30BB2D70DE828D0381D8", "Infima Games | Animated Low Poly Weapons | Magazine Drop"),PropertyFlags=21,MetaDataArray=((DataKey="MultiLine",DataValue="true"),(DataKey="tooltip",DataValue="If true, the magazine will have a copy spawned from its socket, and the original will be hidden until set to false.")))
+   CategorySorting(0)=""
+   CategorySorting(1)="Infima Games "
+   CategorySorting(2)="Default"
+   LastEditedDocuments(0)=(EditedObjectPath=/Game/InfimaGames/AnimatedLowPolyWeapons/Core/BP_ALPW_AN_Magazine_Drop.BP_ALPW_AN_Magazine_Drop:GetNotifyName,SavedViewOffset=(X=2.028534,Y=-150.014252),SavedZoomAmount=1.000000)
+   LastEditedDocuments(1)=(EditedObjectPath=/Game/InfimaGames/AnimatedLowPolyWeapons/Core/BP_ALPW_AN_Magazine_Drop.BP_ALPW_AN_Magazine_Drop:Received_Notify,SavedViewOffset=(X=-568.528381,Y=-261.576569),SavedZoomAmount=1.000000)
+   GeneratedClass=BlueprintGeneratedClass'"BP_ALPW_AN_Magazine_Drop_C"'
+   bLegacyNeedToPurgeSkelRefs=False
+   BlueprintGuid=32CE1D1346CFA588781B2784C1A79DFE
+End Object

@@ -308,6 +308,7 @@ void AWeapon::OnAttackEvent()
 
 void AWeapon::Attack()
 {
+	bAttackCanceled = false;
 	CurAttackDelay = AttackDelay;
 	
 	OnBeforeAttack.Broadcast();

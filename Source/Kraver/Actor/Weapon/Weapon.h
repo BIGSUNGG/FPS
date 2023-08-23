@@ -79,7 +79,8 @@ public:
 	bool GetCanInteracted();
 	bool GetIsAttacking() { return IsAttacking; }
 	bool GetIsSubAttacking() { return IsSubAttacking; }
-	FName GetAttachSocketName() { return AttachSocketName; }
+	FName GetFppHandSocketName() { return FppHandSocketName; }
+	FName GetTppHandSocketName() { return TppHandSocketName; }
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
@@ -183,7 +184,9 @@ protected:
 		class USoundCue* AttackSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
-		FName AttachSocketName = "SOCKET_Weapon_AR_01"; // Weapon을 Attach할 스켈레탈 본 이름
+		FName FppHandSocketName = "SOCKET_Weapon"; // Weapon을 Attach할 스켈레탈 본 이름
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
+		FName TppHandSocketName = "SOCKET_Weapon"; // Weapon을 Attach할 스켈레탈 본 이름
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Component|Info", meta = (AllowPrivateAccess = "true"))
 		UPrimitiveComponent* RootMesh;

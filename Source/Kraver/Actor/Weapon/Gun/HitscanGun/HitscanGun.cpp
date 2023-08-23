@@ -40,7 +40,7 @@ void AHitscanGun::FireBullet()
 			if (Result.bBlockingHit)
 			{
 				FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
-				SpawnImpactEffect(ImpaceEffectPos);
+				ImpactBullet(ImpaceEffectPos);
 			}
 		}
 	}

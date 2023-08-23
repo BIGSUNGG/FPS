@@ -20,7 +20,13 @@ void URocketMagazineComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (OwnerGun->GetCurAmmo() > 0 || OwnerGun->GetWeaponState() == EWeaponState::NONE)
+	if (OwnerGun->GetOwnerCreature() && OwnerGun->GetOwnerCreature()->CombatComponent->GetCurWeapon() != OwnerGun)
+	{
+		SetMagazineVisibility(false);
+		return;
+	}
+
+	if (OwnerGun->GetCurAmmo() > 0)
 	{
 		SetMagazineVisibility(true);
 	}

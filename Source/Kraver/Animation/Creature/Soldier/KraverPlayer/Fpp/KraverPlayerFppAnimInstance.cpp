@@ -44,11 +44,6 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		AnimWeaponMovementFpp = nullptr;
 	}
 
-	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->GetArmMesh())
-	{
-		FabrikLeftHand(KraverPlayer->GetArmMesh(), Fp_WeaponMesh, LeftHandFppFabrikTransform);
-	}
-
 	ProceduralAnimEvent();
 	WeaponSway(DeltaSeconds);
 

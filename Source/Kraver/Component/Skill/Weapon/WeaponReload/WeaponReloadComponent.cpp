@@ -17,7 +17,8 @@ void UWeaponReloadComponent::BeginPlay()
 		return;
 	}
 
-	OwnerGun->OnSkillFirst.AddDynamic(this, &UWeaponReloadComponent::OnSkillFirstEvent);
+	OwnerGun->OnSkillFirst.AddDynamic(this, &ThisClass::OnSkillFirstEvent);
+	OwnerGun->OnSubAttackStart.AddDynamic(this, &ThisClass::OnSubAttackStartEvent);
 }
 
 void UWeaponReloadComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -55,6 +56,7 @@ void UWeaponReloadComponent::OnSkillFirstEvent()
 	if(!GetCanReload())
 		return;
 
+	OwnerGun->OnSubAttackEndEvent();
 	OwnerGun->OnPlayFppMontage.Broadcast(ReloadMontageFpp, 1.f);
 	OwnerGun->OnPlayTppMontage.Broadcast(ReloadMontageTpp, 1.f);
 	if (ReloadSound)
@@ -70,6 +72,14 @@ void UWeaponReloadComponent::OnSkillFirstEvent()
 void UWeaponReloadComponent::OnRefiilAmmoEvent()
 {
 	OwnerGun->RefillAmmo();
+}
+
+void UWeaponReloadComponent::OnSubAttackStartEvent()
+{
+	if (GetOwnerCreature()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontageTpp))
+	{
+		OwnerGun->OnSubAttackEndEvent();
+	}
 }
 
 void UWeaponReloadComponent::OnBeforeAttackEvent()
