@@ -22,6 +22,7 @@ protected:
 
 	virtual void OnAddOnDelegateEvent(UObject* Object) override;
 	virtual void OnRemoveOnDelegateEvent(UObject* Object) override;
+
 	// Delegate
 	UFUNCTION()
 		virtual void OnSkillFirstEvent();
@@ -29,8 +30,14 @@ protected:
 		virtual void OnRefiilAmmoEvent();
 	UFUNCTION()
 		virtual void OnSubAttackStartEvent();
+	UFUNCTION()
+		virtual void OnFireEvent();
 
 	virtual void OnBeforeAttackEvent() override;
+
+	// Func
+	virtual void ReloadStart();
+
 public:
 	bool GetCanReload();
 	const FVector& GetGrabRelativeLocation() { return GrabRelativeLocation; }

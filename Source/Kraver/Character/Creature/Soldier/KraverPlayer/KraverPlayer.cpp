@@ -676,12 +676,15 @@ void AKraverPlayer::OnFP_Reload_Insert_MagazineEvent()
 
 void AKraverPlayer::OnTp_Weapon_HolsterEvent()
 {
+	ArmMesh->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
+	GetMesh()->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
+
 	CombatComponent->HolsterWeapon(CombatComponent->GetCurWeapon());
+
 	if(UnholsterIndex == -1)
 		return;
 
 	UnholsterWeapon();
-
 	UnholsterIndex = -1;
 }
 

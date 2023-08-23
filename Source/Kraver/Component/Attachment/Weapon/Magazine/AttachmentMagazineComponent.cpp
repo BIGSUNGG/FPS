@@ -20,6 +20,7 @@ void UAttachmentMagazineComponent::BeginPlay()
 	MagazineMesh->SetRelativeLocation(MagazineRelativeLocation);
 
 	OwnerWeapon->AddWeaponPrimitive("Magazine", MagazineMesh);
+
 }
 
 void UAttachmentMagazineComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
