@@ -5,6 +5,7 @@
 #include "Kraver/Actor/Weapon/Gun/Gun.h"
 #include "Kraver/Character/Creature/Creature.h"
 #include "Kraver/Animation/Creature/Soldier/SoldierAnimInstance.h"
+#include "Kraver/Component/Movement/CreatureMovementComponent.h"
 
 void UWeaponReloadComponent::BeginPlay()
 {
@@ -105,6 +106,9 @@ void UWeaponReloadComponent::ReloadStart()
 
 bool UWeaponReloadComponent::GetCanReload()
 {
+	if(!GetOwnerCreature())
+		return false;
+
 	if (OwnerGun->GetCurAmmo() == OwnerGun->GetMaxAmmo())
 		return false;
 
@@ -113,6 +117,13 @@ bool UWeaponReloadComponent::GetCanReload()
 
 	if (GetOwnerCreature() && GetOwnerCreature()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontageTpp))
 		return false;
+
+	if (!bReloadWhileSprint)
+	{
+		UCreatureMovementComponent* MovementComp = GetOwnerCreature()->GetComponentByClass<UCreatureMovementComponent>();
+		if(MovementComp && MovementComp->GetMovementState() == EMovementState::SPRINT)
+			return false;
+	}
 
 	return true;
 }

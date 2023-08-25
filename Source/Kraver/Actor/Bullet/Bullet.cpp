@@ -30,6 +30,9 @@ void ABullet::BeginPlay()
 	Super::BeginPlay();
 	
 	BulletMesh->IgnoreActorWhenMoving(GetInstigator(), true);
+	
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&](){ Destroy(true, true); }, BulletLifeTime, false, BulletLifeTime);
 }
 
 void ABullet::PostInitializeComponents()

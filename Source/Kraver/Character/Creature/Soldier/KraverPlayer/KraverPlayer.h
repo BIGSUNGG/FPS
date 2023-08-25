@@ -37,7 +37,7 @@ public:
 	// Getter Setter
 	FORCEINLINE AWeapon* GetCanInteractWeapon() { return CanInteractWeapon; }
 	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
-	virtual bool GetCanAttack() override;
+	virtual bool CanAttack() override;
 	virtual USkeletalMeshComponent* GetCurMainMesh() override;
 
 	virtual void SetWeaponVisibility(class AWeapon* Weapon, bool Value) override;

@@ -5,8 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Kraver/Character/Creature/Creature.h"
 #include "Kraver/Component/Skill/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
-#include "Engine/EngineTypes.h"
-#include "Engine/DamageEvents.h"
+#include "Kraver/Component/Movement/CreatureMovementComponent.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -92,13 +91,18 @@ void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (IsAttacking && !CanAttack())
+		OnAttackEndEvent();
+	if (IsSubAttacking && !CanSubAttack())
+		OnSubAttackEndEvent();
+
 	if (CurAttackDelay > 0.f)
 	{
 		CurAttackDelay -= DeltaTime;
-		if (CurAttackDelay < 0.f)
+		if (CurAttackDelay <= 0.f)
 		{
 			CurAttackDelay = 0.f;
-			if (bFirstInputAttack && bCanFirstInputAttack)
+			if (bCanFirstInputAttack && bFirstInputAttack == true)
 			{
 				bFirstInputAttack = false;
 				OnAttackStartEvent();
@@ -115,7 +119,7 @@ bool AWeapon::Equipped(ACreature* Character)
 		return false;
 	}
 
-	if (GetCanInteracted() == false)
+	if (CanInteracted() == false)
 		return false;
 
 	SetOwner(Character);
@@ -130,7 +134,35 @@ bool AWeapon::Equipped(ACreature* Character)
 	return true;
 }
 
-bool AWeapon::GetCanInteracted()
+bool AWeapon::CanAttack()
+{
+	if (OwnerCreature && !bAttackWhileSprint)
+	{
+		if (UCreatureMovementComponent * MovementComp = OwnerCreature->GetComponentByClass<UCreatureMovementComponent>())
+		{
+			if (MovementComp && OwnerCreature->GetMovementComponent()->IsFalling() == false && MovementComp->GetMovementState() == EMovementState::SPRINT)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+bool AWeapon::CanSubAttack()
+{
+	if (OwnerCreature && !bSubAttackWhileSprint)
+	{
+		if (UCreatureMovementComponent* MovementComp = OwnerCreature->GetComponentByClass<UCreatureMovementComponent>())
+		{
+			if (MovementComp && OwnerCreature->GetMovementComponent()->IsFalling() == false && MovementComp->GetMovementState() == EMovementState::SPRINT)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+bool AWeapon::CanInteracted()
 {
 	switch (WeaponState)
 	{
@@ -219,6 +251,9 @@ void AWeapon::OnAttackStartEvent()
 	if (IsAttacking == true)
 		return;
 
+	if(!CanAttack())
+		return;
+
 	if (CurAttackDelay > 0 && bCanFirstInputAttack)
 	{
 		bFirstInputAttack = true;
@@ -251,8 +286,11 @@ void AWeapon::OnAttackEndEvent()
 }
 
 void AWeapon::OnSubAttackStartEvent()
-{
+{	
 	if(!bCanSubAttack)
+		return;
+
+	if(!CanSubAttack())
 		return;
 
 	SetIsSubAttacking(true);

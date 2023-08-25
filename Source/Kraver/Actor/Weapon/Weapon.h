@@ -76,9 +76,14 @@ protected:
 
 public:
 	// Getter Setter
-	bool GetCanInteracted();
+	virtual bool CanAttack();
+	bool CanSubAttack();
+	bool CanInteracted();
 	bool GetIsAttacking() { return IsAttacking; }
 	bool GetIsSubAttacking() { return IsSubAttacking; }
+	bool GetbAttackWhileSprint() { return bAttackWhileSprint; }
+	bool GetbSubAttackWhileSprint() { return bSubAttackWhileSprint; }
+
 	FName GetFppHandSocketName() { return FppHandSocketName; }
 	FName GetTppHandSocketName() { return TppHandSocketName; }
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
@@ -90,6 +95,8 @@ public:
 
 	UAnimSequence* GetAnimIdleTpp() { return AnimIdleTpp; }
 	UAnimSequence* GetAnimIdleFpp() { return AnimIdleFpp; }
+	UAnimSequence* GetAnimSprintFpp() { return AnimSprintFpp; }
+	UAnimSequence* GetAnimSprintTpp() { return AnimSprintTpp; }
 	UAnimSequence* GetSubAttackTpp() { return SubAttackAnimTpp; }
 	UAnimSequence* GetSubAttackFpp() { return SubAttackAnimFpp; }
 	UBlendSpace* GetAnimMovementTpp() { return AnimMovementTpp; }
@@ -171,6 +178,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
 		UAnimSequence* AnimIdleFpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
+		UAnimSequence* AnimSprintTpp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
+		UAnimSequence* AnimSprintFpp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
 		UAnimSequence* SubAttackAnimTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
 		UAnimSequence* SubAttackAnimFpp;
@@ -206,6 +218,10 @@ protected:
 	UFUNCTION(Server, Reliable)
 		void Server_SetIsSubAttacking(bool Value);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
+		bool bAttackWhileSprint = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
+		bool bSubAttackWhileSprint = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 		bool bCanSubAttack = true;
 

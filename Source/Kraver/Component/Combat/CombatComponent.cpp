@@ -334,32 +334,18 @@ bool UCombatComponent::HolsterWeapon(AWeapon* Weapon)
 
 void UCombatComponent::SetIsAttacking(bool bAttack)
 {
-	if (!CurWeapon)
-		return;
-
-	if (bAttack && CurWeapon->GetIsAttacking() == false)
-	{
+	if (bAttack)
 		OnAttackStartDelegate.Broadcast();
-	}
-	else if(!bAttack && CurWeapon->GetIsAttacking())
-	{
+	else
 		OnAttackEndDelegate.Broadcast();
-	}
 }
 
 void UCombatComponent::SetIsSubAttacking(bool bAttack)
 {
-	if(!CurWeapon)
-		return;
-
-	if (bAttack && CurWeapon->GetIsSubAttacking() == false)
-	{
+	if (bAttack)
 		OnSubAttackStartDelegate.Broadcast();
-	}
-	else if (!bAttack && CurWeapon->GetIsSubAttacking())
-	{
+	else
 		OnSubAttackEndDelegate.Broadcast();
-	}
 }
 
 void UCombatComponent::SetCurWeapon(AWeapon* Weapon)

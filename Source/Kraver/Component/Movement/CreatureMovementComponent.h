@@ -36,6 +36,10 @@ public:
 	virtual void Crouch();
 	virtual void UnCrouch();
 
+protected:
+	UFUNCTION(Server, Reliable)
+		void Server_SetMovementState(EMovementState value);
+
 public:
 	// Getter Setter
 	FORCEINLINE bool GetIsJumping() { return IsJumping; }
@@ -45,6 +49,9 @@ public:
 	FORCEINLINE float GetCrouchRunSpeed() { return CrouchRunSpeed; }
 	FORCEINLINE float GetCrouchWalkSpeed() { return CrouchWalkSpeed; }
 	FORCEINLINE EMovementState GetMovementState() { return MovementState; }
+
+	virtual void SetMovementState(EMovementState value) final;
+
 protected:
 	class ACreature* OwnerCreature;
 	float InputForwardRatio = 1.f;
@@ -58,9 +65,6 @@ protected:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
 		EMovementState MovementState = EMovementState::WALK;
-	virtual void SetMovementState(EMovementState value) final;
-	UFUNCTION(Server, Reliable)
-		void Server_SetMovementState(EMovementState value);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
 		float SprintSpeed = 1200.f; // EMovementState가 SPRINT가 되었을때 설정할 캐릭터 속도

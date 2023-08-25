@@ -66,7 +66,7 @@ void UCreatureMovementComponent::MoveForward(float NewAxisValue)
 		if (NewAxisValue == 0 || OwnerCreature->Controller == nullptr)
 			return;
 
-		if (OwnerCreature->GetbRunButtonPress())
+		if (OwnerCreature->GetbRunButtonPress() && OwnerCreature->CanRun())
 		{
 			if (NewAxisValue >= 0.5f)
 				SetMovementState(EMovementState::SPRINT);

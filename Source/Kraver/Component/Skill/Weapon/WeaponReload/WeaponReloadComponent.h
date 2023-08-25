@@ -40,11 +40,19 @@ protected:
 
 public:
 	bool GetCanReload();
-	const FVector& GetGrabRelativeLocation() { return GrabRelativeLocation; }
-	const FRotator& GetGrabRelativeRotation() { return GrabRelativeRotation; }
+	FORCEINLINE bool GetbReloadWhileSprint() { return bReloadWhileSprint; }
+
+	FORCEINLINE const FVector& GetGrabRelativeLocation() { return GrabRelativeLocation; }
+	FORCEINLINE const FRotator& GetGrabRelativeRotation() { return GrabRelativeRotation; }
+
+	FORCEINLINE const UAnimMontage* GetReloadMontageTpp() { return ReloadMontageTpp; }
+	FORCEINLINE const UAnimMontage* GetReloadMontageFpp() { return ReloadMontageFpp; }
 
 protected:
 	AGun* OwnerGun;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload", Meta = (AllowPrivateAccess = true))
+		bool bReloadWhileSprint = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attachment", Meta = (AllowPrivateAccess = true))
 		FVector GrabRelativeLocation;

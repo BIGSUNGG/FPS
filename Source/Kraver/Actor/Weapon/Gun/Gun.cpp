@@ -11,13 +11,13 @@ AGun::AGun() : Super()
 	
 	ImpactEffect = CreateDefaultSubobject<UNiagaraComponent>("ImpactEffect");
 	ImpactEffect->bAutoActivate = false;
-
+	
+	bAttackWhileSprint = false;
+	bSubAttackWhileSprint = false;
 }
 
 void AGun::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
 	if (OwnerCreature)
 	{
 		if (CurAttackDelay > 0)
@@ -56,6 +56,8 @@ void AGun::Tick(float DeltaTime)
 		TargetRecoilPitch -= AddRecoilPitch;
 		TargetRecoilYaw -= AddRecoilYaw;
 	}
+
+	Super::Tick(DeltaTime);
 }
 
 void AGun::BeginPlay()
@@ -250,6 +252,17 @@ void AGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)
 			ImpactPos
 		);
 	}
+}
+
+bool AGun::CanAttack()
+{
+	if(!Super::CanAttack())
+		return false;
+
+	if(CurAmmo <= 0)
+		return false;
+
+	return true;
 }
 
 void AGun::AddSpread(float Spread)

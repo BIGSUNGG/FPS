@@ -34,14 +34,12 @@ void UKraverPlayerFppAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (IsEquippingWeapon)
 	{
 		AnimWeaponIdleFpp = CurWeapon->GetAnimIdleFpp();
+		AnimWeaponSprintFpp = CurWeapon->GetAnimSprintFpp();
 		AnimWeaponSubAttackFpp = CurWeapon->GetSubAttackFpp();
 		AnimWeaponMovementFpp = CurWeapon->GetAnimMovementFpp();
 	}
 	else
 	{
-		AnimWeaponIdleFpp = nullptr;
-		AnimWeaponSubAttackFpp = nullptr;
-		AnimWeaponMovementFpp = nullptr;
 	}
 
 	ProceduralAnimEvent();

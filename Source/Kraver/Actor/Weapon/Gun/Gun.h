@@ -46,6 +46,7 @@ protected:
 		virtual void Multicast_ImpactBullet(FVector ImpactPos);
 public:
 	// Getter Setter
+	virtual bool CanAttack() override;
 	virtual bool GetbApplySpread() { return !IsSubAttacking; }
 	int32 GetCurAmmo() { return CurAmmo; }
 	int32 GetMaxAmmo() { return MaxAmmo; }

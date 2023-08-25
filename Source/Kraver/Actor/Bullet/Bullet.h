@@ -54,4 +54,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<UKraverDamageType> HitDamageType;
+
+	float BulletLifeTime = 5.f;
 };

@@ -6,6 +6,7 @@
 #include "Kraver/Actor/Weapon/Melee/Melee.h"
 #include "Kraver/Component/Skill/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
 #include "Kraver/Component/Movement/CreatureMovementComponent.h"
+#include "Kraver/Component/Skill/Weapon/WeaponReload/WeaponReloadComponent.h"
 
 // Sets default values
 ACreature::ACreature()
@@ -171,7 +172,7 @@ void ACreature::PostInitializeComponents()
 void ACreature::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
 	CameraTick(DeltaTime);
 	AimOffset(DeltaTime);
 }
@@ -237,10 +238,25 @@ void ACreature::OnAssassinateEndEvent()
 	TargetCameraRelativeLocation = FVector::ZeroVector;
 }
 
-bool ACreature::GetCanAttack()
+bool ACreature::CanAttack()
 {
-	if (CreatureMovementComponent->GetMovementState() == EMovementState::SPRINT && GetMovementComponent()->IsFalling() == false)
-		return false;
+	return true;
+}
+
+bool ACreature::CanRun()
+{
+	if(CombatComponent->GetCurWeapon())
+	{
+		if (bAttackButtonPress && CombatComponent->GetCurWeapon()->GetbAttackWhileSprint() == false)
+			return false;
+
+		if (bSubAttackButtonPress && CombatComponent->GetCurWeapon()->GetbSubAttackWhileSprint() == false)
+			return false;
+
+		UWeaponReloadComponent* ReloadComp = CombatComponent->GetCurWeapon()->GetComponentByClass<UWeaponReloadComponent>();
+		if (ReloadComp && GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadComp->GetReloadMontageTpp()))
+			return false;
+	}
 
 	return true;
 }
@@ -341,34 +357,41 @@ void ACreature::Turn(float NewAxisValue)
 
 void ACreature::ReloadButtonPressed()
 {
-	if(CombatComponent->GetCurWeapon() == nullptr)
+	if(!CombatComponent->GetCurWeapon())
 		return;
+	
+	if(CreatureMovementComponent->GetMovementState() == EMovementState::SPRINT)
+	{
+		UWeaponReloadComponent* ReloadComp = CombatComponent->GetCurWeapon()->GetComponentByClass<UWeaponReloadComponent>();
+		if (ReloadComp && !ReloadComp->GetbReloadWhileSprint())
+			CreatureMovementComponent->SetMovementState(EMovementState::WALK);
+	}
 
 	CombatComponent->GetCurWeapon()->OnSkillFirst.Broadcast();
 }
 
 void ACreature::AttackButtonPressed()
 {
-	if (GetCanAttack())
-	{
-		CombatComponent->SetIsAttacking(true);
-	}
-
+	bAttackButtonPress = true;
+	AttackStart();
 }
 
 void ACreature::AttackButtonReleased()
 {
-	CombatComponent->SetIsAttacking(false);
+	bAttackButtonPress = false;
+	AttackEnd();
 }
 
 void ACreature::SubAttackButtonPressed()
 {
-	CombatComponent->SetIsSubAttacking(true);
+	bSubAttackButtonPress = true;
+	SubAttackStart();
 }
 
 void ACreature::SubAttackButtonReleased()
 {
-	CombatComponent->SetIsSubAttacking(false);
+	bSubAttackButtonPress = false;
+	SubAttackEnd();
 }
 
 void ACreature::RunButtonPressed()
@@ -786,6 +809,39 @@ void ACreature::Client_SimulateMesh_Implementation()
 void ACreature::Multicast_SimulateMesh_Implementation()
 {
 	GetMesh()->SetSimulatePhysics(true);
+}
+
+void ACreature::AttackStart()
+{
+	if(!CombatComponent->GetCurWeapon())
+		return;
+
+	if (CombatComponent->GetCurWeapon()->GetbAttackWhileSprint() == false)
+		CreatureMovementComponent->SetMovementState(EMovementState::WALK);
+
+	if(CanAttack())
+		CombatComponent->SetIsAttacking(true);
+}
+
+void ACreature::AttackEnd()
+{
+	CombatComponent->SetIsAttacking(false);
+}
+
+void ACreature::SubAttackStart()
+{
+	if (!CombatComponent->GetCurWeapon())
+		return;
+
+	if (CombatComponent->GetCurWeapon()->GetbSubAttackWhileSprint() == false)
+		CreatureMovementComponent->SetMovementState(EMovementState::WALK);
+
+	CombatComponent->SetIsSubAttacking(true);
+}
+
+void ACreature::SubAttackEnd()
+{
+	CombatComponent->SetIsSubAttacking(false);
 }
 
 void ACreature::Server_OnAssassinatedEndEvent_Implementation()

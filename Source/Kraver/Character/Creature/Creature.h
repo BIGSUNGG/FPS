@@ -49,9 +49,11 @@ public:
 
 public:
 	// Getter Setter
+	virtual bool CanAttack();
+	virtual bool CanRun();
+
 	FORCEINLINE FRotator GetCreatureAngle() { return Camera ? Camera->GetComponentRotation() - GetMesh()->GetComponentRotation() : FRotator::ZeroRotator; }
 	FORCEINLINE UCameraComponent* GetCamera() { return Camera; }
-	virtual bool GetCanAttack();
 	FORCEINLINE bool GetbRunButtonPress() { return bRunButtonPress; }
 	bool GetbJumpButtonPress() { return bJumpButtonPress; }
 	bool GetbCrouchButtonPress() { return bCrouchButtonPress; }
@@ -205,6 +207,11 @@ protected:
 		virtual void Multicast_SimulateMesh();
 
 	// Function
+	virtual void AttackStart();
+	virtual void AttackEnd();
+	virtual void SubAttackStart();
+	virtual void SubAttackEnd();
+
 	virtual void PlayLandedMontage();
 
 	virtual void SimulateMesh();
@@ -250,6 +257,8 @@ protected:
 	// InputState
 	float CurrentInputForward = 0.f;
 	float CurrentInputRight = 0.f;
+	bool bAttackButtonPress = false;
+	bool bSubAttackButtonPress = false;
 	bool bJumpButtonPress = false;
 	bool bCrouchButtonPress = false;
 	bool bRunButtonPress = false;

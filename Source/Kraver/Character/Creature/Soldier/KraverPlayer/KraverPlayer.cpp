@@ -243,7 +243,7 @@ void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 }
 
-bool AKraverPlayer::GetCanAttack()
+bool AKraverPlayer::CanAttack()
 {
 	return true;
 }
@@ -365,7 +365,7 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 			for (auto& Result : HitResults)
 			{
 				AWeapon* Weapon = Cast<AWeapon>(Result.GetActor());
-				if (Result.bBlockingHit && Weapon && Weapon->GetCanInteracted())
+				if (Result.bBlockingHit && Weapon && Weapon->CanInteracted())
 				{
 					CanInteractWeapon = Weapon;
 					break;
@@ -703,6 +703,9 @@ void AKraverPlayer::ChangeWeapon(int8 Index)
 		KR_LOG(Log,TEXT("Trying to change weapon to cur weapon"));
 		return;
 	}
+
+	if (CombatComponent->GetWeaponSlot()[Index] == nullptr)
+		return;
 
 	UnholsterIndex = CombatComponent->GetWeaponSlot()[Index] ? Index : -1;
 
