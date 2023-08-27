@@ -13,5 +13,8 @@ UCLASS()
 class KRAVER_API AKraverGameMode : public AGameMode
 {
 	GENERATED_BODY()
-	
+public:
+	virtual void CreatureEliminated(class ACreature* ElimmedCreature, class AController* VictimController, AController* AttackerController);
+	virtual void RequestRespawn(ACreature* ElimmedCharacter, AController* ElimmedController);
+
 };

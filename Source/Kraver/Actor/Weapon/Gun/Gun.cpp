@@ -34,7 +34,7 @@ void AGun::Tick(float DeltaTime)
 		if (OwnerCreature->GetMovementComponent()->IsFalling())
 			AdditiveSpreadInAir = FMath::FInterpTo(AdditiveSpreadInAir, SpreadInAir, DeltaTime, 10);
 		else
-			AdditiveSpreadInAir = FMath::FInterpTo(AdditiveSpreadInAir, 0, DeltaTime, 40);
+			AdditiveSpreadInAir = FMath::FInterpTo(AdditiveSpreadInAir, 0, DeltaTime, 10);
 
 		FVector Velocity = OwnerCreature->GetVelocity();
 		Velocity.Z = 0.f;
@@ -211,7 +211,7 @@ void AGun::Multicast_FireBullet_Implementation()
 	if(!WeaponPrimitiveInfo.Contains("FireEffect"))
 		return;
 
-	if(!OwnerCreature->IsLocallyControlled())
+	if(!OwnerCreature || !OwnerCreature->IsLocallyControlled())
 	{
 		UAttachmentSilencerComponent* Silencer = FindComponentByClass<UAttachmentSilencerComponent>();
 

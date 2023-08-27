@@ -7,6 +7,7 @@
 #include "Kraver/Component/Skill/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
 #include "Kraver/Component/Movement/CreatureMovementComponent.h"
 #include "Kraver/Component/Skill/Weapon/WeaponReload/WeaponReloadComponent.h"
+#include "Kraver/GameBase/GameMode/KraverGameMode.h"
 
 // Sets default values
 ACreature::ACreature()
@@ -20,7 +21,7 @@ ACreature::ACreature()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Fp_Camera"));
 
 	CreatureMovementComponent = CreateDefaultSubobject<UCreatureMovementComponent>("CreatureMovementComponent");
-
+	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
 
@@ -146,6 +147,24 @@ void ACreature::UnholsterEvent(AWeapon* Weapon)
 		return;
 
 	SetWeaponVisibility(Weapon, true);
+}
+
+void ACreature::UpdateDissolveMaterial(float DissolveValue)
+{
+	if (DynamicDissolveMaterialInstance)
+	{
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), DissolveValue);
+	}
+}
+
+void ACreature::StartDissolve()
+{
+	DissolveTrack.BindDynamic(this, &ACreature::UpdateDissolveMaterial);
+	if (DissolveCurve && DissolveTimeline)
+	{
+		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTrack);
+		DissolveTimeline->Play();
+	}
 }
 
 void ACreature::OwnOtherActor(AActor* Actor)
@@ -480,7 +499,7 @@ void ACreature::TurnInPlace(float DeltaTime)
 	{
 		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
 		AO_Yaw = InterpAO_Yaw;
-		if (FMath::Abs(AO_Yaw) <= 2.f)
+		if (FMath::Abs(AO_Yaw) <= 0.2f)
 		{
 			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
@@ -718,6 +737,7 @@ void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamag
 	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
 
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
+
 }
 
 void ACreature::Server_OnAfterTakePointDamageEvent_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -809,6 +829,17 @@ void ACreature::Client_SimulateMesh_Implementation()
 void ACreature::Multicast_SimulateMesh_Implementation()
 {
 	GetMesh()->SetSimulatePhysics(true);
+
+	if (DissolveMaterialInstance)
+	{
+		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
+		for (int i = 0; i < GetMesh()->GetMaterials().Num(); i++)
+			GetMesh()->SetMaterial(i, DynamicDissolveMaterialInstance);
+
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), 0.55f);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
+	}
+	StartDissolve();
 }
 
 void ACreature::AttackStart()
@@ -857,6 +888,29 @@ void ACreature::PlayLandedMontage()
 
 void ACreature::SimulateMesh()
 {
+	if (!IS_SERVER())
+	{
+		KR_LOG(Error, TEXT("Function Called on client"));
+		return;
+	}
+
+	AKraverGameMode* GameMode = GetWorld()->GetAuthGameMode<AKraverGameMode>();
+	if(GameMode)
+	{
+		FTimerHandle RespawnTimer;
+		GetWorldTimerManager().SetTimer(
+			RespawnTimer,
+			[=]() { GameMode->RequestRespawn(this, Controller); },
+			5.f,
+			false,
+			5.f
+		);
+	}
+	else
+	{
+		KR_LOG(Warning, TEXT("GameMode is nullptr"));
+	}
+
 	Client_SimulateMesh();
 	Multicast_SimulateMesh();
 }

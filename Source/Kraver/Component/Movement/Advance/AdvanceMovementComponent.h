@@ -50,6 +50,7 @@ protected:
 	void ResetWallRunVerticalSuppression();
 	void SuppressWallRunHorizion(float Delay);
 	void SuppressWallRunVertical(float Delay);
+
 	FVector CalculateRightWallRunEndVector();
 	FVector CalculateLeftWallRunEndVector();
 	FVector CalculateVerticaltWallRunEndVector();
@@ -113,7 +114,7 @@ protected:
 	bool bWallRunHorizonSupressed = false;
 	bool bWallRunVerticalSupressed = false;
 	bool bWallRunGravity = true;
-	float WallRunHorizonSpeed = 1200.f;
+	float WallRunHorizonSpeed = 900.f;
 	float WallRunVerticalSpeed = 600.f;
 	float WallRunJumpHeight = 400.f;
 	float WallRunJumpOffForce  = 400.f;
@@ -130,11 +131,12 @@ protected:
 		void Server_SetIsSliding(bool Value);
 
 	bool bSlideSupressed = false;
-	float MinSlideRequireSpeed = 900.f;
+	float MinSlideRequireSpeed = 600.f;
 	float SlideSlopeSpeed = 20.f;
-	float SlideSpeed = 2000.f;
+	float SlideSpeed = 1500.f;
 	float SlideDuration = 2.f;
 	float SlideGroundFriction = 0.f;
 	float SlideBrakingDecelerationWalking = 1400.f;
 	FTimerHandle SuppressSlideTimer;
+
 };

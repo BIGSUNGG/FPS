@@ -496,8 +496,8 @@ FVector UAdvanceMovementComponent::CalculateRightWallRunEndVector()
 {
 	return (
 		OwnerCreature->GetActorLocation() +
-		OwnerCreature->GetActorRightVector() * 75.f +
-		OwnerCreature->GetActorForwardVector() * -35.f
+		OwnerCreature->GetActorRightVector() * 100.f +
+		OwnerCreature->GetActorForwardVector() * -50.f
 		);
 }
 
@@ -505,8 +505,8 @@ FVector UAdvanceMovementComponent::CalculateLeftWallRunEndVector()
 {
 	return (
 		OwnerCreature->GetActorLocation() +
-		OwnerCreature->GetActorRightVector() * -75.f +
-		OwnerCreature->GetActorForwardVector() * -35.f
+		OwnerCreature->GetActorRightVector() * -100.f +
+		OwnerCreature->GetActorForwardVector() * -50.f
 		);
 }
 

@@ -29,11 +29,11 @@ AGuardAIController::AGuardAIController()
 void AGuardAIController::OnTargetPerceptionUpdatedEvent(AActor* Actor, FAIStimulus Stimulus)
 {
 	TArray<AActor*> OutActors;
-	AIPerceptionComponent->GetPerceivedActors(AISenseConfigSight->Implementation, OutActors);
+	AIPerceptionComponent->GetCurrentlyPerceivedActors(AISenseConfigSight->Implementation, OutActors);
 
 	if (OutActors.Contains(Actor))
 	{
-		AKraverPlayer* Player = Cast<AKraverPlayer>(Actor);
+		AKraverPlayer* Player = Cast<AKraverPlayer>(Actor);	
 		if (Player)
 		{
 			GetBlackboardComponent()->SetValueAsObject(FindEnemyKey, Player);

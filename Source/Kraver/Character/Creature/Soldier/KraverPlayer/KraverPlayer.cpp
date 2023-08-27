@@ -285,7 +285,7 @@ void AKraverPlayer::Server_SetViewType_Implementation(EViewType Type)
 
 void AKraverPlayer::EquipButtonPressed()
 {
-	if(CanInteractWeapon != nullptr)
+	if (CanInteractWeapon != nullptr)
 		CombatComponent->EquipWeapon(CanInteractWeapon);
 }
 

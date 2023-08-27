@@ -117,12 +117,13 @@ public:
 	void SetIsAttacking(bool bAttack);
 	void SetIsSubAttacking(bool bAttack);
 
+	bool IsDead();
+
 	AWeapon* GetCurWeapon() { return CurWeapon; }
 	int32 GetCurHp() { return CurHp; }
 	int32 GetMaxHp() { return MaxHp; }
 	int8 GetCurWeaponSlotIndex();
 	bool GetCanEquipWeapon();
-	bool GetIsDead();
 	const TArray<AWeapon*>& GetWeaponSlot() { return WeaponSlot; }
 
 	int CountWeapon();

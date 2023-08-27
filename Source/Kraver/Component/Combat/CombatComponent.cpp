@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
 #include "Kraver/GameBase/PlayerController/KraverPlayerController.h"
+#include "Kraver/GameBase/GameMode/KraverGameMode.h"
 #include "Kraver/GameBase/Ui/HUD/KraverHUD.h"
 #include "Kraver/Actor/Weapon/Gun/Gun.h"
 
@@ -25,7 +26,7 @@ FKraverDamageResult UCombatComponent::CalculateDamage(float DamageAmount, FDamag
 
 	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
 
-	if(GetIsDead())
+	if(IsDead())
 		Result.bAlreadyDead = true;
 
 	if(DamageEvent.IsOfType(FPointDamageEvent::ClassID))
@@ -131,7 +132,7 @@ void UCombatComponent::BeginPlay()
 
 	// ...
 	OwnerCreature = Cast<ACreature>(GetOwner());
-	OwnerPlayer = Cast<AKraverPlayer>(GetOwner());
+	OwnerPlayer = Cast<AKraverPlayer>(OwnerCreature);
 	if(OwnerCreature == nullptr)
 		UE_LOG(LogTemp, Fatal, TEXT("Owner Actor is not Creature class"));
 
@@ -171,14 +172,6 @@ bool UCombatComponent::GetCanEquipWeapon()
 	return false;
 }
 
-bool UCombatComponent::GetIsDead()
-{
-	if(CurHp <= 0.f)
-		return true;
-
-	return false;
-}
-
 int UCombatComponent::CountWeapon()
 {
 	int WeaponCount = 0;
@@ -203,7 +196,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
-	if (OwnerCreature == nullptr || OwnerCreature->IsLocallyControlled() == false)
+	if (OwnerPlayer == nullptr || OwnerPlayer->IsLocallyControlled() == false)
 		return;
 
 	Controller = Controller == nullptr ? Cast<AKraverPlayerController>(OwnerCreature->Controller) : Controller;
@@ -346,6 +339,14 @@ void UCombatComponent::SetIsSubAttacking(bool bAttack)
 		OnSubAttackStartDelegate.Broadcast();
 	else
 		OnSubAttackEndDelegate.Broadcast();
+}
+
+bool UCombatComponent::IsDead()
+{
+	if (CurHp <= 0.f)
+		return true;
+
+	return false;
 }
 
 void UCombatComponent::SetCurWeapon(AWeapon* Weapon)
@@ -641,6 +642,10 @@ void UCombatComponent::Server_GiveRadialDamage_Implementation(AActor* DamagedAct
 
 void UCombatComponent::Server_Death_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
+	AKraverGameMode* KraverGameMode = GetWorld()->GetAuthGameMode<AKraverGameMode>();
+	if(KraverGameMode)
+		KraverGameMode->CreatureEliminated(OwnerCreature, OwnerCreature->GetController(), EventInstigator);
+
 	OnServerDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 	Client_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }

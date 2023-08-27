@@ -35,6 +35,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void TurnInPlace(float DeltaTime);
 	virtual void CameraTick(float DeltaTime);
 	virtual void Jump() override;
 
@@ -223,7 +224,10 @@ protected:
 	virtual void UnEquipEvent(AWeapon* Weapon);
 	virtual void HolsterEvent(AWeapon* Weapon);
 	virtual void UnholsterEvent(AWeapon* Weapon);
-
+	
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+	void StartDissolve();
 public:
 	// Delegate
 	FCrouchDele OnCrouchStart;
@@ -251,7 +255,7 @@ protected:
 	FRotator StartingAimRotation;
 	FVector TargetCameraRelativeLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Combat|Resist", meta = (AllowPrivateAccess = "true"))
 		float ImpulseResistanceRatio = 1.f;
 
 	// InputState
@@ -264,7 +268,21 @@ protected:
 	bool bRunButtonPress = false;
 
 	ETurningInPlace TurningInPlace;
-	void TurnInPlace(float DeltaTime);
 	float InterpAO_Yaw;
 
+	// Disolve
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Dissolve", meta = (AllowPrivateAccess = "true"))
+	UTimelineComponent* DissolveTimeline;
+	FOnTimelineFloat DissolveTrack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Dissolve", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* DissolveCurve;
+
+	// Dynamic instance that we can change at runtime
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Combat|Dissolve", meta = (AllowPrivateAccess = "true"))
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	// Material instance set on the Blueprint, used with the dynamic material instance
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Dissolve", meta = (AllowPrivateAccess = "true"))
+	UMaterialInstance* DissolveMaterialInstance;
 }; 

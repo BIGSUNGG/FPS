@@ -67,11 +67,12 @@ protected:
 		EMovementState MovementState = EMovementState::WALK;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float SprintSpeed = 1200.f; // EMovementState가 SPRINT가 되었을때 설정할 캐릭터 속도
+		float SprintSpeed = 900.f; // EMovementState가 SPRINT가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float RunSpeed = 600.f; // EMovementState가 RUN가 되었을때 설정할 캐릭터 속도
+		float RunSpeed = 400.f; // EMovementState가 RUN가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float WalkSpeed = 600.f; // EMovementState가 WALK가 되었을때 설정할 캐릭터 속도
+		float WalkSpeed = 400.f; // EMovementState가 WALK가 되었을때 설정할 캐릭터 속도
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
 		float CrouchWalkSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
