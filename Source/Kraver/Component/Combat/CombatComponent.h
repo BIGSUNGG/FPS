@@ -81,6 +81,13 @@ protected:
 	UFUNCTION(Client, Reliable)
 		void Client_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+
 	// Give Damage
 	UFUNCTION(Server, Reliable)
 		void Server_GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
@@ -101,6 +108,8 @@ protected:
 		void Server_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
 	UFUNCTION(Client, Reliable)
 		void Client_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
 
 	// OnRep
 	UFUNCTION()
@@ -148,21 +157,33 @@ public:
 	FHolsterWeaponDele OnServerHolsterWeapon;
 
 	// Take Damage
-	FTakeDamageDele OnServerBeforeTakeDamage; // 데미지를 받았을때 호출
+	FTakeDamageDele OnServerBeforeTakeDamage; // 데미지를 받기전에 호출
 
 	FTakeDamageDele OnClientAfterTakeAnyDamageSuccess; // 데미지를 받았을때 호출
-	FTakeDamageDele OnClientAfterTakeDamageSuccess; // 데미지를 받았을때 호출
-	FTakePointDamageDele OnClientAfterTakePointDamageSuccess; // 데미지를 받았을때 호출
-	FTakeRadialDamageDele OnClientAfterTakeRadialDamageSuccess; // 데미지를 받았을때 호출
+	FTakeDamageDele OnClientAfterTakeDamageSuccess; 
+	FTakePointDamageDele OnClientAfterTakePointDamageSuccess; 
+	FTakeRadialDamageDele OnClientAfterTakeRadialDamageSuccess; 
 
+	FTakeDamageDele OnServerAfterTakeAnyDamageSuccess; 
+	FTakeDamageDele OnServerAfterTakeDamageSuccess;
+	FTakePointDamageDele OnServerAfterTakePointDamageSuccess;
+	FTakeRadialDamageDele OnServerAfterTakeRadialDamageSuccess;
+
+	FTakeDamageDele OnMulticastAfterTakeAnyDamageSuccess;
+	FTakeDamageDele OnMulticastAfterTakeDamageSuccess;
+	FTakePointDamageDele OnMulticastAfterTakePointDamageSuccess;
+	FTakeRadialDamageDele OnMulticastAfterTakeRadialDamageSuccess;
+
+	// Give Damage
 	FGiveDamageDele OnClientGiveAnyDamageSuccess; // 데미지를 주었을때 호출
-	FGiveDamageDele OnClientGiveDamageSuccess; // 데미지를 주었을때 호출
-	FGivePointDamageDele OnClientGivePointDamageSuccess; // 데미지를 주었을때 호출
-	FGiveRadialDamageDele OnClientGiveRadialDamageSuccess; // 데미지를 주었을때 호출
+	FGiveDamageDele OnClientGiveDamageSuccess;
+	FGivePointDamageDele OnClientGivePointDamageSuccess; 
+	FGiveRadialDamageDele OnClientGiveRadialDamageSuccess;
 
 	// Death
 	FDeathDele OnClientDeath; // 죽었을때 호출
-	FDeathDele OnServerDeath; // 죽었을때 호출
+	FDeathDele OnServerDeath;
+	FDeathDele OnMulticastDeath;
 
 	// OnRep
 	FRepWeapon OnRepCurWeapon;

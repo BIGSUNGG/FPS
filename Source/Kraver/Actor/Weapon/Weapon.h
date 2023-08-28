@@ -89,7 +89,7 @@ public:
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
-	UPrimitiveComponent* GetWeaponMesh() { return RootMesh; }
+	UPrimitiveComponent* GetWeaponMesh() { return RootMesh ? RootMesh : RootMesh = WeaponPrimitiveInfo["Root"]; }
 	TMap<FString, UPrimitiveComponent*>& GetTppWeaponPrimitiveInfo() { return WeaponPrimitiveInfo; }
 	TMap<FString, UPrimitiveComponent*>& GetFppWeaponPrimitiveInfo() { return WeaponFppPrimitiveInfo; }
 

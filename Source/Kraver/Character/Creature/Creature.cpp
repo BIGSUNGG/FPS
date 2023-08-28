@@ -25,21 +25,26 @@ ACreature::ACreature()
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
 
-	CombatComponent->OnClientDeath.AddDynamic(this, &ACreature::OnClientDeathEvent);
-	CombatComponent->OnServerDeath.AddDynamic(this, &ACreature::OnServerDeathEvent);
+	CombatComponent->OnClientDeath.AddDynamic(this, &ThisClass::OnClientDeathEvent);
+	CombatComponent->OnServerDeath.AddDynamic(this, &ThisClass::OnServerDeathEvent);
+	CombatComponent->OnMulticastDeath.AddDynamic(this, &ThisClass::OnMulticastDeathEvent);
 
-	CombatComponent->OnClientEquipWeaponSuccess.AddDynamic(this, &ACreature::OnClientEquipWeaponSuccessEvent);
-	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ACreature::OnServerEquipWeaponSuccessEvent);
-	CombatComponent->OnClientUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnClientUnEquipWeaponSuccessEvent);	
-	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ACreature::OnServerUnEquipWeaponSuccessEvent);
+	CombatComponent->OnClientEquipWeaponSuccess.AddDynamic(this, &ThisClass::OnClientEquipWeaponSuccessEvent);
+	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ThisClass::OnServerEquipWeaponSuccessEvent);
+	CombatComponent->OnClientUnEquipWeaponSuccess.AddDynamic(this, &ThisClass::OnClientUnEquipWeaponSuccessEvent);
+	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ThisClass::OnServerUnEquipWeaponSuccessEvent);
 
-	CombatComponent->OnClientAfterTakePointDamageSuccess.AddDynamic(this, &ACreature::OnClientAfterTakePointDamageEvent);
-	CombatComponent->OnClientAfterTakeRadialDamageSuccess.AddDynamic(this, &ACreature::OnClientAfterTakeRadialDamageEvent);
+	CombatComponent->OnClientAfterTakePointDamageSuccess.AddDynamic(this, &ThisClass::OnClientAfterTakePointDamageEvent);
+	CombatComponent->OnClientAfterTakeRadialDamageSuccess.AddDynamic(this, &ThisClass::OnClientAfterTakeRadialDamageEvent);
+	CombatComponent->OnServerAfterTakePointDamageSuccess.AddDynamic(this, &ThisClass::OnServerAfterTakePointDamageEvent);
+	CombatComponent->OnServerAfterTakeRadialDamageSuccess.AddDynamic(this, &ThisClass::OnServerAfterTakeRadialDamageEvent);
+	CombatComponent->OnMulticastAfterTakePointDamageSuccess.AddDynamic(this, &ThisClass::OnMulticastAfterTakePointDamageEvent);
+	CombatComponent->OnMulticastAfterTakeRadialDamageSuccess.AddDynamic(this, &ThisClass::OnMulticastAfterTakeRadialDamageEvent);
 
-	CombatComponent->OnClientUnholsterWeapon.AddDynamic(this, &ACreature::OnClientUnholsterWeaponEvent);
-	CombatComponent->OnServerUnholsterWeapon.AddDynamic(this, &ACreature::OnServerUnholsterWeaponEvent);
-	CombatComponent->OnClientHolsterWeapon.AddDynamic(this, &ACreature::OnClientHolsterWeaponEvent);
-	CombatComponent->OnServerHolsterWeapon.AddDynamic(this, &ACreature::OnServerHolsterWeaponEvent);
+	CombatComponent->OnClientUnholsterWeapon.AddDynamic(this, &ThisClass::OnClientUnholsterWeaponEvent);
+	CombatComponent->OnServerUnholsterWeapon.AddDynamic(this, &ThisClass::OnServerUnholsterWeaponEvent);
+	CombatComponent->OnClientHolsterWeapon.AddDynamic(this, &ThisClass::OnClientHolsterWeaponEvent);
+	CombatComponent->OnServerHolsterWeapon.AddDynamic(this, &ThisClass::OnServerHolsterWeaponEvent);
 
 	CombatComponent->OnRepCurWeapon.AddDynamic(this, &ThisClass::OnRepCurWeaponEvent);
 	CombatComponent->OnRepWeaponSlot.AddDynamic(this, &ThisClass::OnRepWeaponSlotEvent);
@@ -618,7 +623,14 @@ void ACreature::OnServerDeathEvent(float DamageAmount, FDamageEvent const& Damag
 		SimulateMesh();
 	}
 
-	Multicast_OnDeathEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void ACreature::OnMulticastDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
+
+	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
+
 }
 
 void ACreature::Landed(const FHitResult& Hit)
@@ -655,13 +667,58 @@ void ACreature::OnJumped_Implementation()
 
 void ACreature::OnClientAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
-	Server_OnAfterTakePointDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ACreature::OnClientAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
-	Server_OnAfterTakeRadialDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
 
+void ACreature::OnServerAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+}
+
+void ACreature::OnMulticastAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	if (GetMesh()->IsSimulatingPhysics())
+	{
+		UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
+		if (!DamageType)
+		{
+			KR_LOG(Error, TEXT("Damage Type is not UKraverDamageType Class"));
+			return;
+		}
+
+		GetMesh()->AddImpulseAtLocation(
+			DamageEvent.ShotDirection * DamageType->DamageImpulse * GetMesh()->GetMass() * ImpulseResistanceRatio,
+			DamageEvent.HitInfo.ImpactPoint,
+			DamageEvent.HitInfo.BoneName
+		);
+	}
+}
+
+void ACreature::OnServerAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+}
+
+void ACreature::OnMulticastAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	if (GetMesh()->IsSimulatingPhysics())
+	{
+		UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
+		if (!DamageType)
+		{
+			KR_LOG(Error, TEXT("Damage Type is not UKraverDamageType Class"));
+			return;
+		}
+
+		FVector Direction = DamageEvent.ComponentHits[0].ImpactPoint - DamageEvent.Origin;
+		Direction.Normalize();
+
+		GetMesh()->AddImpulseAtLocation(
+			Direction * DamageType->DamageImpulse * GetMesh()->GetMass() * ImpulseResistanceRatio,
+			DamageEvent.ComponentHits[0].ImpactPoint
+		);
+	}
 }
 
 void ACreature::OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
@@ -730,64 +787,6 @@ void ACreature::Client_Assassinated_Implementation(ACreature* Attacker, FAssassi
 {
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	DisableInput(PlayerController);
-}
-
-void ACreature::Multicast_OnDeathEvent_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
-
-	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
-
-}
-
-void ACreature::Server_OnAfterTakePointDamageEvent_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	Multicast_OnAfterTakePointDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-}
-
-void ACreature::Multicast_OnAfterTakePointDamageEvent_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	if (GetMesh()->IsSimulatingPhysics())
-	{
-		UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
-		if (!DamageType)
-		{
-			KR_LOG(Error, TEXT("Damage Type is not UKraverDamageType Class"));
-			return;
-		}
-
-		GetMesh()->AddImpulseAtLocation(
-			DamageEvent.ShotDirection * DamageType->DamageImpulse * GetMesh()->GetMass() * ImpulseResistanceRatio,
-			DamageEvent.HitInfo.ImpactPoint,
-			DamageEvent.HitInfo.BoneName
-		);
-	}
-}
-
-void ACreature::Server_OnAfterTakeRadialDamageEvent_Implementation(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	Multicast_OnAfterTakeRadialDamageEvent(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-}
-
-void ACreature::Multicast_OnAfterTakeRadialDamageEvent_Implementation(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	if (GetMesh()->IsSimulatingPhysics())
-	{
-		UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
-		if (!DamageType)
-		{
-			KR_LOG(Error, TEXT("Damage Type is not UKraverDamageType Class"));
-			return;
-		}
-
-		FVector Direction = DamageEvent.ComponentHits[0].ImpactPoint - DamageEvent.Origin;
-		Direction.Normalize();
-
-		GetMesh()->AddImpulseAtLocation(
-			Direction * DamageType->DamageImpulse * GetMesh()->GetMass() * ImpulseResistanceRatio,
-			DamageEvent.ComponentHits[0].ImpactPoint
-		);
-	}
 }
 
 void ACreature::Server_Jump_Implementation()

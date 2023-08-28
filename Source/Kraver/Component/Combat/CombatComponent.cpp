@@ -493,10 +493,14 @@ void UCombatComponent::Server_TakeDamage_Implementation(float DamageAmount, FDam
 	Server_SetCurHp(CurHp);
 
 	Client_TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+	Multicast_TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 
 	UCombatComponent* CauserCobatComp = FindComponentByClassIncludeOwner<UCombatComponent>(DamageCauser);
 	if (CauserCobatComp)
 		CauserCobatComp->Client_GiveDamageSuccess(GetOwner(), DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+
+	OnServerAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+	OnServerAfterTakeDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
 void UCombatComponent::Server_TakePointDamage_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -522,10 +526,14 @@ void UCombatComponent::Server_TakePointDamage_Implementation(float DamageAmount,
 	Server_SetCurHp(CurHp);
 
 	Client_TakePointDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+	Multicast_TakePointDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 
 	UCombatComponent* CauserCobatComp = FindComponentByClassIncludeOwner<UCombatComponent>(DamageCauser);
 	if (CauserCobatComp)
 		CauserCobatComp->Client_GivePointDamageSuccess(GetOwner(), DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+
+	OnClientAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+	OnClientAfterTakePointDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
 void UCombatComponent::Server_TakeRadialDamage_Implementation(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -552,10 +560,14 @@ void UCombatComponent::Server_TakeRadialDamage_Implementation(float DamageAmount
 	Server_SetCurHp(CurHp);
 
 	Client_TakeRadialDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+	Multicast_TakeRadialDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 
 	UCombatComponent* CauserCobatComp = FindComponentByClassIncludeOwner<UCombatComponent>(DamageCauser);
 	if (CauserCobatComp)
 		CauserCobatComp->Client_GiveRadialDamageSuccess(GetOwner(), DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+
+	OnClientAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+	OnClientAfterTakeRadialDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
 void UCombatComponent::Client_TakeDamage_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
@@ -574,6 +586,24 @@ void UCombatComponent::Client_TakeRadialDamage_Implementation(float DamageAmount
 {
 	OnClientAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 	OnClientAfterTakeRadialDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+}
+
+void UCombatComponent::Multicast_TakeDamage_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	OnMulticastAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+	OnMulticastAfterTakeDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+}
+
+void UCombatComponent::Multicast_TakePointDamage_Implementation(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	OnMulticastAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+	OnMulticastAfterTakePointDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+}
+
+void UCombatComponent::Multicast_TakeRadialDamage_Implementation(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	OnMulticastAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+	OnMulticastAfterTakeRadialDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
 void UCombatComponent::Server_GiveDamage_Implementation(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -647,7 +677,9 @@ void UCombatComponent::Server_Death_Implementation(float DamageAmount, FDamageEv
 		KraverGameMode->CreatureEliminated(OwnerCreature, OwnerCreature->GetController(), EventInstigator);
 
 	OnServerDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+
 	Client_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+	Multicast_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
 void UCombatComponent::Client_Death_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
@@ -655,6 +687,11 @@ void UCombatComponent::Client_Death_Implementation(float DamageAmount, FDamageEv
 	KR_LOG(Log, TEXT("Dead By %s"), *DamageCauser->GetName());
 	Server_SetCurHp(CurHp);
 	OnClientDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+}
+
+void UCombatComponent::Multicast_Death_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	OnMulticastDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
 void UCombatComponent::OnRep_CurWeaponEvent(AWeapon* PrevWeapon)

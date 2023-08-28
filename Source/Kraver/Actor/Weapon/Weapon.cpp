@@ -318,7 +318,7 @@ void AWeapon::Client_UnEquipped_Implementation()
 }
 
 void AWeapon::Multicast_Equipped_Implementation(ACreature* Character)
-{
+{	
 	GetWeaponMesh()->SetSimulatePhysics(false);
 	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
