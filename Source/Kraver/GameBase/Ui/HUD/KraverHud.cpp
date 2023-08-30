@@ -3,6 +3,9 @@
 
 #include "KraverHUD.h"
 #include "Kraver/Character/Creature/Creature.h"
+#include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
+#include "Kraver/GameBase/PlayerState/KraverPlayerState.h"
+#include "Kraver/GameBase/GameState/KraverGameState.h"
 
 AKraverHUD::AKraverHUD()
 {
@@ -10,9 +13,35 @@ AKraverHUD::AKraverHUD()
 	CombatWidget = CreateDefaultSubobject<UUserWidget>(TEXT("CombatWidget"));
 }
 
+void AKraverHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	APlayerController* PlayerController = GetOwningPlayerController();
+	OnNewLocalPlayerEvent(Cast<AKraverPlayer>(PlayerController->GetCharacter()));
+
+	InteractionWidget = CreateWidget<UInteractionWidget>(PlayerController, InteractionWidgetClass);
+	CombatWidget = CreateWidget<UCombatWidget>(PlayerController, CombatWidgetClass);
+	if(CombatWidget)
+		CombatWidget->AddToViewport();
+	else
+		UE_LOG(LogTemp, Fatal, TEXT("CombatWidget is null"));
+
+}
+
 void AKraverHUD::DrawHUD()
 {
 	Super::DrawHUD();
+
+	if (!PlayerState)
+	{
+		PlayerState = GetOwningPlayerController()->GetPlayerState<AKraverPlayerState>();
+		if (PlayerState)
+		{
+			PlayerState->OnNewLocalPlayer.AddDynamic(this, &ThisClass::OnNewLocalPlayerEvent);
+			PlayerState->OnCreatureDeath.AddDynamic(this, &ThisClass::OnCreatureDeathEvent);
+		}
+	}
 
 	if (HitmarkAppearanceTime > 0.f)
 	{
@@ -66,25 +95,6 @@ void AKraverHUD::DrawHUD()
 	}
 }
 
-void AKraverHUD::BeginPlay()
-{
-	Super::BeginPlay();
-
-	APlayerController* PlayerController = GetOwningPlayerController();
-	InteractionWidget = CreateWidget<UInteractionWidget>(PlayerController, InteractionWidgetClass);
-	CombatWidget = CreateWidget<UCombatWidget>(PlayerController, CombatWidgetClass);
-	if(CombatWidget)
-		CombatWidget->AddToViewport();
-	else
-		UE_LOG(LogTemp, Fatal, TEXT("CombatWidget is null"));
-
-	OwnerCreature = Cast<ACreature>(PlayerController->GetCharacter());
-	if (OwnerCreature)
-	{
-		OwnerCreature->CombatComponent->OnClientGiveAnyDamageSuccess.AddDynamic(this, &AKraverHUD::OnClientGiveDamageSuccessEvent);
-	}
-}
-
 void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color)
 {
 	const float TextureWidth = Texture->GetSizeX();
@@ -117,6 +127,20 @@ void AKraverHUD::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float Dama
 		HitmarkAppearanceTime = 0.05f;
 
 	bHitmartCritical = DamageResult.bCritical;
+}
+
+void AKraverHUD::OnNewLocalPlayerEvent(AKraverPlayer* NewCreature)
+{
+	OwnerCreature = NewCreature;
+	if (OwnerCreature)
+	{
+		OwnerCreature->CombatComponent->OnClientGiveAnyDamageSuccess.AddDynamic(this, &AKraverHUD::OnClientGiveDamageSuccessEvent);
+	}
+}
+
+void AKraverHUD::OnCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
+{
+
 }
 
 void AKraverHUD::SetInteractWidget(bool value)

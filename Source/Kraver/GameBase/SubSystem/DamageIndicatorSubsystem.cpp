@@ -20,7 +20,7 @@ void UDamageIndicatorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 }
 
-void UDamageIndicatorSubsystem::OnLocalPlayerBeginPlay(AKraverPlayer* Player)
+void UDamageIndicatorSubsystem::SetLocalPlayer(AKraverPlayer* Player)
 {
 	if(!IsValid(Player))
 		return;

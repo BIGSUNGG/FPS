@@ -12,48 +12,52 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRepWeapon, AWeapon*, PrevWeapon, AWeapon*, CurWeapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRepWeaponSlot, const TArray<AWeapon*>&, PrevWeaponSlot, const TArray<AWeapon*>&, CurWeaponSlot);
 
-// Crouch Delegate
+// GameBase
+	// New Player
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNewKraverPlayer, class AKraverPlayer*, NewPlayer);
+	// Creature Death (GameMode)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FPlayerStateDeathDele, class ACreature*, DeadCreature, class AController*, VictimController, AActor*, AttackerActor, AController*, AttackerController, FKraverDamageResult const&, DamageResult);
+
+// Movement
+	// Crouch Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCrouchDele, float, HalfHeightAdjust, float, ScaledHalfHeightAdjust);
-
-// Landed Delegate
+	// Landed Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLandedDele, const FHitResult&, Hit);
-
-// Jump Delegate
+	// Jump Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FJumpDele);
 
-// Assassinate Delegate
+// Weapon
+	// Assassinate Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAssassinateDele, AActor*, AssassinatedActor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAssassinateEndDele);
-
-// Attack Delegate
+	// Attack Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackStartDele);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackEndDele);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackDele);
-
-// Skill Delegate
+	// Skill Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSkillDele);
+	// Impact Delegate
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FImpactDele, AActor*, Bullet, AActor*, OtherActor, UPrimitiveComponent*, OtherComponent, const FHitResult&, Hit);
 
-// Equip Delegate
+	// Equip Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEquipWeaponSuccessDele, AWeapon*, Weapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUnEquipWeaponSuccessDele, AWeapon*, Weapon);
-
-// Holster Delegate
+	// Holster Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHolsterWeaponDele, AWeapon*, Weapon);
 
-// Take Damage
+// Combat
+	// Take Damage
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FTakeDamageDele, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser, FKraverDamageResult const&, DamageResult);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FTakePointDamageDele, float, DamageAmount, FPointDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser, FKraverDamageResult const&, DamageResult);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FTakeRadialDamageDele, float, DamageAmount, FRadialDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser, FKraverDamageResult const&, DamageResult);
-
-// GiveDamage Delegate
+	// GiveDamage Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FGiveDamageDele, AActor*, DamagedActor, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser, FKraverDamageResult const&, DamageResult);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FGivePointDamageDele, AActor*, DamagedActor, float, DamageAmount, FPointDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser, FKraverDamageResult const&, DamageResult);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FGiveRadialDamageDele, AActor*, DamagedActor, float, DamageAmount, FRadialDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser, FKraverDamageResult const&, DamageResult);
-
-// Death Delegate
+	// Death Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FDeathDele, float, DamageAmount, FDamageEvent const&, DamageEvent, AController*, EventInstigator, AActor*, DamageCauser, FKraverDamageResult const&, DamageResult);
 
-// Anim Delegate
+// Anim
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAnimNotifyDele);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FPlayMontageDele, UAnimMontage*, PlayedMontage, float, MontageSpeed);
 
@@ -61,14 +65,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FPlayMontageDele, UAnimMontage*, Pl
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAddOnDele, UObject*, Object);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRemoveOnDele, UObject*, Object);
 
-// Make NewWeaponPrimitivaeInfo
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMakeNewPrimitiveInfoDele, int, Index);
-
 // Destroy Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDestroyDele, AActor*, Actor);
-
-// Impact Delegate
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FImpactDele, AActor*, Bullet, AActor*, OtherActor, UPrimitiveComponent*, OtherComponent, const FHitResult&, Hit);
 
 UCLASS()
 class KRAVER_API ACustomDelegate : public AActor

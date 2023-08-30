@@ -14,4 +14,8 @@ class KRAVER_API AKraverGameState : public AGameState
 {
 	GENERATED_BODY()
 	
+public:
+
+public:
+
 };

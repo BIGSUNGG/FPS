@@ -22,7 +22,7 @@ public:
 	/** Implement this for deinitialization of instances of the system */
 	virtual void Deinitialize() override { Super::Deinitialize(); }
 
-	void OnLocalPlayerBeginPlay(class AKraverPlayer* Player);
+	void SetLocalPlayer(class AKraverPlayer* Player);
 protected:
 	// Delegate
 
@@ -49,7 +49,7 @@ protected:
 	class AKraverPlayer* KraverPlayer;
 
 	TMap<class ACreature*, class AFloatingDamage*> FloatingWidgets;
-	bool DuplicationFloatingDamage = true;
+	bool DuplicationFloatingDamage = false;
 
 	TMap<class ACreature*, class UDamageDirectionWidget*> DamagedDirectionWidgets;
 

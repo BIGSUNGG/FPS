@@ -3,13 +3,40 @@
 
 #include "KraverGameMode.h"
 #include "Kraver/Character/Creature/Creature.h"
+#include "Kraver/GameBase/GameState/KraverGameState.h"
+#include "Kraver/GameBase/PlayerState/KraverPlayerState.h"
 
-void AKraverGameMode::CreatureEliminated(class ACreature* ElimmedCreature, class AController* VictimController, AController* AttackerController)
+AKraverGameMode::AKraverGameMode()
 {
+	GameStateClass = AKraverGameState::StaticClass();
+	PlayerStateClass = AKraverPlayerState::StaticClass();
+}
+
+void AKraverGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+
+}
+
+void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
+{
+	AKraverPlayerState* KraverPlayerState = AttackerController->GetPlayerState<AKraverPlayerState>();
+	if (KraverPlayerState)
+	{
+		KraverPlayerState->CreatureDeath(DeadCreature, VictimController, AttackerActor, AttackerController, DamageResult);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Fatal, TEXT("GameState Class is not KraerGameState Class"));
+		return;
+	}
 }
 
 void AKraverGameMode::RequestRespawn(ACreature* ElimmedCharacter, AController* ElimmedController)
 {
+	if (!ElimmedCharacter->IsPlayerControlled())
+		return;
+
 	if (ElimmedCharacter)
 	{
 		ElimmedCharacter->Reset();

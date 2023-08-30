@@ -674,7 +674,7 @@ void UCombatComponent::Server_Death_Implementation(float DamageAmount, FDamageEv
 {
 	AKraverGameMode* KraverGameMode = GetWorld()->GetAuthGameMode<AKraverGameMode>();
 	if(KraverGameMode)
-		KraverGameMode->CreatureEliminated(OwnerCreature, OwnerCreature->GetController(), EventInstigator);
+		KraverGameMode->CreatureDeath(OwnerCreature, OwnerCreature->GetController(), DamageCauser, EventInstigator, DamageResult);
 
 	OnServerDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 

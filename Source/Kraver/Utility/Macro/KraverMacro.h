@@ -2,7 +2,7 @@
 
 // Test
 #define TEST_ADS false
-#define TEST_RELOAD true
+#define TEST_RELOAD false
 
 // Coliision
 

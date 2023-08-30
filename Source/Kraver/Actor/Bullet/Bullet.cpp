@@ -34,7 +34,7 @@ void ABullet::BeginPlay()
 	if(IS_SERVER())
 	{
 		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&](){ Destroy(true, true); }, BulletLifeTime, false, BulletLifeTime);
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&](){ Destroy(false, true); }, BulletLifeTime, false, BulletLifeTime);
 	}
 }
 
@@ -76,7 +76,7 @@ void ABullet::HitEvent(AActor* OtherActor, UPrimitiveComponent* OtherComponent, 
 	GiveDamage(OtherActor, OtherComponent, Hit);
 
 	if (HitCount >= MaxHitCount)
-		Destroy(true, true);
+		Destroy(false, true);
 }
 
 void ABullet::OnCollisionEvent(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)

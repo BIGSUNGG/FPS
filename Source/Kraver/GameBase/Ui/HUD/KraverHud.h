@@ -8,8 +8,6 @@
 #include "Kraver/GameBase/Ui/Widget/Combat/CombatWidget.h"
 #include "KraverHUD.generated.h"
 
-class ACreature;
-
 /**
  * 
  */
@@ -19,8 +17,8 @@ class KRAVER_API AKraverHUD : public AHUD
 	GENERATED_BODY()
 public:
 	AKraverHUD();
-	virtual void DrawHUD() override;
 	virtual void BeginPlay() override;
+	virtual void DrawHUD() override;
 
 private:	
 	virtual void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color = FLinearColor::White);
@@ -29,6 +27,10 @@ protected:
 	// Delegate
 	UFUNCTION()
 		void OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	UFUNCTION()
+		void OnNewLocalPlayerEvent(AKraverPlayer* NewCreature);
+	UFUNCTION()
+		void OnCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
 
 public:
 	// Getter Setter
@@ -39,7 +41,8 @@ public:
 	void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
 
 private:
-	ACreature* OwnerCreature;
+	class ACreature* OwnerCreature;
+	class AKraverPlayerState* PlayerState;
 
 	FCrosshairsPackage HUDPackage;
 
