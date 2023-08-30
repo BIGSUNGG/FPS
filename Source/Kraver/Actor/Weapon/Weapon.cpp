@@ -329,6 +329,16 @@ void AWeapon::Multicast_UnEquipped_Implementation()
 	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
+void AWeapon::Server_OnAttackEvent_Implementation()
+{
+	Multicast_OnAttackEvent();
+}
+
+void AWeapon::Multicast_OnAttackEvent_Implementation()
+{
+
+}
+
 void AWeapon::Server_TakeImpulseAtLocation_Implementation(FVector Impulse, FVector ImpactPoint)
 {
 	Multicast_TakeImpulseAtLocation(Impulse, ImpactPoint);
@@ -341,7 +351,7 @@ void AWeapon::Multicast_TakeImpulseAtLocation_Implementation(FVector Impulse, FV
 
 void AWeapon::OnAttackEvent()
 {
-
+	Server_OnAttackEvent();
 }
 
 void AWeapon::Attack()

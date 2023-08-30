@@ -133,10 +133,7 @@ void AGun::FireBullet()
 		);
 	}
 
-	AddRecoil();
 	OnFire.Broadcast();
-
-	Server_FireBullet();
 }
 
 void AGun::ImpactBullet(FVector ImpactPos)
@@ -175,6 +172,7 @@ void AGun::OnAttackEvent()
 		}
 
 		FireBullet();
+		AddRecoil();
 		OnPlayTppMontage.Broadcast(AttackMontageTpp, 1.f);
 		OnPlayFppMontage.Broadcast(AttackMontageFpp, 1.f);
 	}
@@ -201,13 +199,15 @@ void AGun::Server_SetMaxAmmo_Implementation(int32 Ammo)
 	MaxAmmo = Ammo;
 }
 
-void AGun::Server_FireBullet_Implementation()
+void AGun::Server_OnAttackEvent_Implementation()
 {
-	Multicast_FireBullet();
+	Super::Server_OnAttackEvent_Implementation();
 }
 
-void AGun::Multicast_FireBullet_Implementation()
+void AGun::Multicast_OnAttackEvent_Implementation()
 {	
+	Super::Multicast_OnAttackEvent_Implementation();
+
 	if(!WeaponPrimitiveInfo.Contains("FireEffect"))
 		return;
 

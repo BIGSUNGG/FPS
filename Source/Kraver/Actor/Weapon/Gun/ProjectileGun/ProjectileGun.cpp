@@ -26,7 +26,6 @@ void AProjectileGun::FireBullet()
 
 	FHitResult HitResult;
 	FCollisionQueryParams HitParams(NAME_None, false, OwnerCreature);
-	HitParams.AddIgnoredActor(this);
 	bool bHitSuccess = GetWorld()->LineTraceSingleByProfile(HitResult, OwnerCreature->GetCamera()->GetComponentLocation(), EndPoint, "BulletShape", HitParams);
 
 	FVector BulletDirection;

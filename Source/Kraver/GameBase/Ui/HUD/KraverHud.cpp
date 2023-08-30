@@ -2,6 +2,10 @@
 
 
 #include "KraverHUD.h"
+#include "Kraver/GameBase/Ui/Widget/Interaction/InteractionWidget.h"
+#include "Kraver/GameBase/Ui/Widget/Combat/CombatWidget.h"
+#include "Kraver/GameBase/Ui/Widget/KillLog/KillLogWidget.h"
+#include "Kraver/GameBase/Ui/Widget/Combat/CombatWidget.h"
 #include "Kraver/Character/Creature/Creature.h"
 #include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
 #include "Kraver/GameBase/PlayerState/KraverPlayerState.h"
@@ -9,8 +13,7 @@
 
 AKraverHUD::AKraverHUD()
 {
-	InteractionWidget = CreateDefaultSubobject<UUserWidget>(TEXT("InteractionWidget"));
-	CombatWidget = CreateDefaultSubobject<UUserWidget>(TEXT("CombatWidget"));
+	KillLogWidgets.SetNum(5);
 }
 
 void AKraverHUD::BeginPlay()
@@ -21,11 +24,22 @@ void AKraverHUD::BeginPlay()
 	OnNewLocalPlayerEvent(Cast<AKraverPlayer>(PlayerController->GetCharacter()));
 
 	InteractionWidget = CreateWidget<UInteractionWidget>(PlayerController, InteractionWidgetClass);
+	if (InteractionWidget)
+		InteractionWidget->AddToViewport();
+
 	CombatWidget = CreateWidget<UCombatWidget>(PlayerController, CombatWidgetClass);
 	if(CombatWidget)
 		CombatWidget->AddToViewport();
-	else
-		UE_LOG(LogTemp, Fatal, TEXT("CombatWidget is null"));
+		
+	for (int i = 0; i < KillLogWidgets.Num(); i++)
+	{
+		UKillLogWidget* KillLogWidget = CreateWidget<UKillLogWidget>(PlayerController, KillLogWidgetClass);
+		if (KillLogWidget)
+		{
+			KillLogWidgets[i] = KillLogWidget;
+			KillLogWidget->AddToViewport();
+		}
+	}
 
 }
 
@@ -39,7 +53,14 @@ void AKraverHUD::DrawHUD()
 		if (PlayerState)
 		{
 			PlayerState->OnNewLocalPlayer.AddDynamic(this, &ThisClass::OnNewLocalPlayerEvent);
-			PlayerState->OnCreatureDeath.AddDynamic(this, &ThisClass::OnCreatureDeathEvent);
+		}
+	}
+	if (!GameState)
+	{
+		GameState = GetWorld()->GetGameState<AKraverGameState>();
+		if (GameState)
+		{
+			GameState->OnCreatureDeath.AddDynamic(this, &ThisClass::OnCreatureDeathEvent);
 		}
 	}
 
@@ -117,6 +138,12 @@ void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FV
 	);
 }
 
+void AKraverHUD::ApplyKillLogPos()
+{
+	for (int i = 0; i < KillLogWidgets.Num(); i++)
+		KillLogWidgets[i]->SetPositionInViewport(FVector2D(0, 80 * i));
+}
+
 void AKraverHUD::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	if(DamageResult.bAlreadyDead)
@@ -140,30 +167,27 @@ void AKraverHUD::OnNewLocalPlayerEvent(AKraverPlayer* NewCreature)
 
 void AKraverHUD::OnCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
 {
+	for (int i = KillLogWidgets.Num() - 1; i >= 1; i--)
+	{
+		UUserWidget* TempWidget = KillLogWidgets[i - 1];
+		KillLogWidgets[i - 1] = KillLogWidgets[i];
+		KillLogWidgets[i] = TempWidget;
+	}
 
+	UKillLogWidget* KillLogWidget = Cast<UKillLogWidget>(KillLogWidgets[0]);
+	KillLogWidget->Initialize(AttackerController ? AttackerController->GetName() : AttackerActor->GetName(), VictimController ? VictimController->GetName() : DeadCreature->GetName());
+	ApplyKillLogPos();
 }
 
 void AKraverHUD::SetInteractWidget(bool value)
 {
-	return;
+	if(value)
+	{
+		InteractionWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		InteractionWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
 
-	if (value == true && InteractionWidget)
-	{
-		FVector2D ViewportSize;
-		if (GEngine)
-		{
-			GEngine->GameViewport->GetViewportSize(ViewportSize);
-			const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
-			const FVector2D WidgetHalfSize(165, 30);
-			float Y = ViewportCenter.Y * 0.6f;
-			FVector2D WidgetPosition = ViewportCenter - WidgetHalfSize;
-			WidgetPosition.Y += Y;
-			InteractionWidget->SetPositionInViewport(WidgetPosition);
-		}
-		InteractionWidget->AddToViewport();
-	}
-	else if (value == false && InteractionWidget)
-	{
-		InteractionWidget->RemoveFromParent();
-	}
 }

@@ -20,7 +20,7 @@ void AKraverGameMode::InitGame(const FString& MapName, const FString& Options, F
 
 void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
 {
-	AKraverPlayerState* KraverPlayerState = AttackerController->GetPlayerState<AKraverPlayerState>();
+	AKraverGameState* KraverPlayerState = Cast<AKraverGameState>(GameState);
 	if (KraverPlayerState)
 	{
 		KraverPlayerState->CreatureDeath(DeadCreature, VictimController, AttackerActor, AttackerController, DamageResult);

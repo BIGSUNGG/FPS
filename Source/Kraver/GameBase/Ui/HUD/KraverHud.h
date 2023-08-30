@@ -22,6 +22,7 @@ public:
 
 private:	
 	virtual void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color = FLinearColor::White);
+	void ApplyKillLogPos();
 
 protected:
 	// Delegate
@@ -42,6 +43,7 @@ public:
 
 private:
 	class ACreature* OwnerCreature;
+	class AKraverGameState* GameState;
 	class AKraverPlayerState* PlayerState;
 
 	FCrosshairsPackage HUDPackage;
@@ -58,6 +60,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<class UUserWidget> InteractionWidgetClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
 	UUserWidget* InteractionWidget; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<class UUserWidget> KillLogWidgetClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
+	TArray<UUserWidget*> KillLogWidgets; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
 
 	bool bDrawCrosshair = true;
 	UPROPERTY(EditAnywhere)

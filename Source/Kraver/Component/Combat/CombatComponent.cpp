@@ -630,6 +630,9 @@ void UCombatComponent::Server_GiveDamage_Implementation(AActor* DamagedActor, fl
 
 void UCombatComponent::Server_GivePointDamage_Implementation(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if(!IsValid(DamagedActor))
+		return;
+
 	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
 	if (!DamageType)
 	{

@@ -60,6 +60,12 @@ protected:
 		void Multicast_Equipped(ACreature* Character);
 	UFUNCTION(NetMulticast, Reliable)
 		void Multicast_UnEquipped();
+
+	UFUNCTION(Server, Reliable)
+		virtual void Server_OnAttackEvent();
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void Multicast_OnAttackEvent();
+
 	UFUNCTION(Server, Reliable)
 		void Server_TakeImpulseAtLocation(FVector Impulse, FVector ImpactPoint);
 	UFUNCTION(NetMulticast, Reliable)

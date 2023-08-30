@@ -12,16 +12,6 @@ AKraverPlayerState::AKraverPlayerState()
 	OnPawnSet.AddDynamic(this, &ThisClass::OnPawnSetEvent);
 }
 
-void AKraverPlayerState::CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
-{
-	Multicast_CreatureDeath(DeadCreature, VictimController, AttackerActor, AttackerController, DamageResult);
-}
-
-void AKraverPlayerState::Multicast_CreatureDeath_Implementation(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
-{
-	OnCreatureDeath.Broadcast(DeadCreature, VictimController, AttackerActor, AttackerController, DamageResult);
-}
-
 void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn)
 {
 	if(!NewPawn)
