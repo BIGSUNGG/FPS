@@ -2,7 +2,7 @@
 
 
 #include "CreatureMovementComponent.h"
-#include "Kraver/Character/Creature/Creature.h"
+#include Creature_h
 
 // Sets default values for this component's properties
 UCreatureMovementComponent::UCreatureMovementComponent()

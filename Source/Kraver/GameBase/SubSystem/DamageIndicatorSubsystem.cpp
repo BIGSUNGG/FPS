@@ -3,7 +3,7 @@
 
 #include "DamageIndicatorSubsystem.h"
 #include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
-#include "Kraver/Actor/FloatingDamage/FloatingDamage.h"
+#include FloatingDamage_h
 #include "Kraver/GameBase/Ui/Widget/DamageDirection/DamageDirectionWidget.h"
 
 UDamageIndicatorSubsystem::UDamageIndicatorSubsystem()

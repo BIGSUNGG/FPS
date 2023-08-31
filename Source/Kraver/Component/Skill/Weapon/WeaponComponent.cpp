@@ -2,7 +2,7 @@
 
 
 #include "WeaponComponent.h"
-#include "Kraver/Actor/Weapon/Weapon.h"
+#include Weapon_h
 
 // Sets default values for this component's properties
 UWeaponComponent::UWeaponComponent()

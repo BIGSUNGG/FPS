@@ -2,9 +2,9 @@
 
 
 #include "BTTask_AttackTo.h"
-#include "Kraver/Component/Combat/CombatComponent.h"
+#include CombatComponent_h
 #include "Kraver/Ai/Controller/GuardAIController.h"
-#include "Kraver/Character/Creature/Creature.h"
+#include Creature_h
 
 UBTTask_AttackTo::UBTTask_AttackTo()
 {

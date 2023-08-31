@@ -4,8 +4,8 @@
 
 #include "Kraver/Kraver.h"
 #include "GameFramework/Character.h"
-#include "Kraver/Component/Combat/CombatComponent.h"
-#include "Kraver/Component/Skill/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
+#include CombatComponent_h
+#include WeaponAssassinateComponent_h
 #include "Creature.generated.h"
 
 class UWeaponAssassinateComponent;

@@ -2,8 +2,8 @@
 
 
 #include "AdvanceMovementComponent.h"
-#include "Kraver/Character/Creature/Creature.h"
-#include "Kraver/Animation/Creature/CreatureAnimInstance.h"
+#include Creature_h
+#include CreatureAnimInstance_h
 
 // Sets default values for this component's properties
 UAdvanceMovementComponent::UAdvanceMovementComponent()

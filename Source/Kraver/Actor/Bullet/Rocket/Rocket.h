@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "Kraver/Actor/Bullet/Bullet.h"
+#include "Kraver/Kraver.h"
+#include Bullet_h
 #include "Rocket.generated.h"
 
 /**

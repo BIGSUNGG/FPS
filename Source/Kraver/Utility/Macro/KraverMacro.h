@@ -1,5 +1,7 @@
 #pragma once
 
+#include "HeaderMacro.h"
+
 // Test
 #define TEST_ADS false
 #define TEST_RELOAD false

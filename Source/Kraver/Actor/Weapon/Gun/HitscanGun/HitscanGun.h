@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "Kraver/Actor/Weapon/Gun/Gun.h"
+#include "Kraver/Kraver.h"
+#include Gun_h
 #include "HitscanGun.generated.h"
 
 /**

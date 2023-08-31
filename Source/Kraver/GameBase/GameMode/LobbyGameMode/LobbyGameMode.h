@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "GameFramework/GameMode.h"
-#include "Kraver/GameBase/GameMode/KraverGameMode.h"
+#include "Kraver/Kraver.h"
+#include KraverGameMode_h
 #include "LobbyGameMode.generated.h"
 
 /**

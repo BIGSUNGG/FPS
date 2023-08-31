@@ -2,9 +2,9 @@
 
 
 #include "Soldier.h"
-#include "Kraver/Animation/Creature/Soldier/SoldierAnimInstance.h"
-#include "Kraver/Component/Attachment/Weapon/Magazine/AttachmentMagazineComponent.h"
-#include "Kraver/Component/Skill/Weapon/WeaponReload/WeaponReloadComponent.h"
+#include SoldierAnimInstance_h
+#include AttachmentMagazineComponent_h
+#include WeaponReloadComponent_h
 
 ASoldier::ASoldier()
 	: Super()

@@ -2,7 +2,7 @@
 
 
 #include "HitscanGun.h"
-#include "Kraver/Character/Creature/Creature.h"
+#include Creature_h
 
 void AHitscanGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

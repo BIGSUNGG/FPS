@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Melee.h"
-#include "Kraver/Character/Creature/Creature.h"
-#include "Kraver/Animation/Creature/Soldier/SoldierAnimInstance.h"
+#include Creature_h
+#include SoldierAnimInstance_h
 
 AMelee::AMelee()
 {

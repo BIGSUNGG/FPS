@@ -2,9 +2,9 @@
 
 
 #include "KraverGameMode.h"
-#include "Kraver/Character/Creature/Creature.h"
-#include "Kraver/GameBase/GameState/KraverGameState.h"
-#include "Kraver/GameBase/PlayerState/KraverPlayerState.h"
+#include Creature_h
+#include KraverGameState_h
+#include KraverPlayerState_h
 
 AKraverGameMode::AKraverGameMode()
 {

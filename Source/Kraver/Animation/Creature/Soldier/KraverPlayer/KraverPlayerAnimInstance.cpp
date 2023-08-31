@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Kraver/Animation/Creature/Soldier/KraverPlayer/KraverPlayerAnimInstance.h"
+#include "KraverPlayerAnimInstance.h"
 #include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
-#include "Kraver/Component/Movement/Advance/AdvanceMovementComponent.h"
+#include AdvanceMovementComponent_h
 
 void UKraverPlayerAnimInstance::NativeBeginPlay()
 {

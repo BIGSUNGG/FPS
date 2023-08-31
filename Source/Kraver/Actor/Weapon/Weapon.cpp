@@ -3,9 +3,9 @@
 
 #include "Weapon.h"
 #include "Net/UnrealNetwork.h"
-#include "Kraver/Character/Creature/Creature.h"
-#include "Kraver/Component/Skill/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
-#include "Kraver/Component/Movement/CreatureMovementComponent.h"
+#include Creature_h
+#include WeaponAssassinateComponent_h
+#include CreatureMovementComponent_h
 
 // Sets default values
 AWeapon::AWeapon()

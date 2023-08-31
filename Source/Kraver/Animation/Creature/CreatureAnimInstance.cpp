@@ -2,8 +2,8 @@
 
 
 #include "CreatureAnimInstance.h"
-#include "Kraver/Character/Creature/Creature.h"
-#include "Kraver/Component/Movement/CreatureMovementComponent.h"
+#include Creature_h
+#include CreatureMovementComponent_h
 
 UCreatureAnimInstance::UCreatureAnimInstance()
 {

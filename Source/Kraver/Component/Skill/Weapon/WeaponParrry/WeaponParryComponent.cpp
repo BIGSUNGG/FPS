@@ -2,8 +2,8 @@
 
 
 #include "WeaponParryComponent.h"
-#include "Kraver/Actor/Weapon/Weapon.h"
-#include "Kraver/Character/Creature/Creature.h"
+#include Weapon_h
+#include Creature_h
 
 void UWeaponParryComponent::BeginPlay()
 {

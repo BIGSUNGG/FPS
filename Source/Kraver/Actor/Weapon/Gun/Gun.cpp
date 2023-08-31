@@ -2,8 +2,8 @@
 
 
 #include "Gun.h"
-#include "Kraver/Character/Creature/Creature.h"
-#include "Kraver/Component/Attachment/Weapon/Silencer/AttachmentSilencerComponent.h"
+#include Creature_h
+#include AttachmentSilencerComponent_h
 
 AGun::AGun() : Super()
 {

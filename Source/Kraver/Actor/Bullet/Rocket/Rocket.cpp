@@ -2,8 +2,7 @@
 
 
 #include "Rocket.h"
-#include "Kraver/Component/Combat/CombatComponent.h"
-#include "GameFramework/DamageType.h"
+#include CombatComponent_h
 
 void ARocket::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit)
 {

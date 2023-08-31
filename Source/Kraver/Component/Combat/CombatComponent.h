@@ -4,7 +4,7 @@
 
 #include "Kraver/Kraver.h"
 #include "Components/ActorComponent.h"
-#include "Kraver/Actor/Weapon/Weapon.h"
+#include Weapon_h
 #include "CombatComponent.generated.h"
 
 class ACreature;

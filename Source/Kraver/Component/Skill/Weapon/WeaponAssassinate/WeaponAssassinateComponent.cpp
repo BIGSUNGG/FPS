@@ -2,9 +2,9 @@
 
 
 #include "WeaponAssassinateComponent.h"
-#include "Kraver/Character/Creature/Creature.h"
-#include "Kraver/Animation/Creature/Soldier/SoldierAnimInstance.h"
-#include "Kraver/Actor/Weapon/Melee/Melee.h"
+#include Creature_h
+#include SoldierAnimInstance_h
+#include Melee_h
 
 void UWeaponAssassinateComponent::BeginPlay()
 {

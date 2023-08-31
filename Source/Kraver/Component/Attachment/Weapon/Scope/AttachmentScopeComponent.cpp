@@ -2,7 +2,7 @@
 
 
 #include "AttachmentScopeComponent.h"
-#include "Kraver/Actor/Weapon/Weapon.h"
+#include Weapon_h
 
 UAttachmentScopeComponent::UAttachmentScopeComponent()
 {

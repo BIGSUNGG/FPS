@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#pragma warning(disable:4263)
+#pragma warning(disable:4264)
 
 #include "Kraver/Kraver.h"
 #include "Blueprint/UserWidget.h"
@@ -16,7 +18,7 @@ class KRAVER_API UKillLogWidget : public UUserWidget
 	
 public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float DeltaTime) override;
-	virtual void Initialize(const FString& InAttackerName, const FString& InVictimName);
+	bool Initialize(const FString& InAttackerName, const FString& InVictimName);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))

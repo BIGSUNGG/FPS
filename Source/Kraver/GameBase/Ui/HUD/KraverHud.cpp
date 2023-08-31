@@ -6,10 +6,10 @@
 #include "Kraver/GameBase/Ui/Widget/Combat/CombatWidget.h"
 #include "Kraver/GameBase/Ui/Widget/KillLog/KillLogWidget.h"
 #include "Kraver/GameBase/Ui/Widget/Combat/CombatWidget.h"
-#include "Kraver/Character/Creature/Creature.h"
+#include Creature_h
 #include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
-#include "Kraver/GameBase/PlayerState/KraverPlayerState.h"
-#include "Kraver/GameBase/GameState/KraverGameState.h"
+#include KraverPlayerState_h
+#include KraverGameState_h
 
 AKraverHUD::AKraverHUD()
 {

@@ -2,17 +2,17 @@
 
 
 #include "KraverPlayer.h"
-#include "Kraver/Actor/Weapon/Weapon.h"
-#include "Kraver/Actor/Weapon/Gun/Gun.h"
+#include Weapon_h
+#include Gun_h
 #include "Kraver/GameBase/Ui/HUD/KraverHUD.h"
-#include "Kraver/GameBase/PlayerController/KraverPlayerController.h"
-#include "Kraver/GameBase/GameMode/KraverGameMode.h"
-#include "Kraver/Animation/Creature/CreatureAnimInstance.h"
-#include "Kraver/Component/Movement/Advance/AdvanceMovementComponent.h"
-#include "Kraver/Animation/Creature/Soldier/SoldierAnimInstance.h"
-#include "Kraver/Component/Attachment/Weapon/Magazine/AttachmentMagazineComponent.h"
-#include "Kraver/GameBase/SubSystem/DamageIndicatorSubsystem.h"
-#include "Kraver/Component/Skill/Weapon/WeaponReload/WeaponReloadComponent.h"
+#include KraverPlayerController_h
+#include KraverGameMode_h
+#include CreatureAnimInstance_h
+#include AdvanceMovementComponent_h
+#include SoldierAnimInstance_h
+#include AttachmentMagazineComponent_h
+#include DamageIndicatorSubsystem_h
+#include WeaponReloadComponent_h
 
 AKraverPlayer::AKraverPlayer() : Super()
 {

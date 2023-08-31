@@ -3,8 +3,8 @@
 
 #include "KraverPlayerState.h"
 #include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
-#include "Kraver/GameBase/PlayerController/KraverPlayerController.h"
-#include "Kraver/GameBase/SubSystem/DamageIndicatorSubsystem.h"
+#include KraverPlayerController_h
+#include DamageIndicatorSubsystem_h
 #include "Kraver/GameBase/Ui/HUD/KraverHUD.h"
 
 AKraverPlayerState::AKraverPlayerState()

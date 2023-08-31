@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "Kraver/Component/Attachment/Weapon/Magazine/AttachmentMagazineComponent.h"
+#include "Kraver/Kraver.h"
+#include AttachmentMagazineComponent_h
 #include "RocketMagazineComponent.generated.h"
 
 /**

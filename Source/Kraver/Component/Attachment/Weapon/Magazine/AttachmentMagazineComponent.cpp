@@ -2,7 +2,7 @@
 
 
 #include "AttachmentMagazineComponent.h"
-#include "Kraver/Actor/Weapon/Weapon.h"
+#include Weapon_h
 
 UAttachmentMagazineComponent::UAttachmentMagazineComponent()
 {

@@ -2,9 +2,9 @@
 
 
 #include "ProjectileGun.h"
-#include "Kraver/Character/Creature/Creature.h"
+#include Creature_h
 #include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
-#include "Kraver/Actor/Bullet/Bullet.h"
+#include Bullet_h
 
 void AProjectileGun::FireBullet()
 {

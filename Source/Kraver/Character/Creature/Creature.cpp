@@ -2,12 +2,11 @@
 
 
 #include "Creature.h"
-#include "Kraver/Animation/Creature/CreatureAnimInstance.h"
-#include "Kraver/Actor/Weapon/Melee/Melee.h"
-#include "Kraver/Component/Skill/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
-#include "Kraver/Component/Movement/CreatureMovementComponent.h"
-#include "Kraver/Component/Skill/Weapon/WeaponReload/WeaponReloadComponent.h"
-#include "Kraver/GameBase/GameMode/KraverGameMode.h"
+#include CreatureAnimInstance_h
+#include Melee_h
+#include CreatureMovementComponent_h
+#include WeaponReloadComponent_h
+#include KraverGameMode_h
 
 // Sets default values
 ACreature::ACreature()

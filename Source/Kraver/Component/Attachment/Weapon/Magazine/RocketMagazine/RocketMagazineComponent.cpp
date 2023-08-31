@@ -2,9 +2,9 @@
 
 
 #include "RocketMagazineComponent.h"
-#include "Kraver/Actor/Weapon/Gun/Gun.h"
-#include "Kraver/Character/Creature/Creature.h"
-#include "Kraver/Animation/Creature/Soldier/SoldierAnimInstance.h"
+#include Gun_h
+#include Creature_h
+#include SoldierAnimInstance_h
 
 void URocketMagazineComponent::BeginPlay()
 {

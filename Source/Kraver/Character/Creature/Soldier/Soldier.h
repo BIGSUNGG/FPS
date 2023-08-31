@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "Kraver/Character/Creature/Creature.h"
+#include "Kraver/Kraver.h"
+#include Creature_h
 #include "Soldier.generated.h"
 
 /**

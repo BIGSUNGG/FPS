@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "Kraver/Component/Movement/CreatureMovementComponent.h"
+#include "Kraver/Kraver.h"
+#include CreatureMovementComponent_h
 #include "Components/ActorComponent.h"
 #include "AdvanceMovementComponent.generated.h"
 

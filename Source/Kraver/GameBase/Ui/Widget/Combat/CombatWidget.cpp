@@ -2,8 +2,8 @@
 
 
 #include "Kraver/GameBase/Ui/Widget/Combat/CombatWidget.h"
-#include "Kraver/Character/Creature/Creature.h"
-#include "Kraver/Actor/Weapon/Gun/Gun.h"
+#include Creature_h
+#include Gun_h
 
 void UCombatWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {

@@ -2,7 +2,7 @@
 
 
 #include "Bullet.h"
-#include "Kraver/Component/Combat/CombatComponent.h"
+#include CombatComponent_h
 
 // Sets default values
 ABullet::ABullet()

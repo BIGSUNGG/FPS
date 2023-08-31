@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "Kraver/Animation/Creature/CreatureAnimInstance.h"
+#include "Kraver/Kraver.h"
+#include CreatureAnimInstance_h
 #include "SoldierAnimInstance.generated.h"
 
 /**
