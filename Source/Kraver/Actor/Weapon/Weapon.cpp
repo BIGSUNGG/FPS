@@ -16,7 +16,6 @@ AWeapon::AWeapon()
 	SetReplicateMovement(true);
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
-	SetRootComponent(RootComponent);
 
 	OnAttack.AddDynamic(this, &AWeapon::OnAttackEvent);
 
@@ -34,6 +33,8 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	ERROR_IF_CALLED_ON_CLIENT_PARAM(0.f);
+
 	Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator,DamageCauser);
 
 	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
@@ -111,7 +112,7 @@ void AWeapon::Tick(float DeltaTime)
 	}
 }
 
-bool AWeapon::Equipped(ACreature* Character)
+bool AWeapon::OnServer_Equipped(ACreature* Character)
 {
 	if (!IS_SERVER())
 	{
@@ -175,7 +176,7 @@ bool AWeapon::CanInteracted()
 	}
 }
 
-bool AWeapon::UnEquipped()
+bool AWeapon::OnServer_UnEquipped()
 {
 	if (!IS_SERVER())
 	{
@@ -321,12 +322,14 @@ void AWeapon::Multicast_Equipped_Implementation(ACreature* Character)
 {	
 	GetWeaponMesh()->SetSimulatePhysics(false);
 	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponFppPrimitiveInfo["Root"]->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AWeapon::Multicast_UnEquipped_Implementation()
 {	
 	GetWeaponMesh()->SetSimulatePhysics(true);
 	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	WeaponFppPrimitiveInfo["Root"]->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AWeapon::Server_OnAttackEvent_Implementation()

@@ -22,8 +22,8 @@ public:
 
 protected:
 	// Function
-	virtual bool Equipped(ACreature* Character) override; // Character에게 장착됨
-	virtual bool UnEquipped() override; // 장착해제됨
+	virtual bool OnServer_Equipped(ACreature* Character) override; // Character에게 장착됨
+	virtual bool OnServer_UnEquipped() override; // 장착해제됨
 	virtual bool Unholster() override; // Character 손에 들려짐
 	virtual bool Holster() override; // Character 손에서 집어넣어짐
 

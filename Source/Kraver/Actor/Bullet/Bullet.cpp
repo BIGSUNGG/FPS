@@ -80,13 +80,26 @@ void ABullet::HitEvent(AActor* OtherActor, UPrimitiveComponent* OtherComponent, 
 }
 
 void ABullet::OnCollisionEvent(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
-{
-	HitEvent(OtherActor, OtherComponent, Hit);
-
+{	
+	if (IS_SERVER())
+	{
+		HitEvent(OtherActor, OtherComponent, Hit);
+	}
+	else
+	{
+		KR_LOG(Error, TEXT("Function called on client"));
+		return;
+	}
 }
 
 void ABullet::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit)
 {
+	if (!IS_SERVER())
+	{
+		KR_LOG(Error, TEXT("Function called on client"));
+		return;
+	}
+
 	// Find CombatComponent 
 	AActor* CurActor = GetOwner();
 	UCombatComponent* CombatComp = nullptr;
@@ -103,7 +116,7 @@ void ABullet::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 	ShotDirection.Normalize();
 
 	FPointDamageEvent DamageEvent(BulletDamage, Hit, ShotDirection, HitDamageType);
-	CombatComp->GiveDamage(OtherActor, BulletDamage, DamageEvent, CurActor->GetInstigatorController(), GetOwner());
+	CombatComp->OnServer_GiveDamage(OtherActor, BulletDamage, DamageEvent, CurActor->GetInstigatorController(), GetOwner());
 
 	OnImpact.Broadcast(this, OtherActor, OtherComponent, Hit);
 }

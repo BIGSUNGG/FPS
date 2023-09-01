@@ -2,10 +2,10 @@
 
 
 #include "KraverPlayerState.h"
-#include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
+#include KraverPlayer_h
 #include KraverPlayerController_h
 #include DamageIndicatorSubsystem_h
-#include "Kraver/GameBase/Ui/HUD/KraverHUD.h"
+#include KraverHud_h
 
 AKraverPlayerState::AKraverPlayerState()
 {

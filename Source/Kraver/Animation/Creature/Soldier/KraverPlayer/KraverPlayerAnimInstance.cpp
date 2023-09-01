@@ -2,7 +2,7 @@
 
 
 #include "KraverPlayerAnimInstance.h"
-#include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
+#include KraverPlayer_h
 #include AdvanceMovementComponent_h
 
 void UKraverPlayerAnimInstance::NativeBeginPlay()

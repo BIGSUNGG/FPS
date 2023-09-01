@@ -3,7 +3,7 @@
 
 #include "ProjectileGun.h"
 #include Creature_h
-#include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
+#include KraverPlayer_h
 #include Bullet_h
 
 void AProjectileGun::FireBullet()
@@ -18,15 +18,21 @@ void AProjectileGun::FireBullet()
 		Spread.Y = FMath::RandRange(-CurSpread, CurSpread);
 		Spread.Z = FMath::RandRange(-CurSpread, CurSpread);
 	}
+	else
+	{
+		Spread = FVector::ZeroVector;
+	}
 
 	FVector SpreadDirection = OwnerCreature->GetCamera()->GetForwardVector() + Spread;
 	SpreadDirection.Normalize();
-
 	FVector EndPoint = OwnerCreature->GetCamera()->GetComponentLocation() + (SpreadDirection * 10000.f);
 
 	FHitResult HitResult;
 	FCollisionQueryParams HitParams(NAME_None, false, OwnerCreature);
+	HitParams.AddIgnoredActor(this);
 	bool bHitSuccess = GetWorld()->LineTraceSingleByProfile(HitResult, OwnerCreature->GetCamera()->GetComponentLocation(), EndPoint, "BulletShape", HitParams);
+	if(bHitSuccess)
+		KR_LOG(Error, TEXT("%s"), *HitResult.GetActor()->GetName());
 
 	FVector BulletDirection;
 	if (bHitSuccess)
@@ -57,7 +63,7 @@ void AProjectileGun::OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPr
 	FVector Direction = Bullet->GetVelocity();
 	Direction.Normalize();
 
-	Server_ImpactBullet(Hit.ImpactPoint - Direction * 15.f);
+	OnServer_ImpactBullet(Hit.ImpactPoint - Direction * 15.f);
 }
 
 void AProjectileGun::Server_SpawnBullet_Implementation(FVector Location, FRotator Rotation)

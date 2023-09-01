@@ -55,4 +55,4 @@
 
 #define DamageIndicatorSubsystem_h "Kraver/GameBase/SubSystem/DamageIndicatorSubsystem.h"
 
-#define KraverHud_h "Kraver/GameBase/HUD/KraverHud.h"
+#define KraverHud_h "Kraver/GameBase/Ui/HUD/KraverHUD.h"

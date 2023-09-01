@@ -130,7 +130,7 @@ void UWeaponAssassinateComponent::Server_Assassinate_Implementation(AActor* Acto
 	AssassinateInfo.AssassinatedMontagesFpp = AssassinatedMontagesFpp;
 	AssassinateInfo.AssassinatedMontagesTpp = AssassinatedMontagesTpp;
 
-	Creature->Assassinated(GetOwnerCreature(), AssassinateInfo);
+	CurAssassinatedCreature->OnServer_Assassinated(GetOwnerCreature(), AssassinateInfo);	
 	Multicast_Assassinate(Actor);
 }
 
@@ -146,7 +146,7 @@ void UWeaponAssassinateComponent::Multicast_Assassinate_Implementation(AActor* A
 void UWeaponAssassinateComponent::Server_OnAssassinateAttackEvent_Implementation()
 {
 	FDamageEvent AssassinateDamageEvent(AssassinateDamageType);
-	GetOwnerCreature()->CombatComponent->GiveDamage(CurAssassinatedCreature, AssassinationDamage, AssassinateDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
+	GetOwnerCreature()->CombatComponent->OnServer_GiveDamage(CurAssassinatedCreature, AssassinationDamage, AssassinateDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
 }
 
 void UWeaponAssassinateComponent::Server_OnAssassinateEndEvent_Implementation()

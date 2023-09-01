@@ -7,7 +7,7 @@
 #include "Kraver/GameBase/Ui/Widget/KillLog/KillLogWidget.h"
 #include "Kraver/GameBase/Ui/Widget/Combat/CombatWidget.h"
 #include Creature_h
-#include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
+#include KraverPlayer_h
 #include KraverPlayerState_h
 #include KraverGameState_h
 

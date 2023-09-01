@@ -6,6 +6,12 @@
 
 void ARocket::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit)
 {
+	if (!IS_SERVER())
+	{
+		KR_LOG(Error, TEXT("Function called on client"));
+		return;
+	}
+
 	Super::GiveDamage(OtherActor, OtherComponent, Hit);
 
 	TArray<AActor*> IgnoreActors;

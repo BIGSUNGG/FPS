@@ -2,7 +2,7 @@
 
 
 #include "KraverPlayerFppAnimInstance.h"
-#include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
+#include KraverPlayer_h
 
 void UKraverPlayerFppAnimInstance::NativeBeginPlay()
 {

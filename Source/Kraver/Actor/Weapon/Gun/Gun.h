@@ -34,14 +34,13 @@ protected:
 protected:
 	// Delegate
 	virtual void OnAttackEvent() override;
+	virtual void OnServer_ImpactBullet(FVector ImpactPos);
 
 	// Rpc
 	virtual void Server_OnAttackEvent_Implementation();
 	virtual void Multicast_OnAttackEvent_Implementation();
 
 
-	UFUNCTION(Server, Reliable)
-		virtual void Server_ImpactBullet(FVector ImpactPos);
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_ImpactBullet(FVector ImpactPos);
 public:

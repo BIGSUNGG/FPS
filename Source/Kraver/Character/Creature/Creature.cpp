@@ -88,15 +88,23 @@ void ACreature::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	float Damage = CombatComponent->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
+	
+	float Damage = IS_SERVER() ? CombatComponent->OnServer_TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser) : 0.f;
 	return Damage;
 }
 
-void ACreature::Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
+void ACreature::OnServer_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
 {
-	Server_Assassinated(Attacker, AssassinateInfo);
+	ERROR_IF_CALLED_ON_CLIENT();
+
+	SetActorLocationAndRotation
+	(
+		Attacker->GetActorLocation() + Attacker->GetActorForwardVector() * 100,
+		Attacker->GetActorRotation()
+	);
+
+	Client_Assassinated(Attacker, AssassinateInfo);
+	Multicast_Assassinated(Attacker, AssassinateInfo);
 }
 
 void ACreature::AssassinatedEnd()
@@ -766,18 +774,6 @@ void ACreature::Server_OwnOtherActor_Implementation(AActor* Actor)
 	Actor->SetOwner(this);
 }
 
-void ACreature::Server_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
-{
-	SetActorLocationAndRotation
-	(
-		Attacker->GetActorLocation() + Attacker->GetActorForwardVector() * 100,
-		Attacker->GetActorRotation()
-	);
-
-	Client_Assassinated(Attacker, AssassinateInfo);
-	Multicast_Assassinated(Attacker, AssassinateInfo);
-}
-
 void ACreature::Multicast_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
 {
 	GetMesh()->GetAnimInstance()->Montage_Play(AssassinateInfo.AssassinatedMontagesTpp);
@@ -785,8 +781,9 @@ void ACreature::Multicast_Assassinated_Implementation(ACreature* Attacker, FAssa
 
 void ACreature::Client_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
 {
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	DisableInput(PlayerController);
+	APlayerController* PlayerController = Cast<APlayerController>(Controller);
+	if(PlayerController)
+		DisableInput(PlayerController);
 }
 
 void ACreature::Server_Jump_Implementation()

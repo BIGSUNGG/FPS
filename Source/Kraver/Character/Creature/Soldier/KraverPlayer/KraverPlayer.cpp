@@ -4,7 +4,7 @@
 #include "KraverPlayer.h"
 #include Weapon_h
 #include Gun_h
-#include "Kraver/GameBase/Ui/HUD/KraverHUD.h"
+#include KraverHud_h
 #include KraverPlayerController_h
 #include KraverGameMode_h
 #include CreatureAnimInstance_h

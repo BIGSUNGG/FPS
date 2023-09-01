@@ -45,15 +45,15 @@ void AMelee::Tick(float DeltaTime)
 
 }
 
-bool AMelee::Equipped(ACreature* Character)
+bool AMelee::OnServer_Equipped(ACreature* Character)
 {
-	bool bSuccess = Super::Equipped(Character);
+	bool bSuccess = Super::OnServer_Equipped(Character);
 	return bSuccess;
 }
 
-bool AMelee::UnEquipped()
+bool AMelee::OnServer_UnEquipped()
 {
-	bool bSuccess = Super::UnEquipped();
+	bool bSuccess = Super::OnServer_UnEquipped();
 	ComboEnd();
 	return bSuccess;
 }
@@ -135,7 +135,7 @@ void AMelee::SwingAttack()
 		if (IsValid(Result.GetActor()))
 		{
 			FPointDamageEvent DamageEvent(AttackDamage, Result, OwnerCreature->GetCamera()->GetForwardVector(), AttackDamageType);
-			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
+			OwnerCreature->CombatComponent->OnServer_GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
 		}
 	}
 }

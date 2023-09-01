@@ -12,6 +12,26 @@ void AHitscanGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(ThisClass, BulletRadius);
 }
 
+void AHitscanGun::Server_FireBulletResult_Implementation(const TArray<FHitResult>& BulletHitResults)
+{
+	for (auto& Result : BulletHitResults)
+	{
+		if (IsValid(Result.GetActor()))
+		{
+			FVector Direction = Result.TraceEnd - Result.TraceStart;
+			Direction.Normalize();
+
+			FPointDamageEvent DamageEvent(AttackDamage, Result, Direction, AttackDamageType);
+			OwnerCreature->CombatComponent->OnServer_GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
+			if (Result.bBlockingHit)
+			{
+				FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
+				OnServer_ImpactBullet(ImpaceEffectPos);
+			}
+		}
+	}
+}
+
 void AHitscanGun::FireBullet()
 {
 	Super::FireBullet();
@@ -26,17 +46,19 @@ void AHitscanGun::FireBullet()
 	}
 
 	TArray<FHitResult> BulletHitResults = CalculateFireHit(PROFILE_Bullet, Spread);
+	FireBulletResult(BulletHitResults);
 
+}
+
+void AHitscanGun::FireBulletResult(const TArray<FHitResult>& BulletHitResults)
+{
 	for (auto& Result : BulletHitResults)
 	{
-		auto Creature = Cast<ACreature>(Result.GetActor());
 		if (IsValid(Result.GetActor()))
 		{
 			FVector Direction = Result.TraceEnd - Result.TraceStart;
 			Direction.Normalize();
 
-			FPointDamageEvent DamageEvent(AttackDamage, Result, Direction, AttackDamageType);
-			OwnerCreature->CombatComponent->GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
 			if (Result.bBlockingHit)
 			{
 				FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
@@ -44,6 +66,8 @@ void AHitscanGun::FireBullet()
 			}
 		}
 	}
+
+	Server_FireBulletResult(BulletHitResults);
 }
 
 TArray<FHitResult> AHitscanGun::CalculateFireHit(FName ProfileName, FVector Spread /*= FVector(0, 0, 0)*/)

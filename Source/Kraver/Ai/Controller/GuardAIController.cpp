@@ -3,7 +3,7 @@
 
 #include "GuardAIController.h"
 #include Creature_h
-#include "Kraver/Character/Creature/Soldier/KraverPlayer/KraverPlayer.h"
+#include KraverPlayer_h
 
 const FName AGuardAIController::FindEnemyKey(TEXT("FindEnemy"));
 

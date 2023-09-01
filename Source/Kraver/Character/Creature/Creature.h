@@ -172,8 +172,6 @@ protected:
 		void Server_OwnOtherActor(AActor* Actor);
 		
 		// Assassinate
-	UFUNCTION(Server, Reliable)
-		virtual void Server_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void Multicast_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(Client, Reliable)
@@ -214,7 +212,7 @@ protected:
 
 	virtual void SimulateMesh();
 
-	virtual void Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
+	virtual void OnServer_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	virtual void AssassinatedEnd();
 
 	virtual void EquipEvent(AWeapon* Weapon);

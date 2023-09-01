@@ -147,8 +147,6 @@ void AGun::ImpactBullet(FVector ImpactPos)
 			ImpactPos
 		);
 	}
-
-	Server_ImpactBullet(ImpactPos);
 }
 
 void AGun::OnAttackEvent()
@@ -233,8 +231,14 @@ void AGun::Multicast_OnAttackEvent_Implementation()
 	}
 }
 
-void AGun::Server_ImpactBullet_Implementation(FVector ImpactPos)
+void AGun::OnServer_ImpactBullet(FVector ImpactPos)
 {
+	if (!IS_SERVER())
+	{
+		KR_LOG(Error, TEXT("Called on client"));
+		return;
+	}
+
 	Multicast_ImpactBullet(ImpactPos);
 }
 
