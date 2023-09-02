@@ -54,8 +54,6 @@ protected:
 		virtual void ChangeWeapon2Pressed() final;
 	UFUNCTION(BlueprintCallable)
 		virtual void ChangeWeapon3Pressed() final;
-	UFUNCTION(BlueprintCallable)
-		virtual void HolsterWeaponPressed() final;
 
 	// Ect Function
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수

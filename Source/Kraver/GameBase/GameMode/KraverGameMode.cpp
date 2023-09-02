@@ -34,7 +34,7 @@ void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AContro
 
 void AKraverGameMode::RequestRespawn(ACreature* ElimmedCharacter, AController* ElimmedController)
 {
-	if (!ElimmedCharacter->IsPlayerControlled())
+	if (!ElimmedCharacter || !ElimmedCharacter->IsPlayerControlled())
 		return;
 
 	if (ElimmedCharacter)

@@ -47,7 +47,6 @@ void UAdvanceMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 
 	WallRunUpdate();
 	SlideUpdate();
-
 }
 
 void UAdvanceMovementComponent::Landed(const FHitResult& Hit)
@@ -192,6 +191,9 @@ void UAdvanceMovementComponent::DoubleJump()
 
 bool UAdvanceMovementComponent::WallRunUpdate()
 {
+	if(CurWallRunState != EWallRunState::WALLRUN_VERTICAL)
+		CurWallRunVerticalSpeed = FMath::FInterpTo(CurWallRunVerticalSpeed, MaxWallRunVerticalSpeed, GetWorld()->GetDeltaSeconds(), 5.f);
+
 	if (OwnerCreature->GetbJumpButtonPress() || GetIsWallRunning())
 	{
 		bool WallRunVerticalSuccess = false;
@@ -282,12 +284,19 @@ bool UAdvanceMovementComponent::WallRunVerticalUpdate()
 	if (bWallRunVerticalSupressed)
 		return false;
 
+	if (CurWallRunVerticalSpeed <= 100.f)
+	{
+		WallRunVerticalEnd(2.f);
+		return false;
+	}
+
 	if (WallRunVerticalMovement(OwnerCreature->GetActorLocation(), CalculateVerticaltWallRunEndVector()))
 	{
 		if (!GetIsWallRunning())
 			WallRunStart();
 
 		SetCurWallRunState(EWallRunState::WALLRUN_VERTICAL);
+		CurWallRunVerticalSpeed = FMath::FInterpTo(CurWallRunVerticalSpeed, 0.f, GetWorld()->GetDeltaSeconds(), 0.75f);
 		return true;
 	}
 	else
@@ -354,8 +363,6 @@ void UAdvanceMovementComponent::SlideStart()
 		SlidePower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y) * RightSpeed;
 	}
 
-	KR_LOG(Log,TEXT("%f"), SlideSpeed);
-
 	InputForwardRatio = 0.4f;
 	InputRightRatio = 0.4f;
 	OwnerCreature->GetCharacterMovement()->GroundFriction = SlideGroundFriction;
@@ -419,7 +426,7 @@ bool UAdvanceMovementComponent::WallRunVerticalMovement(FVector Start, FVector E
 		{
 			WallRunNormal = Result.Normal;
 
-			OwnerCreature->LaunchCharacter(OwnerCreature->GetActorUpVector() * WallRunVerticalSpeed, true, true);
+			OwnerCreature->LaunchCharacter(OwnerCreature->GetActorUpVector() * CurWallRunVerticalSpeed, true, true);
 			return true;
 		}
 	}

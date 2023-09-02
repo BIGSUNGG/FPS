@@ -232,7 +232,6 @@ void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon1"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeWeapon1Pressed);
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon2"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeWeapon2Pressed);
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon3"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeWeapon3Pressed);
-	PlayerInputComponent->BindAction(TEXT("HolsterWeapon"), EInputEvent::IE_Pressed, this, &AKraverPlayer::HolsterWeaponPressed);
 }
 
 void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -309,12 +308,6 @@ void AKraverPlayer::ChangeWeapon2Pressed()
 void AKraverPlayer::ChangeWeapon3Pressed()
 {
 	ChangeWeapon(2);
-}
-
-void AKraverPlayer::HolsterWeaponPressed()
-{
-	UnholsterIndex = -1;
-	HolsterWeapon();
 }
 
 void AKraverPlayer::CheckCanInteractionWeapon()

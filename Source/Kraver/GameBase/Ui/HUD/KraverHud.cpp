@@ -141,7 +141,7 @@ void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FV
 void AKraverHUD::ApplyKillLogPos()
 {
 	for (int i = 0; i < KillLogWidgets.Num(); i++)
-		KillLogWidgets[i]->SetPositionInViewport(FVector2D(0, 80 * i));
+		KillLogWidgets[i]->SetPositionInViewport(FVector2D(0, 40 * i));
 }
 
 void AKraverHUD::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)

@@ -116,7 +116,8 @@ protected:
 	bool bWallRunVerticalSupressed = false;
 	bool bWallRunGravity = true;
 	float WallRunHorizonSpeed = 900.f;
-	float WallRunVerticalSpeed = 600.f;
+	float MaxWallRunVerticalSpeed = 600.f;
+	float CurWallRunVerticalSpeed = 600.f;
 	float WallRunJumpHeight = 400.f;
 	float WallRunJumpOffForce  = 400.f;
 	float WallRunTargetGravity = 0.75f;
