@@ -11,7 +11,7 @@ void AProjectileGun::FireBullet()
 	Super::FireBullet();
 
 	FVector Spread;
-	if (GetbApplySpread())
+	if (ShouldApplySpread())
 	{
 		float CurSpread = CalculateCurSpread();
 		Spread.X = FMath::RandRange(-CurSpread, CurSpread);
@@ -31,8 +31,6 @@ void AProjectileGun::FireBullet()
 	FCollisionQueryParams HitParams(NAME_None, false, OwnerCreature);
 	HitParams.AddIgnoredActor(this);
 	bool bHitSuccess = GetWorld()->LineTraceSingleByProfile(HitResult, OwnerCreature->GetCamera()->GetComponentLocation(), EndPoint, "BulletShape", HitParams);
-	if(bHitSuccess)
-		KR_LOG(Error, TEXT("%s"), *HitResult.GetActor()->GetName());
 
 	FVector BulletDirection;
 	if (bHitSuccess)

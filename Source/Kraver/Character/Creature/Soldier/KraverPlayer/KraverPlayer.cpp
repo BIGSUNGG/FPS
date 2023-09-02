@@ -242,11 +242,6 @@ void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 }
 
-bool AKraverPlayer::CanAttack()
-{
-	return true;
-}
-
 USkeletalMeshComponent* AKraverPlayer::GetCurMainMesh()
 {
 	switch (ViewType)

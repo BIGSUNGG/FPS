@@ -70,11 +70,11 @@ void AKraverHUD::DrawHUD()
 	}
 
 	FVector2D ViewportSize;
+	GEngine->GameViewport->GetViewportSize(ViewportSize);
+	const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+
 	if (GEngine)
 	{
-		GEngine->GameViewport->GetViewportSize(ViewportSize);
-		const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
-
 		float SpreadScaled = CrosshairSpreadMax * HUDPackage.CrosshairSpread;
 
 		if(bDrawCrosshair)

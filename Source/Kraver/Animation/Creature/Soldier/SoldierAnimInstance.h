@@ -25,11 +25,13 @@ public:
 
 protected:
 	// Animation Notify
+		// Weapon
 	UFUNCTION()
 		void AnimNotify_Weapon_Holster();
 	UFUNCTION()
 		void AnimNotify_Weapon_Unholster();
 
+		// Melee
 	UFUNCTION()
 		void AnimNotify_Melee_SwingAttack();
 	UFUNCTION()
@@ -43,10 +45,15 @@ protected:
 	UFUNCTION()
 		void AnimNotify_Melee_AssassinateEnd();
 
+		// Reload
 	UFUNCTION()
 		void AnimNotify_Reload_Insert_Magazine();
 	UFUNCTION()
 		void AnimNotify_Reload_Grab_Magazine();
+	UFUNCTION()
+		void AnimNotify_Reload_OpenFinish();
+	UFUNCTION()
+		void AnimNotify_Reload_InsertFinish();
 
 public:
 	FAnimNotifyDele OnWeapon_Holster;
@@ -61,6 +68,8 @@ public:
 
 	FAnimNotifyDele OnReload_Insert_Magazine;
 	FAnimNotifyDele OnReload_Grab_Magazine;
+	FAnimNotifyDele OnReload_OpenFinish;
+	FAnimNotifyDele OnReload_InsertFinish;
 
 protected:
 	ASoldier* Soldier;

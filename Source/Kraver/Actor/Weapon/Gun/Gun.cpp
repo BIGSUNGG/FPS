@@ -4,6 +4,7 @@
 #include "Gun.h"
 #include Creature_h
 #include AttachmentSilencerComponent_h
+#include WeaponReloadComponent_h
 
 AGun::AGun() : Super()
 {
@@ -103,7 +104,6 @@ bool AGun::RefillAmmo()
 		Server_SetCurAmmo(CurAmmo);
 		Server_SetTotalAmmo(TotalAmmo);
 	}
-	OnAttackEndEvent();
 	return true;
 }
 
@@ -264,6 +264,10 @@ bool AGun::CanAttack()
 		return false;
 
 	if(CurAmmo <= 0)
+		return false;
+
+	UWeaponReloadComponent* ReloadComp = this->GetComponentByClass<UWeaponReloadComponent>();
+	if(ReloadComp && ReloadComp->IsReloading())
 		return false;
 
 	return true;

@@ -14,12 +14,16 @@ class KRAVER_API AShotGun : public AHitscanGun
 {
 	GENERATED_BODY()
 
+public:
+	virtual bool RefillAmmo() override;
+
 protected:
 	virtual void FireBullet() override;
 
 public:
 	// Getter Setter
-	virtual bool GetbApplySpread() override { return true; }
+	virtual float CalculateCurSpread();
+	virtual bool ShouldApplySpread() { return true; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))

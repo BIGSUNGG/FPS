@@ -37,7 +37,7 @@ void AHitscanGun::FireBullet()
 	Super::FireBullet();
 
 	FVector Spread;
-	if (GetbApplySpread())
+	if (ShouldApplySpread())
 	{
 		float CurSpread = CalculateCurSpread();
 		Spread.X = FMath::RandRange(-CurSpread, CurSpread);

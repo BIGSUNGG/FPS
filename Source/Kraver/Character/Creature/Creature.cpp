@@ -286,7 +286,7 @@ bool ACreature::CanRun()
 			return false;
 
 		UWeaponReloadComponent* ReloadComp = CombatComponent->GetCurWeapon()->GetComponentByClass<UWeaponReloadComponent>();
-		if (ReloadComp && GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadComp->GetReloadMontageTpp()))
+		if (ReloadComp && ReloadComp->GetbReloadWhileSprint() == false && ReloadComp->IsReloading())
 			return false;
 	}
 

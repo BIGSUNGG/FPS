@@ -91,3 +91,13 @@ void USoldierAnimInstance::AnimNotify_Reload_Grab_Magazine()
 {
 	OnReload_Grab_Magazine.Broadcast();
 }
+
+void USoldierAnimInstance::AnimNotify_Reload_OpenFinish()
+{
+	OnReload_OpenFinish.Broadcast();
+}
+
+void USoldierAnimInstance::AnimNotify_Reload_InsertFinish()
+{
+	OnReload_InsertFinish.Broadcast();
+}

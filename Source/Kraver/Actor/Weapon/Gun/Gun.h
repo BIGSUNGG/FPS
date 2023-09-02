@@ -46,11 +46,11 @@ protected:
 public:
 	// Getter Setter
 	virtual bool CanAttack() override;
-	virtual bool GetbApplySpread() { return !IsSubAttacking; }
+	virtual bool ShouldApplySpread() { return !IsSubAttacking; }
+	virtual float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; }
 	int32 GetCurAmmo() { return CurAmmo; }
 	int32 GetMaxAmmo() { return MaxAmmo; }
 	int32 GetTotalAmmo() { return TotalAmmo; }
-	float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; }
 
 	void AddSpread(float Spread);
 

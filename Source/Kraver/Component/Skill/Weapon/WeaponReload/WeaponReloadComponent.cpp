@@ -37,7 +37,7 @@ void UWeaponReloadComponent::OnAddOnDelegateEvent(UObject* Object)
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());
 	if (AnimInstance)
 	{
-		AnimInstance->OnReload_Insert_Magazine.AddDynamic(this, &UWeaponReloadComponent::OnRefiilAmmoEvent);
+		AnimInstance->OnReload_Insert_Magazine.AddDynamic(this, &UWeaponReloadComponent::OnReload_Insert_MagazineEvent);
 	}
 }
 
@@ -49,7 +49,7 @@ void UWeaponReloadComponent::OnRemoveOnDelegateEvent(UObject* Object)
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());
 	if (AnimInstance)
 	{
-		AnimInstance->OnReload_Insert_Magazine.RemoveDynamic(this, &UWeaponReloadComponent::OnRefiilAmmoEvent);
+		AnimInstance->OnReload_Insert_Magazine.RemoveDynamic(this, &UWeaponReloadComponent::OnReload_Insert_MagazineEvent);
 	}
 }
 
@@ -58,7 +58,7 @@ void UWeaponReloadComponent::OnSkillFirstEvent()
 	ReloadStart();
 }
 
-void UWeaponReloadComponent::OnRefiilAmmoEvent()
+void UWeaponReloadComponent::OnReload_Insert_MagazineEvent()
 {
 	OwnerGun->RefillAmmo();
 }
@@ -81,13 +81,13 @@ void UWeaponReloadComponent::OnBeforeAttackEvent()
 {
 	UWeaponComponent::OnBeforeAttackEvent();
 
-	if(GetOwnerCreature() && GetOwnerCreature()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontageTpp))
-		OwnerGun->AttackCancel();
+	if (IsReloading())
+		KR_LOG(Error, TEXT("Try attack while reloading"));
 }
 
 void UWeaponReloadComponent::ReloadStart()
 {
-	if(!GetCanReload())
+	if(!CanReload())
 		return;
 
 	OwnerGun->OnSubAttackEndEvent();
@@ -104,7 +104,18 @@ void UWeaponReloadComponent::ReloadStart()
 	}
 }
 
-bool UWeaponReloadComponent::GetCanReload()
+bool UWeaponReloadComponent::IsReloading()
+{
+	if (!GetOwnerCreature())
+		return false;
+
+	if (GetOwnerCreature()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontageTpp))
+		return true;
+
+	return false;
+}
+
+bool UWeaponReloadComponent::CanReload()
 {
 	if(!GetOwnerCreature())
 		return false;
@@ -115,7 +126,7 @@ bool UWeaponReloadComponent::GetCanReload()
 	if (OwnerGun->GetTotalAmmo() == 0)
 		return false;
 
-	if (GetOwnerCreature() && GetOwnerCreature()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontageTpp))
+	if(IsReloading())
 		return false;
 
 	if (!bReloadWhileSprint)

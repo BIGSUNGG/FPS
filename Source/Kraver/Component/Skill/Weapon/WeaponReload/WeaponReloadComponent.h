@@ -28,7 +28,7 @@ protected:
 	UFUNCTION()
 		virtual void OnSkillFirstEvent();
 	UFUNCTION()
-		virtual void OnRefiilAmmoEvent();
+		virtual void OnReload_Insert_MagazineEvent();
 	UFUNCTION()
 		virtual void OnSubAttackStartEvent();
 	UFUNCTION()
@@ -40,7 +40,10 @@ protected:
 	virtual void ReloadStart();
 
 public:
-	bool GetCanReload();
+	virtual bool IsReloading();
+
+	bool CanReload();
+
 	FORCEINLINE bool GetbReloadWhileSprint() { return bReloadWhileSprint; }
 
 	FORCEINLINE const FVector& GetGrabRelativeLocation() { return GrabRelativeLocation; }
