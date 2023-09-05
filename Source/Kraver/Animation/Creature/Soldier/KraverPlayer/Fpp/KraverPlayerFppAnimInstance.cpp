@@ -67,30 +67,32 @@ void UKraverPlayerFppAnimInstance::WeaponSway(float DeltaSeconds)
 	TargetRot.Yaw = WeaponSwayInitRot.Yaw + WeaponSwayFinalRot.Yaw;
 	TargetRot.Pitch = WeaponSwayInitRot.Pitch + WeaponSwayFinalRot.Pitch;
 
-	WeaponSwayResultRot = FMath::RInterpTo(WeaponSwayResultRot, TargetRot, DeltaSeconds, 4.f);
+	CurWeaponSwayRot = FMath::RInterpTo(CurWeaponSwayRot, TargetRot, DeltaSeconds, 4.f);
 
-	if (WeaponSwayResultRot.Roll > MaxSwayDegree)
-		WeaponSwayResultRot.Roll = MaxSwayDegree;
-	else if (WeaponSwayResultRot.Roll < MinSwayDegree)
-		WeaponSwayResultRot.Roll = MinSwayDegree;
+	if (CurWeaponSwayRot.Roll > MaxSwayDegree)
+		CurWeaponSwayRot.Roll = MaxSwayDegree;
+	else if (CurWeaponSwayRot.Roll < MinSwayDegree)
+		CurWeaponSwayRot.Roll = MinSwayDegree;
 
-	if (WeaponSwayResultRot.Yaw > MaxSwayDegree)
-		WeaponSwayResultRot.Yaw = MaxSwayDegree;
-	else if (WeaponSwayResultRot.Yaw < MinSwayDegree)
-		WeaponSwayResultRot.Yaw = MinSwayDegree;
+	if (CurWeaponSwayRot.Yaw > MaxSwayDegree)
+		CurWeaponSwayRot.Yaw = MaxSwayDegree;
+	else if (CurWeaponSwayRot.Yaw < MinSwayDegree)
+		CurWeaponSwayRot.Yaw = MinSwayDegree;
 
-	if (WeaponSwayResultRot.Roll > MaxSwayDegree)
-		WeaponSwayResultRot.Roll = MaxSwayDegree;
-	else if (WeaponSwayResultRot.Roll < MinSwayDegree)
-		WeaponSwayResultRot.Roll = MinSwayDegree;
+	if (CurWeaponSwayRot.Roll > MaxSwayDegree)
+		CurWeaponSwayRot.Roll = MaxSwayDegree;
+	else if (CurWeaponSwayRot.Roll < MinSwayDegree)
+		CurWeaponSwayRot.Roll = MinSwayDegree;
 
-	if (WeaponSwayResultRot.Pitch > MaxSwayDegree)
-		WeaponSwayResultRot.Pitch = MaxSwayDegree;
-	else if (WeaponSwayResultRot.Pitch < MinSwayDegree)
-		WeaponSwayResultRot.Pitch = MinSwayDegree;
+	if (CurWeaponSwayRot.Pitch > MaxSwayDegree)
+		CurWeaponSwayRot.Pitch = MaxSwayDegree;
+	else if (CurWeaponSwayRot.Pitch < MinSwayDegree)
+		CurWeaponSwayRot.Pitch = MinSwayDegree;
 
 	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->CombatComponent->GetCurWeapon()->GetIsSubAttacking())
-		WeaponSwayResultRot *= 0.4f;
+		WeaponSwayResultRot = CurWeaponSwayRot * 0.1f;
+	else
+		WeaponSwayResultRot = CurWeaponSwayRot;
 
 }
 

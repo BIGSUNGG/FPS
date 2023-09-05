@@ -10,9 +10,6 @@ AGun::AGun() : Super()
 {
 	WeaponType = EWeaponType::GUN;
 	
-	ImpactEffect = CreateDefaultSubobject<UNiagaraComponent>("ImpactEffect");
-	ImpactEffect->bAutoActivate = false;
-	
 	bAttackWhileSprint = false;
 	bSubAttackWhileSprint = false;
 }
@@ -119,7 +116,7 @@ void AGun::FireBullet()
 
 	if (!Silencer || Silencer->GetbFireEffect())
 	{
-		WeaponPrimitiveInfo["FireEffect"]->Activate(true);
+		WeaponTppPrimitiveInfo["FireEffect"]->Activate(true);
 		WeaponFppPrimitiveInfo["FireEffect"]->Activate(true);
 	}
 
@@ -138,7 +135,8 @@ void AGun::FireBullet()
 
 void AGun::ImpactBullet(FVector ImpactPos)
 {
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpactPos);
+	if(ImpactEffect)
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect, ImpactPos);
 	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -206,7 +204,7 @@ void AGun::Multicast_OnAttackEvent_Implementation()
 {	
 	Super::Multicast_OnAttackEvent_Implementation();
 
-	if(!WeaponPrimitiveInfo.Contains("FireEffect"))
+	if(!WeaponTppPrimitiveInfo.Contains("FireEffect"))
 		return;
 
 	if(!OwnerCreature || !OwnerCreature->IsLocallyControlled())
@@ -215,7 +213,7 @@ void AGun::Multicast_OnAttackEvent_Implementation()
 
 		if (!Silencer || Silencer->GetbFireEffect())
 		{
-			WeaponPrimitiveInfo["FireEffect"]->Activate(true);
+			WeaponTppPrimitiveInfo["FireEffect"]->Activate(true);
 			WeaponFppPrimitiveInfo["FireEffect"]->Activate(true);
 		}
 
@@ -244,10 +242,11 @@ void AGun::OnServer_ImpactBullet(FVector ImpactPos)
 
 void AGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)
 {
-	if(OwnerCreature->IsLocallyControlled())
+	if(OwnerCreature && OwnerCreature->IsLocallyControlled())
 		return;
 
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpactPos);
+	if(ImpactEffect)
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect, ImpactPos);
 	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(

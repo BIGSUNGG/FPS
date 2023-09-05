@@ -52,15 +52,6 @@ public:
 
 protected:
 	// Rpc
-	UFUNCTION(Client, Reliable)
-	void Client_Equipped();
-	UFUNCTION(Client, Reliable)
-	void Client_UnEquipped();
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_Equipped(ACreature* Character);
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_UnEquipped();
-
 	UFUNCTION(Server, Reliable)
 	virtual void Server_OnAttackEvent();
 	UFUNCTION(NetMulticast, Reliable)
@@ -77,8 +68,14 @@ protected:
 
 	virtual void Attack() final; // 공격할때 호출되는 함수
 
+	// OnRep
+	UFUNCTION()
+	virtual void OnRep_WeaponState(EWeaponState PrevWeaponState);
+
 	// Func
 	virtual void MakeFppPrimitiveInfo() final; // 1인칭 PrimitiveInfo를 추가
+	virtual void EquipEvent();
+	virtual void UnEquipEvent();
 
 public:
 	// Getter Setter
@@ -95,8 +92,9 @@ public:
 	ACreature* GetOwnerCreature() { return OwnerCreature; }
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
-	UPrimitiveComponent* GetWeaponMesh() { return RootMesh ? RootMesh : RootMesh = WeaponPrimitiveInfo["Root"]; }
-	TMap<FString, UPrimitiveComponent*>& GetTppWeaponPrimitiveInfo() { return WeaponPrimitiveInfo; }
+	USkeletalMeshComponent* GetTppWeaponMesh() { return TppWeaponMesh; }
+	UPrimitiveComponent* GetFppWeaponMesh() { return FppWeaponMesh; }
+	TMap<FString, UPrimitiveComponent*>& GetTppWeaponPrimitiveInfo() { return WeaponTppPrimitiveInfo; }
 	TMap<FString, UPrimitiveComponent*>& GetFppWeaponPrimitiveInfo() { return WeaponFppPrimitiveInfo; }
 
 	UAnimSequence* GetAnimIdleTpp() { return AnimIdleTpp; }
@@ -156,13 +154,10 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_SetOwnerCreature(ACreature* pointer);
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponState)
 	EWeaponState WeaponState = EWeaponState::NONE; // 무기 상태
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
 	EWeaponType WeaponType = EWeaponType::NONE; // 무기 종류
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", Meta = (AllowPrivateAccess = true))
-		USceneComponent* RootSceneComponent;
 
 	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
@@ -206,10 +201,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
 	FName TppHandSocketName = "SOCKET_Weapon"; // Weapon을 Attach할 스켈레탈 본 이름
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Component|Info", meta = (AllowPrivateAccess = "true"))
-	UPrimitiveComponent* RootMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Info", meta = (AllowPrivateAccess = "true"))
-	TMap<FString, UPrimitiveComponent*> WeaponPrimitiveInfo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* TppWeaponMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
+	UPrimitiveComponent* FppWeaponMesh;
+
+	TMap<FString, UPrimitiveComponent*> WeaponTppPrimitiveInfo;
 	TMap<FString, UPrimitiveComponent*> WeaponFppPrimitiveInfo; // 추가적인 WeaponMesh를 가지는 배열
 
 	UPROPERTY(Replicated)

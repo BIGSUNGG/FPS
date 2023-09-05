@@ -6,7 +6,7 @@
 
 UAttachmentSilencerComponent::UAttachmentSilencerComponent()
 {
-	SilencerMesh = CreateDefaultSubobject<UStaticMeshComponent>("SilencerMesh");
+	SilencerMesh = CreateDefaultSubobject<UStaticMeshComponent>("Silencer");
 	SilencerMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -15,10 +15,9 @@ void UAttachmentSilencerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	SilencerMesh->SetStaticMesh(SilencerStaticMesh);
-	SilencerMesh->AttachToComponent(OwnerWeapon->GetTppWeaponPrimitiveInfo()["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, SilencerSocketName);
+	SilencerMesh->AttachToComponent(OwnerWeapon->GetTppWeaponMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, SilencerSocketName);
 	SilencerMesh->SetRelativeLocation(SilencerRelativeLocation);
 
-	OwnerWeapon->AddWeaponPrimitive("Silencer", SilencerMesh);
 }
 
 void UAttachmentSilencerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

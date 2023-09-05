@@ -6,7 +6,7 @@
 
 UAttachmentScopeComponent::UAttachmentScopeComponent()
 {
-	ScopeMesh = CreateDefaultSubobject<UStaticMeshComponent>("ScopeMesh");
+	ScopeMesh = CreateDefaultSubobject<UStaticMeshComponent>("Scope");
 	ScopeMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 }
@@ -16,10 +16,9 @@ void UAttachmentScopeComponent::BeginPlay()
 	Super::BeginPlay();
 
 	ScopeMesh->SetStaticMesh(ScopeStaticMesh);
-	ScopeMesh->AttachToComponent(OwnerWeapon->GetTppWeaponPrimitiveInfo()["Root"],FAttachmentTransformRules::SnapToTargetIncludingScale, ScopeSocketName);
+	ScopeMesh->AttachToComponent(OwnerWeapon->GetTppWeaponMesh(),FAttachmentTransformRules::SnapToTargetIncludingScale, ScopeSocketName);
 	ScopeMesh->SetRelativeLocation(ScopeRelativeLocation);
 
-	OwnerWeapon->AddWeaponPrimitive("Scope", ScopeMesh);
 }
 
 void UAttachmentScopeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

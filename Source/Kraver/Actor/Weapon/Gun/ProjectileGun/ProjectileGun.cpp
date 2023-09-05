@@ -45,9 +45,9 @@ void AProjectileGun::FireBullet()
 
 	AKraverPlayer* Player = Cast<AKraverPlayer>(OwnerCreature);
 	if (Player)
-		MuzzleLocation = WeaponFppPrimitiveInfo["Root"]->GetSocketLocation("SOCKET_Muzzle");
+		MuzzleLocation = FppWeaponMesh->GetSocketLocation("SOCKET_Muzzle");
 	else
-		MuzzleLocation = WeaponPrimitiveInfo["Root"]->GetSocketLocation("SOCKET_Muzzle");
+		MuzzleLocation = TppWeaponMesh->GetSocketLocation("SOCKET_Muzzle");
 
 	Server_SpawnBullet(MuzzleLocation, BulletDirection.Rotation());
 
@@ -77,7 +77,8 @@ void AProjectileGun::Server_SpawnBullet_Implementation(FVector Location, FRotato
 
 void AProjectileGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)
 {
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect->GetAsset(), ImpactPos);
+	if(ImpactEffect)
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect, ImpactPos);
 	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(

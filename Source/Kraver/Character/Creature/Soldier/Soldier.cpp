@@ -56,6 +56,6 @@ void ASoldier::OnReload_Insert_MagazineEvent()
 	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetTppWeaponPrimitiveInfo().Contains("Magazine"))
 	{
 		UAttachmentMagazineComponent* MagazineComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UAttachmentMagazineComponent>();
-		CombatComponent->GetCurWeapon()->GetTppWeaponPrimitiveInfo()["Magazine"]->AttachToComponent(CombatComponent->GetCurWeapon()->GetWeaponMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineComp->GetMagazineSocketName());
+		CombatComponent->GetCurWeapon()->GetTppWeaponPrimitiveInfo()["Magazine"]->AttachToComponent(CombatComponent->GetCurWeapon()->GetTppWeaponMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineComp->GetMagazineSocketName());
 	}
 }

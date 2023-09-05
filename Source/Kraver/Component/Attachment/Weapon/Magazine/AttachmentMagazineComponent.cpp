@@ -6,7 +6,7 @@
 
 UAttachmentMagazineComponent::UAttachmentMagazineComponent()
 {
-	MagazineMesh = CreateDefaultSubobject<UStaticMeshComponent>("MagazineMesh");
+	MagazineMesh = CreateDefaultSubobject<UStaticMeshComponent>("Magazine");
 	MagazineMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 }
@@ -16,10 +16,8 @@ void UAttachmentMagazineComponent::BeginPlay()
 	Super::BeginPlay();
 
 	MagazineMesh->SetStaticMesh(MagazineStaticMesh);
-	MagazineMesh->AttachToComponent(OwnerWeapon->GetTppWeaponPrimitiveInfo()["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineSocketName);
+	MagazineMesh->AttachToComponent(OwnerWeapon->GetTppWeaponMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineSocketName);
 	MagazineMesh->SetRelativeLocation(MagazineRelativeLocation);
-
-	OwnerWeapon->AddWeaponPrimitive("Magazine", MagazineMesh);
 
 }
 

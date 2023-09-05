@@ -19,7 +19,9 @@ void UWeaponReloadComponent::BeginPlay()
 	}
 
 	OwnerGun->OnSkillFirst.AddDynamic(this, &ThisClass::OnSkillFirstEvent);
-}
+	OwnerGun->OnFire.AddDynamic(this, &ThisClass::OnFireEvent);
+}	
+
 
 void UWeaponReloadComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -59,6 +61,12 @@ void UWeaponReloadComponent::OnSkillFirstEvent()
 void UWeaponReloadComponent::OnReload_Insert_MagazineEvent()
 {
 	OwnerGun->RefillAmmo();
+}
+
+void UWeaponReloadComponent::OnFireEvent()
+{
+	if (OwnerGun->GetCurAmmo() <= 0)
+		GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ThisClass::ReloadStart);
 }
 
 void UWeaponReloadComponent::ReloadStart()

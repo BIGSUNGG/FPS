@@ -117,16 +117,16 @@ void ACreature::EquipEvent(AWeapon* Weapon)
 	if(!IsValid(Weapon))
 		return;
 
-	if (IsValid(Weapon->GetWeaponMesh()) == false || IsValid(GetMesh()) == false)
+	if (IsValid(Weapon->GetTppWeaponMesh()) == false || IsValid(GetMesh()) == false)
 	{
 		GetWorld()->GetTimerManager().SetTimerForNextTick([=](){ EquipEvent(Weapon); });
 		return;
 	}
 
-	Weapon->GetWeaponMesh()->SetSimulatePhysics(false);
+	Weapon->GetTppWeaponMesh()->SetSimulatePhysics(false);
 	GetWorld()->GetTimerManager().SetTimerForNextTick([=]() 
 	{ 	
-			Weapon->GetWeaponMesh()->AttachToComponent
+			Weapon->GetTppWeaponMesh()->AttachToComponent
 			(
 				GetMesh(),
 				FAttachmentTransformRules::SnapToTargetIncludingScale,
@@ -143,7 +143,7 @@ void ACreature::UnEquipEvent(AWeapon* Weapon)
 		return;
 
 	SetWeaponVisibility(Weapon, true);
-	Weapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	Weapon->GetTppWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
 void ACreature::HolsterEvent(AWeapon* Weapon)

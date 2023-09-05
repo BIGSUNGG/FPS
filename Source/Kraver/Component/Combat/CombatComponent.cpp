@@ -131,6 +131,12 @@ float UCombatComponent::OnServer_GiveDamage(AActor* DamagedActor, float DamageAm
 		return 0.f;
 	}
 
+	if (!DamageEvent.DamageTypeClass)
+	{
+		KR_LOG(Error, TEXT("DamageTypeClass is nullptr"));
+		return 0.f;
+	}
+
 	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
 	if (!DamageType)
 	{

@@ -46,6 +46,7 @@ protected:
 	// Bone Movement
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Sway", Meta = (AllowPrivateAccess = true))
 	FRotator WeaponSwayResultRot;
+	FRotator CurWeaponSwayRot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|ProceduralAnim", Meta = (AllowPrivateAccess = true))
 	FVector ProceduralAnimResultVec;
 

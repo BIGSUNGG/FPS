@@ -85,10 +85,8 @@ protected:
 		// Montage
 	virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed) override;
 
-	UFUNCTION()
-	virtual void OnFP_Reload_Grab_MagazineEvent();
-	UFUNCTION()
-	virtual void OnFP_Reload_Insert_MagazineEvent();
+	virtual void OnReload_Grab_MagazineEvent() override;
+	virtual void OnReload_Insert_MagazineEvent() override;
 	UFUNCTION()
 	virtual void OnTp_Weapon_HolsterEvent();
 

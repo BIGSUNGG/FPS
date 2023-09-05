@@ -29,6 +29,8 @@ protected:
 	virtual void OnSkillFirstEvent();
 	UFUNCTION()
 	virtual void OnReload_Insert_MagazineEvent();
+	UFUNCTION()
+	virtual void OnFireEvent();
 
 	// Func
 	virtual void ReloadStart();

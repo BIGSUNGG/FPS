@@ -13,9 +13,38 @@ AWeapon::AWeapon()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	//bAsyncPhysicsTickEnabled = true;
 	SetReplicateMovement(true);
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
+	TppWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_TppHolster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_TP_CH_AR_01_Holster.AM_TP_CH_AR_01_Holster'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_FppHolster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_FP_PCH_AR_01_Holster.AM_FP_PCH_AR_01_Holster'"));
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_TppUnholster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_TP_CH_AR_01_Unholster.AM_TP_CH_AR_01_Unholster'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_FppUnholster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_FP_PCH_AR_01_Unholster.AM_FP_PCH_AR_01_Unholster'"));
+
+	if (MONTAGE_TppHolster.Succeeded())
+		HolsterMontageTpp = MONTAGE_TppHolster.Object;
+	else
+		KR_LOG(Error, TEXT("Failed to find HolsterMontageTpp asset"));
+
+	if (MONTAGE_FppHolster.Succeeded())
+		HolsterMontageFpp = MONTAGE_FppHolster.Object;
+	else
+		KR_LOG(Error, TEXT("Failed to find HolsterMontageFpp asset"));
+
+	if (MONTAGE_TppUnholster.Succeeded())
+		UnholsterMontageTpp = MONTAGE_TppUnholster.Object;
+	else
+		KR_LOG(Error, TEXT("Failed to find UnholsterMontageTpp asset"));
+
+	if (MONTAGE_FppUnholster.Succeeded())
+		UnholsterMontageFpp = MONTAGE_FppUnholster.Object;
+	else
+		KR_LOG(Error, TEXT("Failed to find UnholsterMontageFpp asset"));
+
+	SetRootComponent(TppWeaponMesh);
 
 	OnAttack.AddDynamic(this, &AWeapon::OnAttackEvent);
 
@@ -39,14 +68,14 @@ float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 
 	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
 
-	if(RootMesh->IsSimulatingPhysics())
+	if(TppWeaponMesh->IsSimulatingPhysics())
 	{
 		if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 		{
 			FPointDamageEvent const& PointDamageEvent = static_cast<FPointDamageEvent const&>(DamageEvent);
 
 			Server_TakeImpulseAtLocation(
-				PointDamageEvent.ShotDirection * DamageType->DamageImpulse * GetWeaponMesh()->GetMass(),
+				PointDamageEvent.ShotDirection * DamageType->DamageImpulse * GetTppWeaponMesh()->GetMass(),
 				PointDamageEvent.HitInfo.ImpactPoint
 			);	
 		}
@@ -58,7 +87,7 @@ float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 			Direction.Normalize();
 
 			Server_TakeImpulseAtLocation(
-				Direction * DamageType->DamageImpulse * GetWeaponMesh()->GetMass(),
+				Direction * DamageType->DamageImpulse * GetTppWeaponMesh()->GetMass(),
 				RadialDamageEvent.ComponentHits[0].ImpactPoint
 			);
 		}
@@ -72,16 +101,29 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RootMesh = *(WeaponPrimitiveInfo.Find("Root"));
-
-	if (RootMesh)
+	if (TppWeaponMesh)
 	{
-		RootMesh->SetCollisionProfileName("WeaponMesh");
-		RootMesh->SetSimulatePhysics(true);
-		RootMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		TppWeaponMesh->SetCollisionProfileName("WeaponMesh");
+		TppWeaponMesh->SetSimulatePhysics(true);
+		TppWeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
 	else
 		KR_LOG(Error, TEXT("WeaponMesh is nullptr"));
+
+	for (auto& Value : GetComponents())
+	{
+		if (Value == TppWeaponMesh)
+		{
+			WeaponTppPrimitiveInfo.Add("Root", TppWeaponMesh);
+			continue;
+		}
+
+		UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(Value);
+		if (PrimComp && !WeaponTppPrimitiveInfo.Contains(PrimComp->GetName()))
+		{
+			WeaponTppPrimitiveInfo.Add(PrimComp->GetName(), PrimComp);
+		}
+	}
 
 	MakeFppPrimitiveInfo();
 
@@ -127,10 +169,7 @@ bool AWeapon::OnServer_Equipped(ACreature* Character)
 	SetOwnerCreature(Character);
 	WeaponState = EWeaponState::EQUIPPED;
 
-	GetWeaponMesh()->SetSimulatePhysics(false);
-	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	Multicast_Equipped(Character);
+	EquipEvent();
 
 	return true;
 }
@@ -186,13 +225,9 @@ bool AWeapon::OnServer_UnEquipped()
 
 	ACreature* CreaturePtr = OwnerCreature;
 	SetOwnerCreature(nullptr);
-
 	WeaponState = EWeaponState::NONE;
-	GetWeaponMesh()->SetSimulatePhysics(true);
-	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-	Client_UnEquipped();
-	Multicast_UnEquipped();
+	UnEquipEvent();
 	return true;
 }
 
@@ -304,34 +339,6 @@ void AWeapon::OnSubAttackEndEvent()
 	OnSubAttackEnd.Broadcast();
 }
 
-void AWeapon::Client_Equipped_Implementation()
-{
-	OnAttackEndEvent();
-	OnSubAttackEndEvent();
-}
-
-void AWeapon::Client_UnEquipped_Implementation()
-{
-	OnAttackEndEvent();
-	OnSubAttackEndEvent();
-
-	RemoveOnOwnerDelegate();
-}
-
-void AWeapon::Multicast_Equipped_Implementation(ACreature* Character)
-{	
-	GetWeaponMesh()->SetSimulatePhysics(false);
-	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponFppPrimitiveInfo["Root"]->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-}
-
-void AWeapon::Multicast_UnEquipped_Implementation()
-{	
-	GetWeaponMesh()->SetSimulatePhysics(true);
-	GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	WeaponFppPrimitiveInfo["Root"]->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-}
-
 void AWeapon::Server_OnAttackEvent_Implementation()
 {
 	Multicast_OnAttackEvent();
@@ -349,7 +356,7 @@ void AWeapon::Server_TakeImpulseAtLocation_Implementation(FVector Impulse, FVect
 
 void AWeapon::Multicast_TakeImpulseAtLocation_Implementation(FVector Impulse, FVector ImpactPoint)
 {
-	GetWeaponMesh()->AddImpulseAtLocation(Impulse,ImpactPoint);
+	GetTppWeaponMesh()->AddImpulseAtLocation(Impulse,ImpactPoint);
 }
 
 void AWeapon::OnAttackEvent()
@@ -372,9 +379,18 @@ void AWeapon::Attack()
 	OnAttack.Broadcast();
 }
 
+void AWeapon::OnRep_WeaponState(EWeaponState PrevWeaponState)
+{
+	if (PrevWeaponState == EWeaponState::EQUIPPED)
+		UnEquipEvent();
+
+	if (WeaponState == EWeaponState::EQUIPPED)
+		EquipEvent();
+}
+
 void AWeapon::MakeFppPrimitiveInfo()
 {
-	for (auto& Tuple : WeaponPrimitiveInfo)
+	for (auto& Tuple : WeaponTppPrimitiveInfo)
 	{
 		FString CompStr = "Additive " + Tuple.Key;
 		FName CompName = FName(*CompStr);
@@ -418,11 +434,11 @@ void AWeapon::MakeFppPrimitiveInfo()
 		WeaponFppPrimitiveInfo.Add(Tuple.Key, NewPrimitiveComp);
 	}
 
-	for (auto& Tuple : WeaponPrimitiveInfo)
+	for (auto& Tuple : WeaponTppPrimitiveInfo)
 	{
 		if (Tuple.Value->GetAttachParent())
 		{
-			for (auto& CompareTuple : WeaponPrimitiveInfo)
+			for (auto& CompareTuple : WeaponTppPrimitiveInfo)
 			{
 				if (Tuple.Value->GetAttachParent() == CompareTuple.Value)
 				{
@@ -443,12 +459,33 @@ void AWeapon::MakeFppPrimitiveInfo()
 		Tuple.Value->SetCastShadow(false);
 		Tuple.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	FppWeaponMesh = WeaponFppPrimitiveInfo["Root"];
 	return;
+}
+
+void AWeapon::EquipEvent()
+{
+	OnAttackEndEvent();
+	OnSubAttackEndEvent();
+
+	GetTppWeaponMesh()->SetSimulatePhysics(false);
+	GetTppWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AWeapon::UnEquipEvent()
+{
+	OnAttackEndEvent();
+	OnSubAttackEndEvent();
+	RemoveOnOwnerDelegate();
+
+	GetTppWeaponMesh()->SetSimulatePhysics(true);
+	GetTppWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AWeapon::AddWeaponPrimitive(FString Key, UPrimitiveComponent* Value)
 {
-	WeaponPrimitiveInfo.Add(Key, Value);
+	WeaponTppPrimitiveInfo.Add(Key, Value);
 }
 
 void AWeapon::SetOwnerCreature(ACreature* pointer)

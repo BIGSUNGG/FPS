@@ -13,6 +13,7 @@
 #include AttachmentMagazineComponent_h
 #include DamageIndicatorSubsystem_h
 #include WeaponReloadComponent_h
+#include AttachmentScopeComponent_h
 
 AKraverPlayer::AKraverPlayer() : Super()
 {
@@ -56,11 +57,9 @@ void AKraverPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(ArmMesh->GetAnimInstance());
+	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance());
 	if((AnimInstance))
 	{
-		AnimInstance->OnReload_Grab_Magazine.AddDynamic(this, &AKraverPlayer::OnFP_Reload_Grab_MagazineEvent);
-		AnimInstance->OnReload_Insert_Magazine.AddDynamic(this, &AKraverPlayer::OnFP_Reload_Insert_MagazineEvent);
 		AnimInstance->OnWeapon_Holster.AddDynamic(this, &ThisClass::OnTp_Weapon_HolsterEvent);
 	}
 	else
@@ -135,7 +134,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 {
 	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && Cast<AGun>(CombatComponent->GetCurWeapon()))
 	{
-		USkeletalMeshComponent* ArmWeaponMesh = dynamic_cast<USkeletalMeshComponent*>(CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo()["Root"]);
+		USkeletalMeshComponent* ArmWeaponMesh = dynamic_cast<USkeletalMeshComponent*>(CombatComponent->GetCurWeapon()->GetFppWeaponMesh());
 #if TEST_ADS
 		{
 			FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
@@ -158,18 +157,19 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 			UStaticMeshComponent* ScopeMesh = Cast<UStaticMeshComponent>(WeaponPrimitiveInfo["Scope"]);
 			if (ScopeMesh)
 			{
-				FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
+				FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_Scope", ERelativeTransformSpace::RTS_World);
 				FTransform ScopeTransform = ScopeMesh->GetSocketTransform("AimOffset", ERelativeTransformSpace::RTS_World);
 				FTransform RelativeTransform = ScopeTransform.GetRelativeTransform(WeaponTransform);
 				FVector RelativeLocation = RelativeTransform.GetLocation();
 
-				AdsArmLocation = FMath::VInterpTo(AdsArmLocation, -RelativeLocation, DeltaTime, 10.f);
+				UAttachmentScopeComponent* ScopeComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UAttachmentScopeComponent>();
+				AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, -RelativeLocation.Z + ScopeComp->GetAdsAdditiveLocation().Z, DeltaTime, 10.f);
 			}
 			else
-				AdsArmLocation = FMath::VInterpTo(AdsArmLocation, FVector::ZeroVector, DeltaTime, 10.f);
+				AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
 		}
 		else
-			AdsArmLocation = FMath::VInterpTo(AdsArmLocation, FVector::ZeroVector, DeltaTime, 10.f);
+			AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
 
 
 		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, 95.f, DeltaTime, 15.f));
@@ -179,7 +179,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 		if (HUD)
 			HUD->SetbDrawCrosshair(true);
 
-		AdsArmLocation = FMath::VInterpTo(AdsArmLocation, FVector::ZeroVector, DeltaTime, 10.f);
+		AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
 		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, 110.f, DeltaTime, 15.f));
 	}
 
@@ -416,7 +416,7 @@ void AKraverPlayer::ChangeView()
 
 void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 {
-	UPrimitiveComponent* FppWeaponMesh = Weapon->GetFppWeaponPrimitiveInfo()["Root"];
+	UPrimitiveComponent* FppWeaponMesh = Weapon->GetFppWeaponMesh();
 
 	Server_ThrowWeapon(
 		Weapon, 
@@ -453,10 +453,10 @@ void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FTransfor
 
 void AKraverPlayer::Multicast_ThrowWeapon_Implementation(AWeapon* Weapon, FTransform Transform, FVector Direction)
 {
-	Weapon->GetWeaponMesh()->SetWorldTransform(Transform, false, nullptr, ETeleportType::TeleportPhysics);
-	Weapon->GetWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
-	Weapon->GetWeaponMesh()->AddImpulse(Direction * WeaponThrowPower * Weapon->GetWeaponMesh()->GetMass());
-	Weapon->GetWeaponMesh()->AddAngularImpulseInDegrees(Direction * WeaponThrowAngularPower, NAME_None, true);
+	Weapon->GetTppWeaponMesh()->SetWorldTransform(Transform, false, nullptr, ETeleportType::TeleportPhysics);
+	Weapon->GetTppWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
+	Weapon->GetTppWeaponMesh()->AddImpulse(Direction * WeaponThrowPower * Weapon->GetTppWeaponMesh()->GetMass());
+	Weapon->GetTppWeaponMesh()->AddAngularImpulseInDegrees(Direction * WeaponThrowAngularPower, NAME_None, true);
 }
 
 void AKraverPlayer::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
@@ -480,7 +480,7 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 	Super::OnClientEquipWeaponSuccessEvent(Weapon);
 	UnholsterWeapon();
 	
-	Weapon->GetFppWeaponPrimitiveInfo()["Root"]->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetFppHandSocketName());
+	Weapon->GetFppWeaponMesh()->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetFppHandSocketName());
 
 	for(auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 	{
@@ -506,8 +506,8 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	Super::OnClientUnEquipWeaponSuccessEvent(Weapon);
 
 	ThrowWeapon(Weapon);
-	ShowOnlyThirdPerson.Remove(Weapon->GetWeaponMesh());
-	Weapon->GetWeaponMesh()->SetOwnerNoSee(false);
+	ShowOnlyThirdPerson.Remove(Weapon->GetTppWeaponMesh());
+	Weapon->GetTppWeaponMesh()->SetOwnerNoSee(false);
 
 	for (auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 	{
@@ -575,8 +575,8 @@ void AKraverPlayer::OnAssassinateEvent(AActor* AssassinatedActor)
 	GetMesh()->SetOwnerNoSee(false);
 	ArmMesh->SetOwnerNoSee(true);
 
-	CombatComponent->GetCurWeapon()->GetWeaponMesh()->SetOwnerNoSee(false);
-	CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo()["Root"]->SetOwnerNoSee(true);
+	CombatComponent->GetCurWeapon()->GetTppWeaponMesh()->SetOwnerNoSee(false);
+	CombatComponent->GetCurWeapon()->GetFppWeaponMesh()->SetOwnerNoSee(true);
 
 }
 
@@ -596,56 +596,29 @@ void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, flo
 	Super::OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
 }
 
-void AKraverPlayer::OnFP_Reload_Grab_MagazineEvent()
+void AKraverPlayer::OnReload_Grab_MagazineEvent()
 {
-	UPrimitiveComponent** MagazineCompPtr = CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo().Find("Magazine");
-	UPrimitiveComponent* MagazineComp = MagazineCompPtr ? *MagazineCompPtr : nullptr;
+	Super::OnReload_Grab_MagazineEvent();
 
-	if (CombatComponent->GetCurWeapon() && MagazineComp)
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo().Contains("Magazine"))
 	{
-#if TEST_RELOAD
-		FTransform BeforeTransform = MagazineComp->GetComponentTransform();
-#endif
-
+		UPrimitiveComponent* MagazineComp = CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo()["Magazine"];
 		UWeaponReloadComponent* ReloadComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponReloadComponent>();
 
 		MagazineComp->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, "SOCKET_Magazine");
 		MagazineComp->SetRelativeLocation(ReloadComp->GetGrabRelativeLocation());
 		MagazineComp->SetRelativeRotation(ReloadComp->GetGrabRelativeRotation());
-#if TEST_RELOAD
-		FTransform AfterTransform = MagazineComp->GetComponentTransform();
-		FTransform RelativeTransform = BeforeTransform.GetRelativeTransform(AfterTransform);
-		FRotator RelativeRotation = RelativeTransform.Rotator();
-		FVector RelativeLocation = RelativeTransform.GetLocation();
-
-		KR_LOG_VECTOR(RelativeLocation);
-		KR_LOG_ROTATOR(RelativeRotation);
-#endif
 	}
 }
 
-void AKraverPlayer::OnFP_Reload_Insert_MagazineEvent()
+void AKraverPlayer::OnReload_Insert_MagazineEvent()
 {
-	UPrimitiveComponent** MagazineCompPtr = CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo().Find("Magazine");
-	UPrimitiveComponent* MagazineComp = MagazineCompPtr ? *MagazineCompPtr : nullptr;
+	Super::OnReload_Insert_MagazineEvent();
 
-	if (CombatComponent->GetCurWeapon() && MagazineComp)
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo().Contains("Magazine"))
 	{
-#if TEST_RELOAD
-		FTransform BeforeTransform = MagazineComp->GetComponentTransform();
-#endif
-
-		MagazineComp->AttachToComponent(CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo()["Root"], FAttachmentTransformRules::SnapToTargetIncludingScale, CombatComponent->GetCurWeapon()->FindComponentByClass<UAttachmentMagazineComponent>()->GetMagazineSocketName());
-
-#if TEST_RELOAD
-		FTransform AfterTransform = MagazineComp->GetComponentTransform();
-		FTransform RelativeTransform = BeforeTransform.GetRelativeTransform(AfterTransform);
-		FRotator RelativeRotation = RelativeTransform.Rotator();
-		FVector RelativeLocation = RelativeTransform.GetLocation();
-
-		KR_LOG_VECTOR(RelativeLocation);
-		KR_LOG_ROTATOR(RelativeRotation);
-#endif
+		UAttachmentMagazineComponent* MagazineComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UAttachmentMagazineComponent>();
+		CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo()["Magazine"]->AttachToComponent(CombatComponent->GetCurWeapon()->GetFppWeaponMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, MagazineComp->GetMagazineSocketName());
 	}
 }
 

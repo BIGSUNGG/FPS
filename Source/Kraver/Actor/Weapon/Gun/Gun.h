@@ -64,7 +64,7 @@ protected:
 	class USoundCue* ImpactSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Effect", meta = (AllowPrivateAccess = "true"))
-	UNiagaraComponent* ImpactEffect; // Bullet이 Block되었을때 실행되는 이펙트
+	TObjectPtr<UNiagaraSystem> ImpactEffect; // Bullet이 Block되었을때 실행되는 이펙트
 
 	// Ammo
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
