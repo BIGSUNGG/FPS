@@ -273,6 +273,18 @@ bool AGun::CanAttack()
 	return true;
 }
 
+bool AGun::CanSubAttack()
+{
+	if (!Super::CanSubAttack())
+		return false;
+
+	UWeaponReloadComponent* ReloadComp = this->GetComponentByClass<UWeaponReloadComponent>();
+	if (ReloadComp && ReloadComp->IsReloading())
+		return false;
+
+	return true;
+}
+
 void AGun::AddSpread(float Spread)
 {
 	CurBulletSpread += Spread;

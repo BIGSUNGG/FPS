@@ -19,15 +19,15 @@ protected:
 
 	// Delegate
 	UFUNCTION()
-		virtual void OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);
+	virtual void OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);
 
 	// Rpc
 	UFUNCTION(Server, Reliable)
-		virtual void Server_SpawnBullet(FVector Location, FRotator Rotation);
+	virtual void Server_SpawnBullet(FVector Location, FRotator Rotation);
 	virtual void Multicast_ImpactBullet_Implementation(FVector ImpactPos) override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))
-		UClass* BulletClass = nullptr; // ÃÑ¾Ë Å¬·¡½º
+	UClass* BulletClass = nullptr; // ÃÑ¾Ë Å¬·¡½º
 
 };

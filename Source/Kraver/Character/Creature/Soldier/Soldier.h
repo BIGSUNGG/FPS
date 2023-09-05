@@ -26,7 +26,7 @@ public:
 protected:
 	// Delegate
 	UFUNCTION()
-		virtual void OnReload_Grab_MagazineEvent();
+	virtual void OnReload_Grab_MagazineEvent();
 	UFUNCTION()
-		virtual void OnReload_Insert_MagazineEvent();
+	virtual void OnReload_Insert_MagazineEvent();
 };

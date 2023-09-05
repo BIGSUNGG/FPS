@@ -35,9 +35,9 @@ public:
 
 	// Equip UnEquip
 	UFUNCTION(BlueprintCallable)
-		virtual void EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
+	virtual void EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
 	UFUNCTION(BlueprintCallable)
-		virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수
+	virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수
 
 	// Holster Unholster
 	virtual bool UnholsterWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
@@ -53,55 +53,55 @@ public:
 protected:
 	// Equip Weapon
 	UFUNCTION(Server, Reliable)
-		virtual void Server_EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
+	virtual void Server_EquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
 	UFUNCTION(Server, Reliable)
-		virtual void Server_UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
+	virtual void Server_UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
 
 	virtual void Client_EquipWeaponSuccess(AWeapon* Weapon);		
 	virtual void Client_UnEquipWeaponSuccess(AWeapon* Weapon);
 
 	UFUNCTION(Server, Reliable)
-		virtual void Server_UnholsterWeapon(AWeapon* Weapon);
+	virtual void Server_UnholsterWeapon(AWeapon* Weapon);
 	UFUNCTION(Server, Reliable)
-		virtual void Server_HolsterWeapon(AWeapon* Weapon); // CurWeapon을 집어넣는 함수
+	virtual void Server_HolsterWeapon(AWeapon* Weapon); // CurWeapon을 집어넣는 함수
 
 
 	// Take Damage
 	UFUNCTION(Client, Reliable)
-		void Client_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(Client, Reliable)
-		void Client_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(Client, Reliable)
-		void Client_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Multicast_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Multicast_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Multicast_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	// Give Damage
 	UFUNCTION(Client, Reliable)
-		void Client_GiveDamageSuccess(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_GiveDamageSuccess(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(Client, Reliable)
-		void Client_GivePointDamageSuccess(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_GivePointDamageSuccess(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(Client, Reliable)
-		void Client_GiveRadialDamageSuccess(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_GiveRadialDamageSuccess(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	// Death
 	UFUNCTION(Server, Reliable)
-		void Server_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
+	void Server_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
 	UFUNCTION(Client, Reliable)
-		void Client_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); 
+	void Client_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); 
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); 
+	void Multicast_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); 
 
 	// OnRep
 	UFUNCTION()
-		void OnRep_CurWeaponEvent(AWeapon* PrevWeapon);
+	void OnRep_CurWeaponEvent(AWeapon* PrevWeapon);
 	UFUNCTION()
-		void OnRep_WeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot);
+	void OnRep_WeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot);
 
 	// Func
 	bool AddWeapon(AWeapon* Weapon);
@@ -182,26 +182,26 @@ protected:
 	AKraverHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_CurWeaponEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
-		AWeapon* CurWeapon = nullptr; // 현재 무기
+	AWeapon* CurWeapon = nullptr; // 현재 무기
 	void SetCurWeapon(AWeapon* Weapon);
 	UFUNCTION(Server, Reliable)
-		void Server_SetCurWeapon(AWeapon* Weapon);
+	void Server_SetCurWeapon(AWeapon* Weapon);
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponSlotEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
-		TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
+	TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
-		int32 MaxWeaponSlotSize = 3; // WeaponSlot 사이즈
+	int32 MaxWeaponSlotSize = 3; // WeaponSlot 사이즈
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
-		int32 CurHp = 100.f; // 현재 Hp
+	int32 CurHp = 100.f; // 현재 Hp
 	UFUNCTION(Server, Reliable)
-		void Server_SetCurHp(int32 value);
+	void Server_SetCurHp(int32 value);
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_SetCurHp(int32 value);
+	void Multicast_SetCurHp(int32 value);
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
-		int32 MaxHp = 100.f; // 최대 Hp
+	int32 MaxHp = 100.f; // 최대 Hp
 	UFUNCTION(Server, Reliable)
-		void Server_SetMaxHp(int32 value);
+	void Server_SetMaxHp(int32 value);
 
 	bool bCanceledTakeDamage = false; // Server에서만 사용
 

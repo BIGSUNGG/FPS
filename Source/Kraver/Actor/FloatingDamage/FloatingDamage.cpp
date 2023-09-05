@@ -18,7 +18,7 @@ AFloatingDamage::AFloatingDamage()
 	FloatingWidgetComp->SetPivot(FVector2D(0.5f, 0.5f));
 	FloatingWidgetComp->SetVisibility(true);
 
-	static ConstructorHelpers::FClassFinder<UFloatingDamageWidget> FloatingDamageFinder(TEXT("/Game/ProjectFile/Widget/WBP_FloatingDamageWidget.WBP_FloatingDamageWidget_C"));
+	static ConstructorHelpers::FClassFinder<UFloatingDamageWidget> FloatingDamageFinder(TEXT("/Game/ProjectFile/Gamebase/Widget/WBP_FloatingDamageWidget.WBP_FloatingDamageWidget_C"));
 	if (FloatingDamageFinder.Succeeded())
 		FloatingWidgetComp->SetWidgetClass(FloatingDamageFinder.Class);
 
@@ -47,8 +47,15 @@ void AFloatingDamage::ShowFloatingDamage(AActor* DamagedActor, FDamageEvent cons
 	InchargeActor = Cast<ACreature>(DamagedActor);
 
 	UFloatingDamageWidget* Widget = Cast<UFloatingDamageWidget>(FloatingWidgetComp->GetWidget());
-	Widget->AddDamage(DamageResult.ActualDamage);
-	Widget->SetColor(DamageResult.bCritical ? FColor::Red : FColor::White);
+	if (Widget)
+	{
+		Widget->AddDamage(DamageResult.ActualDamage);
+		Widget->SetColor(DamageResult.bCritical ? FColor::Red : FColor::White);
+	}
+	else
+	{
+		KR_LOG(Error, TEXT("Widget class is not UFloatingDamageWidget class"));
+	}
 
 	FVector ForwardVector;
 	FVector ImpactPoint;

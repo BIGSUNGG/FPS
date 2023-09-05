@@ -41,13 +41,13 @@ protected:
 
 	// Delegate
 	UFUNCTION()
-		void OnCanInputNextComboEvent();
+	void OnCanInputNextComboEvent();
 	UFUNCTION()
-		void OnSwingAttackEvent();
+	void OnSwingAttackEvent();
 	UFUNCTION()
-		void OnAttackNextComboEvent();
+	void OnAttackNextComboEvent();
 	UFUNCTION()
-		void OnComboEndEvent();
+	void OnComboEndEvent();
 	virtual void OnAttackEvent() override;
 
 public:
@@ -62,17 +62,17 @@ protected:
 	// Combo
 	int CurComboAttack = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Combo", meta = (AllowPrivateAccess = "true"))
-		int MaxComboAttack = 0;
+	int MaxComboAttack = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Combo", meta = (AllowPrivateAccess = "true"))
-		bool bAutomaticCombo = false;
+	bool bAutomaticCombo = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Combo", meta = (AllowPrivateAccess = "true"))
-		bool bAutomaticRepeatCombo = false;
+	bool bAutomaticRepeatCombo = false;
 	bool bInputNextCombo = false;
 	bool bCanInputNextCombo = false;
 
 	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		TArray<UAnimMontage*> AttackMontagesTpp;
+	TArray<UAnimMontage*> AttackMontagesTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		TArray<UAnimMontage*> AttackMontagesFpp;
+	TArray<UAnimMontage*> AttackMontagesFpp;
 };

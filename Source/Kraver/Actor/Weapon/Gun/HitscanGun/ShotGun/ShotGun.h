@@ -27,5 +27,5 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
-		int64 NumberOfBullet = 1;
+	int64 NumberOfBullet = 1;
 };

@@ -22,9 +22,9 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		UTextBlock* AttackerNameText;
+	UTextBlock* AttackerNameText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		UTextBlock* VictimNameText;
+	UTextBlock* VictimNameText;
 
 	FString AttackerName;
 	FString VictimName;

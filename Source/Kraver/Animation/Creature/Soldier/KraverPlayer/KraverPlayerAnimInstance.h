@@ -25,12 +25,12 @@ protected:
 	AKraverPlayer* KraverPlayer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Movement|AdvancedMovement", Meta = (AllowPrivateAccess = true))
-		bool IsWallRunning = false;
+	bool IsWallRunning = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Movement|AdvancedMovement", Meta = (AllowPrivateAccess = true))
-		EWallRunState CurWallRunState;
+	EWallRunState CurWallRunState;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Movement|AdvancedMovement", Meta = (AllowPrivateAccess = true))
-		bool IsSliding = false;
+	bool IsSliding = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		ETurningInPlace TurningInPlace;
+	ETurningInPlace TurningInPlace;
 };

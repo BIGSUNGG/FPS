@@ -29,19 +29,19 @@ protected:
 
 	// Rpc
 	UFUNCTION(Server, Reliable)
-		virtual void Server_Assassinate(AActor* Actor);
+	virtual void Server_Assassinate(AActor* Actor);
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_Assassinate(AActor* Actor);
+	virtual void Multicast_Assassinate(AActor* Actor);
 	UFUNCTION(Server, Reliable)
-		virtual void Server_OnAssassinateAttackEvent();
+	virtual void Server_OnAssassinateAttackEvent();
 	UFUNCTION(Server, Reliable)
-		virtual void Server_OnAssassinateEndEvent();
+	virtual void Server_OnAssassinateEndEvent();
 
 	// Delegate
 	UFUNCTION()
-		void OnAssassinateAttackEvent();
+	void OnAssassinateAttackEvent();
 	UFUNCTION()
-		void OnAssassinateEndEvent();
+	void OnAssassinateEndEvent();
 	virtual void OnBeforeAttackEvent() override;
 
 public:
@@ -53,20 +53,20 @@ protected:
 
 	bool IsAssassinating = false;
 	UPROPERTY(Replicated)
-		ACreature* CurAssassinatedCreature;
+	ACreature* CurAssassinatedCreature;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
-		bool bCanAssassination = true;
+	bool bCanAssassination = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
-		float AssassinationDamage = 100.f;
+	float AssassinationDamage = 100.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
-		UAnimMontage* AssassinateMontagesTpp;
+	UAnimMontage* AssassinateMontagesTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
-		UAnimMontage* AssassinateMontagesFpp;
+	UAnimMontage* AssassinateMontagesFpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
-		UAnimMontage* AssassinatedMontagesTpp;
+	UAnimMontage* AssassinatedMontagesTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
-		UAnimMontage* AssassinatedMontagesFpp;
+	UAnimMontage* AssassinatedMontagesFpp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<UKraverDamageType> AssassinateDamageType;
+	TSubclassOf<UKraverDamageType> AssassinateDamageType;
 };

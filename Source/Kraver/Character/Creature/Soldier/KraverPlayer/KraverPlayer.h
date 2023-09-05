@@ -32,27 +32,18 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-public:
-	// Getter Setter
-	FORCEINLINE AWeapon* GetCanInteractWeapon() { return CanInteractWeapon; }
-	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
-	virtual USkeletalMeshComponent* GetCurMainMesh() override;
-
-	virtual void SetWeaponVisibility(class AWeapon* Weapon, bool Value) override;
-
 protected:
 	// input event
 	UFUNCTION(BlueprintCallable)
-		virtual void EquipButtonPressed() final;
+	virtual void EquipButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void UnEquipButtonPressed() final;
+	virtual void UnEquipButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void ChangeWeapon1Pressed() final;
+	virtual void ChangeWeapon1Pressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void ChangeWeapon2Pressed() final;
+	virtual void ChangeWeapon2Pressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void ChangeWeapon3Pressed() final;
+	virtual void ChangeWeapon3Pressed() final;
 
 	// Ect Function
 	virtual void CheckCanInteractionWeapon(); // 장착가능한 무기를 찾는 함수
@@ -64,13 +55,13 @@ protected:
 
 	// Rpc
 	UFUNCTION(Server, Reliable)
-		void Server_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
+	void Server_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
+	void Multicast_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
 	UFUNCTION(Server, Reliable)
-		void Server_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
+	void Server_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
+	void Multicast_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
 	virtual void Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed);
 
 	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
@@ -95,11 +86,11 @@ protected:
 	virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed) override;
 
 	UFUNCTION()
-		virtual void OnFP_Reload_Grab_MagazineEvent();
+	virtual void OnFP_Reload_Grab_MagazineEvent();
 	UFUNCTION()
-		virtual void OnFP_Reload_Insert_MagazineEvent();
+	virtual void OnFP_Reload_Insert_MagazineEvent();
 	UFUNCTION()
-		virtual void OnTp_Weapon_HolsterEvent();
+	virtual void OnTp_Weapon_HolsterEvent();
 
 	// Function
 	virtual void PlayLandedMontage() override;
@@ -108,16 +99,25 @@ protected:
 	void UnholsterWeapon();
 
 public:
+	// Getter Setter
+	FORCEINLINE AWeapon* GetCanInteractWeapon() { return CanInteractWeapon; }
+	FORCEINLINE USkeletalMeshComponent* GetArmMesh() { return ArmMesh; }
+	FORCEINLINE USpringArmComponent* GetTp_SpringArm() { return Tp_SpringArm; }
+	virtual USkeletalMeshComponent* GetCurMainMesh() override;
+
+	virtual void SetWeaponVisibility(class AWeapon* Weapon, bool Value) override;
+
+public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		class UTexture2D* CrosshairsCenter;
+	class UTexture2D* CrosshairsCenter;
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		UTexture2D* CrosshairsLeft;
+	UTexture2D* CrosshairsLeft;
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		UTexture2D* CrosshairsRight;
+	UTexture2D* CrosshairsRight;
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		UTexture2D* CrosshairsTop;
+	UTexture2D* CrosshairsTop;
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		UTexture2D* CrosshairsBottom;
+	UTexture2D* CrosshairsBottom;
 
 protected:
 	class AKraverPlayerController* KraverController;
@@ -125,34 +125,32 @@ protected:
 
 	// Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Third person", meta = (AllowPrivateAccess = "true"))
-		USceneComponent* Tp_Root;
+	USceneComponent* Tp_Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Third person", meta = (AllowPrivateAccess = "true"))
-		USpringArmComponent* Tp_SpringArm;
+	USpringArmComponent* Tp_SpringArm;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
-		USkeletalMeshComponent* ArmMesh;
+	USkeletalMeshComponent* ArmMesh;
 
 	// ViewType
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-		EViewType ViewType = EViewType::FIRST_PERSON;
-	void SetViewType(EViewType Type);
-	UFUNCTION(Server, Reliable)
-		void Server_SetViewType(EViewType Type);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
+	EViewType ViewType = EViewType::FIRST_PERSON;
+
 	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
 	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트
 
 	// Interaction
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
-		AWeapon* CanInteractWeapon;
+	AWeapon* CanInteractWeapon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
-		float InteractionDistance = 700.f; // 장착가능한 무기를 찾는 거리
+	float InteractionDistance = 700.f; // 장착가능한 무기를 찾는 거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
-		float InteractionRadius = 5.f; // 장착가능한 무기를 찾는 범위의 반지름
+	float InteractionRadius = 5.f; // 장착가능한 무기를 찾는 범위의 반지름
 
 	// Crouch
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-		float CrouchCameraHeight = -40.f;
+	float CrouchCameraHeight = -40.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-		float UnCrouchCameraHeight = 0.f;
+	float UnCrouchCameraHeight = 0.f;
 
 
 	FVector Fp_SpringArmBasicLocation; // 기본적으로 적용할 SprintArm의 RelativeLocation
@@ -166,6 +164,7 @@ protected:
 	FRotator BasicArmRotation;
 	FVector AdsArmLocation;
 
+	// Holster
 	int8 UnholsterIndex = -1;
 
 };

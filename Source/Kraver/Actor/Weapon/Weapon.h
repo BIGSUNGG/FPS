@@ -41,39 +41,39 @@ public:
 
 	// Delegate
 	UFUNCTION()
-		virtual void OnAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
+	virtual void OnAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
 	UFUNCTION()
-		virtual void OnAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
+	virtual void OnAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
 
 	UFUNCTION()
-		virtual void OnSubAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
+	virtual void OnSubAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
 	UFUNCTION()
-		virtual void OnSubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
+	virtual void OnSubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
 
 protected:
 	// Rpc
 	UFUNCTION(Client, Reliable)
-		void Client_Equipped();
+	void Client_Equipped();
 	UFUNCTION(Client, Reliable)
-		void Client_UnEquipped();
+	void Client_UnEquipped();
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_Equipped(ACreature* Character);
+	void Multicast_Equipped(ACreature* Character);
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_UnEquipped();
+	void Multicast_UnEquipped();
 
 	UFUNCTION(Server, Reliable)
-		virtual void Server_OnAttackEvent();
+	virtual void Server_OnAttackEvent();
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_OnAttackEvent();
+	virtual void Multicast_OnAttackEvent();
 
 	UFUNCTION(Server, Reliable)
-		void Server_TakeImpulseAtLocation(FVector Impulse, FVector ImpactPoint);
+	void Server_TakeImpulseAtLocation(FVector Impulse, FVector ImpactPoint);
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_TakeImpulseAtLocation(FVector Impulse, FVector ImpactPoint);
+	void Multicast_TakeImpulseAtLocation(FVector Impulse, FVector ImpactPoint);
 
 	// Delegate
 	UFUNCTION()
-		virtual void OnAttackEvent();
+	virtual void OnAttackEvent();
 
 	virtual void Attack() final; // 공격할때 호출되는 함수
 
@@ -83,7 +83,7 @@ protected:
 public:
 	// Getter Setter
 	virtual bool CanAttack();
-	bool CanSubAttack();
+	virtual bool CanSubAttack();
 	bool CanInteracted();
 	bool GetIsAttacking() { return IsAttacking; }
 	bool GetIsSubAttacking() { return IsSubAttacking; }
@@ -137,117 +137,117 @@ public:
 	FRemoveOnDele OnRemoveOnDelegate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Component", Meta = (AllowPrivateAccess = true))
-		TArray<UWeaponComponent*> WeaponComponents;
+	TArray<UWeaponComponent*> WeaponComponents;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Crosshairs")
-		class UTexture2D* CrosshairsCenter;
+	class UTexture2D* CrosshairsCenter;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Crosshairs")
-		UTexture2D* CrosshairsLeft;
+	UTexture2D* CrosshairsLeft;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Crosshairs")
-		UTexture2D* CrosshairsRight;
+	UTexture2D* CrosshairsRight;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Crosshairs")
-		UTexture2D* CrosshairsTop;
+	UTexture2D* CrosshairsTop;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Crosshairs")
-		UTexture2D* CrosshairsBottom;
+	UTexture2D* CrosshairsBottom;
 
 protected:
 	UPROPERTY(Replicated)
-		class ACreature* OwnerCreature = nullptr;
+	class ACreature* OwnerCreature = nullptr;
 	UFUNCTION(Server, Reliable)
-		void Server_SetOwnerCreature(ACreature* pointer);
+	void Server_SetOwnerCreature(ACreature* pointer);
 
 	UPROPERTY(Replicated)
 	EWeaponState WeaponState = EWeaponState::NONE; // 무기 상태
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
-		EWeaponType WeaponType = EWeaponType::NONE; // 무기 종류
+	EWeaponType WeaponType = EWeaponType::NONE; // 무기 종류
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", Meta = (AllowPrivateAccess = true))
 		USceneComponent* RootSceneComponent;
 
 	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* AttackMontageTpp;
+	UAnimMontage* AttackMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* AttackMontageFpp;
+	UAnimMontage* AttackMontageFpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* HolsterMontageTpp;
+	UAnimMontage* HolsterMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* HolsterMontageFpp;
+	UAnimMontage* HolsterMontageFpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* UnholsterMontageTpp;
+	UAnimMontage* UnholsterMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* UnholsterMontageFpp;
+	UAnimMontage* UnholsterMontageFpp;
 	
 	// Anim
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* AnimIdleTpp;	
+	UAnimSequence* AnimIdleTpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* AnimIdleFpp;	
+	UAnimSequence* AnimIdleFpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* AnimSprintTpp;
+	UAnimSequence* AnimSprintTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* AnimSprintFpp;
+	UAnimSequence* AnimSprintFpp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* SubAttackAnimTpp;
+	UAnimSequence* SubAttackAnimTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* SubAttackAnimFpp;
+	UAnimSequence* SubAttackAnimFpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
-		UBlendSpace* AnimMovementTpp;	
+	UBlendSpace* AnimMovementTpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
-		UBlendSpace* AnimMovementFpp;	
+	UBlendSpace* AnimMovementFpp;	
 
 	// Sound
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Sound", Meta = (AllowPrivateAccess = true))
-		class USoundCue* AttackSound;
+	class USoundCue* AttackSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
-		FName FppHandSocketName = "SOCKET_Weapon"; // Weapon을 Attach할 스켈레탈 본 이름
+	FName FppHandSocketName = "SOCKET_Weapon"; // Weapon을 Attach할 스켈레탈 본 이름
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
-		FName TppHandSocketName = "SOCKET_Weapon"; // Weapon을 Attach할 스켈레탈 본 이름
+	FName TppHandSocketName = "SOCKET_Weapon"; // Weapon을 Attach할 스켈레탈 본 이름
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Component|Info", meta = (AllowPrivateAccess = "true"))
-		UPrimitiveComponent* RootMesh;
+	UPrimitiveComponent* RootMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Info", meta = (AllowPrivateAccess = "true"))
-		TMap<FString, UPrimitiveComponent*> WeaponPrimitiveInfo;
+	TMap<FString, UPrimitiveComponent*> WeaponPrimitiveInfo;
 	TMap<FString, UPrimitiveComponent*> WeaponFppPrimitiveInfo; // 추가적인 WeaponMesh를 가지는 배열
 
 	UPROPERTY(Replicated)
-		bool IsAttacking = false; // 공격중인지
+	bool IsAttacking = false; // 공격중인지
 	void SetIsAttacking(bool Value);
 	UFUNCTION(Server, Reliable)
-		void Server_SetIsAttacking(bool Value);
+	void Server_SetIsAttacking(bool Value);
 
 	UPROPERTY(Replicated)
-		bool IsSubAttacking = false; // 보조 공격중인지
+	bool IsSubAttacking = false; // 보조 공격중인지
 	void SetIsSubAttacking(bool Value);
 	UFUNCTION(Server, Reliable)
-		void Server_SetIsSubAttacking(bool Value);
+	void Server_SetIsSubAttacking(bool Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		bool bAttackWhileSprint = true;
+	bool bAttackWhileSprint = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		bool bSubAttackWhileSprint = true;
+	bool bSubAttackWhileSprint = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		bool bCanSubAttack = true;
+	bool bCanSubAttack = true;
 
 	bool bAttackCanceled = false;
 	bool bCanAttack = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		bool bAutomaticAttack = false; // 연사공격이 가능한지
+	bool bAutomaticAttack = false; // 연사공격이 가능한지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		bool bFirstAttackDelay = false; // 첫공격에 딜레이가 있는지
+	bool bFirstAttackDelay = false; // 첫공격에 딜레이가 있는지
 	bool bFirstInputAttack = false; // 공격 선입력이 입력되어있는지 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		bool bCanFirstInputAttack = true;
+	bool bCanFirstInputAttack = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		float AttackDelay = 0.2f; // 공격 딜레이
+	float AttackDelay = 0.2f; // 공격 딜레이
 	float CurAttackDelay = 0.f; // 현재 공격 딜레이
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		float AttackDamage = 10.f; // 공격을 하였을때 주는 데미지	
+	float AttackDamage = 10.f; // 공격을 하였을때 주는 데미지	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<UKraverDamageType> AttackDamageType;
+	TSubclassOf<UKraverDamageType> AttackDamageType;
 
 	FTimerHandle AutomaticAttackHandle; // 연사공격을 담당하는 TimerHandle
 

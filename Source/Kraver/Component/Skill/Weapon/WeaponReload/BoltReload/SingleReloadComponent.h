@@ -34,17 +34,17 @@ public:
 protected:
 	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* ReloadInsertMontageTpp;
+	UAnimMontage* ReloadInsertMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* ReloadInsertMontageFpp;
+	UAnimMontage* ReloadInsertMontageFpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* ReloadCloseMontageTpp;
+	UAnimMontage* ReloadCloseMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* ReloadCloseMontageFpp;
+	UAnimMontage* ReloadCloseMontageFpp;
 
 	// Sound
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", Meta = (AllowPrivateAccess = true))
-		USoundCue* ReloadInsertSound;
+	USoundCue* ReloadInsertSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", Meta = (AllowPrivateAccess = true))
-		USoundCue* ReloadCloseSound;
+	USoundCue* ReloadCloseSound;
 };

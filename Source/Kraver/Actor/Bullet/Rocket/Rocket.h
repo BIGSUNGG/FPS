@@ -19,18 +19,18 @@ protected:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Explosion", meta = (AllowPrivateAccess = "true"))
-		float ExplosionMaxDamage;
+	float ExplosionMaxDamage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Explosion", meta = (AllowPrivateAccess = "true"))
-		float ExplosionMinDamage;
+	float ExplosionMinDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Explosion", meta = (AllowPrivateAccess = "true"))
-		float ExplosionInnerRadius;
+	float ExplosionInnerRadius;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Explosion", meta = (AllowPrivateAccess = "true"))
-		float ExplosionOuterRadius;
+	float ExplosionOuterRadius;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Explosion", meta = (AllowPrivateAccess = "true"))
-		float ExplosionFalloff = 1.f;
+	float ExplosionFalloff = 1.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<UKraverDamageType> ExplosionDamageType;
+	TSubclassOf<UKraverDamageType> ExplosionDamageType;
 };

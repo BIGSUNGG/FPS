@@ -20,5 +20,5 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		UTextBlock* EquipText;
+	UTextBlock* EquipText;
 };

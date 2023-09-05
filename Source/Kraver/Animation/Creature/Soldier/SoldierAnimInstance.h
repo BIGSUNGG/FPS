@@ -27,33 +27,33 @@ protected:
 	// Animation Notify
 		// Weapon
 	UFUNCTION()
-		void AnimNotify_Weapon_Holster();
+	void AnimNotify_Weapon_Holster();
 	UFUNCTION()
-		void AnimNotify_Weapon_Unholster();
+	void AnimNotify_Weapon_Unholster();
 
 		// Melee
 	UFUNCTION()
-		void AnimNotify_Melee_SwingAttack();
+	void AnimNotify_Melee_SwingAttack();
 	UFUNCTION()
-		void AnimNotify_Melee_CanInputNextCombo();
+	void AnimNotify_Melee_CanInputNextCombo();
 	UFUNCTION()
-		void AnimNotify_Melee_AttackNextCombo();
+	void AnimNotify_Melee_AttackNextCombo();
 	UFUNCTION()
-		void AnimNotify_Melee_ComboEnd();
+	void AnimNotify_Melee_ComboEnd();
 	UFUNCTION()
-		void AnimNotify_Melee_AssassinateAttack();
+	void AnimNotify_Melee_AssassinateAttack();
 	UFUNCTION()
-		void AnimNotify_Melee_AssassinateEnd();
+	void AnimNotify_Melee_AssassinateEnd();
 
 		// Reload
 	UFUNCTION()
-		void AnimNotify_Reload_Insert_Magazine();
+	void AnimNotify_Reload_Insert_Magazine();
 	UFUNCTION()
-		void AnimNotify_Reload_Grab_Magazine();
+	void AnimNotify_Reload_Grab_Magazine();
 	UFUNCTION()
-		void AnimNotify_Reload_OpenFinish();
+	void AnimNotify_Reload_OpenFinish();
 	UFUNCTION()
-		void AnimNotify_Reload_InsertFinish();
+	void AnimNotify_Reload_InsertFinish();
 
 public:
 	FAnimNotifyDele OnWeapon_Holster;
@@ -75,23 +75,23 @@ protected:
 	ASoldier* Soldier;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Weapon", Meta = (AllowPrivateAccess = true))
-		AWeapon* CurWeapon;
+	AWeapon* CurWeapon;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Weapon", Meta = (AllowPrivateAccess = true))
-		EWeaponType CurWeaponType;
+	EWeaponType CurWeaponType;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Weapon", Meta = (AllowPrivateAccess = true))
-		bool IsEquippingWeapon; // 캐릭터가 무기를 장착하고 있는지 여부
+	bool IsEquippingWeapon; // 캐릭터가 무기를 장착하고 있는지 여부
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Weapon", Meta = (AllowPrivateAccess = true))
-		bool IsAttacking; // 캐릭터 무기가 공격하고 있는지 여부
+	bool IsAttacking; // 캐릭터 무기가 공격하고 있는지 여부
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Weapon", Meta = (AllowPrivateAccess = true))
-		bool IsSubAttacking; // 캐릭터 무기가 보조 공격하고 있는지 여부
+	bool IsSubAttacking; // 캐릭터 무기가 보조 공격하고 있는지 여부
 
 	// Animation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* AnimWeaponIdleTpp;	
+	UAnimSequence* AnimWeaponIdleTpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* AnimWeaponSprintTpp;
+	UAnimSequence* AnimWeaponSprintTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* AnimWeaponSubAttackTpp;	
+	UAnimSequence* AnimWeaponSubAttackTpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Animation", Meta = (AllowPrivateAccess = true))
-		UBlendSpace* AnimWeaponMovementTpp;	
+	UBlendSpace* AnimWeaponMovementTpp;	
 };

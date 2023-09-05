@@ -8,7 +8,7 @@
 
 UDamageIndicatorSubsystem::UDamageIndicatorSubsystem()
 {
-	static ConstructorHelpers::FClassFinder<UDamageDirectionWidget> DamagedDirectionFinder(TEXT("/Game/ProjectFile/Widget/WBP_DamagedDirection.WBP_DamagedDirection_C"));
+	static ConstructorHelpers::FClassFinder<UDamageDirectionWidget> DamagedDirectionFinder(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_DamagedDirection.WBP_DamagedDirection_C"));
 	if(DamagedDirectionFinder.Succeeded())
 		DamagedDirectionClass = DamagedDirectionFinder.Class;
 

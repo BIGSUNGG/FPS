@@ -24,30 +24,30 @@ protected:
 	void ProceduralAnimEvent();
 
 	UFUNCTION()
-		virtual void OnLandEvent(const FHitResult& Result);
+	virtual void OnLandEvent(const FHitResult& Result);
 	UFUNCTION()
-		virtual void OnJumpEvent();
+	virtual void OnJumpEvent();
 	UFUNCTION()
-		virtual void OnStartCrouchEvent(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
+	virtual void OnStartCrouchEvent(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
 	UFUNCTION()
-		virtual void OnEndCrouchEvent(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
+	virtual void OnEndCrouchEvent(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
 
 protected:
 	// Animation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* AnimWeaponIdleFpp;	
+	UAnimSequence* AnimWeaponIdleFpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* AnimWeaponSprintFpp;
+	UAnimSequence* AnimWeaponSprintFpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Animation", Meta = (AllowPrivateAccess = true))
-		UAnimSequence* AnimWeaponSubAttackFpp;	
+	UAnimSequence* AnimWeaponSubAttackFpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Animation", Meta = (AllowPrivateAccess = true))
-		UBlendSpace* AnimWeaponMovementFpp;	
+	UBlendSpace* AnimWeaponMovementFpp;	
 
 	// Bone Movement
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Sway", Meta = (AllowPrivateAccess = true))
-		FRotator WeaponSwayResultRot;
+	FRotator WeaponSwayResultRot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|ProceduralAnim", Meta = (AllowPrivateAccess = true))
-		FVector ProceduralAnimResultVec;
+	FVector ProceduralAnimResultVec;
 
 	// ProceduralAnim
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Curve", meta = (AllowPrivateAccess = "true"))

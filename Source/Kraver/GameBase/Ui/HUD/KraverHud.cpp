@@ -158,10 +158,10 @@ void AKraverHUD::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float Dama
 
 void AKraverHUD::OnNewLocalPlayerEvent(AKraverPlayer* NewCreature)
 {
-	OwnerCreature = NewCreature;
-	if (OwnerCreature)
+	Player = NewCreature;
+	if (Player)
 	{
-		OwnerCreature->CombatComponent->OnClientGiveAnyDamageSuccess.AddDynamic(this, &AKraverHUD::OnClientGiveDamageSuccessEvent);
+		Player->CombatComponent->OnClientGiveAnyDamageSuccess.AddDynamic(this, &AKraverHUD::OnClientGiveDamageSuccessEvent);
 	}
 }
 
@@ -181,6 +181,9 @@ void AKraverHUD::OnCreatureDeathEvent(class ACreature* DeadCreature, class ACont
 
 void AKraverHUD::SetInteractWidget(bool value)
 {
+	if (!InteractionWidget)
+		return;
+
 	if(value)
 	{
 		InteractionWidget->SetVisibility(ESlateVisibility::Visible);

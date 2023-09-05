@@ -21,11 +21,11 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		UTextBlock* CurHpText;
+	UTextBlock* CurHpText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		UTextBlock* MaxHpText;
+	UTextBlock* MaxHpText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		UTextBlock* CurAmmoText;
+	UTextBlock* CurAmmoText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		UTextBlock* TotalAmmoText;
+	UTextBlock* TotalAmmoText;
 };

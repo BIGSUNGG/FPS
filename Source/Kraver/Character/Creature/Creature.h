@@ -44,9 +44,9 @@ public:
 
 	// Delegate
 	UFUNCTION()
-		virtual void OnAssassinateEvent(AActor* AssassinatedActor);
+	virtual void OnAssassinateEvent(AActor* AssassinatedActor);
 	UFUNCTION()
-		virtual void OnAssassinateEndEvent();
+	virtual void OnAssassinateEndEvent();
 
 public:
 	// Getter Setter
@@ -80,27 +80,27 @@ protected:
 
 	// Button Input
 	UFUNCTION(BlueprintCallable)
-		virtual void ReloadButtonPressed() final;
+	virtual void ReloadButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void AttackButtonPressed() final;
+	virtual void AttackButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void AttackButtonReleased() final;
+	virtual void AttackButtonReleased() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void SubAttackButtonPressed() final;
+	virtual void SubAttackButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void SubAttackButtonReleased() final;
+	virtual void SubAttackButtonReleased() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void RunButtonPressed() final;
+	virtual void RunButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void RunButtonReleased() final;
+	virtual void RunButtonReleased() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void CrouchButtonPressed() final;
+	virtual void CrouchButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void CrouchButtonReleased() final;
+	virtual void CrouchButtonReleased() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void JumpingButtonPressed() final;
+	virtual void JumpingButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
-		virtual void JumpingButtonReleased() final;
+	virtual void JumpingButtonReleased() final;
 
 	// Tick함수에서 호출될 함수
 	virtual void AimOffset(float DeltaTime);
@@ -108,31 +108,31 @@ protected:
 	// Delegate Event
 		// Equip Success
 	UFUNCTION()
-		virtual void OnClientEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 호출되는 함수
+	virtual void OnClientEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 호출되는 함수
 	UFUNCTION()
-		virtual void OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 호출되는 함수
+	virtual void OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 호출되는 함수
 	UFUNCTION()
-		virtual void OnServerEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 서버에서 호출되는 함수
+	virtual void OnServerEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 서버에서 호출되는 함수
 	UFUNCTION()
-		virtual void OnServerUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
+	virtual void OnServerUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 서버에서 호출되는 함수
 			
 		// Holster
 	UFUNCTION()
-		virtual void OnClientUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+	virtual void OnClientUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
-		virtual void OnServerUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+	virtual void OnServerUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
-		virtual void OnClientHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+	virtual void OnClientHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
-		virtual void OnServerHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+	virtual void OnServerHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 
 		// Death
 	UFUNCTION()
-		virtual void OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을때 호출되는 함수
+	virtual void OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을때 호출되는 함수
 	UFUNCTION()
-		virtual void OnServerDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
+	virtual void OnServerDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
 	UFUNCTION()
-		virtual void OnMulticastDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
+	virtual void OnMulticastDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을때 서버에서 호출되는 함수
 
 	virtual void Landed(const FHitResult& Hit) override; // 착지했을때 호출되는 함수
 	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
@@ -141,66 +141,66 @@ protected:
 
 		// Take Damage
 	UFUNCTION()
-		virtual void OnClientAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	virtual void OnClientAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION()
-		virtual void OnClientAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	virtual void OnClientAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	UFUNCTION()
-		virtual void OnServerAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	virtual void OnServerAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION()
-		virtual void OnMulticastAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	virtual void OnMulticastAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	UFUNCTION()
-		virtual void OnServerAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	virtual void OnServerAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION()
-		virtual void OnMulticastAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	virtual void OnMulticastAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 		// Montage
 	UFUNCTION()
-		virtual void OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+	virtual void OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 	UFUNCTION()
-		virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+	virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 	
 		// OnRep
 	UFUNCTION() 
-		virtual void OnRepCurWeaponEvent(AWeapon* PrevWeapon, AWeapon* CurWeapon);
+	virtual void OnRepCurWeaponEvent(AWeapon* PrevWeapon, AWeapon* CurWeapon);
 	UFUNCTION()
-		virtual void OnRepWeaponSlotEvent(const TArray<AWeapon*>& PrevWeaponSlot, const TArray<AWeapon*>& CurWeaponSlot);
+	virtual void OnRepWeaponSlotEvent(const TArray<AWeapon*>& PrevWeaponSlot, const TArray<AWeapon*>& CurWeaponSlot);
 
 	// RPC
 	UFUNCTION(Server, Reliable)
-		void Server_OwnOtherActor(AActor* Actor);
+	void Server_OwnOtherActor(AActor* Actor);
 		
 		// Assassinate
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
+	virtual void Multicast_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(Client, Reliable)
-		virtual void Client_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
+	virtual void Client_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(Server, Reliable)
-		virtual void Server_OnAssassinatedEndEvent();
+	virtual void Server_OnAssassinatedEndEvent();
 
 		// Jump
 	UFUNCTION(Server, Reliable)
-		virtual void Server_Jump();
+	virtual void Server_Jump();
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_Jump();
+	virtual void Multicast_Jump();
 
 		// Montage
 	UFUNCTION(Server, Reliable)
-		virtual void Server_OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+	virtual void Server_OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+	virtual void Multicast_OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 
 	UFUNCTION(Server, Reliable)
-		virtual void Server_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+	virtual void Server_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
+	virtual void Multicast_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 
 		// SimulateMesh
 	UFUNCTION(Client, Reliable)
-		virtual void Client_SimulateMesh();
+	virtual void Client_SimulateMesh();
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_SimulateMesh();
+	virtual void Multicast_SimulateMesh();
 
 	// Function
 	virtual void AttackStart();
@@ -210,7 +210,7 @@ protected:
 
 	virtual void PlayLandedMontage();
 
-	virtual void SimulateMesh();
+	virtual void OnServer_SimulateMesh();
 
 	virtual void OnServer_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	virtual void AssassinatedEnd();
@@ -232,17 +232,17 @@ public:
 
 	// Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-		class UCombatComponent* CombatComponent;
+	class UCombatComponent* CombatComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Movement", meta = (AllowPrivateAccess = "true"))
-		class UCreatureMovementComponent* CreatureMovementComponent;
+	class UCreatureMovementComponent* CreatureMovementComponent;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
-		USceneComponent* Fp_Root;
+	USceneComponent* Fp_Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
-		UCameraComponent* Camera;
+	UCameraComponent* Camera;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
-		USpringArmComponent* Fp_SpringArm;
+	USpringArmComponent* Fp_SpringArm;
 
 	float AO_Yaw;
 	float AO_Pitch;
@@ -251,7 +251,7 @@ protected:
 	FVector TargetCameraRelativeLocation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Combat|Resist", meta = (AllowPrivateAccess = "true"))
-		float ImpulseResistanceRatio = 1.f;
+	float ImpulseResistanceRatio = 1.f;
 
 	// InputState
 	float CurrentInputForward = 0.f;

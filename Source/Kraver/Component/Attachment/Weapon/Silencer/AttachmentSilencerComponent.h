@@ -34,16 +34,16 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class UStaticMesh> SilencerStaticMesh;
+	TObjectPtr<class UStaticMesh> SilencerStaticMesh;
 	UStaticMeshComponent* SilencerMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component|Attach", meta = (AllowPrivateAccess = "true"))
-		FName SilencerSocketName = "SOCKET_Muzzle";
+	FName SilencerSocketName = "SOCKET_Muzzle";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component|Attach", meta = (AllowPrivateAccess = "true"))
-		FVector SilencerRelativeLocation;
+	FVector SilencerRelativeLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-		bool bFireEffect = false;
+	bool bFireEffect = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-		class USoundCue* SilencerFireSound;
+	class USoundCue* SilencerFireSound;
 };

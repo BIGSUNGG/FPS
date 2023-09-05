@@ -238,8 +238,6 @@ void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AKraverPlayer, ViewType);
-
 }
 
 USkeletalMeshComponent* AKraverPlayer::GetCurMainMesh()
@@ -264,17 +262,6 @@ void AKraverPlayer::SetWeaponVisibility(class AWeapon* Weapon, bool Value)
 
 	for (auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 		Tuple.Value->SetVisibility(Value);
-}
-
-void AKraverPlayer::SetViewType(EViewType Type)
-{
-	ViewType = Type;
-	Server_SetViewType(Type);
-}
-
-void AKraverPlayer::Server_SetViewType_Implementation(EViewType Type)
-{
-	ViewType = Type;
 }
 
 void AKraverPlayer::EquipButtonPressed()
@@ -391,7 +378,7 @@ void AKraverPlayer::ChangeView()
 	switch (ViewType)
 	{
 	case EViewType::FIRST_PERSON:
-		SetViewType(EViewType::THIRD_PERSON);
+		ViewType = EViewType::THIRD_PERSON;
 		Camera->AttachToComponent(Tp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
 
 		RefreshSpringArm();
@@ -407,7 +394,7 @@ void AKraverPlayer::ChangeView()
 		}
 		break;
 	case EViewType::THIRD_PERSON:
-		SetViewType(EViewType::FIRST_PERSON);
+		ViewType = EViewType::FIRST_PERSON;
 		Camera->AttachToComponent(Fp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
 
 		RefreshSpringArm();

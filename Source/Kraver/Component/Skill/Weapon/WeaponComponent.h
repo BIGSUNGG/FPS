@@ -25,11 +25,11 @@ protected:
 
 	// Delegate
 	UFUNCTION()
-		virtual void OnAddOnDelegateEvent(UObject* Object);
+	virtual void OnAddOnDelegateEvent(UObject* Object);
 	UFUNCTION()
-		virtual void OnRemoveOnDelegateEvent(UObject* Object);
+	virtual void OnRemoveOnDelegateEvent(UObject* Object);
 	UFUNCTION()
-		virtual void OnBeforeAttackEvent();
+	virtual void OnBeforeAttackEvent();
 
 public:
 	// Getter Setter

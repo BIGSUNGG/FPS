@@ -68,25 +68,28 @@ protected:
 
 	// Rpc
 	UFUNCTION(Server, Reliable)
-		virtual void Server_WallRunJumpSuccess(FVector PendingLaunchVelocity);
+	virtual void Server_WallRunJumpSuccess(FVector PendingLaunchVelocity);
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_WallRunJumpSuccess(FVector PendingLaunchVelocity);
+	virtual void Multicast_WallRunJumpSuccess(FVector PendingLaunchVelocity);
 	UFUNCTION(Server, Reliable)
-		virtual void Server_WallRunEnd();
+	virtual void Server_WallRunEnd();
+
 	UFUNCTION(Server, Reliable)
-		virtual void Server_DoubleJump(FVector PendingLaunchVelocity);
+	virtual void Server_DoubleJump(FVector PendingLaunchVelocity);
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_DoubleJump(FVector PendingLaunchVelocity);
+	virtual void Multicast_DoubleJump(FVector PendingLaunchVelocity);
+
 	UFUNCTION(Server, Reliable)
-		virtual void Server_WallRunHorizonSuccess();
+	virtual void Server_WallRunHorizonSuccess();
 	UFUNCTION(Server, Reliable)
-		virtual void Server_WallRunVerticalSuccess();
+	virtual void Server_WallRunVerticalSuccess();
 	UFUNCTION(Server, Reliable)
-		virtual void Server_WallRunSuccess(FVector Location, FRotator Rotation, FVector Velocity, FVector PendingLaunchVelocity);
+	virtual void Server_WallRunSuccess(FVector Location, FRotator Rotation, FVector Velocity, FVector PendingLaunchVelocity);
+
 	UFUNCTION(Server, Reliable)
-		virtual void Server_SlideSuccess(FVector Velocity);
+	virtual void Server_SlideSuccess(FVector Velocity);
 	UFUNCTION(Server, Reliable)
-		virtual void Server_SlideEnd();
+	virtual void Server_SlideEnd();
 	UFUNCTION(Server, Reliable)
 		virtual void Server_SlideUpdate(FVector Velocity);
 
@@ -103,14 +106,14 @@ protected:
 	// Advanced Movement / Double Jump
 	bool bCanDoubleJump = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Movement|AdvancedMovement", meta = (AllowPrivateAccess = "true"))
-		FVector DobuleJumpPower = FVector(600, 600, 450);
+	FVector DobuleJumpPower = FVector(600, 600, 450);
 
 	// Advanced Movement / Wall Run
 	UPROPERTY(Replicated)
-		EWallRunState CurWallRunState;
+	EWallRunState CurWallRunState;
 	void SetCurWallRunState(EWallRunState Value);
 	UFUNCTION(Server, Reliable)
-		void Server_SetCurWallRunState(EWallRunState Value);
+	void Server_SetCurWallRunState(EWallRunState Value);
 
 	bool bWallRunHorizonSupressed = false;
 	bool bWallRunVerticalSupressed = false;
@@ -127,10 +130,10 @@ protected:
 
 	// Advanced Movement / Slide
 	UPROPERTY(Replicated)
-		bool IsSliding = false;
+	bool IsSliding = false;
 	void SetIsSliding(bool Value);
 	UFUNCTION(Server, Reliable)
-		void Server_SetIsSliding(bool Value);
+	void Server_SetIsSliding(bool Value);
 
 	bool bSlideSupressed = false;
 	float MinSlideRequireSpeed = 600.f;

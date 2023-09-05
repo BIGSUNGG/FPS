@@ -25,22 +25,23 @@ protected:
 
 	// Delegate
 	UFUNCTION()
-		virtual void OnSubAttackStartEvent();
+	virtual void OnSubAttackStartEvent();
 	UFUNCTION()
-		virtual void OnServerBeforeTakeDamageEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	virtual void OnServerBeforeTakeDamageEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 	// Rpc
 	UFUNCTION(Server, Reliable)
-		virtual void Server_ParryStart();
+	virtual void Server_ParryStart();
 	UFUNCTION(Client, Reliable)
-		virtual void Client_ParryStart();
+	virtual void Client_ParryStart();
 
 	UFUNCTION(Server, Reliable)
-		virtual void Server_ParryEnd();
+	virtual void Server_ParryEnd();
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		float ParryDelay = 0.6f;
+	float ParryDelay = 0.6f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		float ParryDuration = 0.4f;
+	float ParryDuration = 0.4f;
+
 	bool IsParrying = false;
 	bool bCanParry = true;
 	FTimerHandle ParryDelayTimer;
@@ -48,7 +49,7 @@ protected:
 
 	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* ParryMontageTpp;
+	UAnimMontage* ParryMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* ParryMontageFpp;
+	UAnimMontage* ParryMontageFpp;
 };

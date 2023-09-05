@@ -20,7 +20,7 @@ public:
 protected:
 	// Rpc
 	UFUNCTION(NetMulticast, Reliable)
-		virtual void Multicast_CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
+	virtual void Multicast_CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
 
 public:
 	FPlayerStateDeathDele OnCreatureDeath;

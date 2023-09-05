@@ -28,11 +28,11 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class UStaticMesh> ScopeStaticMesh;
+	TObjectPtr<class UStaticMesh> ScopeStaticMesh;
 	UStaticMeshComponent* ScopeMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component|Attach", meta = (AllowPrivateAccess = "true"))
-		FName ScopeSocketName = "SOCKET_Scope";
+	FName ScopeSocketName = "SOCKET_Scope";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component|Attach", meta = (AllowPrivateAccess = "true"))
-		FVector ScopeRelativeLocation;
+	FVector ScopeRelativeLocation;
 };

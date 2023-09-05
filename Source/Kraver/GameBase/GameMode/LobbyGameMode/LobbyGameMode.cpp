@@ -9,7 +9,7 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	Super::PostLogin(NewPlayer);
 
 	int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num(); // 현재 들어와있는 플레이어의 수를 구함
-	if (NumberOfPlayers == 4)
+	if (NumberOfPlayers >= NeedPlayer)
 	{
 		UWorld* World = GetWorld();
 		if (World)

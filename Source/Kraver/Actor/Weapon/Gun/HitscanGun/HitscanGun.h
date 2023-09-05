@@ -20,7 +20,7 @@ public:
 protected:
 	// Rpc
 	UFUNCTION(Server, Reliable)
-		virtual void Server_FireBulletResult(const TArray<FHitResult>& BulletHitResults);
+	virtual void Server_FireBulletResult(const TArray<FHitResult>& BulletHitResults);
 
 	// Function
 	virtual void FireBullet() override;
@@ -29,7 +29,7 @@ protected:
 
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
-		float BulletDistance = 20000.f; // ÃÑ¾Ë ±æÀÌ
+	float BulletDistance = 20000.f; // ÃÑ¾Ë ±æÀÌ
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
-		float BulletRadius = 0.f; // ÃÑ¾Ë ¹üÀ§
+	float BulletRadius = 0.f; // ÃÑ¾Ë ¹üÀ§
 };

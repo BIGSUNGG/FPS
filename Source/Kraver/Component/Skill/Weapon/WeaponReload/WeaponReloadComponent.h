@@ -26,15 +26,9 @@ protected:
 
 	// Delegate
 	UFUNCTION()
-		virtual void OnSkillFirstEvent();
+	virtual void OnSkillFirstEvent();
 	UFUNCTION()
-		virtual void OnReload_Insert_MagazineEvent();
-	UFUNCTION()
-		virtual void OnSubAttackStartEvent();
-	UFUNCTION()
-		virtual void OnFireEvent();
-
-	virtual void OnBeforeAttackEvent() override;
+	virtual void OnReload_Insert_MagazineEvent();
 
 	// Func
 	virtual void ReloadStart();
@@ -56,21 +50,21 @@ protected:
 	AGun* OwnerGun;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload", Meta = (AllowPrivateAccess = true))
-		bool bReloadWhileSprint = false;
+	bool bReloadWhileSprint = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attachment", Meta = (AllowPrivateAccess = true))
-		FVector GrabRelativeLocation;
+	FVector GrabRelativeLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attachment", Meta = (AllowPrivateAccess = true))
-		FRotator GrabRelativeRotation;
+	FRotator GrabRelativeRotation;
 
 	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* ReloadMontageTpp;
+	UAnimMontage* ReloadMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* ReloadMontageFpp;
+	UAnimMontage* ReloadMontageFpp;
 
 	// Sound
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", Meta = (AllowPrivateAccess = true))
-		class USoundCue* ReloadSound;
+	class USoundCue* ReloadSound;
 
 };

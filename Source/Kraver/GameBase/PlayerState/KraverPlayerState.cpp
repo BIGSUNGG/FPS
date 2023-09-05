@@ -19,10 +19,8 @@ void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, AP
 	
 	AKraverPlayer* NewPlayer = Cast<AKraverPlayer>(NewPawn);
 	if (!NewPlayer)
-	{
-		KR_LOG(Error, TEXT("New Player class is not AKraverPlayer"));
 		return;
-	}
+
 	OnNewPlayer.Broadcast(NewPlayer);
 
 	if(NewPawn->IsLocallyControlled())

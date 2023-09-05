@@ -27,9 +27,10 @@ protected:
 	virtual void OnRemoveOnDelegateEvent(UObject* Object) override;
 
 	UFUNCTION()
-		virtual void OnGrabMagazineEvent();
+	virtual void OnGrabMagazineEvent();
 	UFUNCTION()
-		virtual void OnInsertMagazineEvent();
+	virtual void OnInsertMagazineEvent();
+
 protected:
 	class AGun* OwnerGun;
 	bool IsGrabMagazine = false;

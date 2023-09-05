@@ -628,7 +628,7 @@ void ACreature::OnServerDeathEvent(float DamageAmount, FDamageEvent const& Damag
 
 	if (DamageType->bCanSimulate)
 	{
-		SimulateMesh();
+		OnServer_SimulateMesh();
 	}
 
 }
@@ -873,7 +873,7 @@ void ACreature::SubAttackEnd()
 
 void ACreature::Server_OnAssassinatedEndEvent_Implementation()
 {
-	SimulateMesh();
+	OnServer_SimulateMesh();
 }
 
 void ACreature::PlayLandedMontage()
@@ -882,29 +882,12 @@ void ACreature::PlayLandedMontage()
 	GetMesh()->GetAnimInstance()->Montage_Play(CreatureAnim->GetLandedMontage());
 }
 
-void ACreature::SimulateMesh()
+void ACreature::OnServer_SimulateMesh()
 {
 	if (!IS_SERVER())
 	{
 		KR_LOG(Error, TEXT("Function Called on client"));
 		return;
-	}
-
-	AKraverGameMode* GameMode = GetWorld()->GetAuthGameMode<AKraverGameMode>();
-	if(GameMode)
-	{
-		FTimerHandle RespawnTimer;
-		GetWorldTimerManager().SetTimer(
-			RespawnTimer,
-			[=]() { GameMode->RequestRespawn(this, Controller); },
-			5.f,
-			false,
-			5.f
-		);
-	}
-	else
-	{
-		KR_LOG(Warning, TEXT("GameMode is nullptr"));
 	}
 
 	Client_SimulateMesh();

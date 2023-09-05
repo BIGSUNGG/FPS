@@ -31,7 +31,7 @@ protected:
 	virtual void HitEvent(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);
 	
 	UFUNCTION()
-		virtual void OnCollisionEvent(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) final;
+	virtual void OnCollisionEvent(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) final;
 
 	virtual void GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);
 
@@ -40,20 +40,19 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
-		UStaticMeshComponent* BulletMesh;
+	UStaticMeshComponent* BulletMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
-		UProjectileMovementComponent* ProjectileMovementComponent;
+	UProjectileMovementComponent* ProjectileMovementComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))
-		float BulletDamage = 0.f;
+	float BulletDamage = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))
-		int32 MaxHitCount = 1;
-
+	int32 MaxHitCount = 1;
 	int32 HitCount = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<UKraverDamageType> HitDamageType;
+	TSubclassOf<UKraverDamageType> HitDamageType;
 
 	float BulletLifeTime = 5.f;
 };

@@ -38,7 +38,7 @@ public:
 
 protected:
 	UFUNCTION(Server, Reliable)
-		void Server_SetMovementState(EMovementState value);
+	void Server_SetMovementState(EMovementState value);
 
 public:
 	// Getter Setter
@@ -58,27 +58,27 @@ protected:
 	float InputRightRatio = 1.f;
 
 	UPROPERTY(Replicated , VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		bool IsJumping	 = false;
+	bool IsJumping	 = false;
 	void SetIsJumping(bool value);
 	UFUNCTION(Server, Reliable)
-		void Server_SetIsJumping(bool value);
+	void Server_SetIsJumping(bool value);
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
-		EMovementState MovementState = EMovementState::WALK;
+	EMovementState MovementState = EMovementState::WALK;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float SprintSpeed = 900.f; // EMovementState가 SPRINT가 되었을때 설정할 캐릭터 속도
+	float SprintSpeed = 900.f; // EMovementState가 SPRINT가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float RunSpeed = 400.f; // EMovementState가 RUN가 되었을때 설정할 캐릭터 속도
+	float RunSpeed = 400.f; // EMovementState가 RUN가 되었을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float WalkSpeed = 400.f; // EMovementState가 WALK가 되었을때 설정할 캐릭터 속도
+	float WalkSpeed = 400.f; // EMovementState가 WALK가 되었을때 설정할 캐릭터 속도
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float CrouchWalkSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
+	float CrouchWalkSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float CrouchRunSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
+	float CrouchRunSpeed = 200.f; // 앉았을때 설정할 캐릭터 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-		float CrouchSprintSpeed = 450.f; // 앉았을때 설정할 캐릭터 속도
+	float CrouchSprintSpeed = 450.f; // 앉았을때 설정할 캐릭터 속도
 
 	// Default Movement
 	float DefaultGravity = 0.f;

@@ -19,8 +19,17 @@ public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
 	virtual void CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
-	virtual void RequestRespawn(ACreature* ElimmedCharacter, AController* ElimmedController);
+	virtual void RequestRespawn(AKraverPlayer* RespawnPlayer, AController* PlayerController);
+	virtual void RequsetSpectate(AController* PlayerController);
 
 protected:
+	// Respawn
+	bool bRespawn = true;
+	FTimerHandle RespawnTimer;
+	float RespawnTime = 4.f;
 
+	// Spectator
+	bool bSpectate = true;
+	FTimerHandle SpectateTimer;
+	float SpectateStartTime = 2.f;
 };

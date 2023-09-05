@@ -18,16 +18,16 @@ class KRAVER_API UDamageDirectionWidget : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-		bool Initialize(AActor* InActor, FVector InLocation);
+	bool Initialize(AActor* InActor, FVector InLocation);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-		void StartWidget();
+	void StartWidget();
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-		void EndWidget();
+	void EndWidget();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-		AActor* Actor;
+	AActor* Actor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-		FVector HitLocation;
+	FVector HitLocation;
 };

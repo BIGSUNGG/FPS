@@ -32,11 +32,11 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class UStaticMesh> MagazineStaticMesh;
+	TObjectPtr<class UStaticMesh> MagazineStaticMesh;
 	UStaticMeshComponent* MagazineMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component|Attach", meta = (AllowPrivateAccess = "true"))
-		FName MagazineSocketName = "SOCKET_Magazine";
+	FName MagazineSocketName = "SOCKET_Magazine";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component|Attach", meta = (AllowPrivateAccess = "true"))
-		FVector MagazineRelativeLocation;
+	FVector MagazineRelativeLocation;
 };

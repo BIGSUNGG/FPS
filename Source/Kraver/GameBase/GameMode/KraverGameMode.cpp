@@ -2,9 +2,11 @@
 
 
 #include "KraverGameMode.h"
-#include Creature_h
+#include KraverPlayer_h
+#include KraverSpectator_h
 #include KraverGameState_h
 #include KraverPlayerState_h
+#include KraverPlayerController_h
 
 AKraverGameMode::AKraverGameMode()
 {
@@ -30,24 +32,63 @@ void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AContro
 		UE_LOG(LogTemp, Fatal, TEXT("GameState Class is not KraerGameState Class"));
 		return;
 	}
+
+	if (DeadCreature->IsPlayerControlled() && bRespawn)
+	{
+		AKraverPlayer* PlayerCharacter = Cast<AKraverPlayer>(DeadCreature);
+		if(PlayerCharacter)
+		{
+			GetWorldTimerManager().SetTimer(
+				RespawnTimer,
+				[=]() { RequestRespawn(PlayerCharacter, VictimController); },
+				RespawnTime,
+				false,
+				RespawnTime
+			);
+		}
+	}
+
+	if (bSpectate)
+	{
+		GetWorldTimerManager().SetTimer(
+			SpectateTimer,
+			[=]() { RequsetSpectate(VictimController); },
+			SpectateStartTime,
+			false,
+			SpectateStartTime
+		);
+	}
 }
 
-void AKraverGameMode::RequestRespawn(ACreature* ElimmedCharacter, AController* ElimmedController)
+void AKraverGameMode::RequestRespawn(AKraverPlayer* RespawnPlayer, AController* PlayerController)
 {
-	if (!ElimmedCharacter || !ElimmedCharacter->IsPlayerControlled())
+	if (!RespawnPlayer || !PlayerController)
 		return;
 
-	if (ElimmedCharacter)
-	{
-		ElimmedCharacter->Reset();
-		ElimmedCharacter->Destroy();
-	}
+	AKraverPlayerController* KraverController = Cast<AKraverPlayerController>(PlayerController);
+	if (!KraverController)
+		return;
 
-	if (Cast<APlayerController>(ElimmedController))
-	{
-		TArray<AActor*> PlayerStarts;
-		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
-		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
-		RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
-	}
+	KR_LOG(Log, TEXT("Player Respawn"));
+
+	RespawnPlayer->Reset();
+	RespawnPlayer->Destroy();
+
+	TArray<AActor*> PlayerStarts;
+	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
+	int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
+	RestartPlayerAtPlayerStart(KraverController, PlayerStarts[Selection]);
+	
+}
+
+void AKraverGameMode::RequsetSpectate(AController* PlayerController)
+{
+	KR_LOG(Log, TEXT("Spectate Start"));
+
+	AKraverPlayerController* KraverController = Cast<AKraverPlayerController>(PlayerController);
+	if (!KraverController)
+		return;
+
+	//AKraverSpectator* Spectator = Cast<AKraverSpectator>(GetWorld()->SpawnActor(SpectatorClass));
+
 }
