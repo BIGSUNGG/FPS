@@ -38,6 +38,9 @@ public:
 
 protected:
 	UFUNCTION(Server, Reliable)
+	virtual void Server_JumpStart();
+		
+	UFUNCTION(Server, Reliable)
 	void Server_SetMovementState(EMovementState value);
 
 public:
@@ -58,10 +61,7 @@ protected:
 	float InputRightRatio = 1.f;
 
 	UPROPERTY(Replicated , VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-	bool IsJumping	 = false;
-	void SetIsJumping(bool value);
-	UFUNCTION(Server, Reliable)
-	void Server_SetIsJumping(bool value);
+	bool IsJumping = false;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
 	EMovementState MovementState = EMovementState::WALK;

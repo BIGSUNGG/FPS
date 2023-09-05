@@ -448,11 +448,6 @@ void AKraverPlayer::Multicast_RefreshSpringArm_Implementation(FVector Vector, fl
 
 void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FTransform Transform, FVector Direction)
 {
-	Multicast_ThrowWeapon(Weapon, Transform, Direction);
-}
-
-void AKraverPlayer::Multicast_ThrowWeapon_Implementation(AWeapon* Weapon, FTransform Transform, FVector Direction)
-{
 	Weapon->GetTppWeaponMesh()->SetWorldTransform(Transform, false, nullptr, ETeleportType::TeleportPhysics);
 	Weapon->GetTppWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
 	Weapon->GetTppWeaponMesh()->AddImpulse(Direction * WeaponThrowPower * Weapon->GetTppWeaponMesh()->GetMass());

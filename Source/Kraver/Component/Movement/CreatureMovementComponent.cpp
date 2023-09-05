@@ -50,7 +50,7 @@ void UCreatureMovementComponent::TickComponent(float DeltaTime, ELevelTick TickT
 
 void UCreatureMovementComponent::Landed(const FHitResult& Hit)
 {
-	SetIsJumping(false);
+	IsJumping = false;
 }
 
 void UCreatureMovementComponent::MoveForward(float NewAxisValue)
@@ -96,10 +96,12 @@ void UCreatureMovementComponent::MoveRight(float NewAxisValue)
 
 void UCreatureMovementComponent::JumpStart()
 {
-	if (OwnerCreature->GetMovementComponent()->IsFalling() == false)
-		SetIsJumping(true);
+	if (OwnerCreature->GetMovementComponent()->IsFalling())
+		return;
 
+	IsJumping = true;
 	OwnerCreature->Jump();
+	Server_JumpStart();
 }
 
 void UCreatureMovementComponent::JumpEnd()
@@ -115,17 +117,6 @@ void UCreatureMovementComponent::Crouch()
 void UCreatureMovementComponent::UnCrouch()
 {
 	OwnerCreature->UnCrouch();
-}
-
-void UCreatureMovementComponent::SetIsJumping(bool value)
-{
-	IsJumping = value;
-	Server_SetIsJumping(value);
-}
-
-void UCreatureMovementComponent::Server_SetIsJumping_Implementation(bool value)
-{
-	IsJumping = value;
 }
 
 void UCreatureMovementComponent::SetMovementState(EMovementState value)
@@ -149,6 +140,11 @@ void UCreatureMovementComponent::SetMovementState(EMovementState value)
 		break;
 	}
 	Server_SetMovementState(value);
+}
+
+void UCreatureMovementComponent::Server_JumpStart_Implementation()
+{
+
 }
 
 void UCreatureMovementComponent::Server_SetMovementState_Implementation(EMovementState value)

@@ -81,7 +81,7 @@ void UAdvanceMovementComponent::JumpStart()
 			UnCrouch();
 			bWantToJump = true;
 		}
-		OwnerCreature->Jump();
+		Super::JumpStart();
 	}
 	else if (GetIsWallRunning())
 		WallRunJump();
@@ -251,9 +251,8 @@ bool UAdvanceMovementComponent::WallRunHorizonUpdate()
 	if (WallRunHorizonMovement(OwnerCreature->GetActorLocation(), CalculateRightWallRunEndVector(), -1.f))
 	{
 		if (!GetIsWallRunning())
-			WallRunStart();
+			WallRunStart(EWallRunState::WALLRUN_RIGHT);
 
-		SetCurWallRunState(EWallRunState::WALLRUN_RIGHT);
 		return true;
 	}
 	else if (CurWallRunState == EWallRunState::WALLRUN_RIGHT)
@@ -264,9 +263,8 @@ bool UAdvanceMovementComponent::WallRunHorizonUpdate()
 	else if (WallRunHorizonMovement(OwnerCreature->GetActorLocation(), CalculateLeftWallRunEndVector(), 1.f))
 	{
 		if (!GetIsWallRunning())
-			WallRunStart();
+			WallRunStart(EWallRunState::WALLRUN_LEFT);
 
-		SetCurWallRunState(EWallRunState::WALLRUN_LEFT);
 		return true;
 	}
 	else if (CurWallRunState != EWallRunState::WALLRUN_VERTICAL)
@@ -293,9 +291,8 @@ bool UAdvanceMovementComponent::WallRunVerticalUpdate()
 	if (WallRunVerticalMovement(OwnerCreature->GetActorLocation(), CalculateVerticaltWallRunEndVector()))
 	{
 		if (!GetIsWallRunning())
-			WallRunStart();
+			WallRunStart(EWallRunState::WALLRUN_VERTICAL);
 
-		SetCurWallRunState(EWallRunState::WALLRUN_VERTICAL);
 		CurWallRunVerticalSpeed = FMath::FInterpTo(CurWallRunVerticalSpeed, 0.f, GetWorld()->GetDeltaSeconds(), 0.75f);
 		return true;
 	}
@@ -408,6 +405,11 @@ void UAdvanceMovementComponent::ResetSlideSuppression()
 	OwnerCreature->GetWorldTimerManager().ClearTimer(SuppressSlideTimer);
 }
 
+void UAdvanceMovementComponent::Server_WallRunStart_Implementation(EWallRunState State)
+{
+	CurWallRunState = State;
+}
+
 bool UAdvanceMovementComponent::WallRunVerticalMovement(FVector Start, FVector End)
 {
 	FCollisionQueryParams ObjectParams(NAME_None, false, OwnerCreature);
@@ -433,12 +435,14 @@ bool UAdvanceMovementComponent::WallRunVerticalMovement(FVector Start, FVector E
 	return false;
 }
 
-void UAdvanceMovementComponent::WallRunStart()
+void UAdvanceMovementComponent::WallRunStart(EWallRunState State)
 {
 	if (GetIsWallRunning())
 		return;
 
 	bCanDoubleJump = true;
+	CurWallRunState = State;
+	Server_WallRunStart(State);
 }
 
 void UAdvanceMovementComponent::WallRunEnd(float ResetTime)
@@ -446,7 +450,7 @@ void UAdvanceMovementComponent::WallRunEnd(float ResetTime)
 	if (GetIsWallRunning() == false)
 		return;
 
-	SetCurWallRunState(EWallRunState::NONE);
+	CurWallRunState = EWallRunState::NONE;
 	OwnerCreature->GetCharacterMovement()->GravityScale = DefaultGravity;
 	SuppressWallRunHorizion(ResetTime);
 	SuppressWallRunVertical(ResetTime);
@@ -458,7 +462,7 @@ void UAdvanceMovementComponent::WallRunHorizonEnd(float ResetTime)
 	if (GetIsWallRunning() == false)
 		return;
 
-	SetCurWallRunState(EWallRunState::NONE);
+	CurWallRunState = EWallRunState::NONE;
 	OwnerCreature->GetCharacterMovement()->GravityScale = DefaultGravity;
 	SuppressWallRunHorizion(ResetTime);
 	Server_WallRunEnd();
@@ -469,7 +473,7 @@ void UAdvanceMovementComponent::WallRunVerticalEnd(float ResetTime)
 	if (GetIsWallRunning() == false)
 		return;
 
-	SetCurWallRunState(EWallRunState::NONE);
+	CurWallRunState = EWallRunState::NONE;
 	OwnerCreature->GetCharacterMovement()->GravityScale = DefaultGravity;
 	SuppressWallRunVertical(ResetTime);
 	Server_WallRunEnd();
@@ -587,6 +591,7 @@ void UAdvanceMovementComponent::Multicast_WallRunJumpSuccess_Implementation(FVec
 
 void UAdvanceMovementComponent::Server_WallRunEnd_Implementation()
 {
+	CurWallRunState = EWallRunState::NONE;
 	OwnerCreature->GetCharacterMovement()->GravityScale = DefaultGravity;
 }
 
@@ -646,26 +651,4 @@ void UAdvanceMovementComponent::Server_SlideEnd_Implementation()
 void UAdvanceMovementComponent::Server_SlideUpdate_Implementation(FVector Velocity)
 {
 	OwnerCreature->GetCharacterMovement()->Velocity = Velocity;
-}
-
-void UAdvanceMovementComponent::SetCurWallRunState(EWallRunState Value)
-{
-	CurWallRunState = Value;
-	Server_SetCurWallRunState(Value);
-}
-
-void UAdvanceMovementComponent::Server_SetCurWallRunState_Implementation(EWallRunState Value)
-{
-	CurWallRunState = Value;
-}
-
-void UAdvanceMovementComponent::SetIsSliding(bool Value)
-{
-	IsSliding = Value;
-	Server_SetIsSliding(Value);
-}
-
-void UAdvanceMovementComponent::Server_SetIsSliding_Implementation(bool Value)
-{
-	IsSliding = Value;
 }

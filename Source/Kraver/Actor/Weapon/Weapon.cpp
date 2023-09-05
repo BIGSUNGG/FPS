@@ -166,7 +166,7 @@ bool AWeapon::OnServer_Equipped(ACreature* Character)
 		return false;
 
 	SetOwner(Character);
-	SetOwnerCreature(Character);
+	OwnerCreature = Character;
 	WeaponState = EWeaponState::EQUIPPED;
 
 	EquipEvent();
@@ -224,7 +224,7 @@ bool AWeapon::OnServer_UnEquipped()
 	}
 
 	ACreature* CreaturePtr = OwnerCreature;
-	SetOwnerCreature(nullptr);
+	OwnerCreature = nullptr;
 	WeaponState = EWeaponState::NONE;
 
 	UnEquipEvent();
@@ -296,7 +296,7 @@ void AWeapon::OnAttackStartEvent()
 		return;
 	}
 
-	SetIsAttacking(true);
+	IsAttacking = true;
 
 	if (bCanAttack)
 	{
@@ -308,6 +308,8 @@ void AWeapon::OnAttackStartEvent()
 	}
 
 	OnAttackStart.Broadcast();
+
+	Server_OnAttackStartEvent();
 }
 
 void AWeapon::OnAttackEndEvent()
@@ -316,9 +318,11 @@ void AWeapon::OnAttackEndEvent()
 	if (IsAttacking == false)
 		return;
 
-	SetIsAttacking(false);
+	IsAttacking = false;
 	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle);
 	OnAttackEnd.Broadcast();
+
+	Server_OnAttackEndEvent();
 }
 
 void AWeapon::OnSubAttackStartEvent()
@@ -329,14 +333,38 @@ void AWeapon::OnSubAttackStartEvent()
 	if(!CanSubAttack())
 		return;
 
-	SetIsSubAttacking(true);
+	IsSubAttacking = true;
 	OnSubAttackStart.Broadcast();
+
+	Server_OnSubAttackStartEvent();
 }
 
 void AWeapon::OnSubAttackEndEvent()
 {
-	SetIsSubAttacking(false);
+	IsSubAttacking = false;
 	OnSubAttackEnd.Broadcast();
+
+	Server_OnSubAttackEndEvent();
+}
+
+void AWeapon::Server_OnAttackStartEvent_Implementation()
+{
+	IsAttacking = true;
+}
+
+void AWeapon::Server_OnAttackEndEvent_Implementation()
+{
+	IsAttacking = false;
+}
+
+void AWeapon::Server_OnSubAttackStartEvent_Implementation()
+{
+	IsSubAttacking = true;
+}
+
+void AWeapon::Server_OnSubAttackEndEvent_Implementation()
+{
+	IsSubAttacking = false;
 }
 
 void AWeapon::Server_OnAttackEvent_Implementation()
@@ -486,37 +514,4 @@ void AWeapon::UnEquipEvent()
 void AWeapon::AddWeaponPrimitive(FString Key, UPrimitiveComponent* Value)
 {
 	WeaponTppPrimitiveInfo.Add(Key, Value);
-}
-
-void AWeapon::SetOwnerCreature(ACreature* pointer)
-{
-	OwnerCreature = pointer;
-	Server_SetOwnerCreature(pointer);
-}
-
-void AWeapon::Server_SetOwnerCreature_Implementation(ACreature* pointer)
-{
-	OwnerCreature = pointer;
-}
-
-void AWeapon::SetIsAttacking(bool Value)
-{
-	IsAttacking = Value;
-	Server_SetIsAttacking(Value);
-}
-
-void AWeapon::Server_SetIsAttacking_Implementation(bool Value)
-{
-	IsAttacking = Value;
-}
-
-void AWeapon::SetIsSubAttacking(bool Value)
-{
-	IsSubAttacking = Value;
-	Server_SetIsSubAttacking(Value);
-}
-
-void AWeapon::Server_SetIsSubAttacking_Implementation(bool Value)
-{
-	IsSubAttacking = Value;
 }

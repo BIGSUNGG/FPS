@@ -12,10 +12,8 @@ bool AShotGun::RefillAmmo()
 	--TotalAmmo;
 
 	if (!HasAuthority())
-	{
-		Server_SetCurAmmo(CurAmmo);
-		Server_SetTotalAmmo(TotalAmmo);
-	}
+		Server_RefillAmmo();
+
 	return true;
 }
 

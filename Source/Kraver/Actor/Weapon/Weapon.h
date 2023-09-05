@@ -49,9 +49,18 @@ public:
 	virtual void OnSubAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
 	UFUNCTION()
 	virtual void OnSubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
-
 protected:
 	// Rpc
+	UFUNCTION(Server, Reliable)
+	virtual void Server_OnAttackStartEvent();
+	UFUNCTION(Server, Reliable)
+	virtual void Server_OnAttackEndEvent(); 
+
+	UFUNCTION(Server, Reliable)
+	virtual void Server_OnSubAttackStartEvent(); 
+	UFUNCTION(Server, Reliable)
+	virtual void Server_OnSubAttackEndEvent();
+
 	UFUNCTION(Server, Reliable)
 	virtual void Server_OnAttackEvent();
 	UFUNCTION(NetMulticast, Reliable)
@@ -113,8 +122,6 @@ public:
 	virtual UAnimMontage* GetHolsterMontageTpp() { return HolsterMontageTpp; }
 	virtual UAnimMontage* GetHolsterMontageFpp() { return HolsterMontageFpp; }
 
-	void SetOwnerCreature(ACreature* pointer);
-
 public:
 	FAttackDele OnAttack;
 	FAttackDele OnBeforeAttack;
@@ -151,8 +158,6 @@ public:
 protected:
 	UPROPERTY(Replicated)
 	class ACreature* OwnerCreature = nullptr;
-	UFUNCTION(Server, Reliable)
-	void Server_SetOwnerCreature(ACreature* pointer);
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState)
 	EWeaponState WeaponState = EWeaponState::NONE; // 무기 상태
@@ -211,15 +216,8 @@ protected:
 
 	UPROPERTY(Replicated)
 	bool IsAttacking = false; // 공격중인지
-	void SetIsAttacking(bool Value);
-	UFUNCTION(Server, Reliable)
-	void Server_SetIsAttacking(bool Value);
-
 	UPROPERTY(Replicated)
 	bool IsSubAttacking = false; // 보조 공격중인지
-	void SetIsSubAttacking(bool Value);
-	UFUNCTION(Server, Reliable)
-	void Server_SetIsSubAttacking(bool Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 	bool bAttackWhileSprint = true;

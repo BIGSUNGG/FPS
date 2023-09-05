@@ -43,7 +43,7 @@ protected:
 	bool WallRunVerticalUpdate();
 	bool WallRunHorizonMovement(FVector Start, FVector End, float WallRunDirection);
 	bool WallRunVerticalMovement(FVector Start, FVector End);
-	void WallRunStart();
+	void WallRunStart(EWallRunState State);
 	void WallRunEnd(float ResetTime);
 	void WallRunHorizonEnd(float ResetTime);
 	void WallRunVerticalEnd(float ResetTime);
@@ -67,6 +67,8 @@ protected:
 	void ResetSlideSuppression();
 
 	// Rpc
+	UFUNCTION(Server, Reliable)
+	virtual void Server_WallRunStart(EWallRunState State);
 	UFUNCTION(Server, Reliable)
 	virtual void Server_WallRunJumpSuccess(FVector PendingLaunchVelocity);
 	UFUNCTION(NetMulticast, Reliable)
@@ -111,9 +113,6 @@ protected:
 	// Advanced Movement / Wall Run
 	UPROPERTY(Replicated)
 	EWallRunState CurWallRunState;
-	void SetCurWallRunState(EWallRunState Value);
-	UFUNCTION(Server, Reliable)
-	void Server_SetCurWallRunState(EWallRunState Value);
 
 	bool bWallRunHorizonSupressed = false;
 	bool bWallRunVerticalSupressed = false;
@@ -131,9 +130,6 @@ protected:
 	// Advanced Movement / Slide
 	UPROPERTY(Replicated)
 	bool IsSliding = false;
-	void SetIsSliding(bool Value);
-	UFUNCTION(Server, Reliable)
-	void Server_SetIsSliding(bool Value);
 
 	bool bSlideSupressed = false;
 	float MinSlideRequireSpeed = 600.f;

@@ -75,11 +75,11 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 	if (CurHp <= 0)
 	{
 		CurHp = 0;
-		Server_SetCurHp(CurHp);
+		Client_SetCurHp(CurHp);
 		if (DamageResult.bAlreadyDead == false)
 			Server_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 	}
-	Server_SetCurHp(CurHp);
+	Client_SetCurHp(CurHp);
 
 	UCombatComponent* CauserCobatComp = FindComponentByClassIncludeOwner<UCombatComponent>(DamageCauser);
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
@@ -350,7 +350,7 @@ void UCombatComponent::UnholsterWeapon(AWeapon* Weapon)
 	if (CurWeapon != Weapon)
 		HolsterWeapon(CurWeapon);
 
-	SetCurWeapon(Weapon);
+	CurWeapon = Weapon;
 	Weapon->Unholster();
 	OnClientUnholsterWeapon.Broadcast(Weapon);
 
@@ -366,7 +366,7 @@ bool UCombatComponent::HolsterWeapon(AWeapon* Weapon)
 	bool Success = Weapon->Holster();
 	if(Success)
 	{
-		SetCurWeapon(nullptr);
+		CurWeapon = nullptr;
 		OnClientHolsterWeapon.Broadcast(Weapon);
 
 		Server_HolsterWeapon(Weapon);
@@ -398,33 +398,6 @@ bool UCombatComponent::IsDead()
 		return true;
 
 	return false;
-}
-
-void UCombatComponent::SetCurWeapon(AWeapon* Weapon)
-{
-	CurWeapon = Weapon;
-	Server_SetCurWeapon(Weapon);
-}
-
-void UCombatComponent::Server_SetCurWeapon_Implementation(AWeapon* Weapon)
-{
-	CurWeapon = Weapon;
-}
-
-void UCombatComponent::Server_SetCurHp_Implementation(int32 value)
-{
-	CurHp = value;
-	Multicast_SetCurHp(value);
-}
-
-void UCombatComponent::Multicast_SetCurHp_Implementation(int32 value)
-{
-	CurHp = value;
-}
-
-void UCombatComponent::Server_SetMaxHp_Implementation(int32 value)
-{
-	MaxHp = value;
 }
 
 void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
@@ -490,8 +463,7 @@ void UCombatComponent::Client_EquipWeaponSuccess(AWeapon* Weapon)
 
 	HolsterWeapon(CurWeapon);
 
-	SetCurWeapon(Weapon);
-	Weapon->SetOwnerCreature(OwnerCreature);
+	CurWeapon = Weapon;
 
 	OnClientEquipWeaponSuccess.Broadcast(Weapon);
 
@@ -513,11 +485,13 @@ void UCombatComponent::Client_UnEquipWeaponSuccess(AWeapon* Weapon)
 
 void UCombatComponent::Server_UnholsterWeapon_Implementation(AWeapon* Weapon)
 {
+	CurWeapon = Weapon;
 	OnServerUnholsterWeapon.Broadcast(Weapon);
 }
 
 void UCombatComponent::Server_HolsterWeapon_Implementation(AWeapon* Weapon)
 {
+	CurWeapon = nullptr;
 	OnServerHolsterWeapon.Broadcast(Weapon);
 }
 
@@ -572,13 +546,17 @@ void UCombatComponent::Server_Death_Implementation(float DamageAmount, FDamageEv
 void UCombatComponent::Client_Death_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	KR_LOG(Log, TEXT("Dead By %s"), *DamageCauser->GetName());
-	Server_SetCurHp(CurHp);
 	OnClientDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
 void UCombatComponent::Multicast_Death_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	OnMulticastDeath.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+}
+
+void UCombatComponent::Client_SetCurHp_Implementation(int32 Value)
+{
+	CurHp = Value;
 }
 
 void UCombatComponent::OnRep_CurWeaponEvent(AWeapon* PrevWeapon)

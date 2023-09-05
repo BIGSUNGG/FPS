@@ -40,6 +40,8 @@ protected:
 	virtual void Server_OnAttackEvent_Implementation();
 	virtual void Multicast_OnAttackEvent_Implementation();
 
+	UFUNCTION(Server, Reliable)
+	virtual void Server_RefillAmmo();
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_ImpactBullet(FVector ImpactPos);
@@ -69,16 +71,10 @@ protected:
 	// Ammo
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
 	int32 MaxAmmo = 10.f; // 최대 총알 갯수
-	UFUNCTION(Server, Reliable)
-	void Server_SetMaxAmmo(int32 Ammo);
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
 	int32 CurAmmo = 10.f; // 현재 총알 갯수
-	UFUNCTION(Server, Reliable)
-	void Server_SetCurAmmo(int32 Ammo);
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
 	int32 TotalAmmo = 30.f; // 총 총알 갯수
-	UFUNCTION(Server, Reliable)
-	void Server_SetTotalAmmo(int32 Ammo);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
 	bool bInfinityAmmo = false;
 

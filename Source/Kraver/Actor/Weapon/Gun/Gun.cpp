@@ -98,9 +98,9 @@ bool AGun::RefillAmmo()
 	}
 	if (!HasAuthority())	
 	{
-		Server_SetCurAmmo(CurAmmo);
-		Server_SetTotalAmmo(TotalAmmo);
+		Server_RefillAmmo();
 	}
+
 	return true;
 }
 
@@ -160,11 +160,9 @@ void AGun::OnAttackEvent()
 
 	if (CurAmmo > 0)
 	{
-		if (!bInfinityAmmo)
+		if (!IS_SERVER() && !bInfinityAmmo)
 		{
 			--CurAmmo;
-			if (!HasAuthority())
-				Server_SetCurAmmo(CurAmmo);
 		}
 
 		FireBullet();
@@ -180,24 +178,11 @@ void AGun::OnAttackEvent()
 	Super::OnAttackEvent();
 }
 
-void AGun::Server_SetTotalAmmo_Implementation(int32 Ammo)
-{
-	TotalAmmo = Ammo;
-}
-
-void AGun::Server_SetCurAmmo_Implementation(int32 Ammo)
-{
-	CurAmmo = Ammo;
-}
-
-void AGun::Server_SetMaxAmmo_Implementation(int32 Ammo)
-{
-	MaxAmmo = Ammo;
-}
-
 void AGun::Server_OnAttackEvent_Implementation()
 {
 	Super::Server_OnAttackEvent_Implementation();
+
+	--CurAmmo;
 }
 
 void AGun::Multicast_OnAttackEvent_Implementation()
@@ -238,6 +223,11 @@ void AGun::OnServer_ImpactBullet(FVector ImpactPos)
 	}
 
 	Multicast_ImpactBullet(ImpactPos);
+}
+
+void AGun::Server_RefillAmmo_Implementation()
+{
+	RefillAmmo();
 }
 
 void AGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)

@@ -97,6 +97,10 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); 
 
+	// Hp
+	UFUNCTION(Client, Reliable)
+	void Client_SetCurHp(int32 Value);
+
 	// OnRep
 	UFUNCTION()
 	void OnRep_CurWeaponEvent(AWeapon* PrevWeapon);
@@ -183,9 +187,6 @@ protected:
 
 	UPROPERTY(ReplicatedUsing = OnRep_CurWeaponEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 	AWeapon* CurWeapon = nullptr; // 현재 무기
-	void SetCurWeapon(AWeapon* Weapon);
-	UFUNCTION(Server, Reliable)
-	void Server_SetCurWeapon(AWeapon* Weapon);
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponSlotEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 	TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
@@ -193,15 +194,8 @@ protected:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
 	int32 CurHp = 100.f; // 현재 Hp
-	UFUNCTION(Server, Reliable)
-	void Server_SetCurHp(int32 value);
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetCurHp(int32 value);
-
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
 	int32 MaxHp = 100.f; // 최대 Hp
-	UFUNCTION(Server, Reliable)
-	void Server_SetMaxHp(int32 value);
 
 	bool bCanceledTakeDamage = false; // Server에서만 사용
 
