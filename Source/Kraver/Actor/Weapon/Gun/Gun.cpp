@@ -69,9 +69,9 @@ void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProp
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AGun, MaxAmmo);
-	DOREPLIFETIME(AGun, CurAmmo);
-	DOREPLIFETIME(AGun, TotalAmmo);
+	DOREPLIFETIME_CONDITION(AGun, MaxAmmo, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(AGun, CurAmmo, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(AGun, TotalAmmo, COND_OwnerOnly);
 }
 
 void AGun::PostInitializeComponents()

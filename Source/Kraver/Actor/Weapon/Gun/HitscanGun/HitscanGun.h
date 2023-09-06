@@ -28,8 +28,8 @@ protected:
 	TArray<FHitResult>  CalculateFireHit(FName ProfileName, FVector Spread = FVector(0, 0, 0));
 
 protected:
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
 	float BulletDistance = 20000.f; // ÃÑ¾Ë ±æÀÌ
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
 	float BulletRadius = 0.f; // ÃÑ¾Ë ¹üÀ§
 };

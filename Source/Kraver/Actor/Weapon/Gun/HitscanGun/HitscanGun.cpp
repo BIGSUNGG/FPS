@@ -8,8 +8,6 @@ void AHitscanGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, BulletDistance);
-	DOREPLIFETIME(ThisClass, BulletRadius);
 }
 
 void AHitscanGun::Server_FireBulletResult_Implementation(const TArray<FHitResult>& BulletHitResults)

@@ -29,8 +29,8 @@ void UAdvanceMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UAdvanceMovementComponent, CurWallRunState);
-	DOREPLIFETIME(UAdvanceMovementComponent, IsSliding);
+	DOREPLIFETIME_CONDITION(UAdvanceMovementComponent, CurWallRunState, COND_SkipOwner);
+	DOREPLIFETIME_CONDITION(UAdvanceMovementComponent, IsSliding, COND_SkipOwner);
 }
 
 // Called every frame

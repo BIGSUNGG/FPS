@@ -56,8 +56,8 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AWeapon, WeaponState);
 	DOREPLIFETIME(AWeapon, OwnerCreature);
-	DOREPLIFETIME(AWeapon, IsAttacking);
-	DOREPLIFETIME(AWeapon, IsSubAttacking);
+	DOREPLIFETIME_CONDITION(AWeapon, IsAttacking, COND_SkipOwner);
+	DOREPLIFETIME_CONDITION(AWeapon, IsSubAttacking, COND_SkipOwner);
 }
 
 float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -308,7 +308,6 @@ void AWeapon::OnAttackStartEvent()
 	}
 
 	OnAttackStart.Broadcast();
-
 	Server_OnAttackStartEvent();
 }
 

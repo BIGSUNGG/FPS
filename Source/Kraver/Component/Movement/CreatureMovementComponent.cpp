@@ -18,8 +18,8 @@ void UCreatureMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProp
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UCreatureMovementComponent, MovementState);
-	DOREPLIFETIME(UCreatureMovementComponent, IsJumping);
+	DOREPLIFETIME_CONDITION(UCreatureMovementComponent, MovementState, COND_SkipOwner);
+	DOREPLIFETIME_CONDITION(UCreatureMovementComponent, IsJumping, COND_SkipOwner);
 }
 
 // Called when the game starts

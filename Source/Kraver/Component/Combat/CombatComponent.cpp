@@ -195,8 +195,8 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UCombatComponent, CurWeapon);
 	DOREPLIFETIME(UCombatComponent, WeaponSlot);
-	DOREPLIFETIME(UCombatComponent, CurHp); 
-	DOREPLIFETIME(UCombatComponent, MaxHp);
+	DOREPLIFETIME_CONDITION(UCombatComponent, CurHp, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(UCombatComponent, MaxHp, COND_OwnerOnly);
 }
 
 int8 UCombatComponent::GetCurWeaponSlotIndex()
