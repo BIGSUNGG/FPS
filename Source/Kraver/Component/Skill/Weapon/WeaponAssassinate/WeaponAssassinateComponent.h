@@ -25,6 +25,7 @@ protected:
 	virtual void OnRemoveOnDelegateEvent(UObject* Object) override;
 
 	virtual void Assassinate(AActor* Actor);
+	virtual void AssassinateEvent();
 	virtual std::pair<bool, FHitResult> CalculateCanAssassinate();
 
 	// Rpc

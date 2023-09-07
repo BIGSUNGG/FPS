@@ -40,9 +40,9 @@ public:
 	virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수
 
 	// Holster Unholster
-	virtual bool UnholsterWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
-	virtual void UnholsterWeapon(AWeapon* Weapon); // Weapon을 드는 함수
-	virtual bool HolsterWeapon(AWeapon* Weapon); // CurWeapon을 집어넣는 함수
+	virtual bool OnLocal_UnholsterWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
+	virtual void OnLocal_UnholsterWeapon(AWeapon* Weapon); // Weapon을 드는 함수
+	virtual bool OnLocal_HolsterWeapon(AWeapon* Weapon); // CurWeapon을 집어넣는 함수
 
 	// Damage Event
 	virtual float OnServer_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)

@@ -45,6 +45,13 @@ void AMelee::Tick(float DeltaTime)
 
 }
 
+void AMelee::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ThisClass, CurComboAttack, COND_SkipOwner);
+}
+
 bool AMelee::OnServer_Equipped(ACreature* Character)
 {
 	bool bSuccess = Super::OnServer_Equipped(Character);
@@ -58,25 +65,25 @@ bool AMelee::OnServer_UnEquipped()
 	return bSuccess;
 }
 
-bool AMelee::Unholster()
+bool AMelee::OnLocal_Unholster()
 {
-	bool bSuccess = Super::Unholster();
+	bool bSuccess = Super::OnLocal_Unholster();
 	return bSuccess;
 }
 
-bool AMelee::Holster()
+bool AMelee::OnLocal_Holster()
 {
-	bool bSuccess = Super::Holster();
+	bool bSuccess = Super::OnLocal_Holster();
 	ComboEnd();
 	return bSuccess;
 }
 
-void AMelee::AddOnOwnerDelegate()
+void AMelee::OnLocal_AddOnOwnerDelegate()
 {
 	if (OwnerCreature == nullptr)
 		return;
 
-	Super::AddOnOwnerDelegate();
+	Super::OnLocal_AddOnOwnerDelegate();
 
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(OwnerCreature->GetMesh()->GetAnimInstance());
 	if (AnimInstance)
@@ -88,12 +95,12 @@ void AMelee::AddOnOwnerDelegate()
 	}	
 }
 
-void AMelee::RemoveOnOwnerDelegate()
+void AMelee::OnLocal_RemoveOnOwnerDelegate()
 {
 	if (OwnerCreature == nullptr)
 		return;
 
-	Super::RemoveOnOwnerDelegate();
+	Super::OnLocal_RemoveOnOwnerDelegate();
 
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(OwnerCreature->GetMesh()->GetAnimInstance());
 	if (AnimInstance)
@@ -129,15 +136,7 @@ void AMelee::SwingAttack()
 		Params
 	);
 
-	for (auto& Result : HitResults)
-	{
-		auto Creature = Cast<ACreature>(Result.GetActor());
-		if (IsValid(Result.GetActor()))
-		{
-			FPointDamageEvent DamageEvent(AttackDamage, Result, OwnerCreature->GetCamera()->GetForwardVector(), AttackDamageType);
-			OwnerCreature->CombatComponent->OnServer_GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
-		}
-	}
+	Server_SwingResult(HitResults);
 }
 
 void AMelee::ComboStart()
@@ -167,6 +166,40 @@ void AMelee::ComboEnd()
 
 	if(bAutomaticRepeatCombo && IsAttacking)
 		Attack();
+}
+
+void AMelee::StartSwingEvent()
+{
+	OnPlayTppMontage.Broadcast(AttackMontagesTpp[CurComboAttack], 1.f);
+	OnPlayFppMontage.Broadcast(AttackMontagesFpp[CurComboAttack], 1.f);
+}
+
+void AMelee::Server_SwingResult_Implementation(const TArray<FHitResult>& Results)
+{
+	for (auto& Result : Results)
+	{
+		auto Creature = Cast<ACreature>(Result.GetActor());
+		if (IsValid(Result.GetActor()))
+		{
+			FPointDamageEvent DamageEvent(AttackDamage, Result, OwnerCreature->GetCamera()->GetForwardVector(), AttackDamageType);
+			OwnerCreature->CombatComponent->OnServer_GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
+		}
+	}
+}
+
+void AMelee::Server_SwingStart_Implementation(int Combo)
+{
+	CurComboAttack = Combo;
+	Multicast_SwingStart(Combo);
+}
+
+void AMelee::Multicast_SwingStart_Implementation(int Combo)
+{
+	if (!OwnerCreature || !OwnerCreature->IsLocallyControlled())
+	{
+		CurComboAttack = Combo;
+		StartSwingEvent();
+	}
 }
 
 void AMelee::OnCanInputNextComboEvent()
@@ -201,11 +234,10 @@ void AMelee::OnComboEndEvent()
 void AMelee::OnAttackEvent()
 {
 	if (IsComboAttacking() == false)
-	{
 		ComboStart();
-	}
-	OnPlayTppMontage.Broadcast(AttackMontagesTpp[CurComboAttack], 1.f);
-	OnPlayFppMontage.Broadcast(AttackMontagesFpp[CurComboAttack], 1.f);
+	
+	StartSwingEvent();
+	Server_SwingStart(CurComboAttack);
 
 	Super::OnAttackEvent();
 }

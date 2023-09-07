@@ -305,12 +305,14 @@ void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
 	if(!Weapon)
 		return;
 
-	HolsterWeapon(CurWeapon);
+	OnLocal_HolsterWeapon(CurWeapon);
 	Server_UnEquipWeapon(Weapon);
 }
 
-bool UCombatComponent::UnholsterWeapon(int32 WeaponIndex)
+bool UCombatComponent::OnLocal_UnholsterWeapon(int32 WeaponIndex)
 {
+	ERROR_IF_NOT_CALLED_ON_LOCAL_PARAM(false);
+
 	if (WeaponIndex >= WeaponSlot.Num())
 	{
 		return false;
@@ -334,12 +336,14 @@ bool UCombatComponent::UnholsterWeapon(int32 WeaponIndex)
 		return false;
 	}
 
-	UnholsterWeapon(WeaponSlot[WeaponIndex]);
+	OnLocal_UnholsterWeapon(WeaponSlot[WeaponIndex]);
 	return true;
 }
 
-void UCombatComponent::UnholsterWeapon(AWeapon* Weapon)
+void UCombatComponent::OnLocal_UnholsterWeapon(AWeapon* Weapon)
 {
+	ERROR_IF_NOT_CALLED_ON_LOCAL();
+
 	if (Weapon == nullptr)
 	{
 		KR_LOG(Warning, TEXT("Weapon is nullptr"));
@@ -348,22 +352,24 @@ void UCombatComponent::UnholsterWeapon(AWeapon* Weapon)
 	
 	KR_LOG(Log,TEXT("Unholster Weapon %s"),*Weapon->GetName());
 	if (CurWeapon != Weapon)
-		HolsterWeapon(CurWeapon);
+		OnLocal_HolsterWeapon(CurWeapon);
 
 	CurWeapon = Weapon;
-	Weapon->Unholster();
+	Weapon->OnLocal_Unholster();
 	OnClientUnholsterWeapon.Broadcast(Weapon);
 
 	Server_UnholsterWeapon(Weapon);
 }
 
-bool UCombatComponent::HolsterWeapon(AWeapon* Weapon)
+bool UCombatComponent::OnLocal_HolsterWeapon(AWeapon* Weapon)
 {
+	ERROR_IF_NOT_CALLED_ON_LOCAL_PARAM(false);
+
 	if(CurWeapon == nullptr)
 		return false;
 
 	KR_LOG(Log, TEXT("Holster Weapon %s"), *Weapon->GetName());
-	bool Success = Weapon->Holster();
+	bool Success = Weapon->OnLocal_Holster();
 	if(Success)
 	{
 		CurWeapon = nullptr;
@@ -461,13 +467,11 @@ void UCombatComponent::Client_EquipWeaponSuccess(AWeapon* Weapon)
 
 	Weapon->SetOwner(OwnerCreature);
 
-	HolsterWeapon(CurWeapon);
+	OnLocal_HolsterWeapon(CurWeapon);
 
 	CurWeapon = Weapon;
-
 	OnClientEquipWeaponSuccess.Broadcast(Weapon);
-
-	UnholsterWeapon(Weapon);
+	OnLocal_UnholsterWeapon(Weapon);
 }
 
 void UCombatComponent::Client_UnEquipWeaponSuccess(AWeapon* Weapon)
@@ -478,7 +482,7 @@ void UCombatComponent::Client_UnEquipWeaponSuccess(AWeapon* Weapon)
 		return;
 	}
 
-	HolsterWeapon(Weapon);
+	OnLocal_HolsterWeapon(Weapon);
 
 	OnClientUnEquipWeaponSuccess.Broadcast(Weapon);
 }

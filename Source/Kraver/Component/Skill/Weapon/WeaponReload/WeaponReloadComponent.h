@@ -24,6 +24,12 @@ protected:
 	virtual void OnAddOnDelegateEvent(UObject* Object) override;
 	virtual void OnRemoveOnDelegateEvent(UObject* Object) override;
 
+	// Rpc
+	UFUNCTION(Server, Reliable)
+	virtual void Server_ReloadStart();
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void Multicast_ReloadStart();
+
 	// Delegate
 	UFUNCTION()
 	virtual void OnSkillFirstEvent();
@@ -34,6 +40,7 @@ protected:
 
 	// Func
 	virtual void ReloadStart();
+	virtual void ReloadStartEvent();
 
 public:
 	virtual bool IsReloading();

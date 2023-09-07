@@ -64,7 +64,35 @@ void USingleReloadComponent::OnReload_InsertFinishEvent()
 		ReloadClose();
 }
 
+void USingleReloadComponent::Server_ReloadInstert_Implementation()
+{
+	Multicast_ReloadInstert();
+}
+
+void USingleReloadComponent::Multicast_ReloadInstert_Implementation()
+{
+	if (!GetOwnerCreature() || !GetOwnerCreature()->IsLocallyControlled())
+		ReloadInstertEvent();
+}
+
+void USingleReloadComponent::Server_ReloadClose_Implementation()
+{
+	Multicast_ReloadClose();
+}
+
+void USingleReloadComponent::Multicast_ReloadClose_Implementation()
+{
+	if (!GetOwnerCreature() || !GetOwnerCreature()->IsLocallyControlled())
+		ReloadCloseEvent();
+}
+
 void USingleReloadComponent::ReloadInstert()
+{
+	ReloadInstertEvent();
+	Server_ReloadInstert();
+}
+
+void USingleReloadComponent::ReloadInstertEvent()
 {
 	OwnerGun->OnPlayFppMontage.Broadcast(ReloadInsertMontageFpp, 1.f);
 	OwnerGun->OnPlayTppMontage.Broadcast(ReloadInsertMontageTpp, 1.f);
@@ -80,6 +108,12 @@ void USingleReloadComponent::ReloadInstert()
 }
 
 void USingleReloadComponent::ReloadClose()
+{
+	ReloadCloseEvent();
+	Server_ReloadClose();
+}
+
+void USingleReloadComponent::ReloadCloseEvent()
 {
 	OwnerGun->OnPlayFppMontage.Broadcast(ReloadCloseMontageFpp, 1.f);
 	OwnerGun->OnPlayTppMontage.Broadcast(ReloadCloseMontageTpp, 1.f);

@@ -62,8 +62,6 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
 
-	virtual void Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed);
-
 	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
 
 	// Delegate Event

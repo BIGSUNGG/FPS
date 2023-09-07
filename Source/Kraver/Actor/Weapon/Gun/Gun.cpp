@@ -104,49 +104,6 @@ bool AGun::RefillAmmo()
 	return true;
 }
 
-void AGun::AddRecoil()
-{
-	TargetRecoilPitch += FMath::RandRange(MinRecoilPitch,MaxRecoilPitch);
-	TargetRecoilYaw += FMath::RandRange(MinRecoilYaw, MaxRecoilYaw);
-}
-
-void AGun::FireBullet()
-{
-	UAttachmentSilencerComponent* Silencer = FindComponentByClass<UAttachmentSilencerComponent>();
-
-	if (!Silencer || Silencer->GetbFireEffect())
-	{
-		WeaponTppPrimitiveInfo["FireEffect"]->Activate(true);
-		WeaponFppPrimitiveInfo["FireEffect"]->Activate(true);
-	}
-
-	if (AttackSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation
-		(
-			this,
-			Silencer ? Silencer->GetSilencerFireSound() : AttackSound,
-			GetActorLocation()
-		);
-	}
-
-	OnFire.Broadcast();
-}
-
-void AGun::ImpactBullet(FVector ImpactPos)
-{
-	if(ImpactEffect)
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect, ImpactPos);
-	if (ImpactSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(
-			this,
-			ImpactSound,
-			ImpactPos
-		);
-	}
-}
-
 void AGun::OnAttackEvent()
 {
 	if (!IsAttacking)
@@ -161,21 +118,17 @@ void AGun::OnAttackEvent()
 	if (CurAmmo > 0)
 	{
 		if (!IS_SERVER() && !bInfinityAmmo)
-		{
 			--CurAmmo;
-		}
 
 		FireBullet();
+		FireEvent();
 		AddRecoil();
-		OnPlayTppMontage.Broadcast(AttackMontageTpp, 1.f);
-		OnPlayFppMontage.Broadcast(AttackMontageFpp, 1.f);
+
+		Super::OnAttackEvent();
 	}
 	else
-	{
 		OnAttackEndEvent();
-	}
 
-	Super::OnAttackEvent();
 }
 
 void AGun::Server_OnAttackEvent_Implementation()
@@ -189,29 +142,8 @@ void AGun::Multicast_OnAttackEvent_Implementation()
 {	
 	Super::Multicast_OnAttackEvent_Implementation();
 
-	if(!WeaponTppPrimitiveInfo.Contains("FireEffect"))
-		return;
-
 	if(!OwnerCreature || !OwnerCreature->IsLocallyControlled())
-	{
-		UAttachmentSilencerComponent* Silencer = FindComponentByClass<UAttachmentSilencerComponent>();
-
-		if (!Silencer || Silencer->GetbFireEffect())
-		{
-			WeaponTppPrimitiveInfo["FireEffect"]->Activate(true);
-			WeaponFppPrimitiveInfo["FireEffect"]->Activate(true);
-		}
-
-		if (AttackSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation
-			(
-				this,
-				Silencer ? Silencer->GetSilencerFireSound() : AttackSound,
-				GetActorLocation()
-			);
-		}
-	}
+		FireEvent();
 }
 
 void AGun::OnServer_ImpactBullet(FVector ImpactPos)
@@ -235,7 +167,48 @@ void AGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)
 	if(OwnerCreature && OwnerCreature->IsLocallyControlled())
 		return;
 
-	if(ImpactEffect)
+	ImpactBulletEvent(ImpactPos);
+}
+
+void AGun::AddRecoil()
+{
+	TargetRecoilPitch += FMath::RandRange(MinRecoilPitch, MaxRecoilPitch);
+	TargetRecoilYaw += FMath::RandRange(MinRecoilYaw, MaxRecoilYaw);
+}
+
+void AGun::FireBullet()
+{
+
+	OnFire.Broadcast();
+}
+
+void AGun::FireEvent()
+{
+	OnPlayTppMontage.Broadcast(AttackMontageTpp, 1.f);
+	OnPlayFppMontage.Broadcast(AttackMontageFpp, 1.f);
+
+	UAttachmentSilencerComponent* Silencer = FindComponentByClass<UAttachmentSilencerComponent>();
+	if ((!Silencer || Silencer->GetbFireEffect()) && WeaponTppPrimitiveInfo.Contains("FireEffect"))
+	{
+		WeaponTppPrimitiveInfo["FireEffect"]->Activate(true);
+		WeaponFppPrimitiveInfo["FireEffect"]->Activate(true);
+	}
+
+	if (AttackSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation
+		(
+			this,
+			Silencer ? Silencer->GetSilencerFireSound() : AttackSound,
+			OwnerCreature->GetActorLocation()
+		);
+	}
+
+}
+
+void AGun::ImpactBulletEvent(FVector ImpactPos)
+{
+	if (ImpactEffect)
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect, ImpactPos);
 	if (ImpactSound)
 	{

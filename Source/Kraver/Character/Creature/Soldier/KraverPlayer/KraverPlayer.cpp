@@ -454,13 +454,6 @@ void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FTransfor
 	Weapon->GetTppWeaponMesh()->AddAngularImpulseInDegrees(Direction * WeaponThrowAngularPower, NAME_None, true);
 }
 
-void AKraverPlayer::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
-{
-	Super::Multicast_OnPlayWeaponFppMontageEvent_Implementation(PlayedMontage, Speed);
-
-	ArmMesh->GetAnimInstance()->Montage_Play(PlayedMontage, Speed);
-}
-
 void AKraverPlayer::RefreshCurViewType()
 {
 	for(int i = 0; i < 2; i++)
@@ -589,6 +582,8 @@ void AKraverPlayer::OnAssassinateEndEvent()
 void AKraverPlayer::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
 {
 	Super::OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
+
+	ArmMesh->GetAnimInstance()->Montage_Play(PlayedMontage, Speed);
 }
 
 void AKraverPlayer::OnReload_Grab_MagazineEvent()
@@ -622,7 +617,7 @@ void AKraverPlayer::OnTp_Weapon_HolsterEvent()
 	ArmMesh->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
 	GetMesh()->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
 
-	CombatComponent->HolsterWeapon(CombatComponent->GetCurWeapon());
+	CombatComponent->OnLocal_HolsterWeapon(CombatComponent->GetCurWeapon());
 
 	if(UnholsterIndex == -1)
 		return;
@@ -672,7 +667,7 @@ void AKraverPlayer::HolsterWeapon()
 void AKraverPlayer::UnholsterWeapon()
 {
 	if(UnholsterIndex != -1)
-		CombatComponent->UnholsterWeapon(UnholsterIndex);
+		CombatComponent->OnLocal_UnholsterWeapon(UnholsterIndex);
 
 	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetUnholsterMontageFpp());
 	GetMesh()->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetUnholsterMontageTpp());

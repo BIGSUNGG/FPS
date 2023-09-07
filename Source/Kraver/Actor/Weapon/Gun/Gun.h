@@ -27,11 +27,6 @@ public:
 	virtual bool RefillAmmo(); // CurAmmo를 보충함
 
 protected:
-	virtual void AddRecoil();
-	virtual void FireBullet();
-	virtual void ImpactBullet(FVector ImpactPos);
-
-protected:
 	// Delegate
 	virtual void OnAttackEvent() override;
 	virtual void OnServer_ImpactBullet(FVector ImpactPos);
@@ -45,6 +40,13 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_ImpactBullet(FVector ImpactPos);
+
+	// Func
+	virtual void AddRecoil();
+	virtual void FireBullet();
+	virtual void FireEvent();
+	virtual void ImpactBulletEvent(FVector ImpactPos);
+
 public:
 	// Getter Setter
 	virtual bool CanAttack() override;

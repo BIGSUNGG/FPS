@@ -72,10 +72,15 @@ void UWeaponAssassinateComponent::Assassinate(AActor* Actor)
 	OwnerMelee->OnAttackEndEvent();
 	OwnerMelee->OnSubAttackEndEvent();
 
-	OwnerMelee->OnPlayTppMontage.Broadcast(AssassinateMontagesTpp, 1.f);
-	OwnerMelee->OnPlayFppMontage.Broadcast(AssassinateMontagesFpp, 1.f);
+	AssassinateEvent();
 	OnAssassinate.Broadcast(Actor);
 	Server_Assassinate(Actor);
+}
+
+void UWeaponAssassinateComponent::AssassinateEvent()
+{
+	OwnerMelee->OnPlayTppMontage.Broadcast(AssassinateMontagesTpp, 1.f);
+	OwnerMelee->OnPlayFppMontage.Broadcast(AssassinateMontagesFpp, 1.f);
 }
 
 std::pair<bool, FHitResult> UWeaponAssassinateComponent::CalculateCanAssassinate()
@@ -141,6 +146,9 @@ void UWeaponAssassinateComponent::Multicast_Assassinate_Implementation(AActor* A
 		return;
 
 	CurAssassinatedCreature = Creature;
+
+	if (!GetOwnerCreature() || !GetOwnerCreature()->IsLocallyControlled())
+		AssassinateEvent();
 }
 
 void UWeaponAssassinateComponent::Server_OnAssassinateAttackEvent_Implementation()

@@ -60,7 +60,7 @@ void AHitscanGun::FireBulletResult(const TArray<FHitResult>& BulletHitResults)
 			if (Result.bBlockingHit)
 			{
 				FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
-				ImpactBullet(ImpaceEffectPos);
+				ImpactBulletEvent(ImpaceEffectPos);
 			}
 		}
 	}

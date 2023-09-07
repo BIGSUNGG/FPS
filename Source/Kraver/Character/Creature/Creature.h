@@ -185,17 +185,6 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_Jump();
 
-		// Montage
-	UFUNCTION(Server, Reliable)
-	virtual void Server_OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
-	UFUNCTION(NetMulticast, Reliable)
-	virtual void Multicast_OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
-
-	UFUNCTION(Server, Reliable)
-	virtual void Server_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
-	UFUNCTION(NetMulticast, Reliable)
-	virtual void Multicast_OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
-
 		// SimulateMesh
 	UFUNCTION(Client, Reliable)
 	virtual void Client_SimulateMesh();

@@ -30,11 +30,11 @@ public:
 
 	virtual bool OnServer_Equipped(ACreature* Character); // Character에게 장착됨 Server에서만 호출됨
 	virtual bool OnServer_UnEquipped(); // 장착해제됨
-	virtual bool Unholster(); // Character 손에 들려짐
-	virtual bool Holster(); // Character 손에서 집어넣어짐
+	virtual bool OnLocal_Unholster(); // Character 손에 들려짐
+	virtual bool OnLocal_Holster(); // Character 손에서 집어넣어짐
 
-	virtual void AddOnOwnerDelegate();
-	virtual void RemoveOnOwnerDelegate();
+	virtual void OnLocal_AddOnOwnerDelegate();
+	virtual void OnLocal_RemoveOnOwnerDelegate();
 
 	virtual void AttackCancel();
 	virtual void AddWeaponPrimitive(FString Key, UPrimitiveComponent* Value);

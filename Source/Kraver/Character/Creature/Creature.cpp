@@ -151,6 +151,8 @@ void ACreature::HolsterEvent(AWeapon* Weapon)
 	if (!IsValid(Weapon))
 		return;
 
+	Weapon->OnPlayTppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
+	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 	SetWeaponVisibility(Weapon, false);
 }
 
@@ -159,6 +161,8 @@ void ACreature::UnholsterEvent(AWeapon* Weapon)
 	if (!IsValid(Weapon))
 		return;
 
+	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
+	Weapon->OnPlayFppMontage.AddDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 	SetWeaponVisibility(Weapon, true);
 }
 
@@ -548,9 +552,6 @@ void ACreature::OnClientUnholsterWeaponEvent(AWeapon* Weapon)
 {
 	UnholsterEvent(Weapon);
 
-	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
-	Weapon->OnPlayFppMontage.AddDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
-
 	switch (Weapon->GetWeaponType())
 	{
 	case EWeaponType::NONE:
@@ -583,9 +584,6 @@ void ACreature::OnClientHolsterWeaponEvent(AWeapon* Weapon)
 
 	HolsterEvent(Weapon);
 
-	Weapon->OnPlayTppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
-	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
-
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageTpp());
 
 	switch (Weapon->GetWeaponType())
@@ -617,7 +615,7 @@ void ACreature::OnClientDeathEvent(float DamageAmount, FDamageEvent const& Damag
 {
 	DisableInput(GetController<APlayerController>());
 	if (CombatComponent->GetCurWeapon() != nullptr)
-		CombatComponent->HolsterWeapon(CombatComponent->GetCurWeapon());
+		CombatComponent->OnLocal_HolsterWeapon(CombatComponent->GetCurWeapon());
 
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
 }
@@ -731,12 +729,11 @@ void ACreature::OnMulticastAfterTakeRadialDamageEvent(float DamageAmount, FRadia
 
 void ACreature::OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
 {
-	Server_OnPlayWeaponTppMontageEvent(PlayedMontage, Speed);
+	GetMesh()->GetAnimInstance()->Montage_Play(PlayedMontage, Speed);
 }
 
 void ACreature::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
 {
-	Server_OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
 }
 
 void ACreature::OnRepCurWeaponEvent(AWeapon* PrevWeapon, AWeapon* CurWeapon)
@@ -795,26 +792,6 @@ void ACreature::Multicast_Jump_Implementation()
 {
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(GetMesh()->GetAnimInstance());
 	GetMesh()->GetAnimInstance()->Montage_Play(CreatureAnim->GetJumpMontage());
-}
-
-void ACreature::Server_OnPlayWeaponTppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
-{
-	Multicast_OnPlayWeaponTppMontageEvent(PlayedMontage, Speed);
-}
-
-void ACreature::Multicast_OnPlayWeaponTppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
-{
-	GetMesh()->GetAnimInstance()->Montage_Play(PlayedMontage, Speed);
-}
-
-void ACreature::Server_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
-{
-	Multicast_OnPlayWeaponFppMontageEvent(PlayedMontage, Speed);
-}
-
-void ACreature::Multicast_OnPlayWeaponFppMontageEvent_Implementation(UAnimMontage* PlayedMontage, float Speed)
-{
-
 }
 
 void ACreature::Client_SimulateMesh_Implementation()

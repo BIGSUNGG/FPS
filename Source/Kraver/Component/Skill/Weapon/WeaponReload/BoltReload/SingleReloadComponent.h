@@ -24,9 +24,23 @@ protected:
 	UFUNCTION()
 	virtual void OnReload_InsertFinishEvent();
 
+	// Rpc
+	UFUNCTION(Server, Reliable)
+	virtual void Server_ReloadInstert();
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void Multicast_ReloadInstert();
+
+	UFUNCTION(Server, Reliable)
+	virtual void Server_ReloadClose();
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void Multicast_ReloadClose();
+
 	// Function
 	virtual void ReloadInstert();
+	virtual void ReloadInstertEvent();
+
 	virtual void ReloadClose();
+	virtual void ReloadCloseEvent();
 
 public:
 	virtual bool IsReloading() override;

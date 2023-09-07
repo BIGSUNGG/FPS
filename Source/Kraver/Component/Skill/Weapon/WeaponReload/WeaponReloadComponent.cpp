@@ -53,6 +53,17 @@ void UWeaponReloadComponent::OnRemoveOnDelegateEvent(UObject* Object)
 	}
 }
 
+void UWeaponReloadComponent::Server_ReloadStart_Implementation()
+{
+	Multicast_ReloadStart();
+}
+
+void UWeaponReloadComponent::Multicast_ReloadStart_Implementation()
+{
+	if (!GetOwnerCreature() || !GetOwnerCreature()->IsLocallyControlled())
+		ReloadStartEvent();
+}
+
 void UWeaponReloadComponent::OnSkillFirstEvent()
 {
 	ReloadStart();
@@ -76,6 +87,13 @@ void UWeaponReloadComponent::ReloadStart()
 
 	OwnerGun->OnAttackEndEvent();
 	OwnerGun->OnSubAttackEndEvent();
+
+	ReloadStartEvent();
+	Server_ReloadStart();
+}
+
+void UWeaponReloadComponent::ReloadStartEvent()
+{
 	OwnerGun->OnPlayFppMontage.Broadcast(ReloadMontageFpp, 1.f);
 	OwnerGun->OnPlayTppMontage.Broadcast(ReloadMontageTpp, 1.f);
 

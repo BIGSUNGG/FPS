@@ -46,8 +46,6 @@ AWeapon::AWeapon()
 
 	SetRootComponent(TppWeaponMesh);
 
-	OnAttack.AddDynamic(this, &AWeapon::OnAttackEvent);
-
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -231,26 +229,34 @@ bool AWeapon::OnServer_UnEquipped()
 	return true;
 }
 
-bool AWeapon::Unholster()
+bool AWeapon::OnLocal_Unholster()
 {
+	ERROR_IF_NOT_CALLED_ON_LOCAL_PARAM(false);
+
+	OwnerCreature = Cast<ACreature>(GetOwner());
+
 	OnAttackEndEvent();
 	OnSubAttackEndEvent();
 
-	AddOnOwnerDelegate();
+	OnLocal_AddOnOwnerDelegate();
 	return true;
 }
 
-bool AWeapon::Holster()
+bool AWeapon::OnLocal_Holster()
 {
+	ERROR_IF_NOT_CALLED_ON_LOCAL_PARAM(false);
+
 	OnAttackEndEvent();
 	OnSubAttackEndEvent();
 
-	RemoveOnOwnerDelegate();
+	OnLocal_RemoveOnOwnerDelegate();
 	return true;
 }
 
-void AWeapon::AddOnOwnerDelegate()
+void AWeapon::OnLocal_AddOnOwnerDelegate()
 {
+	ERROR_IF_NOT_CALLED_ON_LOCAL();
+
 	if (OwnerCreature == nullptr)
 		return;
 
@@ -263,8 +269,10 @@ void AWeapon::AddOnOwnerDelegate()
 	OnAddOnDelegate.Broadcast(OwnerCreature);
 }
 
-void AWeapon::RemoveOnOwnerDelegate()
+void AWeapon::OnLocal_RemoveOnOwnerDelegate()
 {
+	ERROR_IF_NOT_CALLED_ON_LOCAL();
+
 	if (OwnerCreature == nullptr)
 		return;
 
@@ -283,7 +291,7 @@ void AWeapon::AttackCancel()
 }
 
 void AWeapon::OnAttackStartEvent()
-{
+{		
 	if (IsAttacking == true)
 		return;
 
@@ -403,6 +411,7 @@ void AWeapon::Attack()
 		bAttackCanceled = false;
 		return;
 	}
+	OnAttackEvent();
 	OnAttack.Broadcast();
 }
 
@@ -504,7 +513,7 @@ void AWeapon::UnEquipEvent()
 {
 	OnAttackEndEvent();
 	OnSubAttackEndEvent();
-	RemoveOnOwnerDelegate();
+	OnLocal_RemoveOnOwnerDelegate();
 
 	GetTppWeaponMesh()->SetSimulatePhysics(true);
 	GetTppWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);

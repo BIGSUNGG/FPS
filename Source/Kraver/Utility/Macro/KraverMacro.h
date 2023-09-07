@@ -29,3 +29,6 @@
 
 #define ERROR_IF_CALLED_ON_CLIENT() {if(!IS_SERVER()) { KR_LOG(Error, TEXT("Function called on client")); return; }}
 #define ERROR_IF_CALLED_ON_CLIENT_PARAM(Value) {if(!IS_SERVER()) { KR_LOG(Error, TEXT("Function called on client")); return Value; }}
+
+#define ERROR_IF_NOT_CALLED_ON_LOCAL() {if(!FindOwnerByClass<ACreature>(GetOwner())->IsLocallyControlled()) { KR_LOG(Error, TEXT("Function not called on local")); return; }}
+#define ERROR_IF_NOT_CALLED_ON_LOCAL_PARAM(Value) {if(!FindOwnerByClass<ACreature>(GetOwner())->IsLocallyControlled()) { KR_LOG(Error, TEXT("Function not called on local")); return Value; }}
