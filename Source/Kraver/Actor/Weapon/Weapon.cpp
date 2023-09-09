@@ -17,6 +17,10 @@ AWeapon::AWeapon()
 	SetReplicateMovement(true);
 
 	TppWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
+	TppWeaponMesh->SetCollisionProfileName("WeaponMesh");
+	TppWeaponMesh->SetAnimInstanceClass(UAnimInstance::StaticClass());
+	TppWeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	TppWeaponMesh->SetSimulatePhysics(true);
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_TppHolster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_TP_CH_AR_01_Holster.AM_TP_CH_AR_01_Holster'"));
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_FppHolster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_FP_PCH_AR_01_Holster.AM_FP_PCH_AR_01_Holster'"));
@@ -99,15 +103,6 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (TppWeaponMesh)
-	{
-		TppWeaponMesh->SetCollisionProfileName("WeaponMesh");
-		TppWeaponMesh->SetSimulatePhysics(true);
-		TppWeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	}
-	else
-		KR_LOG(Error, TEXT("WeaponMesh is nullptr"));
-
 	for (auto& Value : GetComponents())
 	{
 		if (Value == TppWeaponMesh)
@@ -125,6 +120,11 @@ void AWeapon::BeginPlay()
 
 	MakeFppPrimitiveInfo();
 
+	if (!GetTppWeaponMesh()->GetAnimInstance())
+		KR_LOG(Error, TEXT("AnimInstance is nullptr"));
+
+	if (!GetFppWeaponMesh()->GetAnimInstance())
+		KR_LOG(Error, TEXT("AnimInstance is nullptr"));
 }
 
 // Called every frame
@@ -439,6 +439,7 @@ void AWeapon::MakeFppPrimitiveInfo()
 			USkeletalMeshComponent* OriginSkeletaComp = dynamic_cast<USkeletalMeshComponent*>(Tuple.Value);
 
 			NewSkeletaComp->SetSkeletalMesh(OriginSkeletaComp->GetSkeletalMeshAsset());
+			NewSkeletaComp->SetAnimInstanceClass(OriginSkeletaComp->GetAnimClass());
 
 			TArray<UMaterialInterface*> MaterialArray = OriginSkeletaComp->GetMaterials();
 			for (int i = 0; i < MaterialArray.Num(); i++)
@@ -496,7 +497,7 @@ void AWeapon::MakeFppPrimitiveInfo()
 		Tuple.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
-	FppWeaponMesh = WeaponFppPrimitiveInfo["Root"];
+	FppWeaponMesh = Cast<USkeletalMeshComponent>(WeaponFppPrimitiveInfo["Root"]);
 	return;
 }
 

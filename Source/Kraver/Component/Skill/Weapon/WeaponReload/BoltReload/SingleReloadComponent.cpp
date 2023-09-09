@@ -94,8 +94,20 @@ void USingleReloadComponent::ReloadInstert()
 
 void USingleReloadComponent::ReloadInstertEvent()
 {
-	OwnerGun->OnPlayFppMontage.Broadcast(ReloadInsertMontageFpp, 1.f);
-	OwnerGun->OnPlayTppMontage.Broadcast(ReloadInsertMontageTpp, 1.f);
+	if (ReloadInsertMontageFpp)
+		OwnerGun->OnPlayFppMontage.Broadcast(ReloadInsertMontageFpp, 1.f);
+	if (ReloadInsertMontageTpp)
+		OwnerGun->OnPlayTppMontage.Broadcast(ReloadInsertMontageTpp, 1.f);
+
+	if (ReloadInsertMontageWep)
+	{
+		if (OwnerGun->GetTppWeaponMesh()->GetAnimInstance())
+			OwnerGun->GetTppWeaponMesh()->GetAnimInstance()->Montage_Play(ReloadInsertMontageWep);
+
+		if (OwnerGun->GetFppWeaponMesh()->GetAnimInstance())
+			OwnerGun->GetFppWeaponMesh()->GetAnimInstance()->Montage_Play(ReloadInsertMontageWep);
+
+	}
 
 	if (ReloadInsertSound)
 	{
@@ -115,8 +127,23 @@ void USingleReloadComponent::ReloadClose()
 
 void USingleReloadComponent::ReloadCloseEvent()
 {
-	OwnerGun->OnPlayFppMontage.Broadcast(ReloadCloseMontageFpp, 1.f);
-	OwnerGun->OnPlayTppMontage.Broadcast(ReloadCloseMontageTpp, 1.f);
+	if (ReloadCloseMontageFpp)
+		OwnerGun->OnPlayFppMontage.Broadcast(ReloadCloseMontageFpp, 1.f);
+	if (ReloadCloseMontageTpp)
+		OwnerGun->OnPlayTppMontage.Broadcast(ReloadCloseMontageTpp, 1.f);
+
+	if (ReloadCloseMontageWep)
+	{
+		if (OwnerGun->GetTppWeaponMesh()->GetAnimInstance())
+			OwnerGun->GetTppWeaponMesh()->GetAnimInstance()->Montage_Play(ReloadCloseMontageWep);
+		else
+			KR_LOG(Error, TEXT("AnimInstance is nullptr"));
+
+		if (OwnerGun->GetFppWeaponMesh()->GetAnimInstance())
+			OwnerGun->GetFppWeaponMesh()->GetAnimInstance()->Montage_Play(ReloadCloseMontageWep);
+		else
+			KR_LOG(Error, TEXT("AnimInstance is nullptr"));
+	}
 
 	if (ReloadCloseSound)
 	{

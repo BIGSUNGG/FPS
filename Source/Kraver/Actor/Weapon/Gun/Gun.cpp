@@ -187,6 +187,12 @@ void AGun::FireEvent()
 	OnPlayTppMontage.Broadcast(AttackMontageTpp, 1.f);
 	OnPlayFppMontage.Broadcast(AttackMontageFpp, 1.f);
 
+	if (AttackMontageWep)
+	{
+		if (GetTppWeaponMesh()->GetAnimInstance())
+			GetTppWeaponMesh()->GetAnimInstance()->Montage_Play(AttackMontageWep);
+	}
+
 	UAttachmentSilencerComponent* Silencer = FindComponentByClass<UAttachmentSilencerComponent>();
 	if ((!Silencer || Silencer->GetbFireEffect()) && WeaponTppPrimitiveInfo.Contains("FireEffect"))
 	{

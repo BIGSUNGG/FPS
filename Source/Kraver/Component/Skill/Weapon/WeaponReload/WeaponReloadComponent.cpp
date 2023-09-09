@@ -19,7 +19,7 @@ void UWeaponReloadComponent::BeginPlay()
 	}
 
 	OwnerGun->OnSkillFirst.AddDynamic(this, &ThisClass::OnSkillFirstEvent);
-	OwnerGun->OnFire.AddDynamic(this, &ThisClass::OnFireEvent);
+	OwnerGun->OnAttack.AddDynamic(this, &ThisClass::OnFireEvent);
 }	
 
 
@@ -94,8 +94,19 @@ void UWeaponReloadComponent::ReloadStart()
 
 void UWeaponReloadComponent::ReloadStartEvent()
 {
-	OwnerGun->OnPlayFppMontage.Broadcast(ReloadMontageFpp, 1.f);
-	OwnerGun->OnPlayTppMontage.Broadcast(ReloadMontageTpp, 1.f);
+	if(ReloadMontageFpp)
+		OwnerGun->OnPlayFppMontage.Broadcast(ReloadMontageFpp, 1.f);
+	if (ReloadMontageTpp)
+		OwnerGun->OnPlayTppMontage.Broadcast(ReloadMontageTpp, 1.f);
+
+	if (ReloadMontageWep)
+	{
+		if (OwnerGun->GetTppWeaponMesh()->GetAnimInstance())
+			OwnerGun->GetTppWeaponMesh()->GetAnimInstance()->Montage_Play(ReloadMontageWep);
+
+		if (OwnerGun->GetFppWeaponMesh()->GetAnimInstance())
+			OwnerGun->GetFppWeaponMesh()->GetAnimInstance()->Montage_Play(ReloadMontageWep);
+	}
 
 	if (ReloadSound)
 	{

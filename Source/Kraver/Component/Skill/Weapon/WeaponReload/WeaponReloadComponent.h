@@ -71,6 +71,8 @@ protected:
 	UAnimMontage* ReloadMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
 	UAnimMontage* ReloadMontageFpp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
+	UAnimMontage* ReloadMontageWep;
 
 	// Sound
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", Meta = (AllowPrivateAccess = true))

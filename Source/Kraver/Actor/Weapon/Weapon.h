@@ -102,7 +102,7 @@ public:
 	EWeaponType GetWeaponType() { return WeaponType; }
 	EWeaponState GetWeaponState() { return WeaponState; }
 	USkeletalMeshComponent* GetTppWeaponMesh() { return TppWeaponMesh; }
-	UPrimitiveComponent* GetFppWeaponMesh() { return FppWeaponMesh; }
+	USkeletalMeshComponent* GetFppWeaponMesh() { return FppWeaponMesh; }
 	TMap<FString, UPrimitiveComponent*>& GetTppWeaponPrimitiveInfo() { return WeaponTppPrimitiveInfo; }
 	TMap<FString, UPrimitiveComponent*>& GetFppWeaponPrimitiveInfo() { return WeaponFppPrimitiveInfo; }
 
@@ -170,6 +170,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 	UAnimMontage* AttackMontageFpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
+	UAnimMontage* AttackMontageWep;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 	UAnimMontage* HolsterMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 	UAnimMontage* HolsterMontageFpp;
@@ -206,10 +208,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
 	FName TppHandSocketName = "SOCKET_Weapon"; // Weapon을 Attach할 스켈레탈 본 이름
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* TppWeaponMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
-	UPrimitiveComponent* FppWeaponMesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* FppWeaponMesh;
 
 	TMap<FString, UPrimitiveComponent*> WeaponTppPrimitiveInfo;
 	TMap<FString, UPrimitiveComponent*> WeaponFppPrimitiveInfo; // 추가적인 WeaponMesh를 가지는 배열

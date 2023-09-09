@@ -52,9 +52,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
 	UAnimMontage* ReloadInsertMontageFpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
+	UAnimMontage* ReloadInsertMontageWep;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
 	UAnimMontage* ReloadCloseMontageTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
 	UAnimMontage* ReloadCloseMontageFpp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
+	UAnimMontage* ReloadCloseMontageWep;
 
 	// Sound
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", Meta = (AllowPrivateAccess = true))
