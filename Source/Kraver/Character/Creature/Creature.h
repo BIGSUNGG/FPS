@@ -51,6 +51,7 @@ public:
 public:
 	// Getter Setter
 	virtual bool CanAttack();
+	virtual bool CanSubAttack();
 	virtual bool CanRun();
 
 	FORCEINLINE FRotator GetCreatureAngle() { return Camera ? Camera->GetComponentRotation() - GetMesh()->GetComponentRotation() : FRotator::ZeroRotator; }

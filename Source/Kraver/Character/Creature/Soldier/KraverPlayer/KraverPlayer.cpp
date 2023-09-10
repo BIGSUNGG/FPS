@@ -171,7 +171,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 				FVector RelativeLocation = RelativeTransform.GetLocation();
 
 				UAttachmentScopeComponent* ScopeComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UAttachmentScopeComponent>();
-				AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, -RelativeLocation.Z + ScopeComp->GetAdsAdditiveLocation().Z, DeltaTime, 10.f);
+				AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, -RelativeLocation.Z + AdsComp->GetAdsLocation().Z, DeltaTime, 10.f);
 			}
 			else
 				AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
@@ -384,11 +384,15 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 
 void AKraverPlayer::ChangeView()
 {
+	if (!IsLocallyControlled() || !IsPlayerControlled())
+		return;
+
 	switch (ViewType)
 	{
 	case EViewType::FIRST_PERSON:
 		ViewType = EViewType::THIRD_PERSON;
 		Camera->AttachToComponent(Tp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
+		GetMesh()->SetVisibility(true);
 
 		RefreshSpringArm();
 		for (auto& TempMesh : ShowOnlyFirstPerson)
@@ -405,6 +409,7 @@ void AKraverPlayer::ChangeView()
 	case EViewType::THIRD_PERSON:
 		ViewType = EViewType::FIRST_PERSON;
 		Camera->AttachToComponent(Fp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
+		GetMesh()->SetVisibility(false);
 
 		RefreshSpringArm();
 		for (auto TempMesh : ShowOnlyFirstPerson)

@@ -27,7 +27,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	const FVector& GetAdsAdditiveLocation() { return AdsAdditiveLocation; }
+	// Getter Setter
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
@@ -38,6 +38,4 @@ protected:
 	FName ScopeSocketName = "SOCKET_Scope";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component|Attach", meta = (AllowPrivateAccess = "true"))
 	FVector ScopeRelativeLocation;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ads", meta = (AllowPrivateAccess = "true"))
-	FVector AdsAdditiveLocation;
 };

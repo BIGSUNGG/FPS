@@ -211,6 +211,16 @@ void ACreature::Tick(float DeltaTime)
 
 	CameraTick(DeltaTime);
 	AimOffset(DeltaTime);
+
+	if (CombatComponent->GetCurWeapon())
+	{
+		if (CombatComponent->GetCurWeapon()->GetIsAttacking() && !CanAttack())
+			CombatComponent->SetIsAttacking(false);
+
+		if (CombatComponent->GetCurWeapon()->GetIsSubAttacking() && !CanSubAttack())
+			CombatComponent->SetIsSubAttacking(false);
+	}
+
 }
 
 void ACreature::CameraTick(float DeltaTime)
@@ -276,6 +286,27 @@ void ACreature::OnAssassinateEndEvent()
 
 bool ACreature::CanAttack()
 {
+	if (CombatComponent->GetCurWeapon())
+	{
+		if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetHolsterMontageTpp()))
+			return false;
+		if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetUnholsterMontageTpp()))
+			return false;
+	}
+
+	return true;
+}
+
+bool ACreature::CanSubAttack()
+{
+	if (CombatComponent->GetCurWeapon())
+	{
+		if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetHolsterMontageTpp()))
+			return false;
+		if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetUnholsterMontageTpp()))
+			return false;
+	}
+
 	return true;
 }
 
@@ -569,7 +600,7 @@ void ACreature::OnClientUnholsterWeaponEvent(AWeapon* Weapon)
 	{
 		AssassinateComp->OnAssassinate.AddDynamic(this, &ACreature::OnAssassinateEvent);
 		AssassinateComp->OnAssassinateEnd.AddDynamic(this, &ACreature::OnAssassinateEndEvent);
-	}
+	}	
 }
 
 void ACreature::OnServerUnholsterWeaponEvent(AWeapon* Weapon)
