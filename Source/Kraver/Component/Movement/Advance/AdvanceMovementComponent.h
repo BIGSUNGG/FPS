@@ -97,6 +97,8 @@ protected:
 
 public:
 	// Getter Setter
+	virtual bool IsFalling() override;
+
 	EWallRunState GetCurWallRunState() { return CurWallRunState; }
 	bool GetIsSliding() { return IsSliding; }
 	const bool GetIsWallRunning() { return CurWallRunState != EWallRunState::NONE; }

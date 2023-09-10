@@ -213,7 +213,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* FppWeaponMesh;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
 	TMap<FString, UPrimitiveComponent*> WeaponTppPrimitiveInfo;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
 	TMap<FString, UPrimitiveComponent*> WeaponFppPrimitiveInfo; // 추가적인 WeaponMesh를 가지는 배열
 
 	UPROPERTY(Replicated)

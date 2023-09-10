@@ -3,20 +3,6 @@
 
 #include "ShotGun.h"
 
-bool AShotGun::RefillAmmo()
-{
-	if (CurAmmo == MaxAmmo)
-		return false;
-
-	++CurAmmo;
-	--TotalAmmo;
-
-	if (!HasAuthority())
-		Server_RefillAmmo();
-
-	return true;
-}
-
 void AShotGun::FireBullet()
 {
 	for (int i = 0; i < NumberOfBullet; i++)

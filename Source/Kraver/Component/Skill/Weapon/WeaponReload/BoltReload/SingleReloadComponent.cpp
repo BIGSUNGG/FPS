@@ -40,9 +40,6 @@ void USingleReloadComponent::OnReload_OpenFinishEvent()
 	AKraverPlayer* Player = Cast<AKraverPlayer>(Creature);
 	UAnimInstance* FppAnimInstance = Player->GetArmMesh()->GetAnimInstance();
 
-	TppAnimInstance->Montage_Stop(0.f, ReloadMontageTpp);
-	if (FppAnimInstance)
-		FppAnimInstance->Montage_Stop(0.f, ReloadMontageFpp);
 	ReloadInstert();
 }
 
@@ -54,9 +51,6 @@ void USingleReloadComponent::OnReload_InsertFinishEvent()
 	AKraverPlayer* Player = Cast<AKraverPlayer>(Creature);
 	UAnimInstance* FppAnimInstance = Player->GetArmMesh()->GetAnimInstance();
 
-	TppAnimInstance->Montage_Stop(0.f, ReloadInsertMontageTpp);
-	if (FppAnimInstance)
-		FppAnimInstance->Montage_Stop(0.f, ReloadInsertMontageFpp);
 
 	if (OwnerGun->GetCurAmmo() < OwnerGun->GetMaxAmmo() && OwnerGun->GetMaxAmmo() > 0)
 		ReloadInstert();
@@ -153,6 +147,20 @@ void USingleReloadComponent::ReloadCloseEvent()
 			ReloadCloseSound
 		);
 	}
+}
+
+bool USingleReloadComponent::RefillAmmo()
+{
+	if (OwnerGun->CurAmmo == OwnerGun->MaxAmmo)
+		return false;
+
+	++OwnerGun->CurAmmo;
+	--OwnerGun->TotalAmmo;
+
+	if (!IS_SERVER())
+		Server_RefillAmmo();
+
+	return true;
 }
 
 bool USingleReloadComponent::IsReloading()

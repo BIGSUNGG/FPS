@@ -45,6 +45,7 @@ protected:
 
 public:
 	// Getter Setter
+	virtual bool IsFalling();
 	FORCEINLINE bool GetIsJumping() { return IsJumping; }
 	FORCEINLINE float GetSprintSpeed() { return SprintSpeed; }
 	FORCEINLINE float GetWalkSpeed() { return WalkSpeed; }

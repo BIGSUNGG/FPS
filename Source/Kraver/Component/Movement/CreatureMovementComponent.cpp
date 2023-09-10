@@ -119,6 +119,11 @@ void UCreatureMovementComponent::UnCrouch()
 	OwnerCreature->UnCrouch();
 }
 
+bool UCreatureMovementComponent::IsFalling()
+{
+	return OwnerCreature->GetMovementComponent()->IsFalling();
+}
+
 void UCreatureMovementComponent::SetMovementState(EMovementState value)
 {
 	MovementState = value;

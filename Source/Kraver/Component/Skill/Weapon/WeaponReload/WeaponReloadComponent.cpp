@@ -64,6 +64,11 @@ void UWeaponReloadComponent::Multicast_ReloadStart_Implementation()
 		ReloadStartEvent();
 }
 
+void UWeaponReloadComponent::Server_RefillAmmo_Implementation()
+{
+	RefillAmmo();
+}
+
 void UWeaponReloadComponent::OnSkillFirstEvent()
 {
 	ReloadStart();
@@ -71,7 +76,7 @@ void UWeaponReloadComponent::OnSkillFirstEvent()
 
 void UWeaponReloadComponent::OnReload_Insert_MagazineEvent()
 {
-	OwnerGun->RefillAmmo();
+	RefillAmmo();
 }
 
 void UWeaponReloadComponent::OnFireEvent()
@@ -116,6 +121,30 @@ void UWeaponReloadComponent::ReloadStartEvent()
 			ReloadSound
 		);
 	}
+}
+
+bool UWeaponReloadComponent::RefillAmmo()
+{
+	if (OwnerGun->CurAmmo == OwnerGun->MaxAmmo)
+		return false;
+
+	int32 NeedAmmo = OwnerGun->MaxAmmo - OwnerGun->CurAmmo;
+	if (OwnerGun->TotalAmmo >= NeedAmmo)
+	{
+		OwnerGun->TotalAmmo -= NeedAmmo;
+		OwnerGun->CurAmmo = OwnerGun->MaxAmmo;
+	}
+	else
+	{
+		OwnerGun->CurAmmo += OwnerGun->TotalAmmo;
+		OwnerGun->TotalAmmo = 0;
+	}
+	if (!IS_SERVER())
+	{
+		Server_RefillAmmo();
+	}
+
+	return true;
 }
 
 bool UWeaponReloadComponent::IsReloading()

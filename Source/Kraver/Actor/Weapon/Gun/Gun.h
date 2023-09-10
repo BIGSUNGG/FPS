@@ -14,7 +14,9 @@ UCLASS()
 class KRAVER_API AGun : public AWeapon
 {
 	GENERATED_BODY()
-	
+	friend class USingleReloadComponent;
+	friend class UWeaponReloadComponent;
+
 public:
 	AGun();
 
@@ -24,7 +26,6 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 
-	virtual bool RefillAmmo(); // CurAmmo를 보충함
 
 protected:
 	// Delegate
@@ -34,9 +35,6 @@ protected:
 	// Rpc
 	virtual void Server_OnAttackEvent_Implementation();
 	virtual void Multicast_OnAttackEvent_Implementation();
-
-	UFUNCTION(Server, Reliable)
-	virtual void Server_RefillAmmo();
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_ImpactBullet(FVector ImpactPos);
@@ -63,6 +61,10 @@ public:
 	FAttackDele OnFire;
 
 protected:
+	// Component
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ads", Meta = (AllowPrivateAccess = true))
+	class UWeaponAdsComponent* AdsComponent;
+
 	// Sound
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Sound", meta = (AllowPrivateAccess = "true"))
 	class USoundCue* ImpactSound;

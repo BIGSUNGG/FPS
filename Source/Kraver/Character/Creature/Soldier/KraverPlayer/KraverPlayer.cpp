@@ -14,6 +14,7 @@
 #include DamageIndicatorSubsystem_h
 #include WeaponReloadComponent_h
 #include AttachmentScopeComponent_h
+#include WeaponAdsComponent_h
 
 AKraverPlayer::AKraverPlayer() : Super()
 {
@@ -45,6 +46,10 @@ AKraverPlayer::AKraverPlayer() : Super()
 	Tp_SpringArm->bDoCollisionTest = false;
 	Tp_SpringArm->TargetArmLength = 300.f;
 
+	Capture2DComponent = CreateDefaultSubobject<USceneCaptureComponent2D>("Capture2DComponent");
+	Capture2DComponent->SetupAttachment(Camera);
+	Capture2DComponent->FOVAngle = 110.f;
+
 	GetCharacterMovement()->AirControl = 0.5f;
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
 	GetCharacterMovement()->SetCrouchedHalfHeight(60.f);
@@ -57,6 +62,7 @@ void AKraverPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CameraBasicFov = Camera->FieldOfView;
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance());
 	if((AnimInstance))
 	{
@@ -132,9 +138,11 @@ void AKraverPlayer::CameraTilt(float TargetRoll)
 
 void AKraverPlayer::WeaponADS(float DeltaTime)
 {
-	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && Cast<AGun>(CombatComponent->GetCurWeapon()))
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponAdsComponent>())
 	{
+		UWeaponAdsComponent* AdsComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponAdsComponent>();
 		USkeletalMeshComponent* ArmWeaponMesh = dynamic_cast<USkeletalMeshComponent*>(CombatComponent->GetCurWeapon()->GetFppWeaponMesh());
+
 #if TEST_ADS
 		{
 			FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_AIM", ERelativeTransformSpace::RTS_World);
@@ -146,10 +154,10 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 			KR_LOG_VECTOR(RelativeLocation);
 			KR_LOG_ROTATOR(RelativeRotation);
 		}
-#else
+#endif
+
 		if (ViewType == EViewType::FIRST_PERSON && HUD)
 			HUD->SetbDrawCrosshair(false);
-#endif
 
 		const TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo();
 		if (WeaponPrimitiveInfo.Contains("Scope"))
@@ -158,7 +166,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 			if (ScopeMesh)
 			{
 				FTransform WeaponTransform = ArmWeaponMesh->GetSocketTransform("SOCKET_Scope", ERelativeTransformSpace::RTS_World);
-				FTransform ScopeTransform = ScopeMesh->GetSocketTransform("AimOffset", ERelativeTransformSpace::RTS_World);
+				FTransform ScopeTransform = ScopeMesh->GetSocketTransform("SOCKET_Aim", ERelativeTransformSpace::RTS_World);
 				FTransform RelativeTransform = ScopeTransform.GetRelativeTransform(WeaponTransform);
 				FVector RelativeLocation = RelativeTransform.GetLocation();
 
@@ -172,7 +180,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 			AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
 
 
-		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, 95.f, DeltaTime, 15.f));
+		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, CameraBasicFov - AdsComp->GetReduceFov(), DeltaTime, AdsComp->GetInterpSpeed()));
 	}
 	else
 	{
@@ -180,9 +188,10 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 			HUD->SetbDrawCrosshair(true);
 
 		AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
-		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, 110.f, DeltaTime, 15.f));
+		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, CameraBasicFov, DeltaTime, 15.f));
 	}
 
+	Capture2DComponent->FOVAngle = Camera->FieldOfView;
 }
 
 void AKraverPlayer::SpringArmTick(float DeltaTime)

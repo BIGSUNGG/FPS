@@ -5,9 +5,13 @@
 #include Creature_h
 #include AttachmentSilencerComponent_h
 #include WeaponReloadComponent_h
+#include WeaponAdsComponent_h
+#include CreatureMovementComponent_h
 
 AGun::AGun() : Super()
 {
+	AdsComponent = CreateDefaultSubobject<UWeaponAdsComponent>("AdsComponent");
+
 	WeaponType = EWeaponType::GUN;
 	
 	bAttackWhileSprint = false;
@@ -29,7 +33,7 @@ void AGun::Tick(float DeltaTime)
 				CurBulletSpread = MinSpread;
 		}
 
-		if (OwnerCreature->GetMovementComponent()->IsFalling())
+		if (OwnerCreature->CreatureMovementComponent->IsFalling())
 			AdditiveSpreadInAir = FMath::FInterpTo(AdditiveSpreadInAir, SpreadInAir, DeltaTime, 10);
 		else
 			AdditiveSpreadInAir = FMath::FInterpTo(AdditiveSpreadInAir, 0, DeltaTime, 10);
@@ -78,30 +82,6 @@ void AGun::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-}
-
-bool AGun::RefillAmmo()
-{
-	if(CurAmmo == MaxAmmo)
-		return false;
-
-	int32 NeedAmmo = MaxAmmo - CurAmmo;
-	if (TotalAmmo >= NeedAmmo)
-	{
-		TotalAmmo -= NeedAmmo;
-		CurAmmo = MaxAmmo;
-	}
-	else
-	{
-		CurAmmo += TotalAmmo;
-		TotalAmmo = 0;
-	}
-	if (!HasAuthority())	
-	{
-		Server_RefillAmmo();
-	}
-
-	return true;
 }
 
 void AGun::OnAttackEvent()
@@ -155,11 +135,6 @@ void AGun::OnServer_ImpactBullet(FVector ImpactPos)
 	}
 
 	Multicast_ImpactBullet(ImpactPos);
-}
-
-void AGun::Server_RefillAmmo_Implementation()
-{
-	RefillAmmo();
 }
 
 void AGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)

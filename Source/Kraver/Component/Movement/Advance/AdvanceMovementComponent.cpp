@@ -248,7 +248,7 @@ bool UAdvanceMovementComponent::WallRunUpdate()
 
 bool UAdvanceMovementComponent::WallRunHorizonUpdate()
 {
-	if (WallRunHorizonMovement(OwnerCreature->GetActorLocation(), CalculateRightWallRunEndVector(), -1.f))
+	if ((CurWallRunState == EWallRunState::NONE || CurWallRunState == EWallRunState::WALLRUN_RIGHT) && WallRunHorizonMovement(OwnerCreature->GetActorLocation(), CalculateRightWallRunEndVector(), -1.f))
 	{
 		if (!GetIsWallRunning())
 			WallRunStart(EWallRunState::WALLRUN_RIGHT);
@@ -260,7 +260,7 @@ bool UAdvanceMovementComponent::WallRunHorizonUpdate()
 		WallRunHorizonEnd(1.f);
 		return false;
 	}
-	else if (WallRunHorizonMovement(OwnerCreature->GetActorLocation(), CalculateLeftWallRunEndVector(), 1.f))
+	else if ((CurWallRunState == EWallRunState::NONE || CurWallRunState == EWallRunState::WALLRUN_LEFT) && WallRunHorizonMovement(OwnerCreature->GetActorLocation(), CalculateLeftWallRunEndVector(), 1.f))
 	{
 		if (!GetIsWallRunning())
 			WallRunStart(EWallRunState::WALLRUN_LEFT);
@@ -507,8 +507,8 @@ FVector UAdvanceMovementComponent::CalculateRightWallRunEndVector()
 {
 	return (
 		OwnerCreature->GetActorLocation() +
-		OwnerCreature->GetActorRightVector() * 100.f +
-		OwnerCreature->GetActorForwardVector() * -50.f
+		OwnerCreature->GetActorRightVector() * 75.f +
+		OwnerCreature->GetActorForwardVector() * -75.f
 		);
 }
 
@@ -516,8 +516,8 @@ FVector UAdvanceMovementComponent::CalculateLeftWallRunEndVector()
 {
 	return (
 		OwnerCreature->GetActorLocation() +
-		OwnerCreature->GetActorRightVector() * -100.f +
-		OwnerCreature->GetActorForwardVector() * -50.f
+		OwnerCreature->GetActorRightVector() * -75.f +
+		OwnerCreature->GetActorForwardVector() * -75.f
 		);
 }
 
@@ -651,4 +651,12 @@ void UAdvanceMovementComponent::Server_SlideEnd_Implementation()
 void UAdvanceMovementComponent::Server_SlideUpdate_Implementation(FVector Velocity)
 {
 	OwnerCreature->GetCharacterMovement()->Velocity = Velocity;
+}
+
+bool UAdvanceMovementComponent::IsFalling()
+{
+	if (CurWallRunState != EWallRunState::NONE)
+		return false;
+
+	return Super::IsFalling();
 }

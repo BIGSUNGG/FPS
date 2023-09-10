@@ -42,6 +42,7 @@ protected:
 	virtual void ReloadClose();
 	virtual void ReloadCloseEvent();
 
+	virtual bool RefillAmmo() override;
 public:
 	virtual bool IsReloading() override;
 

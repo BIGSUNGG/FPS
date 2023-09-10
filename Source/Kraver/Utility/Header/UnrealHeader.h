@@ -3,6 +3,7 @@
 // Engine
 #include "Engine/EngineTypes.h"
 #include "Engine/DamageEvents.h"
+#include "Engine/TextureRenderTarget.h"
 #include "GenericPlatform/GenericPlatformProcess.h"
 
 // GameFramework
@@ -14,10 +15,11 @@
 #include "Sound/SoundCue.h"
 
 // Components
+#include "Components/TextBlock.h"
 #include "Components/DecalComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Components/TextBlock.h"
 #include "Components/TimelineComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
 
 // Net
 #include "Net/UnrealNetwork.h"

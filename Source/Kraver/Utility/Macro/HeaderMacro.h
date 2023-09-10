@@ -42,6 +42,7 @@
 #define WeaponReloadComponent_h "Kraver/Component/Skill/Weapon/WeaponReload/WeaponReloadComponent.h"
 #define WeaponParryComponent_h "Kraver/Component/Skill/Weapon/WeaponParrry/WeaponParryComponent.h"
 #define WeaponAssassinateComponent_h "Kraver/Component/Skill/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
+#define WeaponAdsComponent_h "Kraver/Component/Skill/Weapon/WeaponAds/WeaponAdsComponent.h"
 
 // GameBase
 #define KraverGameMode_h "Kraver/GameBase/GameMode/KraverGameMode.h"

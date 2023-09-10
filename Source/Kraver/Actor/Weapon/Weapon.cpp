@@ -119,12 +119,6 @@ void AWeapon::BeginPlay()
 	}
 
 	MakeFppPrimitiveInfo();
-
-	if (!GetTppWeaponMesh()->GetAnimInstance())
-		KR_LOG(Error, TEXT("AnimInstance is nullptr"));
-
-	if (!GetFppWeaponMesh()->GetAnimInstance())
-		KR_LOG(Error, TEXT("AnimInstance is nullptr"));
 }
 
 // Called every frame

@@ -14,9 +14,6 @@ class KRAVER_API AShotGun : public AHitscanGun
 {
 	GENERATED_BODY()
 
-public:
-	virtual bool RefillAmmo() override;
-
 protected:
 	virtual void FireBullet() override;
 

@@ -29,6 +29,9 @@ protected:
 	virtual void Server_ReloadStart();
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_ReloadStart();
+	
+	UFUNCTION(Server, Reliable)
+	virtual void Server_RefillAmmo();
 
 	// Delegate
 	UFUNCTION()
@@ -41,6 +44,8 @@ protected:
 	// Func
 	virtual void ReloadStart();
 	virtual void ReloadStartEvent();
+
+	virtual bool RefillAmmo(); // CurAmmo를 보충함
 
 public:
 	virtual bool IsReloading();
