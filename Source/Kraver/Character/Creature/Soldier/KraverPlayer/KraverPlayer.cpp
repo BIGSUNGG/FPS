@@ -392,7 +392,7 @@ void AKraverPlayer::ChangeView()
 	case EViewType::FIRST_PERSON:
 		ViewType = EViewType::THIRD_PERSON;
 		Camera->AttachToComponent(Tp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
-		GetMesh()->SetVisibility(true);
+		GetMesh()->SetWorldScale3D(FVector(1, 1, 1));
 
 		RefreshSpringArm();
 		for (auto& TempMesh : ShowOnlyFirstPerson)
@@ -400,7 +400,7 @@ void AKraverPlayer::ChangeView()
 			if(TempMesh != nullptr)
 				TempMesh->SetOwnerNoSee(true);
 		}
-		for (auto& TempMesh : ShowOnlyThirdPerson)
+		for (auto& TempMesh : ShowOnlyThirdPerson)	
 		{
 			if (TempMesh != nullptr)
 				TempMesh->SetOwnerNoSee(false);
@@ -409,7 +409,7 @@ void AKraverPlayer::ChangeView()
 	case EViewType::THIRD_PERSON:
 		ViewType = EViewType::FIRST_PERSON;
 		Camera->AttachToComponent(Fp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
-		GetMesh()->SetVisibility(false);
+		GetMesh()->SetWorldScale3D(FVector::ZeroVector);
 
 		RefreshSpringArm();
 		for (auto TempMesh : ShowOnlyFirstPerson)

@@ -305,8 +305,7 @@ void AWeapon::OnAttackStartEvent()
 		if (!bFirstAttackDelay)
 			Attack();
 
-		if (bAutomaticAttack)
-			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, bAutomaticAttack, AttackDelay);
+		GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, bAutomaticAttack, AttackDelay);
 	}
 
 	OnAttackStart.Broadcast();

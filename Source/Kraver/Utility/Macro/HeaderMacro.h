@@ -47,6 +47,7 @@
 // GameBase
 #define KraverGameMode_h "Kraver/GameBase/GameMode/KraverGameMode.h"
 #define LobbyGameMode_h "Kraver/GameBase/GameMode/LobbyGameMode/LobbyGameMode.h"
+#define TeamGameMode_h "Kraver/GameBase/GameMode/TeamGameMode/TeamrGameMode.h"
 
 #define KraverGameState_h "Kraver/GameBase/GameState/KraverGameState.h"
 

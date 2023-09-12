@@ -64,3 +64,27 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AttackType)
 	bool bCanSimulate = true;
 };
+
+USTRUCT(BlueprintType)
+struct FTeamInfo
+{
+	GENERATED_BODY()
+
+public:
+	static bool CheckIsTeam(ETeam ATeam, ETeam BTeam)
+	{
+		if (ATeam == ETeam::TEAM_ALL || BTeam == ETeam::TEAM_ALL)
+			return true;
+		if (ATeam == ETeam::ENEMY_ALL || BTeam == ETeam::ENEMY_ALL)
+			return false;
+
+		return ATeam == BTeam;
+	}
+	static bool CheckIsEnemy(ETeam ATeam, ETeam BTeam) { return !CheckIsTeam(ATeam, BTeam); }
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team", meta = (AllowPrivateAccess = "true"))
+	ETeam CurTeam = ETeam::ENEMY_ALL;
+
+
+};

@@ -65,3 +65,12 @@ enum class ETurningInPlace : uint8
 	ETIP_NotTurning UMETA(DisplayName = "Not Turning"),
 	ETIP_MAX		UMETA(DisplayName = "DefaultMAX")
 };
+
+UENUM(BlueprintType)
+enum class ETeam : uint8
+{
+	TEAM_ALL	UMETA(DisplayName = "TEAM_ALL"),
+	ENEMY_ALL	UMETA(DisplayName = "ENEMY_ALL"),
+	RED			UMETA(DisplayName = "RED"),
+	BLUE		UMETA(DisplayName = "BLUE"),
+};

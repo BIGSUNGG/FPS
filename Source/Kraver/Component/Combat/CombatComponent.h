@@ -124,6 +124,7 @@ public:
 	int8 GetCurWeaponSlotIndex();
 	bool GetCanEquipWeapon();
 	const TArray<AWeapon*>& GetWeaponSlot() { return WeaponSlot; }
+	const FTeamInfo& GetCurTeamInfo() { return CurTeamInfo; }
 
 	int CountWeapon();
 
@@ -196,6 +197,9 @@ protected:
 	int32 CurHp = 100.f; // 현재 Hp
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
 	int32 MaxHp = 100.f; // 최대 Hp
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Team", meta = (AllowPrivateAccess = "true"))
+	FTeamInfo CurTeamInfo;
 
 	bool bCanceledTakeDamage = false; // Server에서만 사용
 

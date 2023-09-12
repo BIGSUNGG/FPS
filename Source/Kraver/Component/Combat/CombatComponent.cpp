@@ -147,7 +147,10 @@ float UCombatComponent::OnServer_GiveDamage(AActor* DamagedActor, float DamageAm
 	if (DamageType->AttackType == EKraverDamageType::UNKWOWN)
 		KR_LOG(Error, TEXT("Damage Type is UNKWON"));
 
-	float Damage = DamagedActor->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	float Damage = 0.f;
+	UCombatComponent* DamagedCombatComp = FindComponentByClassIncludeOwner<UCombatComponent>(DamagedActor);
+	if (DamagedCombatComp == nullptr || FTeamInfo::CheckIsEnemy(CurTeamInfo.CurTeam, DamagedCombatComp->GetCurTeamInfo().CurTeam))
+		Damage = DamagedActor->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	KR_LOG(Log, TEXT("Give %f Damge to %s"), Damage, *DamagedActor->GetName());
 
 	return Damage;
@@ -195,6 +198,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UCombatComponent, CurWeapon);
 	DOREPLIFETIME(UCombatComponent, WeaponSlot);
+	DOREPLIFETIME(UCombatComponent, CurTeamInfo);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CurHp, COND_OwnerOnly);
 	DOREPLIFETIME_CONDITION(UCombatComponent, MaxHp, COND_OwnerOnly);
 }

@@ -36,12 +36,12 @@ protected:
 	class ACreature* InchargeActor = nullptr;
 
 	UWidgetComponent* FloatingWidgetComp;
-	float FloatingRightSpeed = 2.f;
-	float FloatingUpSpeed = 3.f;
+	float FloatingRightSpeed = 1.f;
+	float FloatingUpSpeed = 1.5f;
 	FVector RightVector;
 	FVector UpVector;
 
 	FTimerHandle DestroyTimer;
-	float LifeTime = 0.25f;
+	float LifeTime = 0.5f;
 
 };
