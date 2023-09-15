@@ -33,16 +33,6 @@ void AMelee::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if(bInputNextCombo)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			0,
-			0.f,
-			FColor::White,
-			TEXT("InputNextCombo")
-		);
-	}
-
 }
 
 void AMelee::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

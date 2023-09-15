@@ -17,6 +17,4 @@ class KRAVER_API AKraverPlayerController : public APlayerController
 public:
 	virtual void OnPossess(APawn* aPawn) override;
 
-protected:
-	class AKraverPlayer* KraverPlayer = nullptr;
 };

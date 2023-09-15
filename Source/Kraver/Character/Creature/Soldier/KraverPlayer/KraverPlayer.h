@@ -131,7 +131,7 @@ protected:
 
 	// ViewType
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-	EViewType ViewType = EViewType::FIRST_PERSON;
+	EViewType CurViewType = EViewType::FIRST_PERSON;
 
 	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
 	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트

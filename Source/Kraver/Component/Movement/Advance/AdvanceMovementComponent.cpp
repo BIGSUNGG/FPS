@@ -204,12 +204,6 @@ bool UAdvanceMovementComponent::WallRunUpdate()
 			WallRunVerticalSuccess = WallRunVerticalUpdate();
 			if (WallRunVerticalSuccess)
 			{
-				GEngine->AddOnScreenDebugMessage(
-					0,
-					0.f,
-					FColor::White,
-					TEXT("WallRunVertical")
-				);
 				Server_WallRunVerticalSuccess();
 				Server_WallRunSuccess(OwnerCreature->GetActorLocation(), OwnerCreature->GetActorRotation(), OwnerCreature->GetCharacterMovement()->Velocity, OwnerCreature->GetCharacterMovement()->PendingLaunchVelocity);
 				return true;
@@ -228,13 +222,6 @@ bool UAdvanceMovementComponent::WallRunUpdate()
 					OwnerCreature->GetCharacterMovement()->GravityScale = 0.f;
 					OwnerCreature->GetCharacterMovement()->PendingLaunchVelocity.Z = 0.f;
 				}
-
-				GEngine->AddOnScreenDebugMessage(
-					0,
-					0.f,
-					FColor::White,
-					TEXT("WallRunHorizon")
-				);
 
 				Server_WallRunHorizonSuccess();
 				Server_WallRunSuccess(OwnerCreature->GetActorLocation(), OwnerCreature->GetActorRotation(), OwnerCreature->GetCharacterMovement()->Velocity, OwnerCreature->GetCharacterMovement()->PendingLaunchVelocity);

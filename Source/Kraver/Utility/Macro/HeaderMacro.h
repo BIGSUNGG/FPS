@@ -47,13 +47,16 @@
 // GameBase
 #define KraverGameMode_h "Kraver/GameBase/GameMode/KraverGameMode.h"
 #define LobbyGameMode_h "Kraver/GameBase/GameMode/LobbyGameMode/LobbyGameMode.h"
-#define TeamGameMode_h "Kraver/GameBase/GameMode/TeamGameMode/TeamrGameMode.h"
+#define TeamGameMode_h "Kraver/GameBase/GameMode/TeamGameMode/TeamGameMode.h"
 
 #define KraverGameState_h "Kraver/GameBase/GameState/KraverGameState.h"
+#define TeamGameState_h "Kraver/GameBase/GameState/TeamGameState/TeamGameState.h"
+#define ControlGameState_h "Kraver/GameBase/GameState/TeamGameState/ControlGameState/ControlGameState.h"
 
 #define KraverPlayerController_h "Kraver/GameBase/PlayerController/KraverPlayerController.h"
 
 #define KraverPlayerState_h "Kraver/GameBase/PlayerState/KraverPlayerState.h"
+#define TeamPlayerState_h "Kraver/GameBase/PlayerState/TeamPlayerState/TeamPlayerState.h"
 
 #define KraverSpectator_h "Kraver/GameBase/Spectator/KraverSpectator.h"
 

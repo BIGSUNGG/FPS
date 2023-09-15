@@ -17,31 +17,30 @@ void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, AP
 	if(!NewPawn)
 		return;
 	
-	AKraverPlayer* NewPlayer = Cast<AKraverPlayer>(NewPawn);
-	if (!NewPlayer)
+	OwnerPlayer = Cast<AKraverPlayer>(NewPawn);
+	if (!OwnerPlayer)
 		return;
 
-	OnNewPlayer.Broadcast(NewPlayer);
+	OnNewPlayer.Broadcast(OwnerPlayer);
 
-	if(NewPawn->IsLocallyControlled())
+	if(OwnerPlayer->IsLocallyControlled())
 	{
-		LocalPlayer = NewPlayer;
-		LocalController = Cast<AKraverPlayerController>(LocalPlayer->GetController());
-		if (!LocalController)
+		OwnerController = Cast<AKraverPlayerController>(OwnerPlayer->GetController());
+		if (!OwnerController)
 		{
 			KR_LOG(Error, TEXT("Local Controller class is not AKraverPlayerController"));
 			return;
 		}
 
-		HUD = Cast<AKraverHUD>(LocalController->GetHUD());
+		AKraverHUD* HUD = Cast<AKraverHUD>(OwnerController->GetHUD());
 		if (!HUD)
 		{
 			KR_LOG(Error, TEXT("HUD class is not AKraverHUD"));
 			return;
 		}
-		KR_LOG(Log, TEXT("New Local Player : %s"), *LocalPlayer->GetName());
+		KR_LOG(Log, TEXT("New Local Player : %s"), *OwnerPlayer->GetName());
 
-		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->SetLocalPlayer(LocalPlayer);
-		OnNewLocalPlayer.Broadcast(LocalPlayer);
+		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->SetLocalPlayer(OwnerPlayer);
+		OnNewLocalPlayer.Broadcast(OwnerPlayer);
 	}
 }

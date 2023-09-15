@@ -17,12 +17,15 @@ class KRAVER_API AKraverGameMode : public AGameMode
 public:
 	AKraverGameMode();
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	virtual void CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
 	virtual void RequestRespawn(AKraverPlayer* RespawnPlayer, AController* PlayerController);
 	virtual void RequsetSpectate(AController* PlayerController);
 
 protected:
+	class AKraverGameState* KraverGameState = nullptr;
+
 	// Respawn
 	bool bRespawn = true;
 	FTimerHandle RespawnTimer;

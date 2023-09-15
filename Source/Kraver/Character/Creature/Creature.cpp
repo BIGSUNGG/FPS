@@ -262,6 +262,7 @@ void ACreature::OnAssassinateEvent(AActor* AssassinatedActor)
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	DisableInput(PlayerController);
 
+	GetMesh()->SetVisibility(true);
 	Camera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "head");
 
 	GetMovementComponent()->Velocity = FVector::ZeroVector;

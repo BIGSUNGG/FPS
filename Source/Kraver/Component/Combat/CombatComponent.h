@@ -128,6 +128,8 @@ public:
 
 	int CountWeapon();
 
+	void SetTeam(ETeam InTeam) { CurTeamInfo.CurTeam = InTeam; }
+
 public:
 	// Attack
 	FAttackStartDele OnAttackStartDelegate; // 공격을 시작할때 호출

@@ -35,29 +35,11 @@ void AGuardAIController::OnTargetPerceptionUpdatedEvent(AActor* Actor, FAIStimul
 	{
 		AKraverPlayer* Player = Cast<AKraverPlayer>(Actor);	
 		if (Player)
-		{
 			GetBlackboardComponent()->SetValueAsObject(FindEnemyKey, Player);
-
-			FString Message = "Find : " + Actor->GetName();
-			GEngine->AddOnScreenDebugMessage(
-				0,
-				1.f,
-				FColor::White,
-				Message
-			);
-		}
 	}
 	else
 	{
 		if(GetBlackboardComponent()->GetValueAsObject(FindEnemyKey) == Actor)
 			GetBlackboardComponent()->SetValueAsObject(FindEnemyKey, nullptr);
-
-		FString Message = "Lose : " + Actor->GetName();
-		GEngine->AddOnScreenDebugMessage(
-			0,
-			1.f,
-			FColor::White,
-			Message
-		);
 	}
 }

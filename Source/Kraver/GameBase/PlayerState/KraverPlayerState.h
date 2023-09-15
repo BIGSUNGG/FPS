@@ -27,7 +27,6 @@ public:
 	FNewKraverPlayer OnNewLocalPlayer;
 
 protected:
-	class AKraverPlayer* LocalPlayer = nullptr;
-	class AKraverPlayerController* LocalController = nullptr;
-	class AKraverHUD* HUD;
+	class AKraverPlayer* OwnerPlayer = nullptr;
+	class AKraverPlayerController* OwnerController = nullptr;
 };

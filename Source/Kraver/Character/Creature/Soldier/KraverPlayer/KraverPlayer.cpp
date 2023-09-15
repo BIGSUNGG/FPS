@@ -156,7 +156,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 		}
 #endif
 
-		if (ViewType == EViewType::FIRST_PERSON && HUD)
+		if (CurViewType == EViewType::FIRST_PERSON && HUD)
 			HUD->SetbDrawCrosshair(false);
 
 		const TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo();
@@ -251,7 +251,7 @@ void AKraverPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 USkeletalMeshComponent* AKraverPlayer::GetCurMainMesh()
 {
-	switch (ViewType)
+	switch (CurViewType)
 	{
 	case EViewType::FIRST_PERSON:
 		return ArmMesh;
@@ -358,13 +358,6 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 		}
 	}
 
-	if (CanInteractWeapon && GEngine)
-	{
-		FString Text = "Can Interact Weapon : " + CanInteractWeapon->GetName();
-		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::White, Text);
-
-	}
-
 	if (HUD)
 	{
 		if (CanInteractWeapon)
@@ -384,15 +377,16 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 
 void AKraverPlayer::ChangeView()
 {
-	if (!IsLocallyControlled() || !IsPlayerControlled())
+	if (!IsLocallyControlled())
 		return;
 
-	switch (ViewType)
+	switch (CurViewType)
 	{
 	case EViewType::FIRST_PERSON:
-		ViewType = EViewType::THIRD_PERSON;
+		CurViewType = EViewType::THIRD_PERSON;
 		Camera->AttachToComponent(Tp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
-		GetMesh()->SetWorldScale3D(FVector(1, 1, 1));
+		if (IsPlayerControlled())
+			GetMesh()->SetVisibility(true);
 
 		RefreshSpringArm();
 		for (auto& TempMesh : ShowOnlyFirstPerson)
@@ -407,9 +401,10 @@ void AKraverPlayer::ChangeView()
 		}
 		break;
 	case EViewType::THIRD_PERSON:
-		ViewType = EViewType::FIRST_PERSON;
+		CurViewType = EViewType::FIRST_PERSON;
 		Camera->AttachToComponent(Fp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
-		GetMesh()->SetWorldScale3D(FVector::ZeroVector);
+		if (IsPlayerControlled())
+			GetMesh()->SetVisibility(false);
 
 		RefreshSpringArm();
 		for (auto TempMesh : ShowOnlyFirstPerson)
@@ -470,8 +465,11 @@ void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FTransfor
 
 void AKraverPlayer::RefreshCurViewType()
 {
-	for(int i = 0; i < 2; i++)
+	EViewType TargetViewType = CurViewType;
+	do 
+	{
 		ChangeView();
+	} while (TargetViewType != CurViewType);
 }
 
 void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
