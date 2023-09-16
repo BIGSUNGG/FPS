@@ -6,6 +6,8 @@
 
 #define FloatingDamage_h "Kraver/Actor/FloatingDamage/FloatingDamage.h"
 
+#define ControlArea_h "Kraver/Actor/ControlArea/ControlArea.h"
+
 #define Weapon_h "Kraver/Actor/Weapon/Weapon.h"
 #define Melee_h "Kraver/Actor/Weapon/Melee/Melee.h"
 #define Gun_h "Kraver/Actor/Weapon/Gun/Gun.h"

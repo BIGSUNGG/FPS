@@ -16,6 +16,7 @@ class KRAVER_API ATeamPlayerState : public AKraverPlayerState
 	
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn) override; // 새로운 Player 캐릭터가 생성되었을때 호출됨
 
 public:
 	void SetPlayerTeam(ETeam InTeam);

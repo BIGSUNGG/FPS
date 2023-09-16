@@ -20,7 +20,7 @@ public:
 protected:
 	// Delegate
 	UFUNCTION()
-	void OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn); // 새로운 Player 캐릭터가 생성되었을때 호출됨
+	virtual void OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn); // 새로운 Player 캐릭터가 생성되었을때 호출됨
 
 public:
 	FNewKraverPlayer OnNewPlayer;

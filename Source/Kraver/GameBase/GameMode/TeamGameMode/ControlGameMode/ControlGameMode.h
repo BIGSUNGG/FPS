@@ -15,12 +15,25 @@ class KRAVER_API AControlGameMode : public ATeamGameMode
 	GENERATED_BODY()
 	
 public:
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds);
 
 protected:
 	virtual void DivideTeam(APlayerController* InPlayer) override;
+	virtual ETeam CalculateControllingTeam();
+
+	virtual void PointDelayTimerEvent();
 
 protected:
 	TObjectPtr<class AControlGameState> ControlGameState;
-	//class AControlArea*
+	class AControlArea* ControlArea;
 
+	// Control
+	float ControlIncreaseSpeed = 0.5f;
+	float ControlDecreaseSpeed = 0.5f;
+
+	// Point
+	float PointDelay = 0.5f;
+	FTimerHandle PointDelayTimer;
 };

@@ -16,6 +16,7 @@
 
 #define PROFILE_Swing "Swing"
 #define PROFILE_Bullet "Bullet"
+#define PROFILE_ControlArea "ControlArea"
 
 #define IS_SERVER() UKismetSystemLibrary::IsServer(this)
 

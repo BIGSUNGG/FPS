@@ -3,6 +3,18 @@
 
 #include "ControlGameState.h"
 
+void AControlGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AControlGameState, RedTeamArray);
+	DOREPLIFETIME(AControlGameState, BlueTeamArray);
+	DOREPLIFETIME(AControlGameState, CurControlTeam);
+	DOREPLIFETIME(AControlGameState, CurControlPoint);
+	DOREPLIFETIME(AControlGameState, BlueTeamPoint);
+	DOREPLIFETIME(AControlGameState, RedTeamPoint);
+}
+
 const TArray<APlayerState*>& AControlGameState::GetTeamArray(ETeam FindTeam)
 {
 	switch (FindTeam)

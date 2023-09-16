@@ -16,6 +16,7 @@
 
 // Components
 #include "Components/TextBlock.h"
+#include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/TimelineComponent.h"

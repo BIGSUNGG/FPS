@@ -69,6 +69,7 @@ enum class ETurningInPlace : uint8
 UENUM(BlueprintType)
 enum class ETeam : uint8
 {
+	NONE		UMETA(DisplayName = "NONE"),
 	TEAM_ALL	UMETA(DisplayName = "TEAM_ALL"),
 	ENEMY_ALL	UMETA(DisplayName = "ENEMY_ALL"),
 	RED			UMETA(DisplayName = "RED"),

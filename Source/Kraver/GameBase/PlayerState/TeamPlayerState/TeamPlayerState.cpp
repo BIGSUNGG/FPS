@@ -11,8 +11,20 @@ void ATeamPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ATeamPlayerState, PlayerTeam);
 }
 
+void ATeamPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn)
+{
+	Super::OnPawnSetEvent(Player, NewPawn, OldPawn);
+
+	if (this != Player)
+		return;
+
+	SetPlayerTeam(PlayerTeam);
+}
+
 void ATeamPlayerState::SetPlayerTeam(ETeam InTeam)
 {
 	PlayerTeam = InTeam;
-	OwnerPlayer->CombatComponent->SetTeam(InTeam);
+	OwnerPlayer = OwnerPlayer ? OwnerPlayer : Cast<AKraverPlayer>(GetOwner());
+	if(OwnerPlayer)
+		OwnerPlayer->CombatComponent->SetTeam(InTeam);
 }

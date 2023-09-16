@@ -14,11 +14,14 @@ AKraverPlayerState::AKraverPlayerState()
 
 void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn)
 {
-	if(!NewPawn)
-		return;
-	
 	OwnerPlayer = Cast<AKraverPlayer>(NewPawn);
 	if (!OwnerPlayer)
+		return;
+
+	if (this != Player)
+		return;
+
+	if(!NewPawn)
 		return;
 
 	OnNewPlayer.Broadcast(OwnerPlayer);
