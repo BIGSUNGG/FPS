@@ -10,7 +10,7 @@
 class ACreature;
 class AKraverPlayer;
 class AKraverPlayerController;
-class AKraverHUD;
+class AKraverHud;
 
 // 무기와 전투에 관련된 컴포넌트
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -186,7 +186,7 @@ protected:
 	ACreature* OwnerCreature;
 	AKraverPlayer* OwnerPlayer;
 	AKraverPlayerController* Controller;
-	AKraverHUD* HUD;
+	AKraverHud* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_CurWeaponEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 	AWeapon* CurWeapon = nullptr; // 현재 무기

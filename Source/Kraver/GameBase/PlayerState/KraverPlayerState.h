@@ -24,7 +24,6 @@ protected:
 
 public:
 	FNewKraverPlayer OnNewPlayer;
-	FNewKraverPlayer OnNewLocalPlayer;
 
 protected:
 	class AKraverPlayer* OwnerPlayer = nullptr;

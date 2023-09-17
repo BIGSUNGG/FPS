@@ -35,7 +35,7 @@ void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, AP
 			return;
 		}
 
-		AKraverHUD* HUD = Cast<AKraverHUD>(OwnerController->GetHUD());
+		AKraverHud* HUD = Cast<AKraverHud>(OwnerController->GetHUD());
 		if (!HUD)
 		{
 			KR_LOG(Error, TEXT("HUD class is not AKraverHUD"));
@@ -44,6 +44,5 @@ void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, AP
 		KR_LOG(Log, TEXT("New Local Player : %s"), *OwnerPlayer->GetName());
 
 		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->SetLocalPlayer(OwnerPlayer);
-		OnNewLocalPlayer.Broadcast(OwnerPlayer);
 	}
 }

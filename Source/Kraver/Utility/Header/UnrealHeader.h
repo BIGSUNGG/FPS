@@ -15,7 +15,9 @@
 #include "Sound/SoundCue.h"
 
 // Components
+#include "Components/Border.h"
 #include "Components/TextBlock.h"
+#include "Components/RadialSlider.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/WidgetComponent.h"

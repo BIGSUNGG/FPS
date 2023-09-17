@@ -12,11 +12,11 @@
  * 
  */
 UCLASS()
-class KRAVER_API AKraverHUD : public AHUD
+class KRAVER_API AKraverHud : public AHUD
 {
 	GENERATED_BODY()
 public:
-	AKraverHUD();
+	AKraverHud();
 	virtual void BeginPlay() override;
 	virtual void DrawHUD() override;
 
@@ -32,6 +32,10 @@ protected:
 	void OnNewLocalPlayerEvent(AKraverPlayer* NewCreature);
 	UFUNCTION()
 	void OnCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
+
+	// Func
+	void FindGameState();
+	void FindPlayerState();
 
 public:
 	// Getter Setter

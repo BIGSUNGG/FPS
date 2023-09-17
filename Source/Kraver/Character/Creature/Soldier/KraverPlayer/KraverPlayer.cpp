@@ -81,7 +81,7 @@ void AKraverPlayer::BeginPlay()
 	{
 		KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
 		if (KraverController)
-			HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
+			HUD = HUD == nullptr ? Cast<AKraverHud>(KraverController->GetHUD()) : HUD;
 
 		RefreshCurViewType();
 	}
@@ -93,7 +93,7 @@ void AKraverPlayer::Tick(float DeltaTime)
 
 	KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
 	if (KraverController)
-		HUD = HUD == nullptr ? Cast<AKraverHUD>(KraverController->GetHUD()) : HUD;
+		HUD = HUD == nullptr ? Cast<AKraverHud>(KraverController->GetHUD()) : HUD;
 
 	if (IsLocallyControlled() == false)
 		Camera->SetRelativeRotation(FRotator(AO_Pitch, AO_Yaw, 0.0f));

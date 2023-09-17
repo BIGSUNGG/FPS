@@ -21,6 +21,10 @@ public:
 public:
 	// Getter Seeter
 	virtual const TArray<APlayerState*>& GetTeamArray(ETeam FindTeam) override;
+	ETeam GetCurControlTeam() { return CurControlTeam; }
+	float GetCurControlPoint() { return CurControlPoint; }
+	int GetBlueTeamPoint() { return BlueTeamPoint; }
+	int GetRedTeamPoint() { return RedTeamPoint; }
 
 	virtual void AddTeamPlayer(ETeam InTeam, class APlayerState* InPlayer) override;
 

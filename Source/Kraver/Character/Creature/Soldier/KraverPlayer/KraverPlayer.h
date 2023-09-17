@@ -117,7 +117,7 @@ public:
 
 protected:
 	class AKraverPlayerController* KraverController;
-	class AKraverHUD* HUD;
+	class AKraverHud* HUD;
 
 	// Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))

@@ -6,6 +6,7 @@
 #include ControlArea_h
 #include TeamPlayerState_h
 #include KraverPlayer_h
+#include ControlArea_h
 
 void AControlGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
@@ -58,6 +59,25 @@ void AControlGameMode::Tick(float DeltaSeconds)
 				ControlGameState->CurControlPoint = -ControlGameState->CurControlPoint;
 				ControlGameState->CurControlTeam = ControllingTeam;
 				GetWorldTimerManager().ClearTimer(PointDelayTimer);
+			}
+		}
+	}
+	else if(ControlArea->GetRedTeamCount() == 0)
+	{
+		if (GetWorldTimerManager().IsTimerActive(PointDelayTimer))
+		{
+			ControlGameState->CurControlPoint += ControlIncreaseSpeed * DeltaSeconds;
+			if (ControlGameState->CurControlPoint >= 1.f)
+			{
+				ControlGameState->CurControlPoint = 1.f;
+			}
+		}
+		else
+		{
+			ControlGameState->CurControlPoint -= ControlDecreaseSpeed * DeltaSeconds;
+			if (ControlGameState->CurControlPoint <= 0.f)
+			{
+				ControlGameState->CurControlPoint = 0.f;
 			}
 		}
 	}

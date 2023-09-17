@@ -257,7 +257,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	Controller = Controller == nullptr ? Cast<AKraverPlayerController>(OwnerCreature->Controller) : Controller;
 	if (Controller)
 	{
-		HUD = HUD == nullptr ? Cast<AKraverHUD>(Controller->GetHUD()) : HUD;
+		HUD = HUD == nullptr ? Cast<AKraverHud>(Controller->GetHUD()) : HUD;
 		if (HUD)
 		{
 			FCrosshairsPackage HUDPackage;

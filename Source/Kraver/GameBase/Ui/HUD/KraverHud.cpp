@@ -11,12 +11,12 @@
 #include KraverPlayerState_h
 #include KraverGameState_h
 
-AKraverHUD::AKraverHUD()
+AKraverHud::AKraverHud()
 {
 	KillLogWidgets.SetNum(5);
 }
 
-void AKraverHUD::BeginPlay()
+void AKraverHud::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -41,28 +41,13 @@ void AKraverHUD::BeginPlay()
 		}
 	}
 
+	FindGameState();
+	FindPlayerState();
 }
 
-void AKraverHUD::DrawHUD()
+void AKraverHud::DrawHUD()
 {
 	Super::DrawHUD();
-
-	if (!PlayerState)
-	{
-		PlayerState = GetOwningPlayerController()->GetPlayerState<AKraverPlayerState>();
-		if (PlayerState)
-		{
-			PlayerState->OnNewLocalPlayer.AddDynamic(this, &ThisClass::OnNewLocalPlayerEvent);
-		}
-	}
-	if (!GameState)
-	{
-		GameState = GetWorld()->GetGameState<AKraverGameState>();
-		if (GameState)
-		{
-			GameState->OnCreatureDeath.AddDynamic(this, &ThisClass::OnCreatureDeathEvent);
-		}
-	}
 
 	if (HitmarkAppearanceTime > 0.f)
 	{
@@ -116,7 +101,7 @@ void AKraverHUD::DrawHUD()
 	}
 }
 
-void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color)
+void AKraverHud::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color)
 {
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();
@@ -138,13 +123,13 @@ void AKraverHUD::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FV
 	);
 }
 
-void AKraverHUD::ApplyKillLogPos()
+void AKraverHud::ApplyKillLogPos()
 {
 	for (int i = 0; i < KillLogWidgets.Num(); i++)
 		KillLogWidgets[i]->SetPositionInViewport(FVector2D(0, 40 * i));
 }
 
-void AKraverHUD::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void AKraverHud::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	if(DamageResult.bAlreadyDead)
 		return;
@@ -156,16 +141,16 @@ void AKraverHUD::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float Dama
 	bHitmartCritical = DamageResult.bCritical;
 }
 
-void AKraverHUD::OnNewLocalPlayerEvent(AKraverPlayer* NewCreature)
+void AKraverHud::OnNewLocalPlayerEvent(AKraverPlayer* NewCreature)
 {
 	Player = NewCreature;
 	if (Player)
 	{
-		Player->CombatComponent->OnClientGiveAnyDamageSuccess.AddDynamic(this, &AKraverHUD::OnClientGiveDamageSuccessEvent);
+		Player->CombatComponent->OnClientGiveAnyDamageSuccess.AddDynamic(this, &AKraverHud::OnClientGiveDamageSuccessEvent);
 	}
 }
 
-void AKraverHUD::OnCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
+void AKraverHud::OnCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
 {
 	for (int i = KillLogWidgets.Num() - 1; i >= 1; i--)
 	{
@@ -179,7 +164,35 @@ void AKraverHUD::OnCreatureDeathEvent(class ACreature* DeadCreature, class ACont
 	ApplyKillLogPos();
 }
 
-void AKraverHUD::SetInteractWidget(bool value)
+void AKraverHud::FindGameState()
+{
+	if (!GameState)
+	{
+		GameState = GetWorld()->GetGameState<AKraverGameState>();
+		if (GameState)
+		{
+			GameState->OnCreatureDeath.AddDynamic(this, &ThisClass::OnCreatureDeathEvent);
+		}
+		else
+			GetWorldTimerManager().SetTimerForNextTick(this, &ThisClass::FindGameState);
+	}
+}
+
+void AKraverHud::FindPlayerState()
+{
+	if (!PlayerState)
+	{
+		PlayerState = GetOwningPlayerController()->GetPlayerState<AKraverPlayerState>();
+		if (PlayerState)
+		{
+			PlayerState->OnNewPlayer.AddDynamic(this, &ThisClass::OnNewLocalPlayerEvent);
+		}
+		else
+			GetWorldTimerManager().SetTimerForNextTick(this, &ThisClass::FindPlayerState);
+	}
+}
+
+void AKraverHud::SetInteractWidget(bool value)
 {
 	if (!InteractionWidget)
 		return;
