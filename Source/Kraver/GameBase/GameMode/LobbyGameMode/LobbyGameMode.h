@@ -19,7 +19,7 @@ public:
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lobby", meta = (AllowPrivateAccess = "true"))
-	FString TravelMapPath = "/Game/ProjectFile/Maps/GameStartMap";
+	FString TravelMapPath = "/Game/ProjectFile/Maps/ControlMap";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lobby", meta = (AllowPrivateAccess = "true"))
 	int NeedPlayer = 4;
 

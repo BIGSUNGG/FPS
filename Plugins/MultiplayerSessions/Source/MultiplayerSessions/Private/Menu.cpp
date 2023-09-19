@@ -110,14 +110,43 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 	{
 		FString SettingsValue;
 		Result.Session.SessionSettings.Get(FName("MatchType"), SettingsValue);
+
+		if (GEngine)
+		{
+			FString Text = (TEXT("Check session %s"), SettingsValue);
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Red,
+				Text
+			);
+		}
 		if (SettingsValue == MatchType)
 		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					15.f,
+					FColor::Red,
+					FString(TEXT("Success to find session!"))
+				);
+			}
 			MultiplayerSessionsSubsystem->JoinSession(Result);
 			return;
 		}
 	}
 	if (!bWasSuccessful || SessionResults.Num() == 0)
 	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Red,
+				FString(TEXT("Failed to find session!"))
+			);
+		}
 		JoinButton->SetIsEnabled(true);
 	}
 }

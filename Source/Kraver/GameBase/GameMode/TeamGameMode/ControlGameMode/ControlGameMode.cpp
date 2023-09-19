@@ -19,8 +19,6 @@ void AControlGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DivideTeam(UGameplayStatics::GetPlayerController(this, 0));
-
 	TArray<AActor*> ControlAreas;
 	UGameplayStatics::GetAllActorsOfClass(this, AControlArea::StaticClass(), ControlAreas);
 	if (ControlAreas.Num() != 1)
@@ -35,6 +33,9 @@ void AControlGameMode::BeginPlay()
 
 void AControlGameMode::Tick(float DeltaSeconds)
 {
+	if (!ControlGameState)
+		return;
+
 	ETeam ControllingTeam = CalculateControllingTeam();
 
 	if(ControllingTeam != ETeam::NONE)
@@ -68,17 +69,13 @@ void AControlGameMode::Tick(float DeltaSeconds)
 		{
 			ControlGameState->CurControlPoint += ControlIncreaseSpeed * DeltaSeconds;
 			if (ControlGameState->CurControlPoint >= 1.f)
-			{
 				ControlGameState->CurControlPoint = 1.f;
-			}
 		}
 		else
 		{
 			ControlGameState->CurControlPoint -= ControlDecreaseSpeed * DeltaSeconds;
 			if (ControlGameState->CurControlPoint <= 0.f)
-			{
 				ControlGameState->CurControlPoint = 0.f;
-			}
 		}
 	}
 }
@@ -102,7 +99,7 @@ void AControlGameMode::DivideTeam(APlayerController* InPlayer)
 	const TArray<APlayerState*>& RedTeamArr = ControlGameState->GetTeamArray(ETeam::RED);
 
 	ETeam NewTeam;
-	if (BlueTeamArr.Num() >= RedTeamArr.Num())
+	if (BlueTeamArr.Num() > RedTeamArr.Num())
 		NewTeam = ETeam::RED;
 	else
 		NewTeam = ETeam::BLUE;
@@ -127,17 +124,23 @@ ETeam AControlGameMode::CalculateControllingTeam()
 
 void AControlGameMode::PointDelayTimerEvent()
 {
+	if (IsGameFinish)
+		return;
+
 	switch (ControlGameState->CurControlTeam)
 	{
 	case ETeam::RED:
 		++ControlGameState->RedTeamPoint;
-		KR_LOG(Error, TEXT("R %d"), ControlGameState->RedTeamPoint);
+		if (ControlGameState->RedTeamPoint >= 100)
+			GameFinishEvent(ETeam::RED);
 		break;
 	case ETeam::BLUE:
 		++ControlGameState->BlueTeamPoint;
-		KR_LOG(Error, TEXT("B %d"), ControlGameState->BlueTeamPoint);
+		if (ControlGameState->BlueTeamPoint >= 100)
+			GameFinishEvent(ETeam::BLUE);
 		break;
 	default:
 		break;
 	}
+
 }

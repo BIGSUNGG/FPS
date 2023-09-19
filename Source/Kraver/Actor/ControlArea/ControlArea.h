@@ -35,6 +35,6 @@ protected:
 	int BlueTeamCount = 0;
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Data|Control", meta = (AllowPrivateAccess = "true"))
 	int RedTeamCount = 0;
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Data|Control", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Control", meta = (AllowPrivateAccess = "true"))
 	bool IsControlling = false;
 };

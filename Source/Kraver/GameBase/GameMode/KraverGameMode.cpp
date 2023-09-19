@@ -24,7 +24,7 @@ void AKraverGameMode::InitGame(const FString& MapName, const FString& Options, F
 void AKraverGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-
+	
 }
 
 void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
@@ -81,10 +81,7 @@ void AKraverGameMode::RequestRespawn(AKraverPlayer* RespawnPlayer, AController* 
 	RespawnPlayer->Reset();
 	RespawnPlayer->Destroy();
 
-	TArray<AActor*> PlayerStarts;
-	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
-	int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
-	RestartPlayerAtPlayerStart(KraverController, PlayerStarts[Selection]);
+	RestartPlayerAtPlayerStart(KraverController, FindRespawnPoint(RespawnPlayer));
 	
 }
 
@@ -98,4 +95,21 @@ void AKraverGameMode::RequsetSpectate(AController* PlayerController)
 
 	//AKraverSpectator* Spectator = Cast<AKraverSpectator>(GetWorld()->SpawnActor(SpectatorClass));
 
+}
+
+void AKraverGameMode::GameFinishEvent(ETeam WinTeam)
+{
+	if (IsGameFinish)
+		return;
+
+	IsGameFinish = true;
+	KR_LOG(Log, TEXT("Game finish"));
+}
+
+AActor* AKraverGameMode::FindRespawnPoint(AKraverPlayer* RespawnPlayer)
+{
+	TArray<AActor*> PlayerStarts;
+	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
+	int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
+	return PlayerStarts[Selection];
 }

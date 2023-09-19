@@ -22,7 +22,7 @@ public:
 	void SetPlayerTeam(ETeam InTeam);
 
 protected:
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Team", meta = (AllowPrivateAccess = "true"))
 	ETeam PlayerTeam;
 
 };

@@ -24,7 +24,15 @@ public:
 	virtual void RequsetSpectate(AController* PlayerController);
 
 protected:
+	virtual void GameFinishEvent(ETeam WinTeam);
+	UFUNCTION(BlueprintCallable)
+	virtual AActor* FindRespawnPoint(AKraverPlayer* RespawnPlayer);
+
+protected:
 	class AKraverGameState* KraverGameState = nullptr;
+	
+	// Game
+	bool IsGameFinish = false;
 
 	// Respawn
 	bool bRespawn = true;

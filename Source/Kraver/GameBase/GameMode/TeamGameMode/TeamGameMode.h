@@ -21,6 +21,7 @@ public:
 
 protected:
 	virtual void DivideTeam(APlayerController* InPlayer) {}
+	virtual AActor* FindRespawnPoint(AKraverPlayer* RespawnPlayer) override;
 
 protected:
 	TObjectPtr<class ATeamGameState> TeamGameState;
