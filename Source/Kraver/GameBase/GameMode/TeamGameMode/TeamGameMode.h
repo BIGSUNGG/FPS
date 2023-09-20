@@ -20,8 +20,8 @@ public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 protected:
-	virtual void DivideTeam(APlayerController* InPlayer) {}
-	virtual AActor* FindRespawnPoint(AKraverPlayer* RespawnPlayer) override;
+	virtual void DivideTeam(AController* InPlayer) {}
+	virtual AActor* FindSpawnPoint(AController* PlayerController) override;
 
 protected:
 	TObjectPtr<class ATeamGameState> TeamGameState;

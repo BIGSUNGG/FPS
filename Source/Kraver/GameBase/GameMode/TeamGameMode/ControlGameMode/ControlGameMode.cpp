@@ -80,29 +80,34 @@ void AControlGameMode::Tick(float DeltaSeconds)
 	}
 }
 
-void AControlGameMode::DivideTeam(APlayerController* InPlayer)
+void AControlGameMode::DivideTeam(AController* InPlayer)
 {
 	if (!InPlayer)
 		return;
 
 	Super::DivideTeam(InPlayer);
+	if (ATeamPlayerState* PlayerState = InPlayer->GetPlayerState<ATeamPlayerState>())
+	{
+		if(PlayerState->GetPlayerTeam() != ETeam::NONE)
+			return;
+	}
 
 	ControlGameState = ControlGameState ? ControlGameState : GetGameState<AControlGameState>();
-
-	if (!ControlGameState)
-	{
-		GetWorldTimerManager().SetTimerForNextTick([=]() { DivideTeam(InPlayer); });
-		return;
-	}
 
 	const TArray<APlayerState*>& BlueTeamArr = ControlGameState->GetTeamArray(ETeam::BLUE);
 	const TArray<APlayerState*>& RedTeamArr = ControlGameState->GetTeamArray(ETeam::RED);
 
 	ETeam NewTeam;
 	if (BlueTeamArr.Num() > RedTeamArr.Num())
+	{
 		NewTeam = ETeam::RED;
+		KR_LOG(Log, TEXT("Add new red team"));
+	}
 	else
+	{
 		NewTeam = ETeam::BLUE;
+		KR_LOG(Log, TEXT("Add new blue team"));
+	}
 
 	if (ATeamPlayerState* TeamPlayerState = InPlayer->GetPlayerState<ATeamPlayerState>())
 	{

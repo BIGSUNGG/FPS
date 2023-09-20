@@ -19,6 +19,9 @@ public:
 	virtual void OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn) override; // 새로운 Player 캐릭터가 생성되었을때 호출됨
 
 public:
+	// Getter Setter
+	ETeam GetPlayerTeam() { return PlayerTeam; }
+
 	void SetPlayerTeam(ETeam InTeam);
 
 protected:

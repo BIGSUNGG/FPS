@@ -4,6 +4,7 @@
 #include "TeamGameMode.h"
 #include KraverPlayer_h
 #include TeamGameState_h
+#include TeamPlayerState_h
 #include TeamPlayerStart_h
 
 ATeamGameMode::ATeamGameMode()
@@ -25,8 +26,19 @@ void ATeamGameMode::PostLogin(APlayerController* NewPlayer)
 	DivideTeam(NewPlayer);
 }
 
-AActor* ATeamGameMode::FindRespawnPoint(AKraverPlayer* RespawnPlayer)
+AActor* ATeamGameMode::FindSpawnPoint(AController* PlayerController)
 {
+	ATeamPlayerState* PlayerState = PlayerController->GetPlayerState<ATeamPlayerState>();
+	if (!PlayerState)
+	{
+		KR_LOG(Error, TEXT("PlayerState is nullptr"));
+		return Super::FindSpawnPoint(PlayerController);
+	}
+	else if (PlayerState->GetPlayerTeam() == ETeam::NONE)
+	{
+		DivideTeam(PlayerController);
+	}
+
 	TArray<AActor*> PlayerStarts;
 	UGameplayStatics::GetAllActorsOfClass(this, ATeamPlayerStart::StaticClass(), PlayerStarts);
 
@@ -37,7 +49,7 @@ AActor* ATeamGameMode::FindRespawnPoint(AKraverPlayer* RespawnPlayer)
 		if (!TeamStart)
 			continue;;
 
-		if (FTeamInfo::CheckIsTeam(TeamStart->GetCanSpawnTeam(), RespawnPlayer->CombatComponent->GetCurTeamInfo().CurTeam))
+		if (FTeamInfo::CheckIsTeam(TeamStart->GetCanSpawnTeam(), PlayerState->GetPlayerTeam()))
 			CanSpawnStarts.Add(TeamStart);
 	}
 
@@ -48,5 +60,5 @@ AActor* ATeamGameMode::FindRespawnPoint(AKraverPlayer* RespawnPlayer)
 	}
 
 	KR_LOG(Error, TEXT("ATeamPlayerStart is not exist"));
-	return Super::FindRespawnPoint(RespawnPlayer);
+	return Super::FindSpawnPoint(PlayerController);
 }

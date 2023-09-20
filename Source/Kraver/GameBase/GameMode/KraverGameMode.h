@@ -18,6 +18,7 @@ public:
 	AKraverGameMode();
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName) override;
 
 	virtual void CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
 	virtual void RequestRespawn(AKraverPlayer* RespawnPlayer, AController* PlayerController);
@@ -25,8 +26,7 @@ public:
 
 protected:
 	virtual void GameFinishEvent(ETeam WinTeam);
-	UFUNCTION(BlueprintCallable)
-	virtual AActor* FindRespawnPoint(AKraverPlayer* RespawnPlayer);
+		virtual AActor* FindSpawnPoint(AController* PlayerController);
 
 protected:
 	class AKraverGameState* KraverGameState = nullptr;

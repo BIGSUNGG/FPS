@@ -20,7 +20,7 @@ public:
 	virtual void Tick(float DeltaSeconds);
 
 protected:
-	virtual void DivideTeam(APlayerController* InPlayer) override;
+	virtual void DivideTeam(AController* InPlayer) override;
 	virtual ETeam CalculateControllingTeam();
 
 	virtual void PointDelayTimerEvent();

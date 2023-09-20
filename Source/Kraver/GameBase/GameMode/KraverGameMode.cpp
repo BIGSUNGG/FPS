@@ -27,6 +27,12 @@ void AKraverGameMode::PostLogin(APlayerController* NewPlayer)
 	
 }
 
+AActor* AKraverGameMode::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)
+{
+	KR_LOG(Log, TEXT("FindPlayerStart_Implementation"));
+	return FindSpawnPoint(Player);
+}
+
 void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
 {
 	AKraverGameState* KraverPlayerState = Cast<AKraverGameState>(GameState);
@@ -81,7 +87,7 @@ void AKraverGameMode::RequestRespawn(AKraverPlayer* RespawnPlayer, AController* 
 	RespawnPlayer->Reset();
 	RespawnPlayer->Destroy();
 
-	RestartPlayerAtPlayerStart(KraverController, FindRespawnPoint(RespawnPlayer));
+	RestartPlayerAtPlayerStart(KraverController, FindSpawnPoint(PlayerController));
 	
 }
 
@@ -106,7 +112,7 @@ void AKraverGameMode::GameFinishEvent(ETeam WinTeam)
 	KR_LOG(Log, TEXT("Game finish"));
 }
 
-AActor* AKraverGameMode::FindRespawnPoint(AKraverPlayer* RespawnPlayer)
+AActor* AKraverGameMode::FindSpawnPoint(AController* PlayerController)
 {
 	TArray<AActor*> PlayerStarts;
 	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
