@@ -26,7 +26,8 @@ public:
 	int GetBlueTeamPoint() { return BlueTeamPoint; }
 	int GetRedTeamPoint() { return RedTeamPoint; }
 
-	virtual void AddTeamPlayer(ETeam InTeam, class APlayerState* InPlayer) override;
+	virtual void AddTeamPlayer(class ATeamPlayerState* InPlayer) override;
+	virtual void RemoveTeamPlayer(class ATeamPlayerState* InPlayer) override;
 
 protected:
 	UPROPERTY(Replicated)

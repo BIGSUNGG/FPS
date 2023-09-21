@@ -7,15 +7,16 @@
 #include "GenericPlatform/GenericPlatformProcess.h"
 
 // GameFramework
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "GameFramework/GameState.h"
 #include "GameFramework/PlayerStart.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 // Sound
 #include "Sound/SoundCue.h"
 
 // Components
 #include "Components/Border.h"
+#include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/RadialSlider.h"
 #include "Components/BoxComponent.h"

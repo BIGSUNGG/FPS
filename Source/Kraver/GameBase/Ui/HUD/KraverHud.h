@@ -22,7 +22,6 @@ public:
 
 private:	
 	virtual void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color = FLinearColor::White);
-	void ApplyKillLogPos();
 
 protected:
 	// Delegate

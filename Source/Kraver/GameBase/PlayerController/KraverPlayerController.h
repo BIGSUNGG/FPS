@@ -16,5 +16,17 @@ class KRAVER_API AKraverPlayerController : public APlayerController
 	
 public:
 	virtual void OnPossess(APawn* aPawn) override;
+	virtual void SetupInputComponent() override;
+
+protected:
+	void ShowReturnToMainMenu();
+
+protected:
+	// Return
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> ReturnMainMenuWidget;
+	UPROPERTY()
+	class UReturnMainMenuWidget* ReturnToMainMenu;
+	bool bReturnToMainMenuOpen = false;
 
 };

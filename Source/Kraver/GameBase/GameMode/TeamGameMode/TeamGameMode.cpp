@@ -19,24 +19,28 @@ void ATeamGameMode::InitGame(const FString& MapName, const FString& Options, FSt
 	TeamGameState = Cast<ATeamGameState>(GameState);
 }
 
-void ATeamGameMode::PostLogin(APlayerController* NewPlayer)
+void ATeamGameMode::Logout(AController* Exiting)
 {
-	Super::PostLogin(NewPlayer);
+	Super::Logout(Exiting);
 
-	DivideTeam(NewPlayer);
+	TeamGameState = TeamGameState ? TeamGameState : GetGameState<ATeamGameState>();
+	TeamGameState->RemoveTeamPlayer(Exiting->GetPlayerState<ATeamPlayerState>());
 }
 
-AActor* ATeamGameMode::FindSpawnPoint(AController* PlayerController)
+FString ATeamGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal /*= TEXT("")*/)
 {
-	ATeamPlayerState* PlayerState = PlayerController->GetPlayerState<ATeamPlayerState>();
+	DivideTeam(NewPlayerController);
+
+	return Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
+}
+
+AActor* ATeamGameMode::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)
+{
+	ATeamPlayerState* PlayerState = Player->GetPlayerState<ATeamPlayerState>();
 	if (!PlayerState)
 	{
 		KR_LOG(Error, TEXT("PlayerState is nullptr"));
-		return Super::FindSpawnPoint(PlayerController);
-	}
-	else if (PlayerState->GetPlayerTeam() == ETeam::NONE)
-	{
-		DivideTeam(PlayerController);
+		return Super::FindPlayerStart_Implementation(Player, IncomingName);
 	}
 
 	TArray<AActor*> PlayerStarts;
@@ -60,5 +64,5 @@ AActor* ATeamGameMode::FindSpawnPoint(AController* PlayerController)
 	}
 
 	KR_LOG(Error, TEXT("ATeamPlayerStart is not exist"));
-	return Super::FindSpawnPoint(PlayerController);
+	return Super::FindPlayerStart_Implementation(Player, IncomingName);
 }

@@ -58,6 +58,12 @@ void AKraverHud::DrawHUD()
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
 	const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
 
+	for (int i = 0; i < KillLogWidgets.Num(); i++)
+	{
+		if (KillLogWidgets[i])
+			KillLogWidgets[i]->SetPositionInViewport(FVector2D(ViewportCenter.X, 40 * i), true);
+	}
+
 	if (GEngine)
 	{
 		float SpreadScaled = CrosshairSpreadMax * HUDPackage.CrosshairSpread;
@@ -123,12 +129,6 @@ void AKraverHud::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FV
 	);
 }
 
-void AKraverHud::ApplyKillLogPos()
-{
-	for (int i = 0; i < KillLogWidgets.Num(); i++)
-		KillLogWidgets[i]->SetPositionInViewport(FVector2D(0, 40 * i));
-}
-
 void AKraverHud::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	if(DamageResult.bAlreadyDead)
@@ -161,7 +161,6 @@ void AKraverHud::OnCreatureDeathEvent(class ACreature* DeadCreature, class ACont
 
 	UKillLogWidget* KillLogWidget = Cast<UKillLogWidget>(KillLogWidgets[0]);
 	KillLogWidget->Initialize(AttackerController ? AttackerController->GetName() : AttackerActor->GetName(), VictimController ? VictimController->GetName() : DeadCreature->GetName());
-	ApplyKillLogPos();
 }
 
 void AKraverHud::FindGameState()

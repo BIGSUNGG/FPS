@@ -13,13 +13,14 @@ UCLASS()
 class KRAVER_API ATeamGameState : public AKraverGameState
 {
 	GENERATED_BODY()
-	
+
 public:
 
 public:
 	// Getter Seeter
 	virtual const TArray<APlayerState*>& GetTeamArray(ETeam FindTeam) { return PlayerArray; }
 
-	virtual void AddTeamPlayer(ETeam InTeam, class APlayerState* InPlayer) {}
+	virtual void AddTeamPlayer(class ATeamPlayerState* InPlayer) {}
+	virtual void RemoveTeamPlayer(class ATeamPlayerState* InPlayer) {}
 
 };

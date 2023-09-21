@@ -112,7 +112,7 @@ void AControlGameMode::DivideTeam(AController* InPlayer)
 	if (ATeamPlayerState* TeamPlayerState = InPlayer->GetPlayerState<ATeamPlayerState>())
 	{
 		TeamPlayerState->SetPlayerTeam(NewTeam);
-		ControlGameState->AddTeamPlayer(NewTeam, InPlayer->GetPlayerState<APlayerState>());
+		ControlGameState->AddTeamPlayer(InPlayer->GetPlayerState<ATeamPlayerState>());
 	}
 }
 

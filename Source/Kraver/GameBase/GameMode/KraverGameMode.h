@@ -26,7 +26,6 @@ public:
 
 protected:
 	virtual void GameFinishEvent(ETeam WinTeam);
-		virtual AActor* FindSpawnPoint(AController* PlayerController);
 
 protected:
 	class AKraverGameState* KraverGameState = nullptr;

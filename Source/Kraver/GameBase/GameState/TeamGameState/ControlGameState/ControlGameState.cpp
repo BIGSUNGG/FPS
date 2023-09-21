@@ -2,6 +2,7 @@
 
 
 #include "ControlGameState.h"
+#include TeamPlayerState_h
 
 void AControlGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -30,15 +31,28 @@ const TArray<APlayerState*>& AControlGameState::GetTeamArray(ETeam FindTeam)
 	return Super::GetTeamArray(FindTeam);
 }
 
-void AControlGameState::AddTeamPlayer(ETeam InTeam, class APlayerState* InPlayer)
+void AControlGameState::AddTeamPlayer(class ATeamPlayerState* InPlayer)
 {
-	switch (InTeam)
+	switch (InPlayer->GetPlayerTeam())
 	{
 	case ETeam::BLUE:
 		BlueTeamArray.Emplace(InPlayer);
 		break;
 	case ETeam::RED:
 		RedTeamArray.Emplace(InPlayer);
+		break;
+	}
+}
+
+void AControlGameState::RemoveTeamPlayer(class ATeamPlayerState* InPlayer)
+{
+	switch (InPlayer->GetPlayerTeam())
+	{
+	case ETeam::BLUE:
+		BlueTeamArray.Remove(InPlayer);
+		break;
+	case ETeam::RED:
+		RedTeamArray.Remove(InPlayer);
 		break;
 	}
 }

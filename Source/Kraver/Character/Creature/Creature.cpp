@@ -2,11 +2,11 @@
 
 
 #include "Creature.h"
-#include CreatureAnimInstance_h
-#include Melee_h
 #include CreatureMovementComponent_h
 #include WeaponReloadComponent_h
+#include CreatureAnimInstance_h
 #include KraverGameMode_h
+#include Melee_h
 
 // Sets default values
 ACreature::ACreature()

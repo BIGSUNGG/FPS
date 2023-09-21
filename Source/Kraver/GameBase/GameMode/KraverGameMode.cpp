@@ -29,8 +29,10 @@ void AKraverGameMode::PostLogin(APlayerController* NewPlayer)
 
 AActor* AKraverGameMode::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)
 {
-	KR_LOG(Log, TEXT("FindPlayerStart_Implementation"));
-	return FindSpawnPoint(Player);
+	TArray<AActor*> PlayerStarts;
+	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
+	int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
+	return PlayerStarts[Selection];
 }
 
 void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
@@ -87,8 +89,7 @@ void AKraverGameMode::RequestRespawn(AKraverPlayer* RespawnPlayer, AController* 
 	RespawnPlayer->Reset();
 	RespawnPlayer->Destroy();
 
-	RestartPlayerAtPlayerStart(KraverController, FindSpawnPoint(PlayerController));
-	
+	RestartPlayer(PlayerController);
 }
 
 void AKraverGameMode::RequsetSpectate(AController* PlayerController)
@@ -110,12 +111,4 @@ void AKraverGameMode::GameFinishEvent(ETeam WinTeam)
 
 	IsGameFinish = true;
 	KR_LOG(Log, TEXT("Game finish"));
-}
-
-AActor* AKraverGameMode::FindSpawnPoint(AController* PlayerController)
-{
-	TArray<AActor*> PlayerStarts;
-	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
-	int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
-	return PlayerStarts[Selection];
 }
