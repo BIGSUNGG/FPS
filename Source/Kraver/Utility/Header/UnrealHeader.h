@@ -18,6 +18,7 @@
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/ProgressBar.h"
 #include "Components/RadialSlider.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"

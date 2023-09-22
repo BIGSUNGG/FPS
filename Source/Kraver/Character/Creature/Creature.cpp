@@ -2,10 +2,12 @@
 
 
 #include "Creature.h"
+#include LookCameraWidgetComponent_h
 #include CreatureMovementComponent_h
 #include WeaponReloadComponent_h
 #include CreatureAnimInstance_h
 #include KraverGameMode_h
+#include HpBarWidget_h
 #include Melee_h
 
 // Sets default values
@@ -24,6 +26,7 @@ ACreature::ACreature()
 	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
+	HpBarWidget = CreateDefaultSubobject<ULookCameraWidgetComponent>("HpBarWidet");
 
 	CombatComponent->OnClientDeath.AddDynamic(this, &ThisClass::OnClientDeathEvent);
 	CombatComponent->OnServerDeath.AddDynamic(this, &ThisClass::OnServerDeathEvent);
@@ -76,6 +79,7 @@ ACreature::ACreature()
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
 	GetCharacterMovement()->SetWalkableFloorAngle(50.f);
 
+	HpBarWidget->SetupAttachment(GetCapsuleComponent());
 }	
 
 
@@ -194,6 +198,10 @@ void ACreature::OwnOtherActor(AActor* Actor)
 void ACreature::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UHpBarWidget* HpBar = Cast<UHpBarWidget>(HpBarWidget->GetWidget());
+	if (HpBar)
+		HpBar->SetOwnerCreature(this);
 
 	StartingAimRotation = GetActorRotation();
 }
@@ -834,6 +842,7 @@ void ACreature::Client_SimulateMesh_Implementation()
 void ACreature::Multicast_SimulateMesh_Implementation()
 {
 	GetMesh()->SetSimulatePhysics(true);
+	HpBarWidget->SetVisibility(false);
 
 	if (DissolveMaterialInstance)
 	{

@@ -48,6 +48,8 @@
 #define WeaponAssassinateComponent_h	"Kraver/Component/Skill/Weapon/WeaponAssassinate/WeaponAssassinateComponent.h"
 #define WeaponAdsComponent_h			"Kraver/Component/Skill/Weapon/WeaponAds/WeaponAdsComponent.h"
 
+#define LookCameraWidgetComponent_h "Kraver/Component/Widget/LookCameraWidgetComponent.h"
+
 // GameBase
 #define KraverGameMode_h	"Kraver/GameBase/GameMode/KraverGameMode.h"
 #define LobbyGameMode_h		"Kraver/GameBase/GameMode/LobbyGameMode/LobbyGameMode.h"
@@ -77,3 +79,4 @@
 #define InteractionWidget_h		"Kraver/GameBase/Ui/Widget/Interaction/InteractionWidget.h"
 #define KillLogWidget_h			"Kraver/GameBase/Ui/Widget/KillLog/KillLogWidget.h"
 #define ReturnMainMenuWidget_h	"Kraver/GameBase/Ui/Widget/Menu/ReturnMainMenu/ReturnMainMenuWidget.h"
+#define HpBarWidget_h			"Kraver/GameBase/Ui/Widget/HpBar/HpBarWidget.h"
