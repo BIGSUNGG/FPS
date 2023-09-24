@@ -2,7 +2,7 @@
 
 
 #include "KraverPlayerController.h"
-#include ReturnMainMenuWidget_h
+#include PauseMenuWidget_h
 
 void AKraverPlayerController::OnPossess(APawn* aPawn)
 {
@@ -21,22 +21,22 @@ void AKraverPlayerController::SetupInputComponent()
 
 void AKraverPlayerController::ShowReturnToMainMenu()
 {
-	if (ReturnMainMenuWidget == nullptr) 
+	if (PauseMenuWidgetClass == nullptr) 
 		return;
 
-	if (ReturnToMainMenu == nullptr)
-		ReturnToMainMenu = CreateWidget<UReturnMainMenuWidget>(this, ReturnMainMenuWidget);
+	if (PauseMenuWidget == nullptr)
+		PauseMenuWidget = CreateWidget<UPauseMenuWidget>(this, PauseMenuWidgetClass);
 
-	if (ReturnToMainMenu)
+	if (PauseMenuWidget)
 	{
-		bReturnToMainMenuOpen = !bReturnToMainMenuOpen;
-		if (bReturnToMainMenuOpen)
+		bPauseMenuOpen = !bPauseMenuOpen;
+		if (bPauseMenuOpen)
 		{
-			ReturnToMainMenu->MenuSetup();
+			PauseMenuWidget->MenuSetup();
 		}
 		else
 		{
-			ReturnToMainMenu->MenuTearDown();
+			PauseMenuWidget->MenuTearDown();
 		}
 	}
 }

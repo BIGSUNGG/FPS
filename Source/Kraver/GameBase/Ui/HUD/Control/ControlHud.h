@@ -15,6 +15,7 @@ class KRAVER_API AControlHud : public AKraverHud
 	GENERATED_BODY()
 	
 public:
+	AControlHud();
 	virtual void BeginPlay() override;
 
 protected:

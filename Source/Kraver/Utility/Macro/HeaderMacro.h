@@ -81,3 +81,4 @@
 #define ReturnMainMenuWidget_h	"Kraver/GameBase/Ui/Widget/Menu/ReturnMainMenu/ReturnMainMenuWidget.h"
 #define HpBarWidget_h			"Kraver/GameBase/Ui/Widget/HpBar/HpBarWidget.h"
 #define RespawnTimerWidget_h	"Kraver/GameBase/Ui/Widget/RespawnTimer/RespawnTimerWidget.h"
+#define PauseMenuWidget_h		"Kraver/GameBase/Ui/Widget/PauseMenu/PauseMenuWidget.h"

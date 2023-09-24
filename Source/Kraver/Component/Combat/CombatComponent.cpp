@@ -415,6 +415,8 @@ void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
 	if (!Weapon)
 		return;
 
+	OwnerCreature = OwnerCreature ? OwnerCreature : Cast<ACreature>(GetOwner());
+
 	bool Success = Weapon->OnServer_Equipped(OwnerCreature);
 	if (Success)
 	{

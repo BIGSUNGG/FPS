@@ -24,9 +24,8 @@ protected:
 protected:
 	// Return
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> ReturnMainMenuWidget;
-	UPROPERTY()
-	class UReturnMainMenuWidget* ReturnToMainMenu;
-	bool bReturnToMainMenuOpen = false;
+	TSubclassOf<class UPauseMenuWidget> PauseMenuWidgetClass;
+	UPauseMenuWidget* PauseMenuWidget;
+	bool bPauseMenuOpen = false;
 
 };

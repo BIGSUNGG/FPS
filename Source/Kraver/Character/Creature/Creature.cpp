@@ -131,16 +131,20 @@ void ACreature::EquipEvent(AWeapon* Weapon)
 	}
 
 	Weapon->GetTppWeaponMesh()->SetSimulatePhysics(false);
-	GetWorld()->GetTimerManager().SetTimerForNextTick([=]() 
-	{ 	
-			Weapon->GetTppWeaponMesh()->AttachToComponent
-			(
-				GetMesh(),
-				FAttachmentTransformRules::SnapToTargetIncludingScale,
-				Weapon->GetTppHandSocketName()
-			);
+
+	if(GetWorld())
+	{
+		GetWorld()->GetTimerManager().SetTimerForNextTick([=]() 
+		{ 	
+				Weapon->GetTppWeaponMesh()->AttachToComponent
+				(
+					GetMesh(),
+					FAttachmentTransformRules::SnapToTargetIncludingScale,
+					Weapon->GetTppHandSocketName()
+				);
+		}
+		);
 	}
-	);
 
 }
 

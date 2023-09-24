@@ -23,6 +23,7 @@
 #include "Components/RadialSlider.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
+#include "Components/BackgroundBlur.h"
 #include "Components/WidgetComponent.h"
 #include "Components/TimelineComponent.h"
 #include "Components/SceneCaptureComponent2D.h"

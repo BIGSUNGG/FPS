@@ -3,6 +3,13 @@
 
 #include "ControlHud.h"
 
+AControlHud::AControlHud()
+{
+	static ConstructorHelpers::FClassFinder<UContentWidget> CONTROL_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_ControlGameWidget.WBP_ControlGameWidget"));
+	if (CONTROL_WIDGET.Succeeded())
+		ControlWidgetClass = CONTROL_WIDGET.Class;
+}
+
 void AControlHud::BeginPlay()
 {
 	Super::BeginPlay();

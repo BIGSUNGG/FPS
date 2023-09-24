@@ -6,10 +6,7 @@
 
 void UReturnMainMenuWidget::MenuSetup()
 {
-	AddToViewport();
 	SetVisibility(ESlateVisibility::Visible);
-	SetIsFocusable(true);
-
 	UWorld* World = GetWorld();
 	if (World)
 	{
@@ -39,7 +36,7 @@ void UReturnMainMenuWidget::MenuSetup()
 
 void UReturnMainMenuWidget::MenuTearDown()
 {
-	RemoveFromParent();
+	SetVisibility(ESlateVisibility::Hidden);
 	UWorld* World = GetWorld();
 	if (World)
 	{
