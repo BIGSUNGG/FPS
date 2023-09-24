@@ -9,6 +9,7 @@
 // GameFramework
 #include "GameFramework/GameState.h"
 #include "GameFramework/PlayerStart.h"
+#include "GameFramework/PlayerState.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 // Sound

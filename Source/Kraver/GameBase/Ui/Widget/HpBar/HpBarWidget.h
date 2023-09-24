@@ -22,7 +22,7 @@ public:
 	void SetOwnerCreature(ACreature* Value) { OwnerCreature = Value; }
 
 protected:
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* HpBar;
 
 	class ACreature* OwnerCreature;

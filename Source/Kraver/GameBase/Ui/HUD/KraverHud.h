@@ -30,7 +30,9 @@ protected:
 	UFUNCTION()
 	void OnNewLocalPlayerEvent(AKraverPlayer* NewCreature);
 	UFUNCTION()
-	void OnCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
+	void OnAnyCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
+	UFUNCTION()
+	void OnLocalCreatureDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	// Func
 	void FindGameState();
@@ -38,11 +40,11 @@ protected:
 
 public:
 	// Getter Setter
-	FCrosshairsPackage GetHUDPackage() { return HUDPackage; }
+	FORCEINLINE FCrosshairsPackage GetHUDPackage() { return HUDPackage; }
 
 	FORCEINLINE void SetCrosshairsPackage(const FCrosshairsPackage& Package) { HUDPackage = Package; } // HUDPackage를 설정하는 함수
 	FORCEINLINE void SetbDrawCrosshair(bool value) { bDrawCrosshair = value; }
-	void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
+	FORCEINLINE void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
 
 private:
 	class ACreature* Player;
@@ -57,16 +59,20 @@ private:
 	bool bHitmartCritical = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UUserWidget> CombatWidgetClass; // CombatWidget의 클래스 레퍼런스를 가지는 변수
-	UUserWidget* CombatWidget; // PlayerCharacter의 상태를 알려주는 위젯
+	TSubclassOf<class UCombatWidget> CombatWidgetClass; // CombatWidget의 클래스 레퍼런스를 가지는 변수
+	class UCombatWidget* CombatWidget; // PlayerCharacter의 상태를 알려주는 위젯
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> InteractionWidgetClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
-	UUserWidget* InteractionWidget; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
+	TSubclassOf<class UInteractionWidget> InteractionWidgetClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
+	class UInteractionWidget* InteractionWidget; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> KillLogWidgetClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
-	TArray<UUserWidget*> KillLogWidgets; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
+	TSubclassOf<class UKillLogWidget> KillLogWidgetClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
+	TArray<class UKillLogWidget*> KillLogWidgets; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class URespawnTimerWidget> RespawnTimerWidgeClass; // InteractionWidget의 클래스 레퍼런스를 가지는 변수
+	class URespawnTimerWidget* RespawnTimerWidge; // PlayerCharacter가 장착가능한 무기를 찾았을때 렌더링되는 위젯
 
 	bool bDrawCrosshair = true;
 	UPROPERTY(EditAnywhere)

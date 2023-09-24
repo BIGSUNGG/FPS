@@ -28,7 +28,7 @@ protected:
 	void ReturnButtonClicked();
 
 protected:
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UButton* ReturnButton;
 
 	UPROPERTY()

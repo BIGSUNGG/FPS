@@ -80,3 +80,4 @@
 #define KillLogWidget_h			"Kraver/GameBase/Ui/Widget/KillLog/KillLogWidget.h"
 #define ReturnMainMenuWidget_h	"Kraver/GameBase/Ui/Widget/Menu/ReturnMainMenu/ReturnMainMenuWidget.h"
 #define HpBarWidget_h			"Kraver/GameBase/Ui/Widget/HpBar/HpBarWidget.h"
+#define RespawnTimerWidget_h	"Kraver/GameBase/Ui/Widget/RespawnTimer/RespawnTimerWidget.h"

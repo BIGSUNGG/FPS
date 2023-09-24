@@ -27,6 +27,10 @@ public:
 protected:
 	virtual void GameFinishEvent(ETeam WinTeam);
 
+public:
+	// Getter Setter
+	static float GetRespawnTime() { return RespawnTime; }
+
 protected:
 	class AKraverGameState* KraverGameState = nullptr;
 	
@@ -36,7 +40,7 @@ protected:
 	// Respawn
 	bool bRespawn = true;
 	FTimerHandle RespawnTimer;
-	float RespawnTime = 4.f;
+	inline static const float RespawnTime = 10.f;
 
 	// Spectator
 	bool bSpectate = true;

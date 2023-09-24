@@ -8,11 +8,28 @@
 #include "Kraver/GameBase/Ui/Widget/Combat/CombatWidget.h"
 #include Creature_h
 #include KraverPlayer_h
-#include KraverPlayerState_h
 #include KraverGameState_h
+#include KraverPlayerState_h
+#include RespawnTimerWidget_h
 
 AKraverHud::AKraverHud()
 {
+	static ConstructorHelpers::FClassFinder<UCombatWidget> COMBAT_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_CombatWidget.WBP_CombatWidget_C"));
+	if (COMBAT_WIDGET.Succeeded())
+		CombatWidgetClass = COMBAT_WIDGET.Class;
+
+	static ConstructorHelpers::FClassFinder<UInteractionWidget> INTERACTION_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_InteractionWidget.WBP_InteractionWidget"));
+	if (INTERACTION_WIDGET.Succeeded())
+		InteractionWidgetClass = INTERACTION_WIDGET.Class;
+
+	static ConstructorHelpers::FClassFinder<UKillLogWidget> KILL_LOG_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_KillLog.WBP_KillLog"));
+	if (KILL_LOG_WIDGET.Succeeded())
+		KillLogWidgetClass = KILL_LOG_WIDGET.Class;
+
+	static ConstructorHelpers::FClassFinder<URespawnTimerWidget> RESPAWN_TIMER_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_RespawnTimer.WBP_RespawnTimer"));
+	if (RESPAWN_TIMER_WIDGET.Succeeded())
+		RespawnTimerWidgeClass = RESPAWN_TIMER_WIDGET.Class;
+
 	KillLogWidgets.SetNum(5);
 }
 
@@ -40,6 +57,10 @@ void AKraverHud::BeginPlay()
 			KillLogWidget->AddToViewport();
 		}
 	}
+
+	RespawnTimerWidge = CreateWidget<URespawnTimerWidget>(PlayerController, RespawnTimerWidgeClass);
+	if (RespawnTimerWidge)
+		RespawnTimerWidge->AddToViewport();
 
 	FindGameState();
 	FindPlayerState();
@@ -147,20 +168,26 @@ void AKraverHud::OnNewLocalPlayerEvent(AKraverPlayer* NewCreature)
 	if (Player)
 	{
 		Player->CombatComponent->OnClientGiveAnyDamageSuccess.AddDynamic(this, &AKraverHud::OnClientGiveDamageSuccessEvent);
+		Player->CombatComponent->OnClientDeath.AddDynamic(this, &AKraverHud::OnLocalCreatureDeathEvent);
 	}
 }
 
-void AKraverHud::OnCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
+void AKraverHud::OnAnyCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
 {
 	for (int i = KillLogWidgets.Num() - 1; i >= 1; i--)
 	{
-		UUserWidget* TempWidget = KillLogWidgets[i - 1];
+		UKillLogWidget* TempWidget = KillLogWidgets[i - 1];
 		KillLogWidgets[i - 1] = KillLogWidgets[i];
 		KillLogWidgets[i] = TempWidget;
 	}
 
 	UKillLogWidget* KillLogWidget = Cast<UKillLogWidget>(KillLogWidgets[0]);
 	KillLogWidget->Initialize(AttackerController ? AttackerController->GetName() : AttackerActor->GetName(), VictimController ? VictimController->GetName() : DeadCreature->GetName());
+}
+
+void AKraverHud::OnLocalCreatureDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	RespawnTimerWidge->TimerStart();
 }
 
 void AKraverHud::FindGameState()
@@ -170,7 +197,7 @@ void AKraverHud::FindGameState()
 		GameState = GetWorld()->GetGameState<AKraverGameState>();
 		if (GameState)
 		{
-			GameState->OnCreatureDeath.AddDynamic(this, &ThisClass::OnCreatureDeathEvent);
+			GameState->OnCreatureDeath.AddDynamic(this, &ThisClass::OnAnyCreatureDeathEvent);
 		}
 		else
 			GetWorldTimerManager().SetTimerForNextTick(this, &ThisClass::FindGameState);
