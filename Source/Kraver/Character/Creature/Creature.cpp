@@ -80,6 +80,9 @@ ACreature::ACreature()
 	GetCharacterMovement()->SetWalkableFloorAngle(50.f);
 
 	HpBarWidget->SetupAttachment(GetCapsuleComponent());
+	HpBarWidget->SetRelativeLocation(FVector(20.f, 0.f, 95.f));
+	HpBarWidget->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
+	HpBarWidget->SetOwnerNoSee(true);
 }	
 
 

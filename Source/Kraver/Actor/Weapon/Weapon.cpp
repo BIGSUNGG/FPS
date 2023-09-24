@@ -301,11 +301,12 @@ void AWeapon::OnAttackStartEvent()
 	IsAttacking = true;
 
 	if (bCanAttack)
-	{
+	{ 
 		if (!bFirstAttackDelay)
 			Attack();
 
-		GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, bAutomaticAttack, AttackDelay);
+		if(bAutomaticAttack)
+			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, true, AttackDelay);		
 	}
 
 	OnAttackStart.Broadcast();

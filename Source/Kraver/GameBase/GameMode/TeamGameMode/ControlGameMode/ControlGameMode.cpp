@@ -36,46 +36,49 @@ void AControlGameMode::Tick(float DeltaSeconds)
 	if (!ControlGameState)
 		return;
 
-	ETeam ControllingTeam = CalculateControllingTeam();
-
-	if(ControllingTeam != ETeam::NONE)
+	if(ControlArea)
 	{
-		if (ControlGameState->CurControlTeam == ControllingTeam)
+		ETeam ControllingTeam = CalculateControllingTeam();
+	
+		if(ControllingTeam != ETeam::NONE)
 		{
-			if (ControlGameState->CurControlPoint < 1.f)
+			if (ControlGameState->CurControlTeam == ControllingTeam)
 			{
-				ControlGameState->CurControlPoint += ControlIncreaseSpeed * DeltaSeconds;
-				if (ControlGameState->CurControlPoint >= 1.f)
+				if (ControlGameState->CurControlPoint < 1.f)
 				{
-					ControlGameState->CurControlPoint = 1.f;
-					GetWorldTimerManager().SetTimer(PointDelayTimer, this, &ThisClass::PointDelayTimerEvent, PointDelay, true);
+					ControlGameState->CurControlPoint += ControlIncreaseSpeed * DeltaSeconds;
+					if (ControlGameState->CurControlPoint >= 1.f)
+					{
+						ControlGameState->CurControlPoint = 1.f;
+						GetWorldTimerManager().SetTimer(PointDelayTimer, this, &ThisClass::PointDelayTimerEvent, PointDelay, true);
+					}
+				}
+			}
+			else
+			{
+				ControlGameState->CurControlPoint -= ControlDecreaseSpeed * DeltaSeconds;
+				if (ControlGameState->CurControlPoint <= 0.f)
+				{
+					ControlGameState->CurControlPoint = -ControlGameState->CurControlPoint;
+					ControlGameState->CurControlTeam = ControllingTeam;
+					GetWorldTimerManager().ClearTimer(PointDelayTimer);
 				}
 			}
 		}
-		else
+		else if(ControlArea->GetRedTeamCount() == 0)
 		{
-			ControlGameState->CurControlPoint -= ControlDecreaseSpeed * DeltaSeconds;
-			if (ControlGameState->CurControlPoint <= 0.f)
+			if (GetWorldTimerManager().IsTimerActive(PointDelayTimer))
 			{
-				ControlGameState->CurControlPoint = -ControlGameState->CurControlPoint;
-				ControlGameState->CurControlTeam = ControllingTeam;
-				GetWorldTimerManager().ClearTimer(PointDelayTimer);
+				ControlGameState->CurControlPoint += ControlIncreaseSpeed * DeltaSeconds;
+				if (ControlGameState->CurControlPoint >= 1.f)
+					ControlGameState->CurControlPoint = 1.f;
 			}
-		}
-	}
-	else if(ControlArea->GetRedTeamCount() == 0)
-	{
-		if (GetWorldTimerManager().IsTimerActive(PointDelayTimer))
-		{
-			ControlGameState->CurControlPoint += ControlIncreaseSpeed * DeltaSeconds;
-			if (ControlGameState->CurControlPoint >= 1.f)
-				ControlGameState->CurControlPoint = 1.f;
-		}
-		else
-		{
-			ControlGameState->CurControlPoint -= ControlDecreaseSpeed * DeltaSeconds;
-			if (ControlGameState->CurControlPoint <= 0.f)
-				ControlGameState->CurControlPoint = 0.f;
+			else
+			{
+				ControlGameState->CurControlPoint -= ControlDecreaseSpeed * DeltaSeconds;
+				if (ControlGameState->CurControlPoint <= 0.f)
+					ControlGameState->CurControlPoint = 0.f;
+			}
 		}
 	}
 }
