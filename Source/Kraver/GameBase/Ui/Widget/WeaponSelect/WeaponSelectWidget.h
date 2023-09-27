@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Kraver/Kraver.h"
 #include "Blueprint/UserWidget.h"
 #include "WeaponSelectWidget.generated.h"
 
@@ -13,5 +13,16 @@ UCLASS()
 class KRAVER_API UWeaponSelectWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
+public:
+	UFUNCTION(BlueprintCallable)
+	virtual void SelectWeapon(TSubclassOf<AWeapon> WeaponClass, FString WeaponName, float Size, int Index);
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* MainWeaponText;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* SubWeaponText;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* SpecialWeaponText;
 };

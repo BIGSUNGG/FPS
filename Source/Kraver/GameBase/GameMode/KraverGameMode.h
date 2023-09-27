@@ -23,6 +23,7 @@ public:
 	virtual void CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
 	virtual void RequestRespawn(AKraverPlayer* RespawnPlayer, AController* PlayerController);
 	virtual void RequsetSpectate(AController* PlayerController);
+	virtual void RequestDefaultWeapon(class AKraverPlayerState* Player, const TArray<TSubclassOf<class AWeapon>>& RequestWeapons);
 
 protected:
 	virtual void GameFinishEvent(ETeam WinTeam);

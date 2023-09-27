@@ -11,12 +11,9 @@ void ATeamPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ATeamPlayerState, PlayerTeam);
 }
 
-void ATeamPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn)
+void ATeamPlayerState::OnNewPawn(APawn* NewPawn)
 {
-	Super::OnPawnSetEvent(Player, NewPawn, OldPawn);
-
-	if (this != Player)
-		return;
+	Super::OnNewPawn(NewPawn);
 
 	SetPlayerTeam(PlayerTeam);
 }

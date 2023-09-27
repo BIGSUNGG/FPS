@@ -3,8 +3,10 @@
 
 #include "KraverPlayerState.h"
 #include KraverPlayer_h
+#include KraverGameMode_h
 #include KraverPlayerController_h
 #include DamageIndicatorSubsystem_h
+#include SaveSubsystem_h
 #include KraverHud_h
 
 AKraverPlayerState::AKraverPlayerState()
@@ -12,21 +14,38 @@ AKraverPlayerState::AKraverPlayerState()
 	OnPawnSet.AddDynamic(this, &ThisClass::OnPawnSetEvent);
 }
 
-void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn)
+void AKraverPlayerState::Server_RequestDefaultWeapon_Implementation(const TArray<TSubclassOf<class AWeapon>>& RequestWeapons)
 {
-	OwnerPlayer = Cast<AKraverPlayer>(NewPawn);
-	if (!OwnerPlayer)
+	if (bSpawnDefaultWeapon)
 		return;
 
+	bSpawnDefaultWeapon = true;
+
+	AKraverGameMode* GameMode = Cast<AKraverGameMode>(UGameplayStatics::GetGameMode(this));
+	GameMode->RequestDefaultWeapon(this, RequestWeapons);
+}
+
+void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn)
+{
 	if (this != Player)
 		return;
 
 	if(!NewPawn)
 		return;
 
-	OnNewPlayer.Broadcast(OwnerPlayer);
+	OnNewPawn(NewPawn);
+}
 
-	if(OwnerPlayer->IsLocallyControlled())
+void AKraverPlayerState::OnNewPawn(APawn* NewPawn)
+{
+	OwnerPlayer = Cast<AKraverPlayer>(NewPawn);
+	if (!OwnerPlayer)
+		return;
+
+	OnNewPlayer.Broadcast(OwnerPlayer);
+	bSpawnDefaultWeapon = false;
+
+	if (OwnerPlayer->IsLocallyControlled())
 	{
 		OwnerController = Cast<AKraverPlayerController>(OwnerPlayer->GetController());
 		if (!OwnerController)
@@ -44,5 +63,13 @@ void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, AP
 		KR_LOG(Log, TEXT("New Local Player : %s"), *OwnerPlayer->GetName());
 
 		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->SetLocalPlayer(OwnerPlayer);
+		RequestDefaultWeapon(GetGameInstance()->GetSubsystem<USaveSubsystem>()->GetWeaponArray());
 	}
+
+
+}
+
+void AKraverPlayerState::RequestDefaultWeapon(const TArray<TSubclassOf<class AWeapon>>& RequestWeapons)
+{
+	Server_RequestDefaultWeapon(RequestWeapons);
 }

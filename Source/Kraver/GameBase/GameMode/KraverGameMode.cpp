@@ -104,6 +104,18 @@ void AKraverGameMode::RequsetSpectate(AController* PlayerController)
 
 }
 
+void AKraverGameMode::RequestDefaultWeapon(AKraverPlayerState* Player, const TArray<TSubclassOf<class AWeapon>>& RequestWeapons)
+{
+	for (auto& Class : RequestWeapons)
+	{
+		if(!Class)
+			continue;
+
+		AWeapon* NewWeapon = Player->GetOwnerPLayer()->GetWorld()->SpawnActor<AWeapon>(Class);
+		Player->GetOwnerPLayer()->CombatComponent->EquipWeapon(NewWeapon);
+	}
+}
+
 void AKraverGameMode::GameFinishEvent(ETeam WinTeam)
 {
 	if (IsGameFinish)

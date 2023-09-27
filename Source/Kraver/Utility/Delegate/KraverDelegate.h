@@ -44,6 +44,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEquipWeaponSuccessDele, AWeapon*, W
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUnEquipWeaponSuccessDele, AWeapon*, Weapon);
 	// Holster Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHolsterWeaponDele, AWeapon*, Weapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUnholsterWeaponDele, AWeapon*, Weapon);
 
 // Combat
 	// Take Damage

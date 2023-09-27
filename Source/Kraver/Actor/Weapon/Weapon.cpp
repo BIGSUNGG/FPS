@@ -506,9 +506,13 @@ void AWeapon::EquipEvent()
 
 void AWeapon::UnEquipEvent()
 {
-	OnAttackEndEvent();
-	OnSubAttackEndEvent();
-	OnLocal_RemoveOnOwnerDelegate();
+	ACharacter* Charcter = Cast<ACharacter>(GetOwner());
+	if (Charcter->IsLocallyControlled())
+	{
+		OnAttackEndEvent();
+		OnSubAttackEndEvent();
+		OnLocal_RemoveOnOwnerDelegate();
+	}
 
 	GetTppWeaponMesh()->SetSimulatePhysics(true);
 	GetTppWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);

@@ -66,10 +66,11 @@
 
 #define KraverSpectator_h "Kraver/GameBase/Spectator/KraverSpectator.h"
 
-#define DamageIndicatorSubsystem_h "Kraver/GameBase/SubSystem/DamageIndicatorSubsystem.h"
+#define DamageIndicatorSubsystem_h	"Kraver/GameBase/SubSystem/DamageIndicator/DamageIndicatorSubsystem.h"
+#define SaveSubsystem_h				"Kraver/GameBase/SubSystem/Save/SaveSubsystem.h"
 
-#define KraverHud_h "Kraver/GameBase/Ui/HUD/KraverHUD.h"
-#define ControlHUD_h "Kraver/GameBase/Ui/HUD/Control/ControlHUD.h"
+#define KraverHud_h		"Kraver/GameBase/Ui/HUD/KraverHUD.h"
+#define ControlHUD_h	"Kraver/GameBase/Ui/HUD/Control/ControlHUD.h"
 
 // Widget
 #define CombatWidget_h			"Kraver/GameBase/Ui/Widget/Combat/CombatWidget.h"
