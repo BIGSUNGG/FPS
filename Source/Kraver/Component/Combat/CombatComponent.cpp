@@ -309,7 +309,7 @@ void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
 	if(!Weapon)
 		return;
 
-	OnLocal_HolsterWeapon(CurWeapon);
+	OnLocal_HolsterWeapon();
 	Server_UnEquipWeapon(Weapon);
 }
 
@@ -355,8 +355,7 @@ void UCombatComponent::OnLocal_UnholsterWeapon(AWeapon* Weapon)
 	}
 	
 	KR_LOG(Log,TEXT("Unholster Weapon %s"),*Weapon->GetName());
-	if (CurWeapon != Weapon)
-		OnLocal_HolsterWeapon(CurWeapon);
+	OnLocal_HolsterWeapon();
 
 	CurWeapon = Weapon;
 	Weapon->OnLocal_Unholster();
@@ -365,22 +364,24 @@ void UCombatComponent::OnLocal_UnholsterWeapon(AWeapon* Weapon)
 	Server_UnholsterWeapon(Weapon);
 }
 
-bool UCombatComponent::OnLocal_HolsterWeapon(AWeapon* Weapon)
+bool UCombatComponent::OnLocal_HolsterWeapon()
 {
 	ERROR_IF_NOT_CALLED_ON_LOCAL_PARAM(false);
 
-	if(CurWeapon == nullptr)
-		return false;
+	CurWeapon = nullptr;
 
-	KR_LOG(Log, TEXT("Holster Weapon %s"), *Weapon->GetName());
-	bool Success = Weapon->OnLocal_Holster();
-	if(Success)
+	for (auto& Weapon : WeaponSlot)
 	{
-		CurWeapon = nullptr;
-		OnClientHolsterWeapon.Broadcast(Weapon);
+		if(!Weapon || !Weapon->GetIsUnholsting())
+			continue;
 
-		Server_HolsterWeapon(Weapon);
-		return true;
+		KR_LOG(Log, TEXT("Holster Weapon %s"), *Weapon->GetName());
+		bool Success = Weapon->OnLocal_Holster();
+		if (Success)
+		{
+			OnClientHolsterWeapon.Broadcast(Weapon);
+			Server_HolsterWeapon(Weapon);
+		}
 	}
 
 	return false;
@@ -429,7 +430,7 @@ void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
 		OnServerEquipWeaponSuccess.Broadcast(Weapon);
 
 		if(OwnerCreature->IsLocallyControlled())
-			Client_EquipWeaponSuccess(Weapon);
+			OnLocal_EquipWeaponSuccess(Weapon);
 	}
 	else
 		KR_LOG(Warning, TEXT("Failed to equip weapon"));
@@ -451,13 +452,13 @@ void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 		OnServerUnEquipWeaponSuccess.Broadcast(Weapon);
 
 		if (OwnerCreature->IsLocallyControlled())
-			Client_UnEquipWeaponSuccess(Weapon);
+			OnLocal_UnEquipWeaponSuccess(Weapon);
 	}
 	else
 		KR_LOG(Warning, TEXT("Failed to unequip weapon"));
 }
 
-void UCombatComponent::Client_EquipWeaponSuccess(AWeapon* Weapon)
+void UCombatComponent::OnLocal_EquipWeaponSuccess(AWeapon* Weapon)
 {
 	if (!OwnerCreature->IsLocallyControlled())
 	{
@@ -467,20 +468,20 @@ void UCombatComponent::Client_EquipWeaponSuccess(AWeapon* Weapon)
 
 	if (IsValid(Weapon) == false)
 	{
-		GetWorld()->GetTimerManager().SetTimerForNextTick([=](){ Client_EquipWeaponSuccess(Weapon); });
+		GetWorld()->GetTimerManager().SetTimerForNextTick([=](){ OnLocal_EquipWeaponSuccess(Weapon); });
 		return;
 	}
 
 	Weapon->SetOwner(OwnerCreature);
 
-	OnLocal_HolsterWeapon(CurWeapon);
+	OnLocal_HolsterWeapon();
 
 	CurWeapon = Weapon;
 	OnClientEquipWeaponSuccess.Broadcast(Weapon);
 	OnLocal_UnholsterWeapon(Weapon);
 }
 
-void UCombatComponent::Client_UnEquipWeaponSuccess(AWeapon* Weapon)
+void UCombatComponent::OnLocal_UnEquipWeaponSuccess(AWeapon* Weapon)
 {
 	if (!OwnerCreature->IsLocallyControlled())
 	{
@@ -488,7 +489,7 @@ void UCombatComponent::Client_UnEquipWeaponSuccess(AWeapon* Weapon)
 		return;
 	}
 
-	OnLocal_HolsterWeapon(Weapon);
+	OnLocal_HolsterWeapon();
 
 	OnClientUnEquipWeaponSuccess.Broadcast(Weapon);
 }
@@ -501,7 +502,6 @@ void UCombatComponent::Server_UnholsterWeapon_Implementation(AWeapon* Weapon)
 
 void UCombatComponent::Server_HolsterWeapon_Implementation(AWeapon* Weapon)
 {
-	CurWeapon = nullptr;
 	OnServerHolsterWeapon.Broadcast(Weapon);
 }
 
@@ -588,11 +588,11 @@ void UCombatComponent::OnRep_WeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot)
 		{
 			if (WeaponSlot[i] && !PrevWeaponSlot[i]) // 장착한 경우
 			{
-				Client_EquipWeaponSuccess(WeaponSlot[i]);
+				OnLocal_EquipWeaponSuccess(WeaponSlot[i]);
 			}
 			else if (!WeaponSlot[i] && PrevWeaponSlot[i]) // 장착해제한 경우
 			{
-				Client_UnEquipWeaponSuccess(PrevWeaponSlot[i]);
+				OnLocal_UnEquipWeaponSuccess(PrevWeaponSlot[i]);
 			}
 		}
 	}

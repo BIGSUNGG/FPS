@@ -36,6 +36,10 @@ void ABullet::BeginPlay()
 		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&](){ Destroy(false, true); }, BulletLifeTime, false, BulletLifeTime);
 	}
+	else
+	{
+		BulletMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void ABullet::PostInitializeComponents()

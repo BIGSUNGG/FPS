@@ -52,6 +52,11 @@ public:
 protected:
 	// Rpc
 	UFUNCTION(Server, Reliable)
+	virtual void Server_Unholster();
+	UFUNCTION(Server, Reliable)
+	virtual void Server_Holster();
+
+	UFUNCTION(Server, Reliable)
 	virtual void Server_OnAttackStartEvent();
 	UFUNCTION(Server, Reliable)
 	virtual void Server_OnAttackEndEvent(); 
@@ -76,23 +81,29 @@ protected:
 	virtual void OnAttackEvent();
 
 	virtual void Attack() final; // 공격할때 호출되는 함수
-
+	
 	// OnRep
 	UFUNCTION()
 	virtual void OnRep_WeaponState(EWeaponState PrevWeaponState);
+	UFUNCTION()
+	virtual void OnRep_IsUnholsting(bool PrevIsUnholsting);
 
 	// Func
 	virtual void MakeFppPrimitiveInfo() final; // 1인칭 PrimitiveInfo를 추가
 	virtual void EquipEvent();
 	virtual void UnEquipEvent();
+	virtual void HolsterEvent();
+	virtual void UnholsterEvent();
 
 public:
 	// Getter Setter
 	virtual bool CanAttack();
 	virtual bool CanSubAttack();
-	bool CanInteracted();
+	virtual bool CanInteracted();
+
 	bool GetIsAttacking() { return IsAttacking; }
 	bool GetIsSubAttacking() { return IsSubAttacking; }
+	bool GetIsUnholsting() { return bIsUnholsting; }
 	bool GetbAttackWhileSprint() { return bAttackWhileSprint; }
 	bool GetbSubAttackWhileSprint() { return bSubAttackWhileSprint; }
 
@@ -121,6 +132,8 @@ public:
 	virtual UAnimMontage* GetUnholsterMontageFpp() { return UnholsterMontageFpp; }
 	virtual UAnimMontage* GetHolsterMontageTpp() { return HolsterMontageTpp; }
 	virtual UAnimMontage* GetHolsterMontageFpp() { return HolsterMontageFpp; }
+
+	void SetWeaponVisibility(bool Value);
 
 public:
 	FAttackDele OnAttack;
@@ -160,7 +173,9 @@ protected:
 	class ACreature* OwnerCreature = nullptr;
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState)
-	EWeaponState WeaponState = EWeaponState::NONE; // 무기 상태
+	EWeaponState WeaponState = EWeaponState::IDLE; // 무기 상태
+	UPROPERTY(ReplicatedUsing = OnRep_IsUnholsting)
+	bool bIsUnholsting = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
 	EWeaponType WeaponType = EWeaponType::NONE; // 무기 종류
 

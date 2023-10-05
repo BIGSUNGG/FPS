@@ -70,8 +70,6 @@ public:
 	float GetCurrentInputRight() { return CurrentInputRight; }
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 
-	virtual void SetWeaponVisibility(class AWeapon* Weapon, bool Value);
-
 protected:
 	// Axis Input
 	virtual void MoveForward(float NewAxisValue);

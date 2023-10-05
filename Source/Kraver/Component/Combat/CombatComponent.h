@@ -42,7 +42,7 @@ public:
 	// Holster Unholster
 	virtual bool OnLocal_UnholsterWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
 	virtual void OnLocal_UnholsterWeapon(AWeapon* Weapon); // Weapon을 드는 함수
-	virtual bool OnLocal_HolsterWeapon(AWeapon* Weapon); // CurWeapon을 집어넣는 함수
+	virtual bool OnLocal_HolsterWeapon(); // Weapon을 집어넣는 함수
 
 	// Damage Event
 	virtual float OnServer_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
@@ -57,13 +57,13 @@ protected:
 	UFUNCTION(Server, Reliable)
 	virtual void Server_UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착하는 함수
 
-	virtual void Client_EquipWeaponSuccess(AWeapon* Weapon);		
-	virtual void Client_UnEquipWeaponSuccess(AWeapon* Weapon);
+	virtual void OnLocal_EquipWeaponSuccess(AWeapon* Weapon);		
+	virtual void OnLocal_UnEquipWeaponSuccess(AWeapon* Weapon);
 
 	UFUNCTION(Server, Reliable)
 	virtual void Server_UnholsterWeapon(AWeapon* Weapon);
 	UFUNCTION(Server, Reliable)
-	virtual void Server_HolsterWeapon(AWeapon* Weapon); // CurWeapon을 집어넣는 함수
+	virtual void Server_HolsterWeapon(AWeapon* Weapon); // Weapon을 집어넣는 함수
 
 
 	// Take Damage

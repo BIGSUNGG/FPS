@@ -265,14 +265,6 @@ USkeletalMeshComponent* AKraverPlayer::GetCurMainMesh()
 	}
 }
 
-void AKraverPlayer::SetWeaponVisibility(class AWeapon* Weapon, bool Value)
-{
-	Super::SetWeaponVisibility(Weapon, Value);
-
-	for (auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
-		Tuple.Value->SetVisibility(Value);
-}
-
 void AKraverPlayer::EquipButtonPressed()
 {
 	if (CanInteractWeapon != nullptr)
@@ -477,6 +469,12 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 	if(!Weapon)
 		return;
 
+	if (!IsValid(Weapon->GetFppWeaponMesh()))
+	{
+		GetWorldTimerManager().SetTimerForNextTick([=]() { OnClientEquipWeaponSuccessEvent(Weapon); });
+		return;
+	}
+
 	Super::OnClientEquipWeaponSuccessEvent(Weapon);
 	UnholsterWeapon();
 	
@@ -484,6 +482,9 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	for(auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 	{
+		if(!Tuple.Value)
+			continue;
+
 		Tuple.Value->SetVisibility(true);
 		Tuple.Value->SetOnlyOwnerSee(true);
 		Tuple.Value->SetCastShadow(false);
@@ -492,9 +493,12 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 		ShowOnlyFirstPerson.Push(Tuple.Value);
 	}
 	
-	for (auto& Map : Weapon->GetTppWeaponPrimitiveInfo())
+	for (auto& Tuple : Weapon->GetTppWeaponPrimitiveInfo())
 	{
-		ShowOnlyThirdPerson.Push(Map.Value);
+		if (!Tuple.Value)
+			continue;
+
+		ShowOnlyThirdPerson.Push(Tuple.Value);
 	}
 
 	RefreshCurViewType();
@@ -629,7 +633,7 @@ void AKraverPlayer::OnTp_Weapon_HolsterEvent()
 	ArmMesh->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
 	GetMesh()->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
 
-	CombatComponent->OnLocal_HolsterWeapon(CombatComponent->GetCurWeapon());
+	CombatComponent->OnLocal_HolsterWeapon();
 
 	if(UnholsterIndex == -1)
 		return;

@@ -149,7 +149,6 @@ void ACreature::UnEquipEvent(AWeapon* Weapon)
 	if (!IsValid(Weapon))
 		return;
 
-	SetWeaponVisibility(Weapon, true);
 	Weapon->GetTppWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
@@ -160,7 +159,6 @@ void ACreature::HolsterEvent(AWeapon* Weapon)
 
 	Weapon->OnPlayTppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
-	SetWeaponVisibility(Weapon, false);
 }
 
 void ACreature::UnholsterEvent(AWeapon* Weapon)
@@ -170,7 +168,6 @@ void ACreature::UnholsterEvent(AWeapon* Weapon)
 
 	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.AddDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
-	SetWeaponVisibility(Weapon, true);
 }
 
 void ACreature::UpdateDissolveMaterial(float DissolveValue)
@@ -400,14 +397,6 @@ FVector ACreature::CaclulateCurrentFllorSlopeVector()
 		}
 	}
 	return FVector::ZeroVector;
-}
-
-void ACreature::SetWeaponVisibility(class AWeapon* Weapon, bool Value)
-{
-	for (auto& Tuple : Weapon->GetTppWeaponPrimitiveInfo())
-	{
-		Tuple.Value->SetVisibility(Value);
-	}
 }
 
 void ACreature::MoveForward(float NewAxisValue)
@@ -657,8 +646,7 @@ void ACreature::OnServerHolsterWeaponEvent(AWeapon* Weapon)
 void ACreature::OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	DisableInput(GetController<APlayerController>());
-	if (CombatComponent->GetCurWeapon() != nullptr)
-		CombatComponent->OnLocal_HolsterWeapon(CombatComponent->GetCurWeapon());
+	CombatComponent->OnLocal_HolsterWeapon();
 
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
 }

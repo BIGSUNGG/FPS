@@ -101,8 +101,6 @@ public:
 	FORCEINLINE USpringArmComponent* GetTp_SpringArm() { return Tp_SpringArm; }
 	virtual USkeletalMeshComponent* GetCurMainMesh() override;
 
-	virtual void SetWeaponVisibility(class AWeapon* Weapon, bool Value) override;
-
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 	class UTexture2D* CrosshairsCenter;
