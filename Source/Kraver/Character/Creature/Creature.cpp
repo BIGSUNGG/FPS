@@ -646,7 +646,7 @@ void ACreature::OnServerHolsterWeaponEvent(AWeapon* Weapon)
 void ACreature::OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	DisableInput(GetController<APlayerController>());
-	CombatComponent->OnLocal_HolsterWeapon();
+	CombatComponent->HolsterWeapon();
 
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
 }

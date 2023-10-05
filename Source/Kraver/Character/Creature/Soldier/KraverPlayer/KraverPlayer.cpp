@@ -485,11 +485,6 @@ void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
 		if(!Tuple.Value)
 			continue;
 
-		Tuple.Value->SetVisibility(true);
-		Tuple.Value->SetOnlyOwnerSee(true);
-		Tuple.Value->SetCastShadow(false);
-		Tuple.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
 		ShowOnlyFirstPerson.Push(Tuple.Value);
 	}
 	
@@ -515,10 +510,6 @@ void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	for (auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 	{
-		Tuple.Value->SetVisibility(false);
-		Tuple.Value->SetOnlyOwnerSee(false);
-		Tuple.Value->SetOwnerNoSee(false);
-
 		ShowOnlyFirstPerson.Remove(Tuple.Value);
 	}
 
@@ -633,7 +624,7 @@ void AKraverPlayer::OnTp_Weapon_HolsterEvent()
 	ArmMesh->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
 	GetMesh()->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
 
-	CombatComponent->OnLocal_HolsterWeapon();
+	CombatComponent->HolsterWeapon();
 
 	if(UnholsterIndex == -1)
 		return;
@@ -683,7 +674,10 @@ void AKraverPlayer::HolsterWeapon()
 void AKraverPlayer::UnholsterWeapon()
 {
 	if(UnholsterIndex != -1)
-		CombatComponent->OnLocal_UnholsterWeapon(UnholsterIndex);
+		CombatComponent->UnholsterWeapon(UnholsterIndex);
+
+	if (!CombatComponent->GetCurWeapon())
+		return;
 
 	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetUnholsterMontageFpp());
 	GetMesh()->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetUnholsterMontageTpp());

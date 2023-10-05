@@ -106,7 +106,11 @@ void AKraverGameMode::RequsetSpectate(AController* PlayerController)
 
 void AKraverGameMode::RequestDefaultWeapon(AKraverPlayerState* Player, const TArray<TSubclassOf<class AWeapon>>& RequestWeapons)
 {
-	GetWorldTimerManager().SetTimerForNextTick([=]() 
+	AKraverPlayer* KraverPlayer = Player->GetOwnerPLayer();
+	if (!KraverPlayer)
+		return;
+
+	GetWorldTimerManager().SetTimerForNextTick([=]()
 	{
 		for (auto& Class : RequestWeapons)
 		{

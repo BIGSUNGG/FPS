@@ -40,9 +40,11 @@ public:
 	virtual void UnEquipWeapon(AWeapon* Weapon); // Weapon을 장착해제하는 함수
 
 	// Holster Unholster
-	virtual bool OnLocal_UnholsterWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
-	virtual void OnLocal_UnholsterWeapon(AWeapon* Weapon); // Weapon을 드는 함수
-	virtual bool OnLocal_HolsterWeapon(); // Weapon을 집어넣는 함수
+	virtual bool UnholsterWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
+	UFUNCTION(Client, Reliable)
+	virtual void UnholsterWeapon(AWeapon* Weapon); // Weapon을 드는 함수
+	UFUNCTION(Client, Reliable)
+	virtual void HolsterWeapon(); // Weapon을 집어넣는 함수
 
 	// Damage Event
 	virtual float OnServer_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
@@ -124,11 +126,11 @@ public:
 	int8 GetCurWeaponSlotIndex();
 	bool GetCanEquipWeapon();
 	const TArray<AWeapon*>& GetWeaponSlot() { return WeaponSlot; }
-	const FTeamInfo& GetCurTeamInfo() { return CurTeamInfo; }
+	const FTeamInfo& GetTeamInfo() { return TeamInfo; }
 
 	int CountWeapon();
 
-	void SetTeam(ETeam InTeam) { CurTeamInfo.CurTeam = InTeam; }
+	void SetTeam(ETeam InTeam) { TeamInfo.CurTeam = InTeam; }
 
 public:
 	// Attack
@@ -201,8 +203,9 @@ protected:
 	int32 MaxHp = 100.f; // 최대 Hp
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Team", meta = (AllowPrivateAccess = "true"))
-	FTeamInfo CurTeamInfo;
+	FTeamInfo TeamInfo;
 
 	bool bCanceledTakeDamage = false; // Server에서만 사용
+	bool bUnholsterWhenEquip = true;
 
 };

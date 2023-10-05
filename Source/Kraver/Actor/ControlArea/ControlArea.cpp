@@ -47,7 +47,7 @@ void AControlArea::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	UCombatComponent* CombatComp = FindComponentByClassIncludeOwner<UCombatComponent>(OtherActor);
 	if (CombatComp)
 	{
-		switch (CombatComp->GetCurTeamInfo().CurTeam)
+		switch (CombatComp->GetTeamInfo().CurTeam)
 		{
 		case ETeam::RED:
 			++RedTeamCount;
@@ -69,7 +69,7 @@ void AControlArea::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* Oth
 	UCombatComponent* CombatComp = FindComponentByClassIncludeOwner<UCombatComponent>(OtherActor);
 	if (CombatComp)
 	{
-		switch (CombatComp->GetCurTeamInfo().CurTeam)
+		switch (CombatComp->GetTeamInfo().CurTeam)
 		{
 		case ETeam::RED:
 			--RedTeamCount;

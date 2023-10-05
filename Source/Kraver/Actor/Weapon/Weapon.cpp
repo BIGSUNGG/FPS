@@ -542,7 +542,7 @@ void AWeapon::EquipEvent()
 	GetTppWeaponMesh()->SetSimulatePhysics(false);
 	GetTppWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	SetWeaponVisibility(true);
+	SetWeaponVisibility(false);
 }
 
 void AWeapon::UnEquipEvent()

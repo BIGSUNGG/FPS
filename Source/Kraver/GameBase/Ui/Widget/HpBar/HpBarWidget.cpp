@@ -17,7 +17,7 @@ void UHpBarWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 		ACreature* LocalCreature = Cast<ACreature>(PC->GetPawn());
 		if (LocalCreature)
 		{
-			if (FTeamInfo::CheckIsTeam(OwnerCreature->CombatComponent->GetCurTeamInfo().CurTeam, LocalCreature->CombatComponent->GetCurTeamInfo().CurTeam))
+			if (FTeamInfo::CheckIsTeam(OwnerCreature->CombatComponent->GetTeamInfo().CurTeam, LocalCreature->CombatComponent->GetTeamInfo().CurTeam))
 				HpBar->SetFillColorAndOpacity(FLinearColor::Blue);
 			else
 				HpBar->SetFillColorAndOpacity(FLinearColor::Red);

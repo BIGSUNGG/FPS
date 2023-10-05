@@ -2,6 +2,7 @@
 
 
 #include "Rocket.h"
+#include Creature_h
 #include CombatComponent_h
 
 void ARocket::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit)
@@ -15,16 +16,10 @@ void ARocket::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 	Super::GiveDamage(OtherActor, OtherComponent, Hit);
 
 	TArray<AActor*> IgnoreActors;
-	UCombatComponent* CombatComp = nullptr;
-	AActor* CurActor = GetOwner();
-	while (CurActor)
-	{
-		if (!CombatComp)
-			CombatComp = CurActor->FindComponentByClass<UCombatComponent>();
+	ACreature* OwnerCreature = FindOwnerByClass<ACreature>(GetOwner());
+	IgnoreActors.Add(OwnerCreature);
 
-		IgnoreActors.Add(CurActor);
-		CurActor = CurActor->GetOwner();
-	}
+	UCombatComponent* CombatComp = nullptr;
 
 	ECollisionChannel TraceChannel;
 	FCollisionResponseParams ResponseParam;

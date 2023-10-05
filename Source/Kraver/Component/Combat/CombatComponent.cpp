@@ -61,6 +61,10 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 		return 0.f;
 	}
 
+	UCombatComponent* AttackerCobatComp = FindComponentByClassIncludeOwner<UCombatComponent>(DamageCauser);
+	if (FTeamInfo::CheckIsTeam(TeamInfo.CurTeam, AttackerCobatComp->TeamInfo.CurTeam))
+		return 0.f;
+
 	FKraverDamageResult DamageResult = CalculateDamage(DamageAmount, DamageEvent);
 
 	OnServerBeforeTakeDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
@@ -81,7 +85,6 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 	}
 	Client_SetCurHp(CurHp);
 
-	UCombatComponent* CauserCobatComp = FindComponentByClassIncludeOwner<UCombatComponent>(DamageCauser);
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		FPointDamageEvent const& PointDamageEvent = static_cast<FPointDamageEvent const&>(DamageEvent);
@@ -89,8 +92,8 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 		Client_TakePointDamage(DamageAmount, PointDamageEvent, EventInstigator, DamageCauser, DamageResult);
 		Multicast_TakePointDamage(DamageAmount, PointDamageEvent, EventInstigator, DamageCauser, DamageResult);
 
-		if (CauserCobatComp)
-			CauserCobatComp->Client_GivePointDamageSuccess(GetOwner(), DamageAmount, PointDamageEvent, EventInstigator, DamageCauser, DamageResult);
+		if (AttackerCobatComp)
+			AttackerCobatComp->Client_GivePointDamageSuccess(GetOwner(), DamageAmount, PointDamageEvent, EventInstigator, DamageCauser, DamageResult);
 
 		OnClientAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, PointDamageEvent, EventInstigator, DamageCauser, DamageResult);
 		OnClientAfterTakePointDamageSuccess.Broadcast(DamageAmount, PointDamageEvent, EventInstigator, DamageCauser, DamageResult);
@@ -102,8 +105,8 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 		Client_TakeRadialDamage(DamageAmount, RadialDamageEvent, EventInstigator, DamageCauser, DamageResult);
 		Multicast_TakeRadialDamage(DamageAmount, RadialDamageEvent, EventInstigator, DamageCauser, DamageResult);
 
-		if (CauserCobatComp)
-			CauserCobatComp->Client_GiveRadialDamageSuccess(GetOwner(), DamageAmount, RadialDamageEvent, EventInstigator, DamageCauser, DamageResult);
+		if (AttackerCobatComp)
+			AttackerCobatComp->Client_GiveRadialDamageSuccess(GetOwner(), DamageAmount, RadialDamageEvent, EventInstigator, DamageCauser, DamageResult);
 
 		OnClientAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, RadialDamageEvent, EventInstigator, DamageCauser, DamageResult);
 		OnClientAfterTakeRadialDamageSuccess.Broadcast(DamageAmount, RadialDamageEvent, EventInstigator, DamageCauser, DamageResult);
@@ -113,8 +116,8 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 		Client_TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 		Multicast_TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 
-		if (CauserCobatComp)
-			CauserCobatComp->Client_GiveDamageSuccess(GetOwner(), DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+		if (AttackerCobatComp)
+			AttackerCobatComp->Client_GiveDamageSuccess(GetOwner(), DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 
 		OnClientAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 		OnClientAfterTakeDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
@@ -149,7 +152,7 @@ float UCombatComponent::OnServer_GiveDamage(AActor* DamagedActor, float DamageAm
 
 	float Damage = 0.f;
 	UCombatComponent* DamagedCombatComp = FindComponentByClassIncludeOwner<UCombatComponent>(DamagedActor);
-	if (DamagedCombatComp == nullptr || FTeamInfo::CheckIsEnemy(CurTeamInfo.CurTeam, DamagedCombatComp->GetCurTeamInfo().CurTeam))
+	if (DamagedCombatComp == nullptr || FTeamInfo::CheckIsEnemy(TeamInfo.CurTeam, DamagedCombatComp->GetTeamInfo().CurTeam))
 		Damage = DamagedActor->TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	KR_LOG(Log, TEXT("Give %f Damge to %s"), Damage, *DamagedActor->GetName());
 
@@ -198,7 +201,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UCombatComponent, CurWeapon);
 	DOREPLIFETIME(UCombatComponent, WeaponSlot);
-	DOREPLIFETIME(UCombatComponent, CurTeamInfo);
+	DOREPLIFETIME(UCombatComponent, TeamInfo);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CurHp, COND_OwnerOnly);
 	DOREPLIFETIME_CONDITION(UCombatComponent, MaxHp, COND_OwnerOnly);
 }
@@ -309,11 +312,11 @@ void UCombatComponent::UnEquipWeapon(AWeapon* Weapon)
 	if(!Weapon)
 		return;
 
-	OnLocal_HolsterWeapon();
+	HolsterWeapon();
 	Server_UnEquipWeapon(Weapon);
 }
 
-bool UCombatComponent::OnLocal_UnholsterWeapon(int32 WeaponIndex)
+bool UCombatComponent::UnholsterWeapon(int32 WeaponIndex)
 {
 	ERROR_IF_NOT_CALLED_ON_LOCAL_PARAM(false);
 
@@ -340,14 +343,12 @@ bool UCombatComponent::OnLocal_UnholsterWeapon(int32 WeaponIndex)
 		return false;
 	}
 
-	OnLocal_UnholsterWeapon(WeaponSlot[WeaponIndex]);
+	UnholsterWeapon(WeaponSlot[WeaponIndex]);
 	return true;
 }
 
-void UCombatComponent::OnLocal_UnholsterWeapon(AWeapon* Weapon)
+void UCombatComponent::UnholsterWeapon_Implementation(AWeapon* Weapon)
 {
-	ERROR_IF_NOT_CALLED_ON_LOCAL();
-
 	if (Weapon == nullptr)
 	{
 		KR_LOG(Warning, TEXT("Weapon is nullptr"));
@@ -355,7 +356,7 @@ void UCombatComponent::OnLocal_UnholsterWeapon(AWeapon* Weapon)
 	}
 	
 	KR_LOG(Log,TEXT("Unholster Weapon %s"),*Weapon->GetName());
-	OnLocal_HolsterWeapon();
+	HolsterWeapon();
 
 	CurWeapon = Weapon;
 	Weapon->OnLocal_Unholster();
@@ -364,10 +365,8 @@ void UCombatComponent::OnLocal_UnholsterWeapon(AWeapon* Weapon)
 	Server_UnholsterWeapon(Weapon);
 }
 
-bool UCombatComponent::OnLocal_HolsterWeapon()
+void UCombatComponent::HolsterWeapon_Implementation()
 {
-	ERROR_IF_NOT_CALLED_ON_LOCAL_PARAM(false);
-
 	CurWeapon = nullptr;
 
 	for (auto& Weapon : WeaponSlot)
@@ -384,7 +383,7 @@ bool UCombatComponent::OnLocal_HolsterWeapon()
 		}
 	}
 
-	return false;
+	return;
 }
 
 void UCombatComponent::SetIsAttacking(bool bAttack)
@@ -474,11 +473,14 @@ void UCombatComponent::OnLocal_EquipWeaponSuccess(AWeapon* Weapon)
 
 	Weapon->SetOwner(OwnerCreature);
 
-	OnLocal_HolsterWeapon();
-
-	CurWeapon = Weapon;
 	OnClientEquipWeaponSuccess.Broadcast(Weapon);
-	OnLocal_UnholsterWeapon(Weapon);
+
+	if (bUnholsterWhenEquip)
+	{
+		bUnholsterWhenEquip = false;
+		UnholsterWeapon(Weapon);
+	}
+	
 }
 
 void UCombatComponent::OnLocal_UnEquipWeaponSuccess(AWeapon* Weapon)
@@ -489,7 +491,7 @@ void UCombatComponent::OnLocal_UnEquipWeaponSuccess(AWeapon* Weapon)
 		return;
 	}
 
-	OnLocal_HolsterWeapon();
+	HolsterWeapon();
 
 	OnClientUnEquipWeaponSuccess.Broadcast(Weapon);
 }

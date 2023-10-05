@@ -31,7 +31,7 @@ protected:
 	virtual void RequestDefaultWeapon(const TArray<TSubclassOf<class AWeapon>>& RequestWeapons);
 
 public:
-	class AKraverPlayer* GetOwnerPLayer() { return OwnerPlayer; }
+	class AKraverPlayer* GetOwnerPLayer() { return OwnerPlayer ? OwnerPlayer : Cast<AKraverPlayer>(GetOwner()); }
 
 public:
 	FNewKraverPlayer OnNewPlayer;
