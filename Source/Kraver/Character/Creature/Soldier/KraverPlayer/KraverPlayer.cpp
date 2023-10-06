@@ -268,7 +268,10 @@ USkeletalMeshComponent* AKraverPlayer::GetCurMainMesh()
 void AKraverPlayer::EquipButtonPressed()
 {
 	if (CanInteractWeapon != nullptr)
+	{
+		CombatComponent->SetUnholsterWhenEquip(true);
 		CombatComponent->EquipWeapon(CanInteractWeapon);
+	}
 }
 
 void AKraverPlayer::UnEquipButtonPressed()

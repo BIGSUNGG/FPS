@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "WeaponSelectWidget.h"
-#include SaveSubsystem_h
+#include DataSubsystem_h
 
 TTuple<FString, float> UWeaponSelectWidget::MainWeaponTextInfo = TTuple<FString, float>("AR", 36.f);
-TTuple<FString, float> UWeaponSelectWidget::SubWeaponTextInfo = TTuple<FString, float>("Smg", 36.f);
+TTuple<FString, float> UWeaponSelectWidget::SubWeaponTextInfo = TTuple<FString, float>("Silencer Pistol", 32.f);
 TTuple<FString, float> UWeaponSelectWidget::SpecialWeaponTextInfo = TTuple<FString, float>("Grenade Launcher", 26.f);
 
 void UWeaponSelectWidget::NativeConstruct()
@@ -49,6 +49,6 @@ void UWeaponSelectWidget::SelectWeapon(TSubclassOf<AWeapon> WeaponClass, FString
 		break;
 	}
 
-	GetGameInstance()->GetSubsystem<USaveSubsystem>()->SetWeaponSelect(WeaponClass, WeaponName, Index);
+	GetGameInstance()->GetSubsystem<UDataSubsystem>()->SetWeaponSelect(WeaponClass, WeaponName, Index);
 
 }

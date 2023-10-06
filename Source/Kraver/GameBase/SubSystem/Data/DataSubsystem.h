@@ -4,18 +4,18 @@
 
 #include "Kraver/Kraver.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "SaveSubsystem.generated.h"
+#include "DataSubsystem.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class KRAVER_API USaveSubsystem : public UGameInstanceSubsystem
+class KRAVER_API UDataSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	USaveSubsystem();
+	UDataSubsystem();
 	
 public:
 	// Getter Setter

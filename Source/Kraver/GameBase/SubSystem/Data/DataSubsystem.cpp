@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "SaveSubsystem.h"
+#include "DataSubsystem.h"
 #include Weapon_h
 
-USaveSubsystem::USaveSubsystem()
+UDataSubsystem::UDataSubsystem()
 {
 	WeaponSelectArray.SetNum(WeaponSelectArraySize);
 	WeaponSelectNameArray.SetNum(WeaponSelectArraySize);
@@ -15,7 +15,7 @@ USaveSubsystem::USaveSubsystem()
 		WeaponSelectNameArray[0] = "AR";
 	}
 
-	static ConstructorHelpers::FClassFinder<AWeapon> SUB_WEAPON(TEXT("/Game/ProjectFile/Actor/Weapon/Hitscan/BP_Hitscan_Pistol_02.BP_Hitscan_Pistol_02_C"));
+	static ConstructorHelpers::FClassFinder<AWeapon> SUB_WEAPON(TEXT("/Game/ProjectFile/Actor/Weapon/Hitscan/BP_Hitscan_Pistol.BP_Hitscan_Pistol_C"));
 	if (SUB_WEAPON.Succeeded())
 	{
 		WeaponSelectArray[1] = SUB_WEAPON.Class;
@@ -31,7 +31,7 @@ USaveSubsystem::USaveSubsystem()
 
 }
 
-FORCEINLINE void USaveSubsystem::SetWeaponSelect(TSubclassOf<class AWeapon> Value, const FString& Name, int Index)
+FORCEINLINE void UDataSubsystem::SetWeaponSelect(TSubclassOf<class AWeapon> Value, const FString& Name, int Index)
 {
 	WeaponSelectArray[Index] = Value;
 	WeaponSelectNameArray[Index] = Name;

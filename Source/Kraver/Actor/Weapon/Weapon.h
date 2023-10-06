@@ -85,8 +85,6 @@ protected:
 	// OnRep
 	UFUNCTION()
 	virtual void OnRep_WeaponState(EWeaponState PrevWeaponState);
-	UFUNCTION()
-	virtual void OnRep_IsUnholsting(bool PrevIsUnholsting);
 
 	// Func
 	virtual void MakeFppPrimitiveInfo() final; // 1인칭 PrimitiveInfo를 추가
@@ -103,7 +101,6 @@ public:
 
 	bool GetIsAttacking() { return IsAttacking; }
 	bool GetIsSubAttacking() { return IsSubAttacking; }
-	bool GetIsUnholsting() { return bIsUnholsting; }
 	bool GetbAttackWhileSprint() { return bAttackWhileSprint; }
 	bool GetbSubAttackWhileSprint() { return bSubAttackWhileSprint; }
 
@@ -133,7 +130,7 @@ public:
 	virtual UAnimMontage* GetHolsterMontageTpp() { return HolsterMontageTpp; }
 	virtual UAnimMontage* GetHolsterMontageFpp() { return HolsterMontageFpp; }
 
-	void SetWeaponVisibility(bool Value);
+	void SetWeaponVisibility(bool Value, bool bDoTpp = true, bool bDoFpp = true);
 
 public:
 	FAttackDele OnAttack;
@@ -174,8 +171,6 @@ protected:
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState)
 	EWeaponState WeaponState = EWeaponState::IDLE; // 무기 상태
-	UPROPERTY(ReplicatedUsing = OnRep_IsUnholsting)
-	bool bIsUnholsting = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
 	EWeaponType WeaponType = EWeaponType::NONE; // 무기 종류
 

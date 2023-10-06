@@ -371,7 +371,7 @@ void UCombatComponent::HolsterWeapon_Implementation()
 
 	for (auto& Weapon : WeaponSlot)
 	{
-		if(!Weapon || !Weapon->GetIsUnholsting())
+		if(!Weapon)
 			continue;
 
 		KR_LOG(Log, TEXT("Holster Weapon %s"), *Weapon->GetName());

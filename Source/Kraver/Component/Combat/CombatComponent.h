@@ -131,6 +131,7 @@ public:
 	int CountWeapon();
 
 	void SetTeam(ETeam InTeam) { TeamInfo.CurTeam = InTeam; }
+	void SetUnholsterWhenEquip(bool InValue) { bUnholsterWhenEquip = InValue; }
 
 public:
 	// Attack
@@ -206,6 +207,6 @@ protected:
 	FTeamInfo TeamInfo;
 
 	bool bCanceledTakeDamage = false; // Server에서만 사용
-	bool bUnholsterWhenEquip = true;
+	bool bUnholsterWhenEquip = true; 
 
 };

@@ -6,7 +6,7 @@
 #include KraverGameMode_h
 #include KraverPlayerController_h
 #include DamageIndicatorSubsystem_h
-#include SaveSubsystem_h
+#include DataSubsystem_h
 #include KraverHud_h
 
 AKraverPlayerState::AKraverPlayerState()
@@ -63,7 +63,7 @@ void AKraverPlayerState::OnNewPawn(APawn* NewPawn)
 		KR_LOG(Log, TEXT("New Local Player : %s"), *OwnerPlayer->GetName());
 
 		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->SetLocalPlayer(OwnerPlayer);
-		RequestDefaultWeapon(GetGameInstance()->GetSubsystem<USaveSubsystem>()->GetWeaponArray());
+		RequestDefaultWeapon(GetGameInstance()->GetSubsystem<UDataSubsystem>()->GetWeaponArray());
 	}
 
 

@@ -56,9 +56,8 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AWeapon, WeaponState);
 	DOREPLIFETIME(AWeapon, OwnerCreature);
-	DOREPLIFETIME(AWeapon, bIsUnholsting);
+	DOREPLIFETIME(AWeapon, WeaponState);
 	DOREPLIFETIME_CONDITION(AWeapon, IsAttacking, COND_SkipOwner);
 	DOREPLIFETIME_CONDITION(AWeapon, IsSubAttacking, COND_SkipOwner);
 }
@@ -145,6 +144,15 @@ void AWeapon::Tick(float DeltaTime)
 			}
 		}
 	}
+
+	if (IS_SERVER())
+	{
+		if (OwnerCreature && OwnerCreature->CombatComponent->GetCurWeapon() != this)
+		{
+			WeaponState = EWeaponState::EQUIPPED_HOLSTER;
+			HolsterEvent();
+		}
+	}
 }
 
 bool AWeapon::OnServer_Equipped(ACreature* Character)
@@ -158,11 +166,10 @@ bool AWeapon::OnServer_Equipped(ACreature* Character)
 	if (CanInteracted() == false)
 		return false;
 
-	bIsUnholsting = true;
 
 	SetOwner(Character);
 	OwnerCreature = Character;
-	WeaponState = EWeaponState::EQUIPPED;
+	WeaponState = EWeaponState::EQUIPPED_HOLSTER;
 
 	EquipEvent();
 
@@ -203,20 +210,28 @@ bool AWeapon::CanInteracted()
 	{
 	case EWeaponState::IDLE:
 		return true;
-	case EWeaponState::EQUIPPED:
+	case EWeaponState::EQUIPPED_HOLSTER:
+		return false;
+	case EWeaponState::EQUIPPED_UNHOLSTER:
 		return false;
 	default:
 		return false;
 	}
 }
 
-void AWeapon::SetWeaponVisibility(bool Value)
+void AWeapon::SetWeaponVisibility(bool Value, bool bDoTpp /*= true*/, bool bDoFpp /*= true*/)
 {
-	for (auto& Tuple : WeaponTppPrimitiveInfo)
-		Tuple.Value->SetVisibility(Value);
+	if(bDoTpp)
+	{
+		for (auto& Tuple : WeaponTppPrimitiveInfo)
+			Tuple.Value->SetVisibility(Value);
+	}
 
-	for (auto& Tuple : WeaponFppPrimitiveInfo)
-		Tuple.Value->SetVisibility(Value);
+	if (bDoFpp)
+	{
+		for (auto& Tuple : WeaponFppPrimitiveInfo)
+			Tuple.Value->SetVisibility(Value);
+	}
 }
 
 bool AWeapon::OnServer_UnEquipped()
@@ -226,8 +241,6 @@ bool AWeapon::OnServer_UnEquipped()
 		KR_LOG(Error, TEXT("Called on client"));
 		return false;
 	}
-
-	bIsUnholsting = false;
 
 	ACreature* CreaturePtr = OwnerCreature;
 	OwnerCreature = nullptr;
@@ -368,13 +381,13 @@ void AWeapon::OnSubAttackEndEvent()
 
 void AWeapon::Server_Unholster_Implementation()
 {
-	bIsUnholsting = true;
+	WeaponState = EWeaponState::EQUIPPED_UNHOLSTER;
 	UnholsterEvent();
 }
 
 void AWeapon::Server_Holster_Implementation()
 {
-	bIsUnholsting = false;
+	WeaponState = EWeaponState::EQUIPPED_HOLSTER;
 	HolsterEvent();
 }
 
@@ -441,20 +454,15 @@ void AWeapon::Attack()
 
 void AWeapon::OnRep_WeaponState(EWeaponState PrevWeaponState)
 {
-	if (PrevWeaponState == EWeaponState::EQUIPPED)
-		UnEquipEvent();
-
-	if (WeaponState == EWeaponState::EQUIPPED)
-		EquipEvent();
-}
-
-void AWeapon::OnRep_IsUnholsting(bool PrevIsUnholsting)
-{
-	if (bIsUnholsting)
+	if (PrevWeaponState == EWeaponState::IDLE)
 		UnholsterEvent();
-	else
-		HolsterEvent();
 
+	if (WeaponState == EWeaponState::IDLE)
+		UnEquipEvent();
+	else if (WeaponState == EWeaponState::EQUIPPED_UNHOLSTER)
+		UnholsterEvent();
+	else if (WeaponState == EWeaponState::EQUIPPED_HOLSTER)
+		HolsterEvent();
 }
 
 void AWeapon::MakeFppPrimitiveInfo()
@@ -542,13 +550,15 @@ void AWeapon::EquipEvent()
 	GetTppWeaponMesh()->SetSimulatePhysics(false);
 	GetTppWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	SetWeaponVisibility(false);
+	HolsterEvent();
 }
 
 void AWeapon::UnEquipEvent()
 {
-	ACharacter* Charcter = Cast<ACharacter>(GetOwner());
-	if (Charcter->IsLocallyControlled())
+	HolsterEvent();
+
+	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	if (Character && Character->IsLocallyControlled())
 	{
 		OnAttackEndEvent();
 		OnSubAttackEndEvent();
@@ -558,7 +568,8 @@ void AWeapon::UnEquipEvent()
 	GetTppWeaponMesh()->SetSimulatePhysics(true);
 	GetTppWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-	SetWeaponVisibility(true);
+	SetWeaponVisibility(true, true, false);
+	SetWeaponVisibility(false, false, true);
 }
 
 void AWeapon::HolsterEvent()

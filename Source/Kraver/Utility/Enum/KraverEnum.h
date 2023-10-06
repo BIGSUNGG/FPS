@@ -9,7 +9,8 @@ UENUM(BlueprintType)
 enum class EWeaponState : uint8
 {
 	IDLE		UMETA(DisplayName = "IDLE"),
-	EQUIPPED	UMETA(DisplayName = "EQUIPPED"),
+	EQUIPPED_UNHOLSTER	UMETA(DisplayName = "EQUIPPED_UNHOLSTER"),
+	EQUIPPED_HOLSTER	UMETA(DisplayName = "EQUIPPED_HOLSTER"),
 };
 
 UENUM(BlueprintType)
