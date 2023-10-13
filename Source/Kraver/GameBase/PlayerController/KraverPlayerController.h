@@ -26,6 +26,5 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UPauseMenuWidget> PauseMenuWidgetClass;
 	UPauseMenuWidget* PauseMenuWidget;
-	bool bPauseMenuOpen = false;
 
 };

@@ -145,12 +145,21 @@ void AWeapon::Tick(float DeltaTime)
 		}
 	}
 
-	if (IS_SERVER())
+	if (OwnerCreature)
 	{
-		if (OwnerCreature && OwnerCreature->CombatComponent->GetCurWeapon() != this)
+		if (OwnerCreature->CombatComponent->GetCurWeapon() != this)
 		{
-			WeaponState = EWeaponState::EQUIPPED_HOLSTER;
-			HolsterEvent();
+			if(IS_SERVER())
+				WeaponState = EWeaponState::EQUIPPED_HOLSTER;
+
+			SetWeaponVisibility(false);
+		}
+		else if (OwnerCreature->CombatComponent->GetCurWeapon() == this)
+		{
+			if (IS_SERVER())
+				WeaponState = EWeaponState::EQUIPPED_UNHOLSTER;
+
+			SetWeaponVisibility(true);
 		}
 	}
 }

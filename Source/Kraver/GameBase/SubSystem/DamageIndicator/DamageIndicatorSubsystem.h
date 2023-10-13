@@ -16,11 +16,8 @@ class KRAVER_API UDamageIndicatorSubsystem : public UGameInstanceSubsystem
 public:
 	UDamageIndicatorSubsystem();
 
-	/** Implement this for initialization of instances of the system */
-	virtual void Initialize(FSubsystemCollectionBase& Collection);
-
-	/** Implement this for deinitialization of instances of the system */
-	virtual void Deinitialize() override { Super::Deinitialize(); }
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
 	void SetLocalPlayer(class AKraverPlayer* Player);
 protected:

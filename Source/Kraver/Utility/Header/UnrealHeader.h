@@ -4,12 +4,15 @@
 #include "Engine/EngineTypes.h"
 #include "Engine/DamageEvents.h"
 #include "Engine/TextureRenderTarget.h"
+
+// GenericPlatform
 #include "GenericPlatform/GenericPlatformProcess.h"
 
 // GameFramework
 #include "GameFramework/GameState.h"
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/PlayerState.h"
+#include "GameFramework/GameUserSettings.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 // Sound

@@ -29,8 +29,7 @@ void AKraverPlayerController::ShowReturnToMainMenu()
 
 	if (PauseMenuWidget)
 	{
-		bPauseMenuOpen = !bPauseMenuOpen;
-		if (bPauseMenuOpen)
+		if (PauseMenuWidget->GetVisibility() != ESlateVisibility::Visible)
 		{
 			PauseMenuWidget->MenuSetup();
 		}

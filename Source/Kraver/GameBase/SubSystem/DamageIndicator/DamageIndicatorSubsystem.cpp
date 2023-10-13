@@ -20,6 +20,12 @@ void UDamageIndicatorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 }
 
+void UDamageIndicatorSubsystem::Deinitialize()
+{
+	Super::Deinitialize();
+
+}
+
 void UDamageIndicatorSubsystem::SetLocalPlayer(AKraverPlayer* Player)
 {
 	if(!IsValid(Player))

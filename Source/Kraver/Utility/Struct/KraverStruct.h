@@ -85,6 +85,20 @@ public:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team", meta = (AllowPrivateAccess = "true"))
 	ETeam CurTeam = ETeam::ENEMY_ALL;
-
-
 };
+
+USTRUCT(BlueprintType)
+struct FSettingInfo
+{
+	GENERATED_BODY()
+
+public:
+	EWindowMode::Type WinMode = EWindowMode::Type::Fullscreen;
+	FIntPoint DisplayResolution;
+	float MaxFrame = 0.f;
+	int32 TextureQuality = 0;
+	int32 ShadowQuality = 0;
+	int32 AntiAliasingQuality = 0;
+	int32 PostProcessingQuality = 0;
+	int32 ViewDistanceQuality = 0;
+}; 

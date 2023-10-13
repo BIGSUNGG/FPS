@@ -66,8 +66,9 @@
 
 #define KraverSpectator_h "Kraver/GameBase/Spectator/KraverSpectator.h"
 
-#define DamageIndicatorSubsystem_h	"Kraver/GameBase/SubSystem/DamageIndicator/DamageIndicatorSubsystem.h"
-#define DataSubsystem_h				"Kraver/GameBase/SubSystem/Data/DataSubsystem.h"
+#define DamageIndicatorSubsystem_h	"Kraver/GameBase/Subsystem/DamageIndicator/DamageIndicatorSubsystem.h"
+#define DataSubsystem_h				"Kraver/GameBase/Subsystem/Data/DataSubsystem.h"
+#define SettingSubsystem_h			"Kraver/GameBase/Subsystem/Setting/SettingSubsystem.h"
 
 #define KraverHud_h		"Kraver/GameBase/Ui/HUD/KraverHUD.h"
 #define ControlHUD_h	"Kraver/GameBase/Ui/HUD/Control/ControlHUD.h"
@@ -83,3 +84,5 @@
 #define HpBarWidget_h			"Kraver/GameBase/Ui/Widget/HpBar/HpBarWidget.h"
 #define RespawnTimerWidget_h	"Kraver/GameBase/Ui/Widget/RespawnTimer/RespawnTimerWidget.h"
 #define PauseMenuWidget_h		"Kraver/GameBase/Ui/Widget/PauseMenu/PauseMenuWidget.h"
+#define WeaponSelectWidget_h	"Kraver/GameBase/Ui/Widget/WeaponSelect/WeaponSelectWidget.h"
+#define SettingMenuWidget_h		"Kraver/GameBase/Ui/Widget/SettingMenu/SettingMenuWidget.h"

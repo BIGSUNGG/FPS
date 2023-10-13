@@ -15,11 +15,27 @@ class KRAVER_API UPauseMenuWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeConstruct() override;
+
 	void MenuSetup();
 	void MenuTearDown();
 
 protected:
+	// Delegate
+	UFUNCTION()
+	virtual void OnSettingMenuButtonClickEvent();
+
+protected:
+	// Widget
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UReturnMainMenuWidget* ReturnMainMenu;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UWeaponSelectWidget* WeaponSelectMenu;
+
+	// Setting
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UButton* SettingMenuButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class USettingMenuWidget* SettingMenu;
 
 };
