@@ -20,14 +20,18 @@ public:
 
 public:
 	void ApplySettings();
+	void CurSettings();
 
 public:
 	// Getter Setter
-	FORCEINLINE const FSettingInfo& GetSettingInfo() { return SettingInfo; }
+	FORCEINLINE const FDisplaySettingInfo& GetDisplaySettingInfo() { return DisplaySettingInfo ; }
+	FORCEINLINE const FGraphicSettingInfo& GetGraphicSettingInfo() { return GraphicSettingInfo; }
 
-	FORCEINLINE void SetSettingInfo(const FSettingInfo& InInfo) { SettingInfo = InInfo; }
+	FORCEINLINE void SetDisplaySettingInfo(const FDisplaySettingInfo& InInfo) { DisplaySettingInfo = InInfo; }
+	FORCEINLINE void SetGraphicSettingInfo(const FGraphicSettingInfo& InInfo) { GraphicSettingInfo = InInfo; }
 
 protected:
-	FSettingInfo SettingInfo;
+	FDisplaySettingInfo DisplaySettingInfo;
+	FGraphicSettingInfo GraphicSettingInfo;
 
 };

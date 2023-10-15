@@ -76,3 +76,10 @@ enum class ETeam : uint8
 	RED			UMETA(DisplayName = "RED"),
 	BLUE		UMETA(DisplayName = "BLUE"),
 };
+
+UENUM(BlueprintType)
+enum class ESettingMenuState : uint8
+{
+	DISPLAY		UMETA(DisplayName = "DISPLAY"),
+	GRAPHIC		UMETA(DisplayName = "GRAPHIC"),
+};

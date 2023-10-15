@@ -21,7 +21,9 @@
 // Components
 #include "Components/Border.h"
 #include "Components/Button.h"
+#include "Components/CheckBox.h"
 #include "Components/TextBlock.h"
+#include "Components/CanvasPanel.h"
 #include "Components/ProgressBar.h"
 #include "Components/RadialSlider.h"
 #include "Components/BoxComponent.h"

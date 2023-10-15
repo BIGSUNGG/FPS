@@ -15,7 +15,13 @@ AWeapon::AWeapon()
 	bReplicates = true;
 	//bAsyncPhysicsTickEnabled = true;
 	SetReplicateMovement(true);
-
+	NetUpdateFrequency = 1000.f;
+	MinNetUpdateFrequency = 30.f;
+	NetPriority = 2.f;
+	GetReplicatedMovement_Mutable().LocationQuantizationLevel = EVectorQuantization::RoundTwoDecimals;
+	GetReplicatedMovement_Mutable().VelocityQuantizationLevel = EVectorQuantization::RoundTwoDecimals;
+	GetReplicatedMovement_Mutable().RotationQuantizationLevel = ERotatorQuantization::ShortComponents;
+	
 	TppWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	TppWeaponMesh->SetCollisionProfileName("WeaponMesh");
 	TppWeaponMesh->SetAnimInstanceClass(UAnimInstance::StaticClass());

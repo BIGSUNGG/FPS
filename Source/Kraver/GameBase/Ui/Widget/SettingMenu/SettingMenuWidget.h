@@ -20,89 +20,155 @@ public:
 protected:
 	// Delegate
 	UFUNCTION()
-	virtual void OnApplyButtonClickEvent();
+	void OnDisplayButtonClickEvent();
+	UFUNCTION()
+	void OnGraphicButtonClickEvent();
+	UFUNCTION()
+	void OnApplyButtonClickEvent();
+
+		// Display
+	UFUNCTION()
+	void OnWindowModeNextClickEvent();
+	UFUNCTION()
+	void OnWindowModePrevClickEvent();
 
 	UFUNCTION()
-	virtual void OnTextureQualityNextClickEvent();
+	void OnFrameLimitNextClickEvent();
 	UFUNCTION()
-	virtual void OnTextureQualityPrevClickEvent();
+	void OnFrameLimitPrevClickEvent();
+
+		// Graphic
+	UFUNCTION()
+	void OnTextureQualityNextClickEvent();
+	UFUNCTION()
+	void OnTextureQualityPrevClickEvent();
 
 	UFUNCTION()
-	virtual void OnShadowQualityNextClickEvent();
+	void OnShadowQualityNextClickEvent();
 	UFUNCTION()	   
-	virtual void OnShadowQualityPrevClickEvent();
+	void OnShadowQualityPrevClickEvent();
 
 	UFUNCTION()
-	virtual void OnAntiAliasingQualityNextClickEvent();
+	void OnAntiAliasingQualityNextClickEvent();
 	UFUNCTION()	 
-	virtual void OnAntiAliasingQualityPrevClickEvent();
+	void OnAntiAliasingQualityPrevClickEvent();
 
 	UFUNCTION()
-	virtual void OnPostProcessingQualityNextClickEvent();
+	void OnPostProcessingQualityNextClickEvent();
 	UFUNCTION()	   
-	virtual void OnPostProcessingQualityPrevClickEvent();
+	void OnPostProcessingQualityPrevClickEvent();
 
 	UFUNCTION()
-	virtual void OnViewDistanceQualityNextClickEvent();
+	void OnViewDistanceQualityNextClickEvent();
 	UFUNCTION()	   
-	virtual void OnViewDistanceQualityPrevClickEvent();
+	void OnViewDistanceQualityPrevClickEvent();
+
+	UFUNCTION()
+	void OnVSyncCheckBoxStateChangeEvent(bool IsCheck);
 
 	// Func
-	virtual void RefreshTextureQuality();
-	virtual void RefreshShadowQuality();
-	virtual void RefreshAntiAliasingQuality();
-	virtual void RefreshPostProcessingQuality();
-	virtual void RefreshViewDistanceQuality();
+		// Display
+	void RefreshWindowMode();
+	void RefreshFrameLimit();
+
+		// Graphic
+	void RefreshTextureQuality();
+	void RefreshShadowQuality();
+	void RefreshAntiAliasingQuality();
+	void RefreshPostProcessingQuality();
+	void RefreshViewDistanceQuality();
+	void RefreshVSync();
+
+	void CheckCanApplySettings();
+
+	void LoadDisplaySettingInfo();
+	void LoadGraphicSettingInfo();
+public:
+	void MenuSetup();
+	void MenuTearDown();
+
+	void SetCanApplySettings(bool InValue);
+	void SetMenuState(ESettingMenuState InValue);
 
 protected:
-	FSettingInfo SettingInfo;
+	ESettingMenuState MenuState = ESettingMenuState::DISPLAY;
 
-	// Widget
+	FDisplaySettingInfo DisplaySettingInfo;
+	FGraphicSettingInfo GraphicSettingInfo;
+
+	// Top
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UButton* DisplayButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UButton* GraphicButton;
+	
+	// Apply
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* ApplyButton;
+	bool bCanApplySettings = false;
 
-	// Texture Quality
+	// Display settings
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UCanvasPanel* DisplayPanel;
+
+		// Window Mode
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UButton* WindowModeNextButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UButton* WindowModePrevButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* WindowModeText;
+
+		// Frame Limit
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UButton* FrameLimitNextButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UButton* FrameLimitPrevButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* FrameLimitText;
+
+	// Graphic settings
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UCanvasPanel* GraphicsPanel;
+
+		// Texture Quality
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* TextureQualityNextButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* TextureQualityPrevButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* TextureQualityText;
-	int16 TextureQualityIndex;
-
-	// Shadow Quality
+		// Shadow Quality
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* ShadowQualityNextButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* ShadowQualityPrevButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* ShadowQualityText;
-	int16 ShadowQualityIndex;
-
-	// AntiAliasing Quality
+		// AntiAliasing Quality
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* AntiAliasingQualityNextButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* AntiAliasingQualityPrevButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* AntiAliasingQualityText;
-	int16 AntiAliasingQualityIndex;
-
-	// PostProcessing Quality
+		// PostProcessing Quality
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* PostProcessingQualityNextButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* PostProcessingQualityPrevButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* PostProcessingQualityText;
-	int16 PostProcessingQualityIndex;
-
-	// ViewDistance Quality
+		// ViewDistance Quality
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* ViewDistanceQualityNextButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* ViewDistanceQualityPrevButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* ViewDistanceQualityText;
-	int16 ViewDistanceQualityIndex;
+
+		// VSync
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UCheckBox* VSyncCheckbox;
+
 };

@@ -88,17 +88,55 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FSettingInfo
+struct FGraphicSettingInfo
 {
 	GENERATED_BODY()
 
 public:
-	EWindowMode::Type WinMode = EWindowMode::Type::Fullscreen;
-	FIntPoint DisplayResolution;
-	float MaxFrame = 0.f;
 	int32 TextureQuality = 0;
 	int32 ShadowQuality = 0;
 	int32 AntiAliasingQuality = 0;
 	int32 PostProcessingQuality = 0;
 	int32 ViewDistanceQuality = 0;
+	bool bEnableVSync = false;
+
+public:
+	bool operator == (FGraphicSettingInfo InInfo)
+	{
+		if (InInfo.TextureQuality == TextureQuality &&
+			InInfo.ShadowQuality == ShadowQuality &&
+			InInfo.AntiAliasingQuality == AntiAliasingQuality &&
+			InInfo.PostProcessingQuality == PostProcessingQuality &&
+			InInfo.ViewDistanceQuality == ViewDistanceQuality &&
+			InInfo.bEnableVSync == bEnableVSync
+			)
+			return true;
+
+		return false;
+	}
+
+	bool operator != (FGraphicSettingInfo InInfo) { return !operator==(InInfo); }
+
 }; 
+
+USTRUCT(BlueprintType)
+struct FDisplaySettingInfo
+{
+	GENERATED_BODY()
+
+public:
+	EWindowMode::Type WinMode = EWindowMode::Type::Fullscreen;
+	float MaxFrame = 0.f;
+
+public:
+	bool operator == (FDisplaySettingInfo InInfo)
+	{
+		if (InInfo.WinMode == WinMode &&
+			InInfo.MaxFrame == MaxFrame
+			)
+			return true;
+
+		return false;
+	}
+
+};

@@ -24,6 +24,7 @@ void UPauseMenuWidget::MenuSetup()
 	WeaponSelectMenu->SetVisibility(ESlateVisibility::Visible);
 	SettingMenuButton->SetVisibility(ESlateVisibility::Visible);
 	SettingMenu->SetVisibility(ESlateVisibility::Hidden);
+
 	ReturnMainMenu->MenuSetup();
 }
 
@@ -36,6 +37,8 @@ void UPauseMenuWidget::MenuTearDown()
 	WeaponSelectMenu->SetVisibility(ESlateVisibility::Hidden);
 	SettingMenuButton->SetVisibility(ESlateVisibility::Hidden);
 	SettingMenu->SetVisibility(ESlateVisibility::Hidden);
+
+	SettingMenu->MenuTearDown();
 	ReturnMainMenu->MenuTearDown();
 }
 
@@ -45,4 +48,7 @@ void UPauseMenuWidget::OnSettingMenuButtonClickEvent()
 	WeaponSelectMenu->SetVisibility(ESlateVisibility::Hidden);
 	SettingMenuButton->SetVisibility(ESlateVisibility::Hidden);
 	SettingMenu->SetVisibility(ESlateVisibility::Visible);
+
+	SettingMenu->MenuSetup();
+
 }
