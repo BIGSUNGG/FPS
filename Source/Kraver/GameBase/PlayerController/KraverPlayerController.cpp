@@ -65,6 +65,7 @@ void AKraverPlayerController::OnDestroySessionEvent_ReturnToMainMenu(bool bWasSu
 
 void AKraverPlayerController::OnDestroySessionEvent_ExitGame(bool bWasSuccessful)
 {
+	KR_LOG(Log, TEXT("Request Exit Game"));
 	ConsoleCommand("quit");
 
 }

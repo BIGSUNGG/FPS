@@ -206,6 +206,18 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME_CONDITION(UCombatComponent, MaxHp, COND_OwnerOnly);
 }
 
+void UCombatComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	Super::OnComponentDestroyed(bDestroyingHierarchy);
+
+	return;
+	for (auto& Weapon : WeaponSlot)
+	{
+		if (Weapon)
+			Weapon->Destroy();
+	}
+}
+
 int8 UCombatComponent::GetCurWeaponSlotIndex()
 {
 	for (int i = 0; i < WeaponSlot.Num(); i++)

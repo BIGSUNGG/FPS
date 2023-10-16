@@ -42,7 +42,7 @@ protected:
 	// Respawn
 	bool bRespawn = true;
 	FTimerHandle RespawnTimer;
-	inline static const float RespawnTime = 10.f;
+	inline static const float RespawnTime = 5.f;
 
 	// Spectator
 	bool bSpectate = true;

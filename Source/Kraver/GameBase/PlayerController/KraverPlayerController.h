@@ -18,7 +18,9 @@ public:
 	virtual void OnPossess(APawn* aPawn) override;
 	virtual void SetupInputComponent() override;
 
+	UFUNCTION(BlueprintCallable)
 	virtual void ReturnToMainMenu();
+	UFUNCTION(BlueprintCallable)
 	virtual void ExitGame();
 
 

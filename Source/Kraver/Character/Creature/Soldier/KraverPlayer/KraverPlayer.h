@@ -17,6 +17,7 @@ public:
 	AKraverPlayer();
 
 	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
 
 	// Tick
 	virtual void Tick(float DeltaTime) override;

@@ -87,6 +87,15 @@ void AKraverPlayer::BeginPlay()
 	}
 }
 
+
+void AKraverPlayer::Destroyed()
+{
+	Super::Destroyed();
+
+	KR_LOG(Error, TEXT("BeginDestroy"));
+	Capture2DComponent->TextureTarget = nullptr;
+}
+
 void AKraverPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
