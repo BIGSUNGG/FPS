@@ -84,7 +84,9 @@ protected:
 	void LoadDisplaySettingInfo();
 	void LoadGraphicSettingInfo();
 public:
+	UFUNCTION(BlueprintCallable)
 	void MenuSetup();
+	UFUNCTION(BlueprintCallable)
 	void MenuTearDown();
 
 	void SetCanApplySettings(bool InValue);

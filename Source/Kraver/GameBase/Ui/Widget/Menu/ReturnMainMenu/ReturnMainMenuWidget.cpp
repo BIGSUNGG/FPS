@@ -2,7 +2,7 @@
 
 
 #include "ReturnMainMenuWidget.h"
-#include "MultiplayerSessionsSubsystem.h"
+#include KraverPlayerController_h
 
 void UReturnMainMenuWidget::MenuSetup()
 {
@@ -21,16 +21,7 @@ void UReturnMainMenuWidget::MenuSetup()
 	}
 	if (ReturnButton)
 	{
-		ReturnButton->OnClicked.AddDynamic(this, &UReturnMainMenuWidget::ReturnButtonClicked);
-	}
-	UGameInstance* GameInstance = GetGameInstance();
-	if (GameInstance)
-	{
-		MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
-		if (MultiplayerSessionsSubsystem)
-		{
-			MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.AddDynamic(this, &UReturnMainMenuWidget::OnDestroySession);
-		}
+		ReturnButton->OnClicked.AddDynamic(this, &UReturnMainMenuWidget::OnReturnButtonClickEvent);
 	}
 }
 
@@ -50,11 +41,7 @@ void UReturnMainMenuWidget::MenuTearDown()
 	}
 	if (ReturnButton && ReturnButton->OnClicked.IsBound())
 	{
-		ReturnButton->OnClicked.RemoveDynamic(this, &UReturnMainMenuWidget::ReturnButtonClicked);
-	}
-	if (MultiplayerSessionsSubsystem && MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.IsBound())
-	{
-		MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.RemoveDynamic(this, &UReturnMainMenuWidget::OnDestroySession);
+		ReturnButton->OnClicked.RemoveDynamic(this, &UReturnMainMenuWidget::OnReturnButtonClickEvent);
 	}
 }
 
@@ -68,33 +55,13 @@ bool UReturnMainMenuWidget::Initialize()
 	return true;
 }
 
-void UReturnMainMenuWidget::OnDestroySession(bool bWasSuccessful)
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		AGameModeBase* GameMode = World->GetAuthGameMode<AGameModeBase>();
-		if (GameMode)
-		{
-			GameMode->ReturnToMainMenuHost();
-		}
-		else
-		{
-			PlayerController = PlayerController == nullptr ? World->GetFirstPlayerController() : PlayerController;
-			if (PlayerController)
-			{
-				PlayerController->ClientReturnToMainMenuWithTextReason(FText());
-			}
-		}
-	}
-}
-
-void UReturnMainMenuWidget::ReturnButtonClicked()
+void UReturnMainMenuWidget::OnReturnButtonClickEvent()
 {
 	ReturnButton->SetIsEnabled(false);
 
-	if (MultiplayerSessionsSubsystem)
-	{
-		MultiplayerSessionsSubsystem->DestroySession();
-	}
+	AKraverPlayerController* PC = Cast<AKraverPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+	if (!PC) return;
+
+	PC->ReturnToMainMenu();
+
 }

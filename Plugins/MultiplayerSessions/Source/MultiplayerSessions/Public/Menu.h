@@ -34,12 +34,12 @@ protected:
 	UFUNCTION()
 	void OnStartSession(bool bWasSuccessful);
 
-private:
+protected:
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UButton* HostButton;
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UButton* JoinButton;
 
 	UFUNCTION()

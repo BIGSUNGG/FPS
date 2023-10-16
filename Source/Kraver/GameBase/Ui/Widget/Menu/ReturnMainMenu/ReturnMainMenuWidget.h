@@ -16,23 +16,19 @@ class KRAVER_API UReturnMainMenuWidget : public UUserWidget
 public:
 	virtual bool Initialize() override;
 
+	UFUNCTION(BlueprintCallable)
 	void MenuSetup();
+	UFUNCTION(BlueprintCallable)
 	void MenuTearDown();
 
 protected:
 	// Delegate
 	UFUNCTION()
-	void OnDestroySession(bool bWasSuccessful);
-
-	UFUNCTION()
-	void ReturnButtonClicked();
+	void OnReturnButtonClickEvent();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UButton* ReturnButton;
-
-	UPROPERTY()
-	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 
 	UPROPERTY()
 	class APlayerController* PlayerController;

@@ -17,13 +17,15 @@ class KRAVER_API UPauseMenuWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void MenuSetup();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void MenuTearDown();
 
 protected:
 	// Delegate
-	UFUNCTION()
-	virtual void OnSettingMenuButtonClickEvent();
+	UFUNCTION(BlueprintNativeEvent)
+	void OnSettingMenuButtonClickEvent();
 
 protected:
 	// Widget

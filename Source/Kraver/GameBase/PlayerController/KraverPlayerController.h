@@ -18,8 +18,19 @@ public:
 	virtual void OnPossess(APawn* aPawn) override;
 	virtual void SetupInputComponent() override;
 
+	virtual void ReturnToMainMenu();
+	virtual void ExitGame();
+
+
 protected:
-	void ShowReturnToMainMenu();
+	// Delegate
+	UFUNCTION()
+	void OnDestroySessionEvent_ReturnToMainMenu(bool bWasSuccessful);
+	UFUNCTION()
+	void OnDestroySessionEvent_ExitGame(bool bWasSuccessful);
+
+	// Func
+	void ShowPauseMenu();
 
 protected:
 	// Return

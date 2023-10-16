@@ -14,7 +14,7 @@ void UPauseMenuWidget::NativeConstruct()
 
 }
 
-void UPauseMenuWidget::MenuSetup()
+void UPauseMenuWidget::MenuSetup_Implementation()
 {
 	AddToViewport();
 	SetVisibility(ESlateVisibility::Visible);
@@ -28,7 +28,7 @@ void UPauseMenuWidget::MenuSetup()
 	ReturnMainMenu->MenuSetup();
 }
 
-void UPauseMenuWidget::MenuTearDown()
+void UPauseMenuWidget::MenuTearDown_Implementation()
 {
 	RemoveFromParent();
 	SetVisibility(ESlateVisibility::Hidden);
@@ -42,7 +42,7 @@ void UPauseMenuWidget::MenuTearDown()
 	ReturnMainMenu->MenuTearDown();
 }
 
-void UPauseMenuWidget::OnSettingMenuButtonClickEvent()
+void UPauseMenuWidget::OnSettingMenuButtonClickEvent_Implementation()
 {
 	ReturnMainMenu->SetVisibility(ESlateVisibility::Hidden);
 	WeaponSelectMenu->SetVisibility(ESlateVisibility::Hidden);
