@@ -32,9 +32,9 @@ ACreature::ACreature()
 	CombatComponent->OnServerDeath.AddDynamic(this, &ThisClass::OnServerDeathEvent);
 	CombatComponent->OnMulticastDeath.AddDynamic(this, &ThisClass::OnMulticastDeathEvent);
 
-	CombatComponent->OnClientEquipWeaponSuccess.AddDynamic(this, &ThisClass::OnClientEquipWeaponSuccessEvent);
+	CombatComponent->OnEquipWeaponSuccess.AddDynamic(this, &ThisClass::OnEquipWeaponSuccessEvent);
 	CombatComponent->OnServerEquipWeaponSuccess.AddDynamic(this, &ThisClass::OnServerEquipWeaponSuccessEvent);
-	CombatComponent->OnClientUnEquipWeaponSuccess.AddDynamic(this, &ThisClass::OnClientUnEquipWeaponSuccessEvent);
+	CombatComponent->OnUnEquipWeaponSuccess.AddDynamic(this, &ThisClass::OnUnEquipWeaponSuccessEvent);
 	CombatComponent->OnServerUnEquipWeaponSuccess.AddDynamic(this, &ThisClass::OnServerUnEquipWeaponSuccessEvent);
 
 	CombatComponent->OnClientAfterTakePointDamageSuccess.AddDynamic(this, &ThisClass::OnClientAfterTakePointDamageEvent);
@@ -44,13 +44,10 @@ ACreature::ACreature()
 	CombatComponent->OnMulticastAfterTakePointDamageSuccess.AddDynamic(this, &ThisClass::OnMulticastAfterTakePointDamageEvent);
 	CombatComponent->OnMulticastAfterTakeRadialDamageSuccess.AddDynamic(this, &ThisClass::OnMulticastAfterTakeRadialDamageEvent);
 
-	CombatComponent->OnClientUnholsterWeapon.AddDynamic(this, &ThisClass::OnClientUnholsterWeaponEvent);
+	CombatComponent->OnUnholsterWeapon.AddDynamic(this, &ThisClass::OnUnholsterWeaponEvent);
 	CombatComponent->OnServerUnholsterWeapon.AddDynamic(this, &ThisClass::OnServerUnholsterWeaponEvent);
-	CombatComponent->OnClientHolsterWeapon.AddDynamic(this, &ThisClass::OnClientHolsterWeaponEvent);
+	CombatComponent->OnHolsterWeapon.AddDynamic(this, &ThisClass::OnHolsterWeaponEvent);
 	CombatComponent->OnServerHolsterWeapon.AddDynamic(this, &ThisClass::OnServerHolsterWeaponEvent);
-
-	CombatComponent->OnRepCurWeapon.AddDynamic(this, &ThisClass::OnRepCurWeaponEvent);
-	CombatComponent->OnRepWeaponSlot.AddDynamic(this, &ThisClass::OnRepWeaponSlotEvent);
 
 	Fp_Root->SetupAttachment(GetCapsuleComponent());
 
@@ -117,57 +114,6 @@ void ACreature::OnServer_Assassinated(ACreature* Attacker, FAssassinateInfo Assa
 void ACreature::AssassinatedEnd()
 {
 	Server_OnAssassinatedEndEvent();
-}
-
-void ACreature::EquipEvent(AWeapon* Weapon)
-{
-	if(!IsValid(Weapon))
-		return;
-
-	if (IsValid(Weapon->GetTppWeaponMesh()) == false || IsValid(GetMesh()) == false)
-	{
-		GetWorld()->GetTimerManager().SetTimerForNextTick([=](){ EquipEvent(Weapon); });
-		return;
-	}
-
-	Weapon->GetTppWeaponMesh()->SetSimulatePhysics(false);
-	GetWorld()->GetTimerManager().SetTimerForNextTick([=]() 
-	{ 	
-			Weapon->GetTppWeaponMesh()->AttachToComponent
-			(
-				GetMesh(),
-				FAttachmentTransformRules::SnapToTargetIncludingScale,
-				Weapon->GetTppHandSocketName()
-			);
-	}
-	);
-
-}
-
-void ACreature::UnEquipEvent(AWeapon* Weapon)
-{
-	if (!IsValid(Weapon))
-		return;
-
-	Weapon->GetTppWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-}
-
-void ACreature::HolsterEvent(AWeapon* Weapon)
-{
-	if (!IsValid(Weapon))
-		return;
-
-	Weapon->OnPlayTppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
-	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
-}
-
-void ACreature::UnholsterEvent(AWeapon* Weapon)
-{
-	if (!IsValid(Weapon))
-		return;
-
-	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
-	Weapon->OnPlayFppMontage.AddDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 }
 
 void ACreature::UpdateDissolveMaterial(float DissolveValue)
@@ -556,91 +502,117 @@ void ACreature::TurnInPlace(float DeltaTime)
 	}
 }
 
-void ACreature::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
+void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	if (Weapon == nullptr)
+	if (!IsValid(Weapon))
 		return;
 
-	EquipEvent(Weapon);
+	if (IsValid(Weapon->GetTppWeaponMesh()) == false || IsValid(GetMesh()) == false)
+	{
+		GetWorld()->GetTimerManager().SetTimerForNextTick([=]() { OnEquipWeaponSuccessEvent(Weapon); });
+		return;
+	}
+
+	Weapon->GetTppWeaponMesh()->SetSimulatePhysics(false);
+	GetWorld()->GetTimerManager().SetTimerForNextTick([=]()
+		{
+			Weapon->GetTppWeaponMesh()->AttachToComponent
+			(
+				GetMesh(),
+				FAttachmentTransformRules::SnapToTargetIncludingScale,
+				Weapon->GetTppHandSocketName()
+			);
+		}
+	);
 }
 
 void ACreature::OnServerEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
 	Weapon->SetOwner(this);
-	EquipEvent(Weapon);
 }
 
 void ACreature::OnServerUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	UnEquipEvent(Weapon);
 }
 
-void ACreature::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
+void ACreature::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	UnEquipEvent(Weapon);
+	if (!IsValid(Weapon))
+		return;
+
+	Weapon->GetTppWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
-void ACreature::OnClientUnholsterWeaponEvent(AWeapon* Weapon)
+void ACreature::OnUnholsterWeaponEvent(AWeapon* Weapon)
 {
-	UnholsterEvent(Weapon);
+	if (!IsValid(Weapon))
+		return;
 
-	switch (Weapon->GetWeaponType())
+	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
+	Weapon->OnPlayFppMontage.AddDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
+
+	if(IsLocallyControlled())
 	{
-	case EWeaponType::NONE:
-		break;
-	case EWeaponType::GUN:
-		break;
-	case EWeaponType::MELEE:
-		break;
-	default:
-		break;
+		switch (Weapon->GetWeaponType())
+		{
+		case EWeaponType::NONE:
+			break;
+		case EWeaponType::GUN:
+			break;
+		case EWeaponType::MELEE:
+			break;
+		default:
+			break;
+		}
+	
+		UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
+		if (AssassinateComp)
+		{
+			AssassinateComp->OnAssassinate.AddDynamic(this, &ACreature::OnAssassinateEvent);
+			AssassinateComp->OnAssassinateEnd.AddDynamic(this, &ACreature::OnAssassinateEndEvent);
+		}	
 	}
-
-	UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
-	if (AssassinateComp)
-	{
-		AssassinateComp->OnAssassinate.AddDynamic(this, &ACreature::OnAssassinateEvent);
-		AssassinateComp->OnAssassinateEnd.AddDynamic(this, &ACreature::OnAssassinateEndEvent);
-	}	
 }
 
 void ACreature::OnServerUnholsterWeaponEvent(AWeapon* Weapon)
 {
-	UnholsterEvent(Weapon);
 }
 
-void ACreature::OnClientHolsterWeaponEvent(AWeapon* Weapon)
+void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 {
-	if(!Weapon)
+	if (!IsValid(Weapon))
 		return;
 
-	HolsterEvent(Weapon);
-
+	Weapon->OnPlayTppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
+	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageTpp());
 
-	switch (Weapon->GetWeaponType())
+	if (IsLocallyControlled())
 	{
-	case EWeaponType::NONE:
-		break;
-	case EWeaponType::GUN:
-		break;
-	case EWeaponType::MELEE:
-		break;
-	default:
-		break;
-	}
-
-	UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
-	if (AssassinateComp)
-	{
-		AssassinateComp->OnAssassinate.RemoveDynamic(this, &ACreature::OnAssassinateEvent);
-		AssassinateComp->OnAssassinateEnd.RemoveDynamic(this, &ACreature::OnAssassinateEndEvent);
+	
+		switch (Weapon->GetWeaponType())
+		{
+		case EWeaponType::NONE:
+			break;
+		case EWeaponType::GUN:
+			break;
+		case EWeaponType::MELEE:
+			break;
+		default:
+			break;
+		}
+	
+		UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
+		if (AssassinateComp)
+		{
+			AssassinateComp->OnAssassinate.RemoveDynamic(this, &ACreature::OnAssassinateEvent);
+			AssassinateComp->OnAssassinateEnd.RemoveDynamic(this, &ACreature::OnAssassinateEndEvent);
+		}
 	}
 }
 
 void ACreature::OnServerHolsterWeaponEvent(AWeapon* Weapon)
 {
-	HolsterEvent(Weapon);
 }
 
 void ACreature::OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
@@ -765,36 +737,6 @@ void ACreature::OnPlayWeaponTppMontageEvent(UAnimMontage* PlayedMontage, float S
 
 void ACreature::OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed)
 {
-}
-
-void ACreature::OnRepCurWeaponEvent(AWeapon* PrevWeapon, AWeapon* CurWeapon)
-{
-	if(IsLocallyControlled())
-		return;
-
-	if(PrevWeapon)
-		HolsterEvent(PrevWeapon);
-
-	if (CurWeapon)
-		UnholsterEvent(CurWeapon);
-}
-
-void ACreature::OnRepWeaponSlotEvent(const TArray<AWeapon*>& PrevWeaponSlot, const TArray<AWeapon*>& CurWeaponSlot)
-{
-	if (IsLocallyControlled())
-		return;
-
-	for (int i = 0; i < CurWeaponSlot.Num(); i++)
-	{
-		if (CurWeaponSlot[i] && !PrevWeaponSlot[i]) // 장착한 경우
-		{
-			EquipEvent(CurWeaponSlot[i]);
-		}
-		else if (!CurWeaponSlot[i] && PrevWeaponSlot[i]) // 장착해제한 경우
-		{
-			UnEquipEvent(PrevWeaponSlot[i]);
-		}
-	}
 }
 
 void ACreature::Server_OwnOtherActor_Implementation(AActor* Actor)

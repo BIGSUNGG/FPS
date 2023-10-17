@@ -370,17 +370,13 @@ void UCombatComponent::UnholsterWeapon_Implementation(AWeapon* Weapon)
 	KR_LOG(Log,TEXT("Unholster Weapon %s"),*Weapon->GetName());
 	HolsterWeapon();
 
-	CurWeapon = Weapon;
 	Weapon->OnLocal_Unholster();
-	OnClientUnholsterWeapon.Broadcast(Weapon);
 
 	Server_UnholsterWeapon(Weapon);
 }
 
 void UCombatComponent::HolsterWeapon_Implementation()
 {
-	CurWeapon = nullptr;
-
 	for (auto& Weapon : WeaponSlot)
 	{
 		if(!Weapon)
@@ -390,7 +386,6 @@ void UCombatComponent::HolsterWeapon_Implementation()
 		bool Success = Weapon->OnLocal_Holster();
 		if (Success)
 		{
-			OnClientHolsterWeapon.Broadcast(Weapon);
 			Server_HolsterWeapon(Weapon);
 		}
 	}
@@ -438,7 +433,9 @@ void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
 		if (!AddWeapon(Weapon))
 			KR_LOG(Error, TEXT("Failed to AddWeapon"));
 
+
 		OnServerEquipWeaponSuccess.Broadcast(Weapon);
+		OnEquipWeaponSuccess.Broadcast(Weapon);
 
 		if(OwnerCreature->IsLocallyControlled())
 			OnLocal_EquipWeaponSuccess(Weapon);
@@ -461,6 +458,7 @@ void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 			KR_LOG(Error, TEXT("Failed to RemoveWeapon"));
 
 		OnServerUnEquipWeaponSuccess.Broadcast(Weapon);
+		OnUnEquipWeaponSuccess.Broadcast(Weapon);
 
 		if (OwnerCreature->IsLocallyControlled())
 			OnLocal_UnEquipWeaponSuccess(Weapon);
@@ -485,8 +483,6 @@ void UCombatComponent::OnLocal_EquipWeaponSuccess(AWeapon* Weapon)
 
 	Weapon->SetOwner(OwnerCreature);
 
-	OnClientEquipWeaponSuccess.Broadcast(Weapon);
-
 	if (bUnholsterWhenEquip)
 	{
 		bUnholsterWhenEquip = false;
@@ -504,19 +500,20 @@ void UCombatComponent::OnLocal_UnEquipWeaponSuccess(AWeapon* Weapon)
 	}
 
 	HolsterWeapon();
-
-	OnClientUnEquipWeaponSuccess.Broadcast(Weapon);
 }
 
 void UCombatComponent::Server_UnholsterWeapon_Implementation(AWeapon* Weapon)
 {
 	CurWeapon = Weapon;
 	OnServerUnholsterWeapon.Broadcast(Weapon);
+	OnUnholsterWeapon.Broadcast(Weapon);
 }
 
 void UCombatComponent::Server_HolsterWeapon_Implementation(AWeapon* Weapon)
 {
+	CurWeapon = nullptr;
 	OnServerHolsterWeapon.Broadcast(Weapon);
+	OnHolsterWeapon.Broadcast(Weapon);
 }
 
 void UCombatComponent::Client_TakeDamage_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
@@ -585,33 +582,39 @@ void UCombatComponent::Client_SetCurHp_Implementation(int32 Value)
 
 void UCombatComponent::OnRep_CurWeaponEvent(AWeapon* PrevWeapon)
 {
-	OnRepCurWeapon.Broadcast(PrevWeapon, CurWeapon);
+	if (PrevWeapon)
+		OnHolsterWeapon.Broadcast(PrevWeapon);
+
+	if (CurWeapon)
+		OnUnholsterWeapon.Broadcast(CurWeapon);
+
 }
 
 void UCombatComponent::OnRep_WeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot)
 {
 	if (!OwnerCreature)
 	{
-		GetWorld()->GetTimerManager().SetTimerForNextTick([=](){ OnRep_WeaponSlotEvent(PrevWeaponSlot); });
+		GetWorld()->GetTimerManager().SetTimerForNextTick([=]() { OnRep_WeaponSlotEvent(PrevWeaponSlot); });
 		return;
 	}
 
-	if(OwnerCreature->IsLocallyControlled())
+	for (int i = 0; i < WeaponSlot.Num(); i++)
 	{
-		for (int i = 0; i < WeaponSlot.Num(); i++)
+		if (WeaponSlot[i] && !PrevWeaponSlot[i]) // ÀåÂøÇÑ °æ¿ì
 		{
-			if (WeaponSlot[i] && !PrevWeaponSlot[i]) // ÀåÂøÇÑ °æ¿ì
-			{
+			if (OwnerCreature->IsLocallyControlled())
 				OnLocal_EquipWeaponSuccess(WeaponSlot[i]);
-			}
-			else if (!WeaponSlot[i] && PrevWeaponSlot[i]) // ÀåÂøÇØÁ¦ÇÑ °æ¿ì
-			{
+
+			OnEquipWeaponSuccess.Broadcast(WeaponSlot[i]);
+		}
+		else if (!WeaponSlot[i] && PrevWeaponSlot[i]) // ÀåÂøÇØÁ¦ÇÑ °æ¿ì
+		{
+			if (OwnerCreature->IsLocallyControlled())
 				OnLocal_UnEquipWeaponSuccess(PrevWeaponSlot[i]);
-			}
+
+			OnUnEquipWeaponSuccess.Broadcast(PrevWeaponSlot[i]);
 		}
 	}
-
-	OnRepWeaponSlot.Broadcast(PrevWeaponSlot, WeaponSlot);
 }
 
 bool UCombatComponent::AddWeapon(AWeapon* Weapon)

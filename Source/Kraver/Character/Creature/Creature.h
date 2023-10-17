@@ -107,9 +107,9 @@ protected:
 	// Delegate Event
 		// Equip Success
 	UFUNCTION()
-	virtual void OnClientEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 호출되는 함수
+	virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 호출되는 함수
 	UFUNCTION()
-	virtual void OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 호출되는 함수
+	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착해제 성공할때 호출되는 함수
 	UFUNCTION()
 	virtual void OnServerEquipWeaponSuccessEvent(AWeapon* Weapon); // 무기 장착 성공할때 서버에서 호출되는 함수
 	UFUNCTION()
@@ -117,11 +117,11 @@ protected:
 			
 		// Holster
 	UFUNCTION()
-	virtual void OnClientUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+	virtual void OnUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
 	virtual void OnServerUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
-	virtual void OnClientHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+	virtual void OnHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 	UFUNCTION()
 	virtual void OnServerHolsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
 
@@ -160,12 +160,6 @@ protected:
 	UFUNCTION()
 	virtual void OnPlayWeaponFppMontageEvent(UAnimMontage* PlayedMontage, float Speed);
 	
-		// OnRep
-	UFUNCTION() 
-	virtual void OnRepCurWeaponEvent(AWeapon* PrevWeapon, AWeapon* CurWeapon);
-	UFUNCTION()
-	virtual void OnRepWeaponSlotEvent(const TArray<AWeapon*>& PrevWeaponSlot, const TArray<AWeapon*>& CurWeaponSlot);
-
 	// RPC
 	UFUNCTION(Server, Reliable)
 	void Server_OwnOtherActor(AActor* Actor);
@@ -202,11 +196,6 @@ protected:
 
 	virtual void OnServer_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	virtual void AssassinatedEnd();
-
-	virtual void EquipEvent(AWeapon* Weapon);
-	virtual void UnEquipEvent(AWeapon* Weapon);
-	virtual void HolsterEvent(AWeapon* Weapon);
-	virtual void UnholsterEvent(AWeapon* Weapon);
 	
 	UFUNCTION()
 	void UpdateDissolveMaterial(float DissolveValue);

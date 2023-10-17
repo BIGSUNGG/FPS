@@ -67,12 +67,12 @@ protected:
 
 	// Delegate Event
 		// Equip
-	virtual void OnClientEquipWeaponSuccessEvent(AWeapon* Weapon) override;
-	virtual void OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
+	virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
+	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 		
 		// Holster Unholster
-	virtual void OnClientHolsterWeaponEvent(AWeapon* Weapon); // 무기를 넣을때 호출되는 함수
-	virtual void OnClientUnholsterWeaponEvent(AWeapon* Weapon); // 무기를 들때 호출되는 함수
+	virtual void OnHolsterWeaponEvent(AWeapon* Weapon) override; // 무기를 넣을때 호출되는 함수
+	virtual void OnUnholsterWeaponEvent(AWeapon* Weapon) override; // 무기를 들때 호출되는 함수
 	
 		// Simulate Mesh
 	virtual void Client_SimulateMesh_Implementation() override;

@@ -476,85 +476,106 @@ void AKraverPlayer::RefreshCurViewType()
 	} while (TargetViewType != CurViewType);
 }
 
-void AKraverPlayer::OnClientEquipWeaponSuccessEvent(AWeapon* Weapon)
+void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {	
-	if(!Weapon)
+	if (!IsValid(Weapon))
 		return;
+
+	if (IsValid(Weapon->GetTppWeaponMesh()) == false || IsValid(GetMesh()) == false)
+	{
+		GetWorld()->GetTimerManager().SetTimerForNextTick([=]() { OnEquipWeaponSuccessEvent(Weapon); });
+		return;
+	}
 
 	if (!IsValid(Weapon->GetFppWeaponMesh()))
 	{
-		GetWorldTimerManager().SetTimerForNextTick([=]() { OnClientEquipWeaponSuccessEvent(Weapon); });
+		GetWorldTimerManager().SetTimerForNextTick([=]() { OnEquipWeaponSuccessEvent(Weapon); });
 		return;
 	}
 
-	Super::OnClientEquipWeaponSuccessEvent(Weapon);
-	UnholsterWeapon();
-	
-	Weapon->GetFppWeaponMesh()->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetFppHandSocketName());
+	Super::OnEquipWeaponSuccessEvent(Weapon);
 
-	for(auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
+	if(IsLocallyControlled())
 	{
-		if(!Tuple.Value)
-			continue;
-
-		ShowOnlyFirstPerson.Push(Tuple.Value);
-	}
+		UnholsterWeapon();
+		
+		Weapon->GetFppWeaponMesh()->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetFppHandSocketName());
 	
-	for (auto& Tuple : Weapon->GetTppWeaponPrimitiveInfo())
-	{
-		if (!Tuple.Value)
-			continue;
-
-		ShowOnlyThirdPerson.Push(Tuple.Value);
+		for(auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
+		{
+			if(!Tuple.Value)
+				continue;
+	
+			ShowOnlyFirstPerson.Push(Tuple.Value);
+		}
+		
+		for (auto& Tuple : Weapon->GetTppWeaponPrimitiveInfo())
+		{
+			if (!Tuple.Value)
+				continue;
+	
+			ShowOnlyThirdPerson.Push(Tuple.Value);
+		}
+	
+		RefreshCurViewType();
 	}
-
-	RefreshCurViewType();
 
 }
 
-void AKraverPlayer::OnClientUnEquipWeaponSuccessEvent(AWeapon* Weapon)
+void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 {
-	Super::OnClientUnEquipWeaponSuccessEvent(Weapon);
+	if (!IsValid(Weapon))
+		return;
 
-	ThrowWeapon(Weapon);
-	ShowOnlyThirdPerson.Remove(Weapon->GetTppWeaponMesh());
-	Weapon->GetTppWeaponMesh()->SetOwnerNoSee(false);
+	Super::OnUnEquipWeaponSuccessEvent(Weapon);
 
-	for (auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
+	if (IsLocallyControlled())
 	{
-		ShowOnlyFirstPerson.Remove(Tuple.Value);
-	}
+		ThrowWeapon(Weapon);
+		ShowOnlyThirdPerson.Remove(Weapon->GetTppWeaponMesh());
+		Weapon->GetTppWeaponMesh()->SetOwnerNoSee(false);
 
-	for (auto& Map : Weapon->GetTppWeaponPrimitiveInfo())
-	{
-		Map.Value->SetOnlyOwnerSee(false);
-		Map.Value->SetOwnerNoSee(false);
-
-		ShowOnlyThirdPerson.Remove(Map.Value);
-	}
-
-	RefreshCurViewType();
-
-	for (int i = 0; i < CombatComponent->GetWeaponSlot().Num(); i++)
-	{
-		if (CombatComponent->GetWeaponSlot()[i])
+		for (auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 		{
-			ChangeWeapon(i);
-			break;
+			ShowOnlyFirstPerson.Remove(Tuple.Value);
+		}
+
+		for (auto& Map : Weapon->GetTppWeaponPrimitiveInfo())
+		{
+			Map.Value->SetOnlyOwnerSee(false);
+			Map.Value->SetOwnerNoSee(false);
+
+			ShowOnlyThirdPerson.Remove(Map.Value);
+		}
+
+		RefreshCurViewType();
+
+		for (int i = 0; i < CombatComponent->GetWeaponSlot().Num(); i++)
+		{
+			if (CombatComponent->GetWeaponSlot()[i])
+			{
+				ChangeWeapon(i);
+				break;
+			}
 		}
 	}
+}
+
+void AKraverPlayer::OnUnholsterWeaponEvent(AWeapon* Weapon)
+{
+	if (!IsValid(Weapon))
+		return;
+
+	Super::OnUnholsterWeaponEvent(Weapon);
 
 }
 
-void AKraverPlayer::OnClientUnholsterWeaponEvent(AWeapon* Weapon)
+void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
 {
-	Super::OnClientUnholsterWeaponEvent(Weapon);
+	if (!IsValid(Weapon))
+		return;
 
-}
-
-void AKraverPlayer::OnClientHolsterWeaponEvent(AWeapon* Weapon)
-{
-	Super::OnClientHolsterWeaponEvent(Weapon);
+	Super::OnHolsterWeaponEvent(Weapon);
 
 	ArmMesh->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageFpp());
 }

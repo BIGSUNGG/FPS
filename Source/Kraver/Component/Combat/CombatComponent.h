@@ -143,15 +143,15 @@ public:
 
 	// Equip
 	FEquipWeaponSuccessDele OnServerEquipWeaponSuccess; // 무기를 장착했을때 호출
-	FEquipWeaponSuccessDele OnClientEquipWeaponSuccess; // 무기를 장착했을때 호출
+	FEquipWeaponSuccessDele OnEquipWeaponSuccess; // 무기를 장착했을때 호출
 	FUnEquipWeaponSuccessDele OnServerUnEquipWeaponSuccess; // 무기를 해제했을때 호출
-	FUnEquipWeaponSuccessDele OnClientUnEquipWeaponSuccess; // 무기를 해제했을때 호출
+	FUnEquipWeaponSuccessDele OnUnEquipWeaponSuccess; // 무기를 해제했을때 호출
 
 	// Holster Holster
-	FHolsterWeaponDele OnClientUnholsterWeapon;
 	FHolsterWeaponDele OnServerUnholsterWeapon;
-	FHolsterWeaponDele OnClientHolsterWeapon;
+	FHolsterWeaponDele OnUnholsterWeapon;
 	FHolsterWeaponDele OnServerHolsterWeapon;
+	FHolsterWeaponDele OnHolsterWeapon;
 
 	// Take Damage
 	FTakeDamageDele OnServerBeforeTakeDamage; // 데미지를 받기전에 호출
@@ -181,10 +181,6 @@ public:
 	FDeathDele OnClientDeath; // 죽었을때 호출
 	FDeathDele OnServerDeath;
 	FDeathDele OnMulticastDeath;
-
-	// OnRep
-	FRepWeapon OnRepCurWeapon;
-	FRepWeaponSlot OnRepWeaponSlot;
 
 protected:
 	ACreature* OwnerCreature;
