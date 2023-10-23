@@ -93,7 +93,7 @@ protected:
 	UFUNCTION(Server, Reliable)
 	virtual void Server_SlideEnd();
 	UFUNCTION(Server, Reliable)
-		virtual void Server_SlideUpdate(FVector Velocity);
+		virtual void Server_SlideUpdate(FVector Location, FVector Velocity);
 
 public:
 	// Getter Setter

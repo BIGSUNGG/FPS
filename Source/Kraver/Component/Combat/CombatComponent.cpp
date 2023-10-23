@@ -210,11 +210,16 @@ void UCombatComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 
-	return;
-	for (auto& Weapon : WeaponSlot)
+	if(IS_SERVER())
 	{
-		if (Weapon)
-			Weapon->Destroy();
+		for (auto& Weapon : WeaponSlot)
+		{
+			if (Weapon)
+			{
+				KR_LOG(Log, TEXT("Destroy weapon %s"), *Weapon->GetName());
+				Weapon->Destroy();
+			}
+		}
 	}
 }
 

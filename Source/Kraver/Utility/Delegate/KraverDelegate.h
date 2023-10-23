@@ -17,6 +17,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRepWeaponSlot, const TArray<AWeapo
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNewKraverPlayer, class AKraverPlayer*, NewPlayer);
 	// Creature Death (GameMode)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FPlayerStateDeathDele, class ACreature*, DeadCreature, class AController*, VictimController, AActor*, AttackerActor, AController*, AttackerController, FKraverDamageResult const&, DamageResult);
+	// Game Finish
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameFinish, ETeam, WinTeam);
+
 
 // Movement
 	// Crouch Delegate

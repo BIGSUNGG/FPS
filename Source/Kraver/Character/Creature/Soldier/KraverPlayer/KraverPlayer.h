@@ -62,8 +62,8 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void Server_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
-
-	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
+		
+	virtual void Client_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo) override;
 
 	// Delegate Event
 		// Equip
@@ -90,6 +90,7 @@ protected:
 	virtual void OnTp_Weapon_HolsterEvent();
 
 	// Function
+	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
 	virtual void PlayLandedMontage() override;
 	void ChangeWeapon(int8 Index);
 	void HolsterWeapon();

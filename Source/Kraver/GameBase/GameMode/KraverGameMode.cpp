@@ -21,6 +21,13 @@ void AKraverGameMode::InitGame(const FString& MapName, const FString& Options, F
 	KraverGameState = Cast<AKraverGameState>(GameState);
 }
 
+void AKraverGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	KraverGameState = Cast<AKraverGameState>(GameState);
+}
+
 void AKraverGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
@@ -37,10 +44,10 @@ AActor* AKraverGameMode::FindPlayerStart_Implementation(AController* Player, con
 
 void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
 {
-	AKraverGameState* KraverPlayerState = Cast<AKraverGameState>(GameState);
-	if (KraverPlayerState)
+	KraverGameState = KraverGameState ? KraverGameState : Cast<AKraverGameState>(GameState);
+	if (KraverGameState)
 	{
-		KraverPlayerState->CreatureDeath(DeadCreature, VictimController, AttackerActor, AttackerController, DamageResult);
+		KraverGameState->CreatureDeath(DeadCreature, VictimController, AttackerActor, AttackerController, DamageResult);
 	}
 	else
 	{
@@ -136,6 +143,21 @@ void AKraverGameMode::GameFinishEvent(ETeam WinTeam)
 	if (IsGameFinish)
 		return;
 
-	IsGameFinish = true;
 	KR_LOG(Log, TEXT("Game finish"));
+	IsGameFinish = true;
+
+	AWorldSettings* WorldSetting = GetWorld()->GetWorldSettings();
+	if (WorldSetting)
+		WorldSetting->SetTimeDilation(GameFinishTimeDilation);
+
+	GetWorldTimerManager().SetTimer(GameFinishExitTimer, this, &ThisClass::OnGameFinishExitTimerEvent, GameFinishExitTime * GameFinishTimeDilation, false, GameFinishExitTime * GameFinishTimeDilation);
+	KraverGameState->GameFinish(WinTeam);
+}
+
+void AKraverGameMode::OnGameFinishExitTimerEvent()
+{
+	AKraverPlayerController* PC = Cast<AKraverPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+	if (!PC) return;
+
+	PC->ReturnToMainMenu();
 }

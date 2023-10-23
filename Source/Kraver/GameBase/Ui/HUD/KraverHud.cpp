@@ -10,7 +10,9 @@
 #include KraverPlayer_h
 #include KraverGameState_h
 #include KraverPlayerState_h
+#include TeamPlayerState_h
 #include RespawnTimerWidget_h
+#include GameFinishWidget_h
 
 AKraverHud::AKraverHud()
 {
@@ -18,17 +20,21 @@ AKraverHud::AKraverHud()
 	if (COMBAT_WIDGET.Succeeded())
 		CombatWidgetClass = COMBAT_WIDGET.Class;
 
-	static ConstructorHelpers::FClassFinder<UInteractionWidget> INTERACTION_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_InteractionWidget.WBP_InteractionWidget"));
+	static ConstructorHelpers::FClassFinder<UInteractionWidget> INTERACTION_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_InteractionWidget.WBP_InteractionWidget_C"));
 	if (INTERACTION_WIDGET.Succeeded())
 		InteractionWidgetClass = INTERACTION_WIDGET.Class;
 
-	static ConstructorHelpers::FClassFinder<UKillLogWidget> KILL_LOG_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_KillLog.WBP_KillLog"));
+	static ConstructorHelpers::FClassFinder<UKillLogWidget> KILL_LOG_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_KillLog.WBP_KillLog_C"));
 	if (KILL_LOG_WIDGET.Succeeded())
 		KillLogWidgetClass = KILL_LOG_WIDGET.Class;
 
-	static ConstructorHelpers::FClassFinder<URespawnTimerWidget> RESPAWN_TIMER_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_RespawnTimer.WBP_RespawnTimer"));
+	static ConstructorHelpers::FClassFinder<URespawnTimerWidget> RESPAWN_TIMER_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_RespawnTimer.WBP_RespawnTimer_C"));
 	if (RESPAWN_TIMER_WIDGET.Succeeded())
 		RespawnTimerWidgeClass = RESPAWN_TIMER_WIDGET.Class;
+
+	static ConstructorHelpers::FClassFinder<UGameFinishWidget> GAMEFINISH_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_GameFinishWidget.WBP_GameFinishWidget_C"));
+	if (GAMEFINISH_WIDGET.Succeeded())
+		GameFinishWidgeClass = GAMEFINISH_WIDGET.Class;
 
 	KillLogWidgets.SetNum(5);
 }
@@ -61,6 +67,10 @@ void AKraverHud::BeginPlay()
 	RespawnTimerWidge = CreateWidget<URespawnTimerWidget>(PlayerController, RespawnTimerWidgeClass);
 	if (RespawnTimerWidge)
 		RespawnTimerWidge->AddToViewport();
+
+	GameFinishWidge = CreateWidget<UGameFinishWidget>(PlayerController, GameFinishWidgeClass);
+	if(GameFinishWidge)
+		GameFinishWidge->AddToViewport();
 
 	FindGameState();
 	FindPlayerState();
@@ -162,13 +172,18 @@ void AKraverHud::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float Dama
 	bHitmartCritical = DamageResult.bCritical;
 }
 
+void AKraverHud::OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	RespawnTimerWidge->TimerStart();
+}
+
 void AKraverHud::OnNewLocalPlayerEvent(AKraverPlayer* NewCreature)
 {
 	Player = NewCreature;
 	if (Player)
 	{
 		Player->CombatComponent->OnClientGiveAnyDamageSuccess.AddDynamic(this, &AKraverHud::OnClientGiveDamageSuccessEvent);
-		Player->CombatComponent->OnClientDeath.AddDynamic(this, &AKraverHud::OnLocalCreatureDeathEvent);
+		Player->CombatComponent->OnClientDeath.AddDynamic(this, &AKraverHud::OnClientDeathEvent);
 	}
 }
 
@@ -185,9 +200,10 @@ void AKraverHud::OnAnyCreatureDeathEvent(class ACreature* DeadCreature, class AC
 	KillLogWidget->Initialize(AttackerController ? AttackerController->GetName() : AttackerActor->GetName(), VictimController ? VictimController->GetName() : DeadCreature->GetName());
 }
 
-void AKraverHud::OnLocalCreatureDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void AKraverHud::OnGameFinishEvent(ETeam WinTeam)
 {
-	RespawnTimerWidge->TimerStart();
+	ATeamPlayerState* TeamPlayerState = Cast<ATeamPlayerState>(PlayerState);
+	GameFinishWidge->GameFinish(FTeamInfo::CheckIsTeam(WinTeam, TeamPlayerState ? TeamPlayerState->GetPlayerTeam() : ETeam::TEAM_ALL));
 }
 
 void AKraverHud::FindGameState()
@@ -198,6 +214,7 @@ void AKraverHud::FindGameState()
 		if (GameState)
 		{
 			GameState->OnCreatureDeath.AddDynamic(this, &ThisClass::OnAnyCreatureDeathEvent);
+			GameState->OnGameFinish.AddDynamic(this, &ThisClass::OnGameFinishEvent);
 		}
 		else
 			GetWorldTimerManager().SetTimerForNextTick(this, &ThisClass::FindGameState);

@@ -754,6 +754,16 @@ void ACreature::Client_Assassinated_Implementation(ACreature* Attacker, FAssassi
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	if(PlayerController)
 		DisableInput(PlayerController);
+
+	GetMesh()->SetOwnerNoSee(false);
+	GetMesh()->SetOnlyOwnerSee(false);
+	GetMesh()->SetVisibility(true);
+	GetMesh()->SetHiddenInGame(false);
+
+	FAttachmentTransformRules TransformRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
+	TransformRules.bWeldSimulatedBodies = true;
+	TransformRules.RotationRule = EAttachmentRule::KeepWorld;
+	Camera->AttachToComponent(GetMesh(), TransformRules, "head");
 }
 
 void ACreature::Server_Jump_Implementation()

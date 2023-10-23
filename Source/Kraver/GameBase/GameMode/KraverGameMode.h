@@ -17,6 +17,7 @@ class KRAVER_API AKraverGameMode : public AGameMode
 public:
 	AKraverGameMode();
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName) override;
 
@@ -28,6 +29,9 @@ public:
 
 protected:
 	virtual void GameFinishEvent(ETeam WinTeam);
+
+	UFUNCTION()
+	virtual void OnGameFinishExitTimerEvent();
 
 public:
 	// Getter Setter
@@ -48,4 +52,9 @@ protected:
 	bool bSpectate = true;
 	FTimerHandle SpectateTimer;
 	float SpectateStartTime = 2.f;
+
+	// Game Finish
+	float GameFinishTimeDilation = 0.2f;
+	FTimerHandle GameFinishExitTimer;
+	float GameFinishExitTime = 5.f;
 };

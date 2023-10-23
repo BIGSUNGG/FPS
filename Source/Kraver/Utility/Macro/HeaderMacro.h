@@ -86,3 +86,4 @@
 #define PauseMenuWidget_h		"Kraver/GameBase/Ui/Widget/PauseMenu/PauseMenuWidget.h"
 #define WeaponSelectWidget_h	"Kraver/GameBase/Ui/Widget/WeaponSelect/WeaponSelectWidget.h"
 #define SettingMenuWidget_h		"Kraver/GameBase/Ui/Widget/SettingMenu/SettingMenuWidget.h"
+#define GameFinishWidget_h		"Kraver/GameBase/Ui/Widget/GameFinish/GameFinishWidget.h"

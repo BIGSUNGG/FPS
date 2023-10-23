@@ -92,7 +92,6 @@ void AKraverPlayer::Destroyed()
 {
 	Super::Destroyed();
 
-	KR_LOG(Error, TEXT("BeginDestroy"));
 	Capture2DComponent->TextureTarget = nullptr;
 }
 
@@ -465,6 +464,15 @@ void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FTransfor
 	Weapon->GetTppWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
 	Weapon->GetTppWeaponMesh()->AddImpulse(Direction * WeaponThrowPower * Weapon->GetTppWeaponMesh()->GetMass());
 	Weapon->GetTppWeaponMesh()->AddAngularImpulseInDegrees(Direction * WeaponThrowAngularPower, NAME_None, true);
+}
+
+
+void AKraverPlayer::Client_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
+{
+	Super::Client_Assassinated_Implementation(Attacker, AssassinateInfo);
+
+	ArmMesh->SetOwnerNoSee(true);
+
 }
 
 void AKraverPlayer::RefreshCurViewType()

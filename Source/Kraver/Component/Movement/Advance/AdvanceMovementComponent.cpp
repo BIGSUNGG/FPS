@@ -560,7 +560,7 @@ void UAdvanceMovementComponent::SlideUpdate()
 	SlopePhysics.Z = 0.f;
 	OwnerCreature->GetCharacterMovement()->Velocity += SlopePhysics;
 
-	Server_SlideUpdate(OwnerCreature->GetCharacterMovement()->Velocity);
+	Server_SlideUpdate(OwnerCreature->GetActorLocation(), OwnerCreature->GetCharacterMovement()->Velocity);
 }
 
 void UAdvanceMovementComponent::Server_WallRunJumpSuccess_Implementation(FVector PendingLaunchVelocity)
@@ -635,8 +635,9 @@ void UAdvanceMovementComponent::Server_SlideEnd_Implementation()
 	OwnerCreature->GetCharacterMovement()->BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
 }
 
-void UAdvanceMovementComponent::Server_SlideUpdate_Implementation(FVector Velocity)
+void UAdvanceMovementComponent::Server_SlideUpdate_Implementation(FVector Location, FVector Velocity)
 {
+	OwnerCreature->SetActorLocation(Location);
 	OwnerCreature->GetCharacterMovement()->Velocity = Velocity;
 }
 
