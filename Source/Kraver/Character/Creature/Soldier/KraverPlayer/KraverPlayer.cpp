@@ -467,6 +467,31 @@ void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FTransfor
 }
 
 
+void AKraverPlayer::Server_HolsterWeapon_Implementation()
+{
+	Multicast_HolsterWeapon();
+}
+
+
+void AKraverPlayer::Multicast_HolsterWeapon_Implementation()
+{
+	if (!IsLocallyControlled())
+		HolsterWeaponEvent();
+}
+
+
+void AKraverPlayer::Server_UnholsterWeapon_Implementation()
+{
+	Multicast_UnholsterWeapon();
+}
+
+
+void AKraverPlayer::Multicast_UnholsterWeapon_Implementation()
+{
+	if (!IsLocallyControlled())
+		UnholsterWeaponEvent();
+}
+
 void AKraverPlayer::Client_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
 {
 	Super::Client_Assassinated_Implementation(Attacker, AssassinateInfo);
@@ -662,6 +687,8 @@ void AKraverPlayer::OnReload_Insert_MagazineEvent()
 
 void AKraverPlayer::OnTp_Weapon_HolsterEvent()
 {
+	if (!IsLocallyControlled()) return;
+
 	ArmMesh->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
 	GetMesh()->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
 
@@ -702,7 +729,14 @@ void AKraverPlayer::ChangeWeapon(int8 Index)
 
 }
 
+
 void AKraverPlayer::HolsterWeapon()
+{
+	HolsterWeaponEvent();
+	Server_HolsterWeapon();
+}
+
+void AKraverPlayer::HolsterWeaponEvent()
 {
 	if(!CombatComponent->GetCurWeapon())
 		return;
@@ -712,9 +746,16 @@ void AKraverPlayer::HolsterWeapon()
 
 }
 
+
 void AKraverPlayer::UnholsterWeapon()
 {
-	if(UnholsterIndex != -1)
+	UnholsterWeaponEvent();
+	Server_UnholsterWeapon();
+}
+
+void AKraverPlayer::UnholsterWeaponEvent()
+{
+	if(IsLocallyControlled() && UnholsterIndex != -1)
 		CombatComponent->UnholsterWeapon(UnholsterIndex);
 
 	if (!CombatComponent->GetCurWeapon())

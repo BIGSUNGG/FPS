@@ -65,6 +65,16 @@ protected:
 		
 	virtual void Client_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo) override;
 
+		// Holster
+	UFUNCTION(Server, Reliable)
+	virtual void Server_HolsterWeapon();
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void Multicast_HolsterWeapon();
+	UFUNCTION(Server, Reliable)
+	virtual void Server_UnholsterWeapon();
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void Multicast_UnholsterWeapon();
+
 	// Delegate Event
 		// Equip
 	virtual void OnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
@@ -93,8 +103,12 @@ protected:
 	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
 	virtual void PlayLandedMontage() override;
 	void ChangeWeapon(int8 Index);
+
+		// Holster
 	void HolsterWeapon();
+	void HolsterWeaponEvent();
 	void UnholsterWeapon();
+	void UnholsterWeaponEvent();
 
 public:
 	// Getter Setter
