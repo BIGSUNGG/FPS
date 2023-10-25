@@ -67,7 +67,6 @@
 #define KraverSpectator_h "Kraver/GameBase/Spectator/KraverSpectator.h"
 
 #define DamageIndicatorSubsystem_h	"Kraver/GameBase/Subsystem/DamageIndicator/DamageIndicatorSubsystem.h"
-#define DataSubsystem_h				"Kraver/GameBase/Subsystem/Data/DataSubsystem.h"
 #define SettingSubsystem_h			"Kraver/GameBase/Subsystem/Setting/SettingSubsystem.h"
 
 #define KraverHud_h		"Kraver/GameBase/Ui/HUD/KraverHUD.h"

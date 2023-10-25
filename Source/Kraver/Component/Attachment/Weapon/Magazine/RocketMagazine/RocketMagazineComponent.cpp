@@ -41,7 +41,7 @@ void URocketMagazineComponent::SetMagazineVisibility(bool Value)
 	if(MagazineMesh->IsVisible() == Value)
 		return;
 
-	MagazineMesh->SetVisibility(Value);
+	OwnerGun->GetTppWeaponPrimitiveInfo()["Magazine"]->SetVisibility(Value);
 	OwnerGun->GetFppWeaponPrimitiveInfo()["Magazine"]->SetVisibility(Value);
 }
 

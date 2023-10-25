@@ -6,23 +6,37 @@
 #include KraverGameMode_h
 #include KraverPlayerController_h
 #include DamageIndicatorSubsystem_h
-#include DataSubsystem_h
 #include KraverHud_h
 
 AKraverPlayerState::AKraverPlayerState()
 {
+	DefaultWeapons.SetNum(3);
+
+	static ConstructorHelpers::FClassFinder<AWeapon> MAIN_WEAPON(TEXT("/Game/ProjectFile/Actor/Weapon/Hitscan/BP_Hitscan_Assult.BP_Hitscan_Assult_C"));
+	if (MAIN_WEAPON.Succeeded())
+	{
+		DefaultWeapons[0] = MAIN_WEAPON.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<AWeapon> SUB_WEAPON(TEXT("/Game/ProjectFile/Actor/Weapon/Hitscan/BP_Hitscan_Pistol.BP_Hitscan_Pistol_C"));
+	if (SUB_WEAPON.Succeeded())
+	{
+		DefaultWeapons[1] = SUB_WEAPON.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<AWeapon> SPECIAL_WEAPON(TEXT("/Game/ProjectFile/Actor/Weapon/Projectile/BP_Projectile_GL.BP_Projectile_GL_C"));
+	if (SPECIAL_WEAPON.Succeeded())
+	{
+		DefaultWeapons[2] = SPECIAL_WEAPON.Class;
+	}
+
 	OnPawnSet.AddDynamic(this, &ThisClass::OnPawnSetEvent);
 }
 
-void AKraverPlayerState::Server_RequestDefaultWeapon_Implementation(const TArray<TSubclassOf<class AWeapon>>& RequestWeapons)
+void AKraverPlayerState::Server_SetDefaultWeapons_Implementation(TSubclassOf<class AWeapon> InValue, int Index)
 {
-	if (bSpawnDefaultWeapon)
-		return;
-
-	bSpawnDefaultWeapon = true;
-
-	AKraverGameMode* GameMode = Cast<AKraverGameMode>(UGameplayStatics::GetGameMode(this));
-	GameMode->RequestDefaultWeapon(this, RequestWeapons);
+	KR_LOG(Error, TEXT("H"));
+	DefaultWeapons[Index] = InValue;
 }
 
 void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn)
@@ -43,7 +57,6 @@ void AKraverPlayerState::OnNewPawn(APawn* NewPawn)
 		return;
 
 	OnNewPlayer.Broadcast(OwnerPlayer);
-	bSpawnDefaultWeapon = false;
 
 	if (OwnerPlayer->IsLocallyControlled())
 	{
@@ -63,13 +76,21 @@ void AKraverPlayerState::OnNewPawn(APawn* NewPawn)
 		KR_LOG(Log, TEXT("New Local Player : %s"), *OwnerPlayer->GetName());
 
 		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->SetLocalPlayer(OwnerPlayer);
-		RequestDefaultWeapon(GetGameInstance()->GetSubsystem<UDataSubsystem>()->GetWeaponArray());
 	}
 
-
+	if (IS_SERVER())
+	{
+		AKraverGameMode* GameMode = Cast<AKraverGameMode>(UGameplayStatics::GetGameMode(this));
+		GameMode->RequestDefaultWeapon(this, DefaultWeapons);
+	}
 }
 
-void AKraverPlayerState::RequestDefaultWeapon(const TArray<TSubclassOf<class AWeapon>>& RequestWeapons)
+class AKraverPlayer* AKraverPlayerState::GetOwnerPLayer()
 {
-	Server_RequestDefaultWeapon(RequestWeapons);
+	return OwnerPlayer ? OwnerPlayer : Cast<AKraverPlayer>(GetOwner());
+}
+
+void AKraverPlayerState::SetDefaultWeapons(const TSubclassOf<class AWeapon>& InValue, int Index)
+{
+	Server_SetDefaultWeapons(InValue, Index);
 }

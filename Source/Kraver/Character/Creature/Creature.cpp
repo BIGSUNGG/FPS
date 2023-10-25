@@ -101,12 +101,6 @@ void ACreature::OnServer_Assassinated(ACreature* Attacker, FAssassinateInfo Assa
 {
 	ERROR_IF_CALLED_ON_CLIENT();
 
-	SetActorLocationAndRotation
-	(
-		Attacker->GetActorLocation() + Attacker->GetActorForwardVector() * 100,
-		Attacker->GetActorRotation()
-	);
-
 	Client_Assassinated(Attacker, AssassinateInfo);
 	Multicast_Assassinated(Attacker, AssassinateInfo);
 }
@@ -746,6 +740,12 @@ void ACreature::Server_OwnOtherActor_Implementation(AActor* Actor)
 
 void ACreature::Multicast_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
 {
+	SetActorLocationAndRotation
+	(
+		Attacker->GetActorLocation() + Attacker->GetActorForwardVector() * 100,
+		Attacker->GetActorRotation()
+	);
+
 	GetMesh()->GetAnimInstance()->Montage_Play(AssassinateInfo.AssassinatedMontagesTpp);
 }
 
@@ -784,6 +784,7 @@ void ACreature::Client_SimulateMesh_Implementation()
 
 void ACreature::Multicast_SimulateMesh_Implementation()
 {
+	KR_LOG(Log, TEXT("Simulate mesh"));
 	GetMesh()->SetSimulatePhysics(true);
 	HpBarWidget->SetVisibility(false);
 

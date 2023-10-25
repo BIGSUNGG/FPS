@@ -7,7 +7,7 @@ void USettingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	CurSettings();
+	LoadSettings();
 }
 
 void USettingSubsystem::Deinitialize()
@@ -39,7 +39,7 @@ void USettingSubsystem::ApplySettings()
 
 }
 
-void USettingSubsystem::CurSettings()
+void USettingSubsystem::LoadSettings()
 {
 	UGameUserSettings* GameUserSettings = GEngine->GetGameUserSettings();
 	if (GameUserSettings)

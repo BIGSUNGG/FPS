@@ -204,7 +204,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 
 void AKraverPlayer::SpringArmTick(float DeltaTime)
 {
-	if (GetMovementComponent()->IsCrouching())
+	if (GetCharacterMovement()->IsCrouching())
 		FP_SpringArmCrouchLocation.Z = FMath::FInterpTo(FP_SpringArmCrouchLocation.Z, CrouchCameraHeight, DeltaTime, 20.f);
 	else
 		FP_SpringArmCrouchLocation.Z = FMath::FInterpTo(FP_SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);

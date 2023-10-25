@@ -30,7 +30,6 @@ void UPauseMenuWidget::MenuSetup_Implementation()
 
 void UPauseMenuWidget::MenuTearDown_Implementation()
 {
-	RemoveFromParent();
 	SetVisibility(ESlateVisibility::Hidden);
 
 	ReturnMainMenu->SetVisibility(ESlateVisibility::Hidden);

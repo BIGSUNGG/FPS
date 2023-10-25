@@ -20,7 +20,7 @@ public:
 protected:
 	// Rpc
 	UFUNCTION(Server, Reliable)
-	virtual void Server_RequestDefaultWeapon(const TArray<TSubclassOf<class AWeapon>>& RequestWeapons);
+	virtual void Server_SetDefaultWeapons(TSubclassOf<class AWeapon> InValue, int Index);
 
 	// Delegate
 	UFUNCTION()
@@ -28,10 +28,11 @@ protected:
 
 	// Func
 	virtual void OnNewPawn(APawn* NewPawn);
-	virtual void RequestDefaultWeapon(const TArray<TSubclassOf<class AWeapon>>& RequestWeapons);
 
 public:
-	class AKraverPlayer* GetOwnerPLayer() { return OwnerPlayer ? OwnerPlayer : Cast<AKraverPlayer>(GetOwner()); }
+	class AKraverPlayer* GetOwnerPLayer();
+
+	void SetDefaultWeapons(const TSubclassOf<class AWeapon>& InValue, int Index);
 
 public:
 	FNewKraverPlayer OnNewPlayer;
@@ -41,6 +42,5 @@ protected:
 	class AKraverPlayerController* OwnerController = nullptr;
 
 	// Default Weapon
-	bool bSpawnDefaultWeapon = false;
-
+	TArray<TSubclassOf<class AWeapon>> DefaultWeapons;
 };

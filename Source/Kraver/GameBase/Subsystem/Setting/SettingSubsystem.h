@@ -20,7 +20,7 @@ public:
 
 public:
 	void ApplySettings();
-	void CurSettings();
+	void LoadSettings();
 
 public:
 	// Getter Setter

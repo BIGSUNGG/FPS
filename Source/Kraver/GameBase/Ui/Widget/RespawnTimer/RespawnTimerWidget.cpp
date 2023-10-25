@@ -31,5 +31,5 @@ void URespawnTimerWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTim
 void URespawnTimerWidget::TimerStart()
 {
 	SetVisibility(ESlateVisibility::Visible);
-	RemainRespawnTime = AKraverGameMode::GetRespawnTime() - (UGameplayStatics::GetPlayerController(this, 0)->GetPlayerState<APlayerState>()->GetPingInMilliseconds() * 0.001f);
+	RemainRespawnTime = AKraverGameMode::GetRespawnTime();
 }

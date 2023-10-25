@@ -23,10 +23,6 @@ public:
 	virtual void SelectWeapon(TSubclassOf<AWeapon> WeaponClass, FString WeaponName, float Size, int Index);
 
 protected:
-	static TTuple<FString, float> MainWeaponTextInfo;
-	static TTuple<FString, float> SubWeaponTextInfo;
-	static TTuple<FString, float> SpecialWeaponTextInfo;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* MainWeaponText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
