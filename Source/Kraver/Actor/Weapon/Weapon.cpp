@@ -109,6 +109,7 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// WeaponTppPrimitiveInfo에 컴포넌트를 모두 추가
 	for (auto& Value : GetComponents())
 	{
 		if (Value == TppWeaponMesh)
@@ -132,10 +133,10 @@ void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsAttacking && !CanAttack())
-		OnAttackEndEvent();
-	if (IsSubAttacking && !CanSubAttack())
-		OnSubAttackEndEvent();
+	if (IsAttacking && !CanAttack()) // 공격이 불가능한데 공격중일 때 
+		OnAttackEndEvent(); // 공격 종료
+	if (IsSubAttacking && !CanSubAttack()) // 보조 공격이 불가능한데 보조 공격중일 때 
+		OnSubAttackEndEvent(); // 보조 공격 종료
 
 	if (CurAttackDelay > 0.f)
 	{
@@ -143,29 +144,29 @@ void AWeapon::Tick(float DeltaTime)
 		if (CurAttackDelay <= 0.f)
 		{
 			CurAttackDelay = 0.f;
-			if (bCanFirstInputAttack && bFirstInputAttack == true)
+			if (bCanFirstInputAttack && bFirstInputAttack == true) // 선입력이 입력되어있고 선입력이 공격이 가능할 때 
 			{
 				bFirstInputAttack = false;
-				OnAttackStartEvent();
+				OnAttackStartEvent(); // 공격 실행
 			}
 		}
 	}
 
 	if (OwnerCreature)
 	{
-		if (OwnerCreature->CombatComponent->GetCurWeapon() != this)
+		if (OwnerCreature->CombatComponent->GetCurWeapon() != this) // OwnerCreature의 현재 무기가 이 무기가 아닐 경우
 		{
 			if(IS_SERVER())
 				WeaponState = EWeaponState::EQUIPPED_HOLSTER;
 
-			SetWeaponVisibility(false);
+			SetWeaponVisibility(false); // 메쉬 숨기기
 		}
-		else if (OwnerCreature->CombatComponent->GetCurWeapon() == this)
+		else // OwnerCreature의 현재 무기가 이 무기일 경우
 		{
 			if (IS_SERVER())
 				WeaponState = EWeaponState::EQUIPPED_UNHOLSTER;
 
-			SetWeaponVisibility(true);
+			SetWeaponVisibility(true); // 메쉬 보이기
 		}
 	}
 }
@@ -271,6 +272,7 @@ bool AWeapon::OnLocal_Unholster()
 
 	OwnerCreature = Cast<ACreature>(GetOwner());
 
+	// 공격 종료
 	OnAttackEndEvent();
 	OnSubAttackEndEvent();
 
@@ -284,6 +286,7 @@ bool AWeapon::OnLocal_Holster()
 {
 	ERROR_IF_NOT_CALLED_ON_LOCAL_PARAM(false);
 
+	// 공격 종료
 	OnAttackEndEvent();
 	OnSubAttackEndEvent();
 
@@ -332,13 +335,13 @@ void AWeapon::AttackCancel()
 
 void AWeapon::OnAttackStartEvent()
 {		
-	if (IsAttacking == true)
+	if (IsAttacking == true) // 이미 공격중이면 
 		return;
 
-	if(!CanAttack())
+	if(!CanAttack()) // 공격이 불가능하면
 		return;
 
-	if (CurAttackDelay > 0 && bCanFirstInputAttack)
+	if (CurAttackDelay > 0 && bCanFirstInputAttack) // 공격 딜레이 중이고 선입력이 공격이 가능하면
 	{
 		bFirstInputAttack = true;
 		return;
@@ -348,11 +351,15 @@ void AWeapon::OnAttackStartEvent()
 
 	if (bCanAttack)
 	{ 
-		if (!bFirstAttackDelay)
-			Attack();
+		if (!bFirstAttackDelay) // 첫공격 딜레이가 없으면
+			TryAttack();
 
-		if(bAutomaticAttack)
-			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::Attack, AttackDelay, true, AttackDelay);		
+		if(bAutomaticAttack) // 자동공격이 가능하면
+			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::TryAttack, AttackDelay, true, AttackDelay);	
+
+		if(bFirstAttackDelay && !bAutomaticAttack) // 첫공격 딜레이도 있고 자동공격이 불가능하면
+			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::TryAttack, AttackDelay, false, AttackDelay);
+
 	}
 
 	OnAttackStart.Broadcast();
@@ -361,12 +368,12 @@ void AWeapon::OnAttackStartEvent()
 
 void AWeapon::OnAttackEndEvent()
 {
-	bFirstInputAttack = false;
+	bFirstInputAttack = false; // 선입력 취소
 	if (IsAttacking == false)
 		return;
 
 	IsAttacking = false;
-	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle);
+	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle); // 자동공격 취소
 	OnAttackEnd.Broadcast();
 
 	Server_OnAttackEndEvent();
@@ -426,12 +433,12 @@ void AWeapon::Server_OnSubAttackEndEvent_Implementation()
 	IsSubAttacking = false;
 }
 
-void AWeapon::Server_OnAttackEvent_Implementation()
+void AWeapon::Server_Attack_Implementation()
 {
-	Multicast_OnAttackEvent();
+	Multicast_Attack();
 }
 
-void AWeapon::Multicast_OnAttackEvent_Implementation()
+void AWeapon::Multicast_Attack_Implementation()
 {
 
 }
@@ -446,25 +453,25 @@ void AWeapon::Multicast_TakeImpulseAtLocation_Implementation(FVector Impulse, FV
 	GetTppWeaponMesh()->AddImpulseAtLocation(Impulse,ImpactPoint);
 }
 
-void AWeapon::OnAttackEvent()
+void AWeapon::Attack()
 {
-	Server_OnAttackEvent();
+	OnAttack.Broadcast();
+	Server_Attack();
 }
 
-void AWeapon::Attack()
+void AWeapon::TryAttack()
 {
 	bAttackCanceled = false;
 	CurAttackDelay = AttackDelay;
 	
 	OnBeforeAttack.Broadcast();
 
-	if (bAttackCanceled)
+	if (bAttackCanceled) // 공격이 취소되었을 경우
 	{
 		bAttackCanceled = false;
 		return;
 	}
-	OnAttackEvent();
-	OnAttack.Broadcast();
+	Attack();
 }
 
 void AWeapon::OnRep_WeaponState(EWeaponState PrevWeaponState)
@@ -482,6 +489,7 @@ void AWeapon::OnRep_WeaponState(EWeaponState PrevWeaponState)
 
 void AWeapon::MakeFppPrimitiveInfo()
 {
+	// WeaponTppPrimitiveInfo에 있는 컴포넌트를 WeaponFppPrimitiveInfo에 복사
 	for (auto& Tuple : WeaponTppPrimitiveInfo)
 	{
 		FString CompStr = "Additive " + Tuple.Key;
@@ -489,6 +497,7 @@ void AWeapon::MakeFppPrimitiveInfo()
 		UPrimitiveComponent* NewPrimitiveComp = NewObject<UPrimitiveComponent>(this, Tuple.Value->GetClass(), CompName);
 		NewPrimitiveComp->RegisterComponent();
 
+		// 컴포넌트 클래스별로 설정
 		if (Cast<USkeletalMeshComponent>(NewPrimitiveComp))
 		{
 			USkeletalMeshComponent* NewSkeletaComp = dynamic_cast<USkeletalMeshComponent*>(NewPrimitiveComp);
@@ -526,7 +535,8 @@ void AWeapon::MakeFppPrimitiveInfo()
 
 		WeaponFppPrimitiveInfo.Add(Tuple.Key, NewPrimitiveComp);
 	}
-
+	
+	// TppComp가 부착된 컴포넌트와 같은 컴포넌트를 FppComp에 붙임
 	for (auto& Tuple : WeaponTppPrimitiveInfo)
 	{
 		if (Tuple.Value->GetAttachParent())
@@ -545,6 +555,7 @@ void AWeapon::MakeFppPrimitiveInfo()
 		}
 	}
 
+	// 1인칭에서만 보이게 설정
 	for (auto& Tuple : WeaponFppPrimitiveInfo)
 	{
 		Tuple.Value->SetOnlyOwnerSee(true);
@@ -559,45 +570,51 @@ void AWeapon::MakeFppPrimitiveInfo()
 
 void AWeapon::EquipEvent()
 {
+	// 공격과 보조 공격 중지
 	OnAttackEndEvent();
 	OnSubAttackEndEvent();
 
+	// Physics 중지
 	GetTppWeaponMesh()->SetSimulatePhysics(false);
 	GetTppWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	// 세팅 초기화를 위해 HolsterEvent호출
 	HolsterEvent();
 }
 
 void AWeapon::UnEquipEvent()
 {
+	// 세팅 초기화를 위해 HolsterEvent호출
 	HolsterEvent();
 
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
 	if (Character && Character->IsLocallyControlled())
 	{
+		// 공격과 보조 공격 중지
 		OnAttackEndEvent();
 		OnSubAttackEndEvent();
+
+		// OwnerCreature의 델리게이트에 추가된 함수 제거
 		OnLocal_RemoveOnOwnerDelegate();
 	}
 
+	// Physics 실행
 	GetTppWeaponMesh()->SetSimulatePhysics(true);
 	GetTppWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
+	// 3인칭 메쉬는 보이게 1인칭 메쉬는 숨기기
 	SetWeaponVisibility(true, true, false);
 	SetWeaponVisibility(false, false, true);
 }
 
 void AWeapon::HolsterEvent()
 {
+	// 무기 숨기기
 	SetWeaponVisibility(false);
 }
 
 void AWeapon::UnholsterEvent()
 {
+	// 무기 드러내기
 	SetWeaponVisibility(true);
-}
-
-void AWeapon::AddWeaponPrimitive(FString Key, UPrimitiveComponent* Value)
-{
-	WeaponTppPrimitiveInfo.Add(Key, Value);
 }

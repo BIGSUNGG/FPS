@@ -35,14 +35,14 @@ protected:
 
 	// Delegate
 	UFUNCTION()
-	virtual void OnSkillFirstEvent();
+	virtual void OnSkillFirstEvent(); // R버튼 눌렸을때 호출
 	UFUNCTION()
 	virtual void OnReload_Insert_MagazineEvent();
 	UFUNCTION()
-	virtual void OnFireEvent();
+	virtual void OnFireEvent(); // Gun이 총을 발사했을때 호출
 
 	// Func
-	virtual void ReloadStart();
+	virtual void ReloadStart(); // 재장전 시작
 	virtual void ReloadStartEvent();
 
 	virtual bool RefillAmmo(); // CurAmmo를 보충함

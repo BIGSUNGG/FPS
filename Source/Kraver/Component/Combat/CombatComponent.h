@@ -51,7 +51,7 @@ public:
 	virtual float OnServer_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
 	virtual float OnServer_GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 주는 함수 (클라이언트에서 서버로 GiveDamage이벤트 호출)
 
-	virtual void CancelTakeDamage();
+	virtual void OnServer_CancelTakeDamage(); // 데미지 취소
 
 protected:
 	// Equip Weapon
@@ -111,8 +111,8 @@ protected:
 	void OnRep_WeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot);
 
 	// Func
-	bool AddWeapon(AWeapon* Weapon);
-	bool RemoveWeapon(AWeapon* Weapon);
+	bool AddWeapon(AWeapon* Weapon); // 무기 슬롯에 무기 추가
+	bool RemoveWeapon(AWeapon* Weapon); // 무기 슬롯에 무기 제거
 
 public:
 	// Getter Setter
@@ -121,17 +121,17 @@ public:
 
 	bool IsDead();
 
+	int8 FindCurWeaponSlotIndex(); // 현재 장착중인 무기의 인덱스 값 구하기
 	AWeapon* GetCurWeapon() { return CurWeapon; }
 	int32 GetCurHp() { return CurHp; }
 	int32 GetMaxHp() { return MaxHp; }
-	int8 GetCurWeaponSlotIndex();
-	bool GetCanEquipWeapon();
+	bool GetCanEquipWeapon(); // 무기를 더 장착할 수 있는지
 	const TArray<AWeapon*>& GetWeaponSlot() { return WeaponSlot; }
 	const FTeamInfo& GetTeamInfo() { return TeamInfo; }
 
-	int CountWeapon();
+	int CountWeapon(); // 무기 슬롯에 있는 무기 개수 구하기
 
-	void SetTeam(ETeam InTeam) { TeamInfo.CurTeam = InTeam; }
+	void SetTeam(ETeam InTeam) { TeamInfo.CurTeam = InTeam; } 
 	void SetUnholsterWhenEquip(bool InValue) { bUnholsterWhenEquip = InValue; }
 
 public:
@@ -201,9 +201,9 @@ protected:
 	int32 MaxHp = 100.f; // 최대 Hp
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Team", meta = (AllowPrivateAccess = "true"))
-	FTeamInfo TeamInfo;
+	FTeamInfo TeamInfo; // 팀 정보
 
 	bool bCanceledTakeDamage = false; // Server에서만 사용
-	bool bUnholsterWhenEquip = true; 
+	bool bUnholsterWhenEquip = true;  // 무기를 장착했을때 바로 무기를 들것인지
 
 };

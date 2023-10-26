@@ -26,6 +26,6 @@ void UKraverPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		CurWallRunState = AdvanceMovementComp->GetCurWallRunState();
 		IsWallRunning = (CurWallRunState != EWallRunState::NONE);
-		IsSliding = AdvanceMovementComp->GetIsSliding();
+		IsSliding = AdvanceMovementComp->IsSliding();
 	}
 }

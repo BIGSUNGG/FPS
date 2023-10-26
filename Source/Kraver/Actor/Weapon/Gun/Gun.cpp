@@ -21,23 +21,18 @@ AGun::AGun() : Super()
 void AGun::Tick(float DeltaTime)
 {
 	if (OwnerCreature)
-	{
-		if (CurAttackDelay > 0)
-		{
-			AddSpread(SpreadPerTime * DeltaTime);
-		}
-		else
-		{
-			CurBulletSpread -= SpreadForceBack * DeltaTime;
-			if (CurBulletSpread < MinSpread)
-				CurBulletSpread = MinSpread;
-		}
+	{		
+		if (CurAttackDelay > 0) // 발사중일 때 
+			IncreaseSpread(SpreadPerTime * DeltaTime);
+		else // 발사중이 아닐 때
+			DecreaseSpread(SpreadForceBack * DeltaTime);
 
-		if (OwnerCreature->CreatureMovementComponent->IsFalling())
+		if (OwnerCreature->CreatureMovementComponent->IsFalling()) // 공중에 떠있는지
 			AdditiveSpreadInAir = FMath::FInterpTo(AdditiveSpreadInAir, SpreadInAir, DeltaTime, 10);
 		else
 			AdditiveSpreadInAir = FMath::FInterpTo(AdditiveSpreadInAir, 0, DeltaTime, 10);
 
+		// 속도에 따른 스프레드
 		FVector Velocity = OwnerCreature->GetVelocity();
 		Velocity.Z = 0.f;
 		float Speed =  Velocity.Size();
@@ -46,6 +41,7 @@ void AGun::Tick(float DeltaTime)
 
 		AdditiveSpreadPerSpeed = Speed * SpreadPerSpeed;
 
+		// 반동
 		float TempRecoilPitch = FMath::FInterpTo(TargetRecoilPitch, 0.f, DeltaTime, 15.f);
 		float TempRecoilYaw = FMath::FInterpTo(TargetRecoilYaw, 0.f, DeltaTime, 15.f);
 
@@ -84,9 +80,9 @@ void AGun::PostInitializeComponents()
 
 }
 
-void AGun::OnAttackEvent()
+void AGun::Attack()
 {
-	if (!IsAttacking)
+	if (!IsAttacking) // 공격중이 아닌지
 		return;
 
 	if (OwnerCreature == nullptr)
@@ -95,32 +91,32 @@ void AGun::OnAttackEvent()
 		return;
 	}
 
-	if (CurAmmo > 0)
+	if (CurAmmo > 0) // 남아있는 총알이 있는지
 	{
 		if (!IS_SERVER() && !bInfinityAmmo)
 			--CurAmmo;
 
-		FireBullet();
-		FireEvent();
-		AddRecoil();
+		FireBullet(); // 총알 발사
+		FireEvent(); // 발사 이벤트
+		IncreaseRecoil(); // 반동추가
 
-		Super::OnAttackEvent();
+		Super::Attack();
 	}
-	else
-		OnAttackEndEvent();
+	else // 남아있는 총알이 없으면
+		OnAttackEndEvent(); // 공격 중지
 
 }
 
-void AGun::Server_OnAttackEvent_Implementation()
+void AGun::Server_Attack_Implementation()
 {
-	Super::Server_OnAttackEvent_Implementation();
+	Super::Server_Attack_Implementation();
 
 	--CurAmmo;
 }
 
-void AGun::Multicast_OnAttackEvent_Implementation()
+void AGun::Multicast_Attack_Implementation()
 {	
-	Super::Multicast_OnAttackEvent_Implementation();
+	Super::Multicast_Attack_Implementation();
 
 	if(!OwnerCreature || !OwnerCreature->IsLocallyControlled())
 		FireEvent();
@@ -145,20 +141,34 @@ void AGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)
 	ImpactBulletEvent(ImpactPos);
 }
 
-void AGun::AddRecoil()
+void AGun::IncreaseRecoil()
 {
 	TargetRecoilPitch += FMath::RandRange(MinRecoilPitch, MaxRecoilPitch);
 	TargetRecoilYaw += FMath::RandRange(MinRecoilYaw, MaxRecoilYaw);
 }
 
+void AGun::IncreaseSpread(float InValue)
+{
+	CurBulletSpread += InValue;
+	if (CurBulletSpread > MaxSpread)
+		CurBulletSpread = MaxSpread;
+}
+
+void AGun::DecreaseSpread(float InValue)
+{
+	CurBulletSpread -= InValue;
+	if (CurBulletSpread < MinSpread)
+		CurBulletSpread = MinSpread;
+}
+
 void AGun::FireBullet()
 {
-
 	OnFire.Broadcast();
 }
 
 void AGun::FireEvent()
 {
+	// 공격 몽타주
 	OnPlayTppMontage.Broadcast(AttackMontageTpp, 1.f);
 	OnPlayFppMontage.Broadcast(AttackMontageFpp, 1.f);
 
@@ -168,6 +178,7 @@ void AGun::FireEvent()
 			GetTppWeaponMesh()->GetAnimInstance()->Montage_Play(AttackMontageWep);
 	}
 
+	// 발사 이펙트
 	UAttachmentSilencerComponent* Silencer = FindComponentByClass<UAttachmentSilencerComponent>();
 	if ((!Silencer || Silencer->GetbFireEffect()) && WeaponTppPrimitiveInfo.Contains("FireEffect"))
 	{
@@ -175,6 +186,7 @@ void AGun::FireEvent()
 		WeaponFppPrimitiveInfo["FireEffect"]->Activate(true);
 	}
 
+	// 발사 소리
 	if (AttackSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation
@@ -189,8 +201,11 @@ void AGun::FireEvent()
 
 void AGun::ImpactBulletEvent(FVector ImpactPos)
 {
+	// 명중 소리
 	if (ImpactEffect)
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect, ImpactPos);
+
+	// 명중 이펙트
 	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -206,9 +221,10 @@ bool AGun::CanAttack()
 	if(!Super::CanAttack())
 		return false;
 
-	if(CurAmmo <= 0)
+	if(CurAmmo <= 0) // 남아있는 총알이 있는지
 		return false;
 
+	// 재장전 중인지
 	UWeaponReloadComponent* ReloadComp = this->GetComponentByClass<UWeaponReloadComponent>();
 	if(ReloadComp && ReloadComp->IsReloading())
 		return false;
@@ -221,16 +237,10 @@ bool AGun::CanSubAttack()
 	if (!Super::CanSubAttack())
 		return false;
 
+	// 재장전 중인지
 	UWeaponReloadComponent* ReloadComp = this->GetComponentByClass<UWeaponReloadComponent>();
 	if (ReloadComp && ReloadComp->IsReloading())
 		return false;
 
 	return true;
-}
-
-void AGun::AddSpread(float Spread)
-{
-	CurBulletSpread += Spread;
-	if(CurBulletSpread > MaxSpread)
-		CurBulletSpread = MaxSpread;
 }

@@ -101,7 +101,6 @@ void UCreatureMovementComponent::JumpStart()
 
 	IsJumping = true;
 	OwnerCreature->Jump();
-	Server_JumpStart();
 }
 
 void UCreatureMovementComponent::JumpEnd()
@@ -145,11 +144,6 @@ void UCreatureMovementComponent::SetMovementState(EMovementState value)
 		break;
 	}
 	Server_SetMovementState(value);
-}
-
-void UCreatureMovementComponent::Server_JumpStart_Implementation()
-{
-
 }
 
 void UCreatureMovementComponent::Server_SetMovementState_Implementation(EMovementState value)

@@ -24,7 +24,7 @@ protected:
 	virtual void OnAddOnDelegateEvent(UObject* Object) override;
 	virtual void OnRemoveOnDelegateEvent(UObject* Object) override;
 
-	virtual void Assassinate(AActor* Actor);
+	virtual void Assassinate(AActor* Actor); // 암살 시작시 호출
 	virtual void AssassinateEvent();
 	virtual std::pair<bool, FHitResult> CalculateCanAssassinate();
 
@@ -40,10 +40,10 @@ protected:
 
 	// Delegate
 	UFUNCTION()
-	void OnAssassinateAttackEvent();
+	void OnAssassinateAttackEvent(); // Montage에서 암살 데미지를 주는 노티파이가 호출되었을때 호출
 	UFUNCTION()
-	void OnAssassinateEndEvent();
-	virtual void OnBeforeAttackEvent() override;
+	void OnAssassinateEndEvent(); // Montage에서 암살이 끝나는 노티파이가 호출되었을때 호출
+	virtual void OnBeforeAttackEvent() override; // Melee에서 공격전에 암살이 가능한지 확인하기 위해 호출
 
 public:
 	FAssassinateDele OnAssassinate;
@@ -58,7 +58,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
 	bool bCanAssassination = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
-	float AssassinationDamage = 100.f;
+	float AssassinationDamage = 1000.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AssassinateMontagesTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))

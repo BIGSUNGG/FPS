@@ -35,9 +35,10 @@ void UWeaponParryComponent::ParryDelayEnd()
 	bCanParry = true;
 }
 
-void UWeaponParryComponent::ParrySuccess()
+void UWeaponParryComponent::OnServer_ParrySuccess()
 {
-	OwnerWeapon->GetOwnerCreature()->CombatComponent->CancelTakeDamage();
+	// 패링성공 시 데미지 받기 취소
+	OwnerWeapon->GetOwnerCreature()->CombatComponent->OnServer_CancelTakeDamage();
 	KR_LOG(Log, TEXT("Parry Success"));
 	Server_ParryEnd();
 }
@@ -57,9 +58,10 @@ void UWeaponParryComponent::OnServerBeforeTakeDamageEvent(float DamageAmount, FD
 
 	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
 
-	if (IsParrying && DamageType->bCanParried)
+	if (IsParrying && DamageType->bCanParried) // 패링가능한 공격일 경우 
 	{
-		ParrySuccess();
+		// 패링성공
+		OnServer_ParrySuccess();
 	}
 }
 

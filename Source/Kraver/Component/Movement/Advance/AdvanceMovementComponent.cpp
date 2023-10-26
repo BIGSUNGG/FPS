@@ -30,7 +30,7 @@ void UAdvanceMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(UAdvanceMovementComponent, CurWallRunState, COND_SkipOwner);
-	DOREPLIFETIME_CONDITION(UAdvanceMovementComponent, IsSliding, COND_SkipOwner);
+	DOREPLIFETIME_CONDITION(UAdvanceMovementComponent, bIsSliding, COND_SkipOwner);
 }
 
 // Called every frame
@@ -69,54 +69,56 @@ void UAdvanceMovementComponent::Landed(const FHitResult& Hit)
 
 void UAdvanceMovementComponent::JumpStart()
 {
-	if (OwnerCreature->GetMovementComponent()->IsFalling() == false)
+	if (OwnerCreature->GetMovementComponent()->IsFalling() == false) // 공중에 있으면
 	{
-		if (IsSliding)
+		if (bIsSliding) // 슬라이딩 중이면
 		{
 			SlideEnd(true);
 			bWantToJump = true;
 		}
-		else if (OwnerCreature->GetCharacterMovement()->IsCrouching())
+		else if (OwnerCreature->GetCharacterMovement()->IsCrouching()) // 앉아있으면
 		{
 			UnCrouch();
 			bWantToJump = true;
 		}
 		Super::JumpStart();
 	}
-	else if (GetIsWallRunning())
+	else if (IsWallRunning()) // 벽타기 중이면
 		WallRunJump();
-	else if (bCanDoubleJump)
+	else if (bCanDoubleJump) // 더블점프가 가능하면
 		DoubleJump();
 }
 
 void UAdvanceMovementComponent::JumpEnd()
 {
-
+	Super::JumpEnd();
 }
 
 void UAdvanceMovementComponent::Crouch()
 {
-	if (OwnerCreature->GetMovementComponent()->IsFalling() == false && CanSlide())
-		SlideStart();
-	else if (GetIsWallRunning())
-		WallRunEnd(0.3f);
-	else if (OwnerCreature->GetCharacterMovement()->IsFalling() == false)
-		OwnerCreature->Crouch();
+	if (OwnerCreature->GetMovementComponent()->IsFalling() == false && CanSlide()) // 슬라이딩이 가능하면
+		SlideStart(); // 슬라이딩 시작
+	else if (IsWallRunning()) // 벽타기 중이면
+		WallRunEnd(0.3f); // 벽타기 중지
+	else if (OwnerCreature->GetCharacterMovement()->IsFalling() == false) // 지면에 있으면
+		OwnerCreature->Crouch(); // 앉기 시작
 }
 
 void UAdvanceMovementComponent::UnCrouch()
 {
-	if (IsSliding)
-		SlideEnd(true);
-	else if (OwnerCreature->GetCharacterMovement()->IsFalling() == false)
-		OwnerCreature->UnCrouch();
+	if (bIsSliding) // 슬라이딩 중이면
+		SlideEnd(true); // 슬라이딩 중지
+	else if (OwnerCreature->GetCharacterMovement()->IsFalling() == false) // 지면에 있으면
+		OwnerCreature->UnCrouch(); // 일어나기
 }
 
 void UAdvanceMovementComponent::WallRunJump()
 {
-	if (GetIsWallRunning())
+	if (IsWallRunning()) // 벽타기 중이면
 	{
-		WallRunEnd(0.35);
+		WallRunEnd(0.35); // 벽타기 중지
+		
+		// 벽타기 점프 방향 구하기
 		FVector LaunchVector;
 		LaunchVector.X = WallRunNormal.X * WallRunJumpOffForce;
 		LaunchVector.Y = WallRunNormal.Y * WallRunJumpOffForce;
@@ -136,6 +138,7 @@ void UAdvanceMovementComponent::DoubleJump()
 {
 	bCanDoubleJump = false;
 
+	// 더블점프 힘 계산
 	FVector LaunchPower(0, 0, DobuleJumpPower.Z);
 
 	UCharacterMovementComponent* MovementComp = OwnerCreature->GetCharacterMovement();
@@ -191,18 +194,18 @@ void UAdvanceMovementComponent::DoubleJump()
 
 bool UAdvanceMovementComponent::WallRunUpdate()
 {
-	if(CurWallRunState != EWallRunState::WALLRUN_VERTICAL)
-		CurWallRunVerticalSpeed = FMath::FInterpTo(CurWallRunVerticalSpeed, MaxWallRunVerticalSpeed, GetWorld()->GetDeltaSeconds(), 5.f);
+	if(CurWallRunState != EWallRunState::WALLRUN_VERTICAL) // 세로 벽타기 중이면
+		CurWallRunVerticalSpeed = FMath::FInterpTo(CurWallRunVerticalSpeed, MaxWallRunVerticalSpeed, GetWorld()->GetDeltaSeconds(), 5.f); // 세로 벽타기 속도 줄이기
 
-	if (OwnerCreature->GetbJumpButtonPress() || GetIsWallRunning())
+	if (OwnerCreature->GetbJumpButtonPress() || IsWallRunning()) // 점프 버튼을 누르고있고 벽타기 중이면
 	{
 		bool WallRunVerticalSuccess = false;
 		bool WallRunHorizonSuccess = false;
 
-		if (!bWallRunVerticalSupressed)
+		if (!bWallRunVerticalSupressed) // 세로 벽타기가 가능한지
 		{
-			WallRunVerticalSuccess = WallRunVerticalUpdate();
-			if (WallRunVerticalSuccess)
+			WallRunVerticalSuccess = WallRunVerticalUpdate(); // 세로 벽타기 시작
+			if (WallRunVerticalSuccess) // 벽타기 성공했을때
 			{
 				Server_WallRunVerticalSuccess();
 				Server_WallRunSuccess(OwnerCreature->GetActorLocation(), OwnerCreature->GetActorRotation(), OwnerCreature->GetCharacterMovement()->Velocity, OwnerCreature->GetCharacterMovement()->PendingLaunchVelocity);
@@ -210,14 +213,16 @@ bool UAdvanceMovementComponent::WallRunUpdate()
 			}
 		}
 
-		if (!bWallRunHorizonSupressed)
+		if (!bWallRunHorizonSupressed) // 가로 벽타기가 가능한지
 		{
-			WallRunHorizonSuccess = WallRunHorizonUpdate();
-			if (WallRunHorizonSuccess)
+			WallRunHorizonSuccess = WallRunHorizonUpdate(); // 가로 벽타기 시작
+			if (WallRunHorizonSuccess) // 벽타기 성공했을때
 			{
-				if (bWallRunGravity)
-					OwnerCreature->GetCharacterMovement()->GravityScale = WallRunTargetGravity;
-				if (OwnerCreature->GetVelocity().Z < 0.f)
+				if (bWallRunGravity) // 벽타기 중 개별적인 중력을 적용할지
+					OwnerCreature->GetCharacterMovement()->GravityScale = WallRunTargetGravity; // 중력 적용
+
+				// 벽타기 중 아래로 내려가지 않도록 속도 조정
+				if (OwnerCreature->GetVelocity().Z < 0.f) 
 				{
 					OwnerCreature->GetCharacterMovement()->GravityScale = 0.f;
 					OwnerCreature->GetCharacterMovement()->PendingLaunchVelocity.Z = 0.f;
@@ -236,29 +241,32 @@ bool UAdvanceMovementComponent::WallRunUpdate()
 bool UAdvanceMovementComponent::WallRunHorizonUpdate()
 {
 	if ((CurWallRunState == EWallRunState::NONE || CurWallRunState == EWallRunState::WALLRUN_RIGHT) && WallRunHorizonMovement(OwnerCreature->GetActorLocation(), CalculateRightWallRunEndVector(), -1.f))
+		// 오른쪽 벽타기 확인
 	{
-		if (!GetIsWallRunning())
+		if (!IsWallRunning())
 			WallRunStart(EWallRunState::WALLRUN_RIGHT);
 
 		return true;
 	}
 	else if (CurWallRunState == EWallRunState::WALLRUN_RIGHT)
+		// 오른쪽 벽타기 중이였지만 오른쪽 벽타기를 실패한경우
 	{
 		WallRunHorizonEnd(1.f);
 		return false;
 	}
 	else if ((CurWallRunState == EWallRunState::NONE || CurWallRunState == EWallRunState::WALLRUN_LEFT) && WallRunHorizonMovement(OwnerCreature->GetActorLocation(), CalculateLeftWallRunEndVector(), 1.f))
+		// 왼쪽 벽타기 확인
 	{
-		if (!GetIsWallRunning())
+		if (!IsWallRunning())
 			WallRunStart(EWallRunState::WALLRUN_LEFT);
 
 		return true;
 	}
 	else if (CurWallRunState != EWallRunState::WALLRUN_VERTICAL)
 	{
+		// 왼쪽 벽타기 중이였지만 왼쪽 벽타기를 실패한경우
 		WallRunHorizonEnd(1.f);
 		return false;
-
 	}
 
 	return false;
@@ -266,18 +274,19 @@ bool UAdvanceMovementComponent::WallRunHorizonUpdate()
 
 bool UAdvanceMovementComponent::WallRunVerticalUpdate()
 {
-	if (bWallRunVerticalSupressed)
+	if (bWallRunVerticalSupressed) // 세로 벽타기가 가능한지
 		return false;
 
-	if (CurWallRunVerticalSpeed <= 100.f)
+	if (CurWallRunVerticalSpeed <= 100.f) // 세로 벽타기 속도가 부족하면
 	{
-		WallRunVerticalEnd(2.f);
+		WallRunVerticalEnd(2.f); // 세로 벽타기 중지
 		return false;
 	}
 
 	if (WallRunVerticalMovement(OwnerCreature->GetActorLocation(), CalculateVerticaltWallRunEndVector()))
+		// 세로 벽타기가 성공했는지
 	{
-		if (!GetIsWallRunning())
+		if (!IsWallRunning())
 			WallRunStart(EWallRunState::WALLRUN_VERTICAL);
 
 		CurWallRunVerticalSpeed = FMath::FInterpTo(CurWallRunVerticalSpeed, 0.f, GetWorld()->GetDeltaSeconds(), 0.75f);
@@ -295,6 +304,7 @@ bool UAdvanceMovementComponent::WallRunHorizonMovement(FVector Start, FVector En
 	if (bWallRunHorizonSupressed)
 		return false;
 
+	// 벽타기할 오브젝트 찾기
 	FCollisionQueryParams ObjectParams(NAME_None, false, OwnerCreature);
 	FHitResult Result;
 	bool bSuccess = GetWorld()->LineTraceSingleByChannel(
@@ -309,6 +319,7 @@ bool UAdvanceMovementComponent::WallRunHorizonMovement(FVector Start, FVector En
 	{
 		if (OwnerCreature->GetMovementComponent()->IsFalling() && CalculateValidWallVector(Result.Normal))
 		{
+			// 벽 각도에 맞춰 이동
 			WallRunNormal = Result.Normal;
 			FVector WallRunVec = FVector::CrossProduct(WallRunNormal, FVector(0, 0, 1)) * (WallRunDirection * WallRunHorizonSpeed);
 			OwnerCreature->LaunchCharacter(WallRunVec, true, !bWallRunGravity);
@@ -331,7 +342,7 @@ void UAdvanceMovementComponent::SlideStart()
 
 	float RightSpeed = OwnerCreature->CalculateRightSpeed();
 
-	IsSliding = true;
+	bIsSliding = true;
 
 	FVector SlidePower;
 	
@@ -362,16 +373,18 @@ void UAdvanceMovementComponent::SlideStart()
 
 void UAdvanceMovementComponent::SlideEnd(bool DoUncrouch)
 {
-	if (!IsSliding || bSlideSupressed)
+	if (!bIsSliding || bSlideSupressed)
 		return;
 
-	IsSliding = false;
+	bIsSliding = false;
 
+	// Movement 설정 되돌리기
 	InputForwardRatio = 1.f;
 	InputRightRatio = 1.f;
 	OwnerCreature->GetCharacterMovement()->GroundFriction = DefaultGroundFriction;
 	OwnerCreature->GetCharacterMovement()->BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
-
+	
+	// 일어나기
 	if (DoUncrouch)
 		OwnerCreature->UnCrouch(true);
 
@@ -424,7 +437,7 @@ bool UAdvanceMovementComponent::WallRunVerticalMovement(FVector Start, FVector E
 
 void UAdvanceMovementComponent::WallRunStart(EWallRunState State)
 {
-	if (GetIsWallRunning())
+	if (IsWallRunning())
 		return;
 
 	bCanDoubleJump = true;
@@ -434,7 +447,7 @@ void UAdvanceMovementComponent::WallRunStart(EWallRunState State)
 
 void UAdvanceMovementComponent::WallRunEnd(float ResetTime)
 {
-	if (GetIsWallRunning() == false)
+	if (IsWallRunning() == false)
 		return;
 
 	CurWallRunState = EWallRunState::NONE;
@@ -446,7 +459,7 @@ void UAdvanceMovementComponent::WallRunEnd(float ResetTime)
 
 void UAdvanceMovementComponent::WallRunHorizonEnd(float ResetTime)
 {
-	if (GetIsWallRunning() == false)
+	if (IsWallRunning() == false)
 		return;
 
 	CurWallRunState = EWallRunState::NONE;
@@ -457,7 +470,7 @@ void UAdvanceMovementComponent::WallRunHorizonEnd(float ResetTime)
 
 void UAdvanceMovementComponent::WallRunVerticalEnd(float ResetTime)
 {
-	if (GetIsWallRunning() == false)
+	if (IsWallRunning() == false)
 		return;
 
 	CurWallRunState = EWallRunState::NONE;
@@ -521,17 +534,12 @@ bool UAdvanceMovementComponent::CalculateValidWallVector(FVector InVec)
 	return UKismetMathLibrary::InRange_FloatFloat(InVec.Z, -0.52f, 0.52, false, false);
 }
 
-FVector UAdvanceMovementComponent::CalculatePlayerToWallVector()
-{
-	return -WallRunNormal;
-}
-
 bool UAdvanceMovementComponent::CanSlide()
 {
 	if (bSlideSupressed)
 		return false;
 
-	if (IsSliding)
+	if (bIsSliding)
 		return false;
 
 	if (MovementState != EMovementState::SPRINT)
@@ -545,7 +553,7 @@ bool UAdvanceMovementComponent::CanSlide()
 
 void UAdvanceMovementComponent::SlideUpdate()
 {
-	if (!IsSliding)
+	if (!bIsSliding)
 		return;
 
 	float Speed = OwnerCreature->GetVelocity().Size();
@@ -620,7 +628,7 @@ void UAdvanceMovementComponent::Server_WallRunSuccess_Implementation(FVector Loc
 
 void UAdvanceMovementComponent::Server_SlideSuccess_Implementation(FVector Velocity)
 {
-	IsSliding = true;
+	bIsSliding = true;
 
 	OwnerCreature->GetCharacterMovement()->GroundFriction = SlideGroundFriction;
 	OwnerCreature->GetCharacterMovement()->BrakingDecelerationWalking = SlideBrakingDecelerationWalking;
@@ -629,7 +637,7 @@ void UAdvanceMovementComponent::Server_SlideSuccess_Implementation(FVector Veloc
 
 void UAdvanceMovementComponent::Server_SlideEnd_Implementation()
 {
-	IsSliding = false;
+	bIsSliding = false;
 
 	OwnerCreature->GetCharacterMovement()->GroundFriction = DefaultGroundFriction;
 	OwnerCreature->GetCharacterMovement()->BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;

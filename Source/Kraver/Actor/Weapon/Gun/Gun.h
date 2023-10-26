@@ -29,21 +29,24 @@ public:
 
 protected:
 	// Delegate
-	virtual void OnAttackEvent() override;
+	virtual void Attack() override;
 	virtual void OnServer_ImpactBullet(FVector ImpactPos);
 
 	// Rpc
-	virtual void Server_OnAttackEvent_Implementation();
-	virtual void Multicast_OnAttackEvent_Implementation();
+	virtual void Server_Attack_Implementation();
+	virtual void Multicast_Attack_Implementation();
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_ImpactBullet(FVector ImpactPos);
 
 	// Func
-	virtual void AddRecoil();
-	virtual void FireBullet();
-	virtual void FireEvent();
-	virtual void ImpactBulletEvent(FVector ImpactPos);
+	virtual void IncreaseRecoil(); // 반동 추가
+	virtual void IncreaseSpread(float InValue); // 스프레드 반동 늘이기
+	virtual void DecreaseSpread(float InValue); // 스프레드 반동 줄이기
+
+	virtual void FireBullet(); // 총을 발사할 때 호출 (공격 범위에 있는적을 트레이스할때 사용, 여러번 호출 가능)
+	virtual void FireEvent(); // 총을 발사한 후 호출 (한번만 호출)
+	virtual void ImpactBulletEvent(FVector ImpactPos); // 총알이 Block되었을때 호출
 
 public:
 	// Getter Setter
@@ -54,8 +57,6 @@ public:
 	int32 GetCurAmmo() { return CurAmmo; }
 	int32 GetMaxAmmo() { return MaxAmmo; }
 	int32 GetTotalAmmo() { return TotalAmmo; }
-
-	void AddSpread(float Spread);
 
 public:
 	FAttackDele OnFire;
@@ -80,37 +81,37 @@ protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
 	int32 TotalAmmo = 30.f; // 총 총알 갯수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
-	bool bInfinityAmmo = false;
+	bool bInfinityAmmo = false; // 발사할 때 총알을 소비할지 
 
 	// Recoil
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Spread", meta = (AllowPrivateAccess = "true"))
-	float MinSpread;
+	float MinSpread; // 발사에 인한 최소 스프레드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Spread", meta = (AllowPrivateAccess = "true"))
-	float MaxSpread;
+	float MaxSpread; // 발사에 인한 최대 스프레드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Spread", meta = (AllowPrivateAccess = "true"))
-	float SpreadPerTime;
+	float SpreadPerTime; // 발사 중 얼마나 빠르게 스프레드가 늘어날지 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Spread", meta = (AllowPrivateAccess = "true"))
-	float SpreadForceBack;		
+	float SpreadForceBack; // 발사 중이 아닐때 얼마나 빠르게 스프레드가 줄어들지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Spread", meta = (AllowPrivateAccess = "true"))
-	float SpreadInAir;
+	float SpreadInAir; // 공중에서 스프레드가 얼마나 늘어날지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Spread", meta = (AllowPrivateAccess = "true"))
-	float SpreadPerSpeed;
+	float SpreadPerSpeed; // 속도에 따라 스프레드가 얼마나 늘어날지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Spread", meta = (AllowPrivateAccess = "true"))
-	float SpreadMaxSpeed;
+	float SpreadMaxSpeed; // 속도에 따라 늘어나는 스프레드가 어느 속도까지 늘어날지
 
-	float CurBulletSpread;
-	float AdditiveSpreadInAir;
-	float AdditiveSpreadPerSpeed;
+	float CurBulletSpread; // 발사에 의한 스프레드
+	float AdditiveSpreadInAir; // 공중에 있으면서 생긴 스프레드
+	float AdditiveSpreadPerSpeed; // 속도에 따른 스프레드
 
-	float TargetRecoilPitch;
-	float TargetRecoilYaw;
+	float TargetRecoilPitch; // 현재 세로 반동
+	float TargetRecoilYaw; // 현재 가로 반동
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Recoil", meta = (AllowPrivateAccess = "true"))
-	float MaxRecoilPitch;
+	float MaxRecoilPitch; // 세로 반동 최대치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Recoil", meta = (AllowPrivateAccess = "true"))
-	float MinRecoilPitch;
+	float MinRecoilPitch; // 세로 반동 최소치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Recoil", meta = (AllowPrivateAccess = "true"))
-	float MaxRecoilYaw;
+	float MaxRecoilYaw; // 가로 반동 최대치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Recoil", meta = (AllowPrivateAccess = "true"))
-	float MinRecoilYaw;
+	float MinRecoilYaw; // 가로 반동 최소치
 };

@@ -44,15 +44,15 @@ public:
 
 	// Delegate
 	UFUNCTION()
-	virtual void OnAssassinateEvent(AActor* AssassinatedActor);
+	virtual void OnAssassinateEvent(AActor* AssassinatedActor); // 캐릭터가 암살을 시작할때 호출
 	UFUNCTION()
-	virtual void OnAssassinateEndEvent();
+	virtual void OnAssassinateEndEvent(); // 캐릭터가 암살을 당하기 시작할때 호출
 
 public:
 	// Getter Setter
-	virtual bool CanAttack();
-	virtual bool CanSubAttack();
-	virtual bool CanRun();
+	virtual bool CanAttack(); // 공격할 수 있는지
+	virtual bool CanSubAttack(); // 보조 공격할 수 있는지
+	virtual bool CanRun(); // 달릴 수 있는지
 
 	FORCEINLINE FRotator GetCreatureAngle() { return Camera ? Camera->GetComponentRotation() - GetMesh()->GetComponentRotation() : FRotator::ZeroRotator; }
 	FORCEINLINE UCameraComponent* GetCamera() { return Camera; }
@@ -61,10 +61,10 @@ public:
 	bool GetbCrouchButtonPress() { return bCrouchButtonPress; }
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
-	float CalculateForwardSpeed();
-	float CalculateRightSpeed();
-	float CalculateCurrentFloorSlope();
-	FVector CaclulateCurrentFllorSlopeVector();
+	float CalculateForwardSpeed(); // 컨트롤러 방향 기준으로 앞으로 전진하는 속도
+	float CalculateRightSpeed(); // 컨트롤러 방향 기준으로 옆으로 이동하는 속도
+	float CalculateCurrentFloorSlope(); // 현재 캐릭터가 밟고 있는 바닥의 각도 구하기
+	FVector CaclulateCurrentFllorSlopeVector(); // 현재 캐릭터가 밟고 있는 바닥의 각도를 벡터로 구함
 	virtual USkeletalMeshComponent* GetCurMainMesh() { return GetMesh(); }
 	float GetCurrentInputForward() { return CurrentInputForward; }
 	float GetCurrentInputRight() { return CurrentInputRight; }
@@ -249,15 +249,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Dissolve", meta = (AllowPrivateAccess = "true"))
 	UTimelineComponent* DissolveTimeline;
 	FOnTimelineFloat DissolveTrack;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Dissolve", meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* DissolveCurve;
-
-	// Dynamic instance that we can change at runtime
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Combat|Dissolve", meta = (AllowPrivateAccess = "true"))
 	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
-
-	// Material instance set on the Blueprint, used with the dynamic material instance
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Dissolve", meta = (AllowPrivateAccess = "true"))
 	UMaterialInstance* DissolveMaterialInstance;
 }; 

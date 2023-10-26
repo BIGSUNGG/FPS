@@ -146,6 +146,7 @@ void AKraverPlayer::CameraTilt(float TargetRoll)
 
 void AKraverPlayer::WeaponADS(float DeltaTime)
 {
+	// 정조준 중일때
 	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponAdsComponent>())
 	{
 		UWeaponAdsComponent* AdsComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponAdsComponent>();
@@ -163,10 +164,11 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 			KR_LOG_ROTATOR(RelativeRotation);
 		}
 #endif
-
+		// 크로스헤어 끄기
 		if (CurViewType == EViewType::FIRST_PERSON && HUD)
 			HUD->SetbDrawCrosshair(false);
 
+		// 스코프 조준점에 맞춰 ArmMesh이동
 		const TMap<FString, UPrimitiveComponent*>& WeaponPrimitiveInfo = CombatComponent->GetCurWeapon()->GetFppWeaponPrimitiveInfo();
 		if (WeaponPrimitiveInfo.Contains("Scope"))
 		{
@@ -187,7 +189,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 		else
 			AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
 
-
+		// 카메라 줌인
 		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, CameraBasicFov - AdsComp->GetReduceFov(), DeltaTime, AdsComp->GetInterpSpeed()));
 	}
 	else
@@ -196,6 +198,7 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 			HUD->SetbDrawCrosshair(true);
 
 		AdsArmLocation.Z = FMath::FInterpTo(AdsArmLocation.Z, 0.f, DeltaTime, 10.f);
+		// 카메라 줌아웃
 		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, CameraBasicFov, DeltaTime, 15.f));
 	}
 
@@ -210,7 +213,6 @@ void AKraverPlayer::SpringArmTick(float DeltaTime)
 		FP_SpringArmCrouchLocation.Z = FMath::FInterpTo(FP_SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
 
 	Fp_SpringArm->SetRelativeLocation(Fp_SpringArmBasicLocation + FP_SpringArmCrouchLocation);
-	RefreshArm();
 }
 
 void AKraverPlayer::ClientTick(float DeltaTime)
@@ -437,25 +439,9 @@ void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 		);
 }
 
-void AKraverPlayer::RefreshArm()
-{
-}
-
 void AKraverPlayer::RefreshSpringArm()
 {
 	Fp_SpringArm->SetRelativeLocation(Fp_SpringArmBasicLocation + FP_SpringArmCrouchLocation);
-	Server_RefreshSpringArm(Fp_SpringArmBasicLocation + FP_SpringArmCrouchLocation, Fp_SpringArm->TargetArmLength);
-}
-
-void AKraverPlayer::Server_RefreshSpringArm_Implementation(FVector Vector, float Length)
-{
-	Multicast_RefreshSpringArm(Vector,Length);
-}
-
-void AKraverPlayer::Multicast_RefreshSpringArm_Implementation(FVector Vector, float Length)
-{
-	Fp_SpringArm->SetRelativeLocation(Vector);
-	Fp_SpringArm->TargetArmLength = Length;
 }
 
 void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FTransform Transform, FVector Direction)
@@ -514,13 +500,7 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	if (!IsValid(Weapon))
 		return;
 
-	if (IsValid(Weapon->GetTppWeaponMesh()) == false || IsValid(GetMesh()) == false)
-	{
-		GetWorld()->GetTimerManager().SetTimerForNextTick([=]() { OnEquipWeaponSuccessEvent(Weapon); });
-		return;
-	}
-
-	if (!IsValid(Weapon->GetFppWeaponMesh()))
+	if (IsValid(Weapon->GetTppWeaponMesh()) == false || IsValid(GetMesh()) == false || !IsValid(Weapon->GetFppWeaponMesh()))
 	{
 		GetWorldTimerManager().SetTimerForNextTick([=]() { OnEquipWeaponSuccessEvent(Weapon); });
 		return;
@@ -534,6 +514,8 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 		
 		Weapon->GetFppWeaponMesh()->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetFppHandSocketName());
 	
+
+		// 1인칭으로만 보이는 컴포넌트 추가
 		for(auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 		{
 			if(!Tuple.Value)
@@ -542,6 +524,7 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 			ShowOnlyFirstPerson.Push(Tuple.Value);
 		}
 		
+		// 3인칭으로만 보이는 컴포넌트 추가
 		for (auto& Tuple : Weapon->GetTppWeaponPrimitiveInfo())
 		{
 			if (!Tuple.Value)

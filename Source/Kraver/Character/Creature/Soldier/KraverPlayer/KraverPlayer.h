@@ -51,15 +51,9 @@ protected:
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
 	virtual void ThrowWeapon(AWeapon* Weapon);
 
-	virtual void RefreshArm();
 	virtual void RefreshSpringArm(); // SpringArm의 RelativeLocation을 새로고침하는 함수
 
 	// Rpc
-	UFUNCTION(Server, Reliable)
-	void Server_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_RefreshSpringArm(FVector Vector, float Length); // SpringArm의 RelativeLocation을 서버에서 새로고침하는 함수
-
 	UFUNCTION(Server, Reliable)
 	void Server_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
 		
@@ -102,7 +96,7 @@ protected:
 	// Function
 	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
 	virtual void PlayLandedMontage() override;
-	void ChangeWeapon(int8 Index);
+	void ChangeWeapon(int8 Index); // 무기 변경
 
 		// Holster
 	void HolsterWeapon();
@@ -145,14 +139,14 @@ protected:
 
 	// ViewType
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-	EViewType CurViewType = EViewType::FIRST_PERSON;
+	EViewType CurViewType = EViewType::FIRST_PERSON; // 현재 1인칭인지 3인칭인지
 
 	TArray<UPrimitiveComponent*> ShowOnlyFirstPerson; // 1인칭 시점일때만 보이는 컴포넌트
 	TArray<UPrimitiveComponent*> ShowOnlyThirdPerson; // 3인칭 시점일때만 보이는 컴포넌트
 
 	// Interaction
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
-	AWeapon* CanInteractWeapon;
+	AWeapon* CanInteractWeapon; // 장착가능한 무기
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
 	float InteractionDistance = 700.f; // 장착가능한 무기를 찾는 거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
@@ -160,15 +154,14 @@ protected:
 
 	// Crouch
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-	float CrouchCameraHeight = -40.f;
+	float CrouchCameraHeight = -40.f; // 앉았을때 목표 카메라 높이
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-	float UnCrouchCameraHeight = 0.f;
+	float UnCrouchCameraHeight = 0.f; // 일어났을때 목표 카메라 높이
 
-	float CameraBasicFov = 110.f;
+	float CameraBasicFov = 110.f; // 기본 Fov값
 	FVector Fp_SpringArmBasicLocation; // 기본적으로 적용할 SprintArm의 RelativeLocation
 	FVector FP_SpringArmCrouchLocation; // 추가적으로 적용할 SprintArm의 RelativeLocation
 
-	FTimerHandle UnEquipWeaponTimerHandle;
 	float WeaponThrowPower = 700.f; // 장착해제된 무기를 던지는 힘
 	FVector WeaponThrowAngularPower = FVector(100, 100, 0); // 장착해제된 무기를 던지는 힘
 
@@ -177,6 +170,6 @@ protected:
 	FVector AdsArmLocation;
 
 	// Holster
-	int8 UnholsterIndex = -1;
+	int8 UnholsterIndex = -1; // 다음에 들 무기 인덱스 값
 
 };

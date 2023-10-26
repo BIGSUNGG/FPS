@@ -139,6 +139,7 @@ void ACreature::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// HpBar 할당
 	UHpBarWidget* HpBar = Cast<UHpBarWidget>(HpBarWidget->GetWidget());
 	if (HpBar)
 		HpBar->SetOwnerCreature(this);
@@ -162,10 +163,10 @@ void ACreature::Tick(float DeltaTime)
 
 	if (CombatComponent->GetCurWeapon())
 	{
-		if (CombatComponent->GetCurWeapon()->GetIsAttacking() && !CanAttack())
+		if (CombatComponent->GetCurWeapon()->GetIsAttacking() && !CanAttack()) // 공격이 불가능할 시 공격 종료
 			CombatComponent->SetIsAttacking(false);
 
-		if (CombatComponent->GetCurWeapon()->GetIsSubAttacking() && !CanSubAttack())
+		if (CombatComponent->GetCurWeapon()->GetIsSubAttacking() && !CanSubAttack()) // 보조 공격이 불가능할 시 공격 종료
 			CombatComponent->SetIsSubAttacking(false);
 	}
 
@@ -207,20 +208,25 @@ void ACreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ACreature::OnAssassinateEvent(AActor* AssassinatedActor)
 {	
+	// DisableInput
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	DisableInput(PlayerController);
 
+	// 카메라 설정
 	GetMesh()->SetVisibility(true);
 	Camera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "head");
 
+	// 캐릭터 멈추기
 	GetMovementComponent()->Velocity = FVector::ZeroVector;
 }
 
 void ACreature::OnAssassinateEndEvent()
 {
+	// EnableInput
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	EnableInput(PlayerController);
 
+	// 카메라 설정
 	Camera->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
 	Camera->AttachToComponent(Fp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
 
@@ -289,26 +295,27 @@ float ACreature::CalculateRightSpeed()
 {
 	FVector Velocity = GetCharacterMovement()->Velocity;
 
-	FVector Right = GetControlRotation().Vector().GetSafeNormal2D().RotateAngleAxis(-90.0f, FVector::UpVector);
-	return -FVector::DotProduct(Velocity, Right) / Right.Size2D();
+	FVector Right = GetControlRotation().Vector().GetSafeNormal2D().RotateAngleAxis(90.0f, FVector::UpVector);
+	return FVector::DotProduct(Velocity, Right) / Right.Size2D();
 }
 
 float ACreature::CalculateCurrentFloorSlope()
 {
-	if(GetCharacterMovement()->IsFalling())
+	if(GetCharacterMovement()->IsFalling()) // 공중에 있을 경우 바닥이 없으므로 0 반환
 		return 0.f;
 
+	// 바닥 오브젝트 구하기
 	FHitResult HitResult;
 	FVector StartLocation = GetActorLocation();
 	FVector EndLocation = StartLocation - FVector(0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 60.f);
 	FCollisionQueryParams QueryParams;
 	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_ONLY_OBJECT, QueryParams);
 
-	// Calculate floor slope if hit result is valid
 	if (HitResult.IsValidBlockingHit())
 	{
+		// 바닥 각도 구하기
 		FVector FloorNormal = HitResult.Normal;
-		float FloorSlope = FMath::Acos(FloorNormal.Z) * 180.0f / PI; // Convert to degrees
+		float FloorSlope = FMath::Acos(FloorNormal.Z) * 180.0f / PI; // 각도 변환
 		return FloorSlope;
 	}
 
@@ -319,9 +326,10 @@ FVector ACreature::CaclulateCurrentFllorSlopeVector()
 {
 	UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement();
 
-	if(CharacterMovementComp->IsFalling())
+	if(CharacterMovementComp->IsFalling()) // 공중에 있을 경우 바닥이 없으므로 ZeroVector 반환
 		return FVector::ZeroVector;
 
+	// 바닥 오브젝트 구하기
 	if (CharacterMovementComp)
 	{
 		FHitResult HitResult;
@@ -331,10 +339,8 @@ FVector ACreature::CaclulateCurrentFllorSlopeVector()
 		QueryParams.bFindInitialOverlaps = true;
 
 		if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_ONLY_OBJECT, QueryParams))
-		{
-			FVector FloorNormal = HitResult.ImpactNormal;
-			return FloorNormal;
-		}
+			return HitResult.ImpactNormal;
+
 	}
 	return FVector::ZeroVector;
 }
@@ -444,7 +450,7 @@ void ACreature::AimOffset(float DeltaTime)
 	Velocity.Z = 0.f;
 	float Speed = Velocity.Size();
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
-	if (Speed == 0.f && !bIsInAir) // standing still, not jumping
+	if (Speed == 0.f && !bIsInAir) // 가만히 있을 경우
 	{
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
@@ -467,7 +473,6 @@ void ACreature::AimOffset(float DeltaTime)
 	AO_Pitch = (GetBaseAimRotation().Pitch);
 	if (AO_Pitch > 90.f && !IsLocallyControlled())
 	{
-		// map pitch from [270, 360) to [-90, 0)
 		FVector2D InRange(270.f, 360.f);
 		FVector2D OutRange(-90.f, 0.f);
 		AO_Pitch = (FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch));
@@ -501,13 +506,13 @@ void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	if (!IsValid(Weapon))
 		return;
 
-	if (IsValid(Weapon->GetTppWeaponMesh()) == false || IsValid(GetMesh()) == false)
+	if (IsValid(Weapon->GetTppWeaponMesh()) == false || IsValid(GetMesh()) == false) // 무기가 아직 생성이 안되었는지 확인
 	{
 		GetWorld()->GetTimerManager().SetTimerForNextTick([=]() { OnEquipWeaponSuccessEvent(Weapon); });
 		return;
 	}
 
-	Weapon->GetTppWeaponMesh()->SetSimulatePhysics(false);
+	// 무기의 TppMesh를 3인칭 메쉬에 장착
 	GetWorld()->GetTimerManager().SetTimerForNextTick([=]()
 		{
 			Weapon->GetTppWeaponMesh()->AttachToComponent
@@ -542,6 +547,7 @@ void ACreature::OnUnholsterWeaponEvent(AWeapon* Weapon)
 	if (!IsValid(Weapon))
 		return;
 
+	// 무기의 델리게이트에 함수 등록
 	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.AddDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 
@@ -577,6 +583,7 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 	if (!IsValid(Weapon))
 		return;
 
+	// 무기의 델리게이트에 함수 제거
 	Weapon->OnPlayTppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageTpp());
@@ -751,15 +758,18 @@ void ACreature::Multicast_Assassinated_Implementation(ACreature* Attacker, FAssa
 
 void ACreature::Client_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo)
 {
+	// DisableInput
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	if(PlayerController)
 		DisableInput(PlayerController);
 
+	// 3인칭 메쉬 보이기
 	GetMesh()->SetOwnerNoSee(false);
 	GetMesh()->SetOnlyOwnerSee(false);
 	GetMesh()->SetVisibility(true);
 	GetMesh()->SetHiddenInGame(false);
 
+	// 카메라 설정
 	FAttachmentTransformRules TransformRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
 	TransformRules.bWeldSimulatedBodies = true;
 	TransformRules.RotationRule = EAttachmentRule::KeepWorld;
@@ -785,9 +795,14 @@ void ACreature::Client_SimulateMesh_Implementation()
 void ACreature::Multicast_SimulateMesh_Implementation()
 {
 	KR_LOG(Log, TEXT("Simulate mesh"));
+
+	// 3인칭 메쉬보이기
 	GetMesh()->SetSimulatePhysics(true);
+
+	// HpBar 숨기기
 	HpBarWidget->SetVisibility(false);
 
+	// 3인칭 메쉬 Dissolve 실행
 	if (DissolveMaterialInstance)
 	{
 		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);

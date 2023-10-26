@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "CreatureMovementComponent.generated.h"
 
-
+// Creature의 이동을 담당하는 컴포넌트
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class KRAVER_API UCreatureMovementComponent : public UActorComponent
 {
@@ -27,19 +27,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void Landed(const FHitResult& Hit);
 
-	virtual void MoveForward(float NewAxisValue);
-	virtual void MoveRight(float NewAxisValue);
+	virtual void MoveForward(float NewAxisValue); // 정면으로 이동
+	virtual void MoveRight(float NewAxisValue); // 측면으로 이동
 
-	virtual void JumpStart();
-	virtual void JumpEnd();
+	virtual void JumpStart(); // 점프 시작
+	virtual void JumpEnd(); // 점프 종료
 
-	virtual void Crouch();
-	virtual void UnCrouch();
+	virtual void Crouch(); // 앉기 
+	virtual void UnCrouch(); // 일어나기
 
-protected:
-	UFUNCTION(Server, Reliable)
-	virtual void Server_JumpStart();
-		
+protected:	
 	UFUNCTION(Server, Reliable)
 	void Server_SetMovementState(EMovementState value);
 

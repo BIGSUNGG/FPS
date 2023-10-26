@@ -34,6 +34,7 @@ void AHitscanGun::FireBullet()
 {
 	Super::FireBullet();
 
+	// 스프레드 구하기
 	FVector Spread;
 	if (ShouldApplySpread())
 	{
@@ -42,6 +43,8 @@ void AHitscanGun::FireBullet()
 		Spread.Y = FMath::RandRange(-CurSpread, CurSpread);
 		Spread.Z = FMath::RandRange(-CurSpread, CurSpread);
 	}
+	else
+		Spread = FVector::ZeroVector;
 
 	TArray<FHitResult> BulletHitResults = CalculateFireHit(PROFILE_Bullet, Spread);
 	FireBulletResult(BulletHitResults);
@@ -70,11 +73,13 @@ void AHitscanGun::FireBulletResult(const TArray<FHitResult>& BulletHitResults)
 
 TArray<FHitResult> AHitscanGun::CalculateFireHit(FName ProfileName, FVector Spread /*= FVector(0, 0, 0)*/)
 {
+	// 발사 끝지점 구하기
 	FVector EndPoint = OwnerCreature->GetCamera()->GetForwardVector() + Spread;
 	EndPoint.Normalize();
 	EndPoint *= BulletDistance;
 	EndPoint += OwnerCreature->GetCamera()->GetComponentLocation();
 
+	// 트레이스
 	TArray<FHitResult> BulletHitResults;
 	FCollisionQueryParams BulletParams(NAME_None, false, OwnerCreature);
 	bool bResult = GetWorld()->SweepMultiByProfile(

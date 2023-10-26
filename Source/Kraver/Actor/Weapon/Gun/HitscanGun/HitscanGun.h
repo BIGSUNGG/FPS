@@ -25,7 +25,7 @@ protected:
 	// Function
 	virtual void FireBullet() override;
 	virtual void FireBulletResult(const TArray<FHitResult>& BulletHitResults);
-	TArray<FHitResult>  CalculateFireHit(FName ProfileName, FVector Spread = FVector(0, 0, 0));
+	TArray<FHitResult> CalculateFireHit(FName ProfileName, FVector Spread = FVector(0, 0, 0)); // 발사 결과
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))

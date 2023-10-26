@@ -24,7 +24,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-public:
 	void FireBullet(FVector& Direction, AActor* Target = nullptr);
 
 protected:
@@ -39,20 +38,23 @@ public:
 	FImpactDele OnImpact;
 
 protected:
+	// Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* BulletMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovementComponent;
 
+
+	// Bullet
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))
 	float BulletDamage = 0.f;
-
+	float BulletLifeTime = 5.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))
 	int32 MaxHitCount = 1;
 	int32 HitCount = 0;
 
+	// Damage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UKraverDamageType> HitDamageType;
 
-	float BulletLifeTime = 5.f;
 };

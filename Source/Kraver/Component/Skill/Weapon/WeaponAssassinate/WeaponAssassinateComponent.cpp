@@ -93,6 +93,7 @@ std::pair<bool, FHitResult> UWeaponAssassinateComponent::CalculateCanAssassinate
 		return Result;
 	}
 
+	// 대상 찾기
 	FCollisionQueryParams Params(NAME_None, false, OwnerMelee);
 	Params.AddIgnoredActor(GetOwnerCreature());
 
@@ -106,6 +107,7 @@ std::pair<bool, FHitResult> UWeaponAssassinateComponent::CalculateCanAssassinate
 		Params
 	);
 
+	// 대상이 뒤돌고있는지
 	if (bSuccess)
 	{
 		FTransform OwnerTransform = GetOwnerCreature()->GetTransform();
@@ -179,9 +181,9 @@ void UWeaponAssassinateComponent::OnBeforeAttackEvent()
 {
 	UWeaponComponent::OnBeforeAttackEvent();
 
-	if (bCanAssassination && OwnerMelee->IsComboAttacking() == false)
+	if (bCanAssassination && OwnerMelee->IsComboAttacking() == false) // 콤보 공격중이 아닐때
 	{
-		pair<bool, FHitResult> CanAssassinate = CalculateCanAssassinate();
+		pair<bool, FHitResult> CanAssassinate = CalculateCanAssassinate(); // 암살 대상 찾기
 		if (CanAssassinate.first)
 		{
 			Assassinate(CanAssassinate.second.GetActor());

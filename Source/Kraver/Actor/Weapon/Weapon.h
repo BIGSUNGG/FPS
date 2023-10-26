@@ -36,8 +36,7 @@ public:
 	virtual void OnLocal_AddOnOwnerDelegate();
 	virtual void OnLocal_RemoveOnOwnerDelegate();
 
-	virtual void AttackCancel();
-	virtual void AddWeaponPrimitive(FString Key, UPrimitiveComponent* Value);
+	virtual void AttackCancel(); // 다음 공격 또는 공격 전에 공격을 취소하기 위해 호출
 
 	// Delegate
 	UFUNCTION()
@@ -67,20 +66,18 @@ protected:
 	virtual void Server_OnSubAttackEndEvent();
 
 	UFUNCTION(Server, Reliable)
-	virtual void Server_OnAttackEvent();
+	virtual void Server_Attack();
 	UFUNCTION(NetMulticast, Reliable)
-	virtual void Multicast_OnAttackEvent();
+	virtual void Multicast_Attack();
 
 	UFUNCTION(Server, Reliable)
-	void Server_TakeImpulseAtLocation(FVector Impulse, FVector ImpactPoint);
+	void Server_TakeImpulseAtLocation(FVector Impulse, FVector ImpactPoint); // Mesh에 Impulse를 주기 위해 사용
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_TakeImpulseAtLocation(FVector Impulse, FVector ImpactPoint);
 
 	// Delegate
-	UFUNCTION()
-	virtual void OnAttackEvent();
-
-	virtual void Attack() final; // 공격할때 호출되는 함수
+	virtual void TryAttack() final; // 공격을 시도할 때 호출 AttackCancel을 통해 취소될 수 있음 취소되지 않을 경우
+	virtual void Attack(); // 공격이 취소되지 않았을때 호출
 	
 	// OnRep
 	UFUNCTION()
@@ -88,6 +85,8 @@ protected:
 
 	// Func
 	virtual void MakeFppPrimitiveInfo() final; // 1인칭 PrimitiveInfo를 추가
+
+		// Weapon State에 따라 함수 호출
 	virtual void EquipEvent();
 	virtual void UnEquipEvent();
 	virtual void HolsterEvent();
@@ -133,7 +132,7 @@ public:
 	void SetWeaponVisibility(bool Value, bool bDoTpp = true, bool bDoFpp = true);
 
 public:
-	FAttackDele OnAttack;
+	FAttackDele OnAttack; // 공격
 	FAttackDele OnBeforeAttack;
 
 	FAttackStartDele OnAttackStart;
@@ -234,21 +233,21 @@ protected:
 	bool IsSubAttacking = false; // 보조 공격중인지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-	bool bAttackWhileSprint = true;
+	bool bAttackWhileSprint = true; // Sprint 중에 공격이 가능한지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-	bool bSubAttackWhileSprint = true;
+	bool bSubAttackWhileSprint = true; // Sprint 중에 보조 공격이 가능한지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-	bool bCanSubAttack = true;
+	bool bCanSubAttack = true; // 보조 공격이 가능한지
+	bool bCanAttack = true; // 공격이 가능한지
+	bool bAttackCanceled = false; // TryAttack 함수에서 Attack함수를 호출할지
 
-	bool bAttackCanceled = false;
-	bool bCanAttack = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 	bool bAutomaticAttack = false; // 연사공격이 가능한지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 	bool bFirstAttackDelay = false; // 첫공격에 딜레이가 있는지
 	bool bFirstInputAttack = false; // 공격 선입력이 입력되어있는지 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-	bool bCanFirstInputAttack = true;
+	bool bCanFirstInputAttack = true; // 첫 공격에 딜레이가 추가
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 	float AttackDelay = 0.2f; // 공격 딜레이
 	float CurAttackDelay = 0.f; // 현재 공격 딜레이

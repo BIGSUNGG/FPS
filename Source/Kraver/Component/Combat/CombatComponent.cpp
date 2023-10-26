@@ -26,13 +26,13 @@ FKraverDamageResult UCombatComponent::CalculateDamage(float DamageAmount, FDamag
 
 	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
 
-	if(IsDead())
+	if(IsDead()) // 이미 죽어있다면
 		Result.bAlreadyDead = true;
 
 	if(DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		FPointDamageEvent const& PointDamageEvent = static_cast<FPointDamageEvent const&>(DamageEvent);
-		if (DamageType->bCanHeadShot && PointDamageEvent.HitInfo.BoneName == "Head")
+		if (DamageType->bCanHeadShot && PointDamageEvent.HitInfo.BoneName == "Head") // 헤드샷이가능하고 머리에 맞았을경우
 		{
 			Result.ActualDamage *= 3.f;
 			Result.bCritical = true;
@@ -44,10 +44,9 @@ FKraverDamageResult UCombatComponent::CalculateDamage(float DamageAmount, FDamag
 		FHitResult HitResult = RadialDamageEvent.ComponentHits[0];
 		float Distance = (RadialDamageEvent.Origin - HitResult.ImpactPoint).Size();
 		Result.ActualDamage *= RadialDamageEvent.Params.GetDamageScale(Distance);
-
 	}
 
-	if(CurHp - Result.ActualDamage <= 0.f)
+	if(CurHp - Result.ActualDamage <= 0.f) // 데미지를 받으면 죽는다면
 		Result.bCreatureDead = true;
 
 	return Result;
@@ -62,7 +61,7 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 	}
 
 	UCombatComponent* AttackerCobatComp = FindComponentByClassIncludeOwner<UCombatComponent>(DamageCauser);
-	if (FTeamInfo::CheckIsTeam(TeamInfo.CurTeam, AttackerCobatComp->TeamInfo.CurTeam))
+	if (FTeamInfo::CheckIsTeam(TeamInfo.CurTeam, AttackerCobatComp->TeamInfo.CurTeam)) // 같은 팀일 경우 데미지를 받지 않음
 		return 0.f;
 
 	FKraverDamageResult DamageResult = CalculateDamage(DamageAmount, DamageEvent);
@@ -177,8 +176,9 @@ void UCombatComponent::Client_GiveRadialDamageSuccess_Implementation(AActor* Dam
 	OnClientGiveRadialDamageSuccess.Broadcast(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
-void UCombatComponent::CancelTakeDamage()
+void UCombatComponent::OnServer_CancelTakeDamage()
 {
+	ERROR_IF_CALLED_ON_CLIENT();
 	bCanceledTakeDamage = true;
 }
 
@@ -202,14 +202,15 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, CurWeapon);
 	DOREPLIFETIME(UCombatComponent, WeaponSlot);
 	DOREPLIFETIME(UCombatComponent, TeamInfo);
-	DOREPLIFETIME_CONDITION(UCombatComponent, CurHp, COND_OwnerOnly);
-	DOREPLIFETIME_CONDITION(UCombatComponent, MaxHp, COND_OwnerOnly);
+	DOREPLIFETIME(UCombatComponent, CurHp);
+	DOREPLIFETIME(UCombatComponent, MaxHp);
 }
 
 void UCombatComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 
+	// 장착중인 무기를 모두 Destroy함
 	if(IS_SERVER())
 	{
 		for (auto& Weapon : WeaponSlot)
@@ -223,7 +224,7 @@ void UCombatComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	}
 }
 
-int8 UCombatComponent::GetCurWeaponSlotIndex()
+int8 UCombatComponent::FindCurWeaponSlotIndex()
 {
 	for (int i = 0; i < WeaponSlot.Num(); i++)
 	{
@@ -231,14 +232,14 @@ int8 UCombatComponent::GetCurWeaponSlotIndex()
 			return i;
 	}
 
-	return -1;
+	return -1; // WeaponSlot에 현재 무기가 없을 경우 -1반환
 }
 
 bool UCombatComponent::GetCanEquipWeapon()
 {
 	for (auto& Value : WeaponSlot)
 	{
-		if (Value == nullptr)
+		if (Value == nullptr) // WeaponSlot에 Nullptr이 있을경우 장착가능
 		{
 			return true;
 		}
@@ -337,24 +338,24 @@ bool UCombatComponent::UnholsterWeapon(int32 WeaponIndex)
 {
 	ERROR_IF_NOT_CALLED_ON_LOCAL_PARAM(false);
 
-	if (WeaponIndex >= WeaponSlot.Num())
+	if (WeaponIndex >= WeaponSlot.Num()) // Index가 WeaponSlot크기보다 클경우
 	{
 		return false;
 	}
 
-	if (WeaponIndex >= MaxWeaponSlotSize)
+	if (WeaponIndex >= MaxWeaponSlotSize) // Index가 MaxWeaponSlotSize크기보다 클경우
 	{
 		KR_LOG(Error, TEXT("WeaponIndex is bigger than MaxWeaponSlotSize"));
 		return false;
 	}
 
-	if (WeaponSlot[WeaponIndex] == nullptr)
+	if (WeaponSlot[WeaponIndex] == nullptr) // 들려는 무기가 Nullptr일 경우
 	{
 		KR_LOG(Warning, TEXT("WeaponSlot[%d] is null"), WeaponIndex);
 		return false;
 	}
 
-	if (WeaponSlot[WeaponIndex] == CurWeapon)
+	if (WeaponSlot[WeaponIndex] == CurWeapon) // 들려는 무기가 현재들고있는 무기일 경우
 	{
 		KR_LOG(Warning, TEXT("WeaponSlot[%d] is CurWeapon"), WeaponIndex);
 		return false;

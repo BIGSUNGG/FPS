@@ -5,7 +5,7 @@
 
 void AShotGun::FireBullet()
 {
-	for (int i = 0; i < NumberOfBullet; i++)
+	for (int i = 0; i < NumberOfBullet; i++) // 한번에 발사할 총알 개수만큼 발사
 	{
 		Super::FireBullet();
 	}

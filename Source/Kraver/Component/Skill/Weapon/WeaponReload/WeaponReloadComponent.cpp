@@ -81,6 +81,7 @@ void UWeaponReloadComponent::OnReload_Insert_MagazineEvent()
 
 void UWeaponReloadComponent::OnFireEvent()
 {
+	// 발사이후 총알이 없을시 자동 재장전 시작
 	if (OwnerGun->GetCurAmmo() <= 0)
 		GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ThisClass::ReloadStart);
 }

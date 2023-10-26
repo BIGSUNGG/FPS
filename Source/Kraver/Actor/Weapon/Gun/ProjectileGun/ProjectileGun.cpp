@@ -10,6 +10,7 @@ void AProjectileGun::FireBullet()
 {
 	Super::FireBullet();
 
+	// 스프레드 구하기
 	FVector Spread;
 	if (ShouldApplySpread())
 	{
@@ -23,6 +24,7 @@ void AProjectileGun::FireBullet()
 		Spread = FVector::ZeroVector;
 	}
 
+	// 끝지점 구하기
 	FVector SpreadDirection = OwnerCreature->GetCamera()->GetForwardVector() + Spread;
 	SpreadDirection.Normalize();
 	FVector EndPoint = OwnerCreature->GetCamera()->GetComponentLocation() + (SpreadDirection * 10000.f);
@@ -40,7 +42,8 @@ void AProjectileGun::FireBullet()
 	}
 	else
 		BulletDirection = SpreadDirection;
-		
+	
+	// 총구 위치 구하기
 	FVector MuzzleLocation;
 
 	AKraverPlayer* Player = Cast<AKraverPlayer>(OwnerCreature);

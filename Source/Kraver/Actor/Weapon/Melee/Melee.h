@@ -32,13 +32,12 @@ protected:
 	virtual void OnLocal_RemoveOnOwnerDelegate() override;
 
 	virtual void OnAttackStartEvent() override; // 캐릭터의 공격이 시작하였을때 호출되는 함수
-	virtual void SwingAttack();
 
-	virtual void ComboStart();
-	virtual void NextComboAttack();
-	virtual void ComboEnd();
+	virtual void ComboStart(); // 콤보를 시작할 때 호출
+	virtual void NextComboAttack(); // 다음 콤보 공격할 때 호출
+	virtual void ComboEnd(); // 콤보가 끝날때 호출
 
-	virtual void StartSwingEvent();
+	virtual void StartSwingEvent(); // 무기를 휘두를 때 호출
 
 	// Rpc
 	UFUNCTION(Server, Reliable)
@@ -51,35 +50,31 @@ protected:
 
 	// Delegate
 	UFUNCTION()
-	void OnCanInputNextComboEvent();
+	void OnCanInputNextComboEvent(); // 몽타주에서 다음 공격 입력이 가능한지 알리는 노티파이가 호출되었을 때 호출
 	UFUNCTION()
-	void OnSwingAttackEvent();
+	void OnSwingAttackEvent(); // 몽타주에서 공격을 확인하는 노티파이가 호출되었을 때 호출
 	UFUNCTION()
-	void OnAttackNextComboEvent();
+	void OnAttackNextComboEvent(); // 몽타주에서 다음 콤보를 실행할지 확인하는 노티파이가 호출되었을 때 호출
 	UFUNCTION()
-	void OnComboEndEvent();
-	virtual void OnAttackEvent() override;
+	void OnComboEndEvent(); // 다음 콤보가 실행되지않고 몽타주에서 콤보가 끝났다는것을 알리는 노티파이가 호출되었을 때 호출
+	virtual void Attack() override;
 
 public:
 	// Getter Setter
 	FORCEINLINE bool IsComboAttacking() { return CurComboAttack != 0; }
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component", meta = (AllowPrivateAccess = "true"))
-	TArray<UWeaponComponent*> WeaponComps;
-
 protected:	
 	// Combo
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Data|Combat|Combo", meta = (AllowPrivateAccess = "true"))
-	int CurComboAttack = 0;
+	int CurComboAttack = 0; // 현재 무슨 콤보 중인지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Combo", meta = (AllowPrivateAccess = "true"))
-	int MaxComboAttack = 0;
+	int MaxComboAttack = 0; // 최대 콤보 수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Combo", meta = (AllowPrivateAccess = "true"))
-	bool bAutomaticCombo = false;
+	bool bAutomaticCombo = false; // 자동 콤보가 가능한지 (계속 공격 중일경우 bCanInputNextCombo가 true로 변경 되었을때 자동으로 bInputNextCombo도 true로 변경)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Combo", meta = (AllowPrivateAccess = "true"))
-	bool bAutomaticRepeatCombo = false;
-	bool bInputNextCombo = false;
-	bool bCanInputNextCombo = false;
+	bool bAutomaticRepeatCombo = false; // 자동으로 콤보가 반복이 가능한지 (MaxComboAttack다음 이후 다시 0으로 시작)
+	bool bInputNextCombo = false; // 다음 콤보 공격이 예약되었는지
+	bool bCanInputNextCombo = false; // 다음 콤보 공격 입력이 가능한지
 
 	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))

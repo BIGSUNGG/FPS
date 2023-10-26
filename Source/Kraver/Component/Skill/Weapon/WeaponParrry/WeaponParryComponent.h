@@ -18,10 +18,10 @@ public:
 	virtual void BeginPlay() override;
 
 protected:
-	virtual void ParryStart();
-	virtual void ParryEnd();
+	virtual void ParryStart(); // 패링시작
+	virtual void ParryEnd(); // 패링종료
 	virtual void ParryDelayEnd();
-	virtual void ParrySuccess();
+	virtual void OnServer_ParrySuccess();
 
 	// Delegate
 	UFUNCTION()
