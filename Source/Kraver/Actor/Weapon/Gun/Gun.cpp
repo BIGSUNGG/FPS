@@ -93,25 +93,12 @@ void AGun::Attack()
 
 	if (CurAmmo > 0) // 남아있는 총알이 있는지
 	{
-		if (!IS_SERVER() && !bInfinityAmmo)
-			--CurAmmo;
-
-		FireBullet(); // 총알 발사
-		FireEvent(); // 발사 이벤트
-		IncreaseRecoil(); // 반동추가
-
+		Fire();
 		Super::Attack();
 	}
 	else // 남아있는 총알이 없으면
 		OnAttackEndEvent(); // 공격 중지
 
-}
-
-void AGun::Server_Attack_Implementation()
-{
-	Super::Server_Attack_Implementation();
-
-	--CurAmmo;
 }
 
 void AGun::Multicast_Attack_Implementation()
@@ -131,6 +118,12 @@ void AGun::OnServer_ImpactBullet(FVector ImpactPos)
 	}
 
 	Multicast_ImpactBullet(ImpactPos);
+}
+
+void AGun::Server_Fire_Implementation()
+{
+	if (!bInfinityAmmo)
+		--CurAmmo;
 }
 
 void AGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)
@@ -161,9 +154,22 @@ void AGun::DecreaseSpread(float InValue)
 		CurBulletSpread = MinSpread;
 }
 
+void AGun::Fire()
+{
+	if (!IS_SERVER() && !bInfinityAmmo)
+		--CurAmmo;
+	Server_Fire();
+
+	FireBullet(); // 총알 발사
+	FireEvent(); // 발사 이벤트
+	IncreaseRecoil(); // 반동추가
+
+	OnAfterFire.Broadcast();
+}
+
 void AGun::FireBullet()
 {
-	OnFire.Broadcast();
+	OnFireBullet.Broadcast();
 }
 
 void AGun::FireEvent()

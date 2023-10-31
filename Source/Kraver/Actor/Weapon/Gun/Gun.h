@@ -33,7 +33,9 @@ protected:
 	virtual void OnServer_ImpactBullet(FVector ImpactPos);
 
 	// Rpc
-	virtual void Server_Attack_Implementation();
+	UFUNCTION(Server, Reliable)
+	virtual void Server_Fire();
+
 	virtual void Multicast_Attack_Implementation();
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -44,8 +46,9 @@ protected:
 	virtual void IncreaseSpread(float InValue); // 스프레드 반동 늘이기
 	virtual void DecreaseSpread(float InValue); // 스프레드 반동 줄이기
 
+	virtual void Fire();
 	virtual void FireBullet(); // 총을 발사할 때 호출 (공격 범위에 있는적을 트레이스할때 사용, 여러번 호출 가능)
-	virtual void FireEvent(); // 총을 발사한 후 호출 (한번만 호출)
+	virtual void FireEvent(); // 총을 발사한 후 이벤트
 	virtual void ImpactBulletEvent(FVector ImpactPos); // 총알이 Block되었을때 호출
 
 public:
@@ -59,7 +62,8 @@ public:
 	int32 GetTotalAmmo() { return TotalAmmo; }
 
 public:
-	FAttackDele OnFire;
+	FAttackDele OnFireBullet; // 총알을 발사할 때마다 호출 (여러번 호출가능)
+	FAttackDele OnAfterFire; // 총알을 발사한 후 호출 (한번만 호출)
 
 protected:
 	// Component

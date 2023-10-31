@@ -39,7 +39,7 @@ protected:
 	UFUNCTION()
 	virtual void OnReload_Insert_MagazineEvent();
 	UFUNCTION()
-	virtual void OnFireEvent(); // Gun이 총을 발사했을때 호출
+	virtual void OnAfterFireEvent(); // Gun이 총을 발사했을때 호출
 
 	// Func
 	virtual void ReloadStart(); // 재장전 시작
