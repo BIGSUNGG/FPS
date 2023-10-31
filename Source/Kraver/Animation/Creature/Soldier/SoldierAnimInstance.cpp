@@ -26,8 +26,8 @@ void USoldierAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	IsEquippingWeapon = (CurWeapon != nullptr);
 	if (IsEquippingWeapon)
 	{
-		IsAttacking = Soldier->CombatComponent->GetCurWeapon()->GetIsAttacking();
-		IsSubAttacking = Soldier->CombatComponent->GetCurWeapon()->GetIsSubAttacking();
+		IsAttacking = Soldier->CombatComponent->GetCurWeapon()->IsAttacking();
+		IsSubAttacking = Soldier->CombatComponent->GetCurWeapon()->IsSubAttacking();
 
 		AnimWeaponIdleTpp = CurWeapon->GetAnimIdleTpp();
 		AnimWeaponSprintTpp = CurWeapon->GetAnimSprintTpp();

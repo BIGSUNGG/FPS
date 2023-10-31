@@ -89,7 +89,7 @@ void UKraverPlayerFppAnimInstance::WeaponSway(float DeltaSeconds)
 	else if (CurWeaponSwayRot.Pitch < MinSwayDegree)
 		CurWeaponSwayRot.Pitch = MinSwayDegree;
 
-	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->CombatComponent->GetCurWeapon()->GetIsSubAttacking())
+	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->CombatComponent->GetCurWeapon()->IsSubAttacking())
 		WeaponSwayResultRot = CurWeaponSwayRot * 0.1f;
 	else
 		WeaponSwayResultRot = CurWeaponSwayRot;
@@ -130,7 +130,7 @@ void UKraverPlayerFppAnimInstance::ProceduralAnimEvent()
 		ProceduralAnimResultVec.Z += UKismetMathLibrary::Lerp(0.f, -10.f, CurveFloatValue * ProceduralAnimStates[i].Value);
 
 	}
-	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->CombatComponent->GetCurWeapon()->GetIsSubAttacking())
+	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->CombatComponent->GetCurWeapon()->IsSubAttacking())
 		ProceduralAnimResultVec.Z *= 0.1f;
 }
 

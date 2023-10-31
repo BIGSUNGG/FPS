@@ -43,7 +43,7 @@ protected:
 public:
 	// Getter Setter
 	virtual bool IsFalling();
-	FORCEINLINE bool GetIsJumping() { return IsJumping; }
+	FORCEINLINE bool IsJumping() { return bIsJumping; }
 	FORCEINLINE float GetSprintSpeed() { return SprintSpeed; }
 	FORCEINLINE float GetWalkSpeed() { return WalkSpeed; }
 	FORCEINLINE float GetCrouchSprintSpeed() { return CrouchSprintSpeed; }
@@ -58,8 +58,8 @@ protected:
 	float InputForwardRatio = 1.f;
 	float InputRightRatio = 1.f;
 
-	UPROPERTY(Replicated , VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
-	bool IsJumping = false;
+	UPROPERTY(Replicated , VisibleAnywhere, BlueprintReadOnly, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
+	bool bIsJumping = false;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
 	EMovementState MovementState = EMovementState::WALK;

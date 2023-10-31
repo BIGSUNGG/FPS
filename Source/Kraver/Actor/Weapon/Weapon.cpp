@@ -64,8 +64,8 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AWeapon, OwnerCreature);
 	DOREPLIFETIME(AWeapon, WeaponState);
-	DOREPLIFETIME_CONDITION(AWeapon, IsAttacking, COND_SkipOwner);
-	DOREPLIFETIME_CONDITION(AWeapon, IsSubAttacking, COND_SkipOwner);
+	DOREPLIFETIME_CONDITION(AWeapon, bIsAttacking, COND_SkipOwner);
+	DOREPLIFETIME_CONDITION(AWeapon, bIsSubAttacking, COND_SkipOwner);
 }
 
 float AWeapon::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -133,9 +133,9 @@ void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsAttacking && !CanAttack()) // 공격이 불가능한데 공격중일 때 
+	if (bIsAttacking && !CanAttack()) // 공격이 불가능한데 공격중일 때 
 		OnAttackEndEvent(); // 공격 종료
-	if (IsSubAttacking && !CanSubAttack()) // 보조 공격이 불가능한데 보조 공격중일 때 
+	if (bIsSubAttacking && !CanSubAttack()) // 보조 공격이 불가능한데 보조 공격중일 때 
 		OnSubAttackEndEvent(); // 보조 공격 종료
 
 	if (CurAttackDelay > 0.f)
@@ -335,7 +335,7 @@ void AWeapon::AttackCancel()
 
 void AWeapon::OnAttackStartEvent()
 {		
-	if (IsAttacking == true) // 이미 공격중이면 
+	if (bIsAttacking == true) // 이미 공격중이면 
 		return;
 
 	if(!CanAttack()) // 공격이 불가능하면
@@ -347,7 +347,7 @@ void AWeapon::OnAttackStartEvent()
 		return;
 	}
 
-	IsAttacking = true;
+	bIsAttacking = true;
 
 	if (bCanAttack)
 	{ 
@@ -369,10 +369,10 @@ void AWeapon::OnAttackStartEvent()
 void AWeapon::OnAttackEndEvent()
 {
 	bFirstInputAttack = false; // 선입력 취소
-	if (IsAttacking == false)
+	if (bIsAttacking == false)
 		return;
 
-	IsAttacking = false;
+	bIsAttacking = false;
 	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle); // 자동공격 취소
 	OnAttackEnd.Broadcast();
 
@@ -387,7 +387,7 @@ void AWeapon::OnSubAttackStartEvent()
 	if(!CanSubAttack())
 		return;
 
-	IsSubAttacking = true;
+	bIsSubAttacking = true;
 	OnSubAttackStart.Broadcast();
 
 	Server_OnSubAttackStartEvent();
@@ -395,7 +395,7 @@ void AWeapon::OnSubAttackStartEvent()
 
 void AWeapon::OnSubAttackEndEvent()
 {
-	IsSubAttacking = false;
+	bIsSubAttacking = false;
 	OnSubAttackEnd.Broadcast();
 
 	Server_OnSubAttackEndEvent();
@@ -415,22 +415,22 @@ void AWeapon::Server_Holster_Implementation()
 
 void AWeapon::Server_OnAttackStartEvent_Implementation()
 {
-	IsAttacking = true;
+	bIsAttacking = true;
 }
 
 void AWeapon::Server_OnAttackEndEvent_Implementation()
 {
-	IsAttacking = false;
+	bIsAttacking = false;
 }
 
 void AWeapon::Server_OnSubAttackStartEvent_Implementation()
 {
-	IsSubAttacking = true;
+	bIsSubAttacking = true;
 }
 
 void AWeapon::Server_OnSubAttackEndEvent_Implementation()
 {
-	IsSubAttacking = false;
+	bIsSubAttacking = false;
 }
 
 void AWeapon::Server_Attack_Implementation()

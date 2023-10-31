@@ -98,8 +98,8 @@ public:
 	virtual bool CanSubAttack();
 	virtual bool CanInteracted();
 
-	bool GetIsAttacking() { return IsAttacking; }
-	bool GetIsSubAttacking() { return IsSubAttacking; }
+	bool IsAttacking() { return bIsAttacking; }
+	bool IsSubAttacking() { return bIsSubAttacking; }
 	bool GetbAttackWhileSprint() { return bAttackWhileSprint; }
 	bool GetbSubAttackWhileSprint() { return bSubAttackWhileSprint; }
 
@@ -228,9 +228,9 @@ protected:
 	TMap<FString, UPrimitiveComponent*> WeaponFppPrimitiveInfo; // 추가적인 WeaponMesh를 가지는 배열
 
 	UPROPERTY(Replicated)
-	bool IsAttacking = false; // 공격중인지
+	bool bIsAttacking = false; // 공격중인지
 	UPROPERTY(Replicated)
-	bool IsSubAttacking = false; // 보조 공격중인지
+	bool bIsSubAttacking = false; // 보조 공격중인지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 	bool bAttackWhileSprint = true; // Sprint 중에 공격이 가능한지

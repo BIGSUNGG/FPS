@@ -172,7 +172,7 @@ void AKraverPlayer::CameraTilt(float TargetRoll)
 void AKraverPlayer::WeaponADS(float DeltaTime)
 {
 	// 정조준 중일때
-	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->GetIsSubAttacking() && CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponAdsComponent>())
+	if (CombatComponent->GetCurWeapon() && CombatComponent->GetCurWeapon()->IsSubAttacking() && CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponAdsComponent>())
 	{
 		UWeaponAdsComponent* AdsComp = CombatComponent->GetCurWeapon()->FindComponentByClass<UWeaponAdsComponent>();
 		USkeletalMeshComponent* ArmWeaponMesh = dynamic_cast<USkeletalMeshComponent*>(CombatComponent->GetCurWeapon()->GetFppWeaponMesh());

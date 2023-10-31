@@ -55,7 +55,7 @@ public:
 	// Getter Setter
 	virtual bool CanAttack() override;
 	virtual bool CanSubAttack() override;
-	virtual bool ShouldApplySpread() { return !IsSubAttacking; }
+	virtual bool ShouldApplySpread() { return !bIsSubAttacking; }
 	virtual float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; }
 	int32 GetCurAmmo() { return CurAmmo; }
 	int32 GetMaxAmmo() { return MaxAmmo; }

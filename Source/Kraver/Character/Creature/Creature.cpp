@@ -164,10 +164,10 @@ void ACreature::Tick(float DeltaTime)
 
 	if (CombatComponent->GetCurWeapon())
 	{
-		if (CombatComponent->GetCurWeapon()->GetIsAttacking() && !CanAttack()) // 공격이 불가능할 시 공격 종료
+		if (CombatComponent->GetCurWeapon()->IsAttacking() && !CanAttack()) // 공격이 불가능할 시 공격 종료
 			CombatComponent->SetIsAttacking(false);
 
-		if (CombatComponent->GetCurWeapon()->GetIsSubAttacking() && !CanSubAttack()) // 보조 공격이 불가능할 시 공격 종료
+		if (CombatComponent->GetCurWeapon()->IsSubAttacking() && !CanSubAttack()) // 보조 공격이 불가능할 시 공격 종료
 			CombatComponent->SetIsSubAttacking(false);
 	}
 

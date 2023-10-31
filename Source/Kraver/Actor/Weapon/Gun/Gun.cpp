@@ -82,7 +82,7 @@ void AGun::PostInitializeComponents()
 
 void AGun::Attack()
 {
-	if (!IsAttacking) // 공격중이 아닌지
+	if (!bIsAttacking) // 공격중이 아닌지
 		return;
 
 	if (OwnerCreature == nullptr)

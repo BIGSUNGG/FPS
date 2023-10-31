@@ -14,7 +14,7 @@ void AShotGun::FireBullet()
 float AShotGun::CalculateCurSpread()
 {
 	float Result = CurBulletSpread;
-	if (!IsSubAttacking)
+	if (!bIsSubAttacking)
 	{
 		Result += AdditiveSpreadInAir + AdditiveSpreadPerSpeed;
 	}

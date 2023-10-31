@@ -19,7 +19,7 @@ void UCreatureMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProp
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(UCreatureMovementComponent, MovementState, COND_SkipOwner);
-	DOREPLIFETIME_CONDITION(UCreatureMovementComponent, IsJumping, COND_SkipOwner);
+	DOREPLIFETIME_CONDITION(UCreatureMovementComponent, bIsJumping, COND_SkipOwner);
 }
 
 // Called when the game starts
@@ -50,7 +50,7 @@ void UCreatureMovementComponent::TickComponent(float DeltaTime, ELevelTick TickT
 
 void UCreatureMovementComponent::Landed(const FHitResult& Hit)
 {
-	IsJumping = false;
+	bIsJumping = false;
 }
 
 void UCreatureMovementComponent::MoveForward(float NewAxisValue)
@@ -99,7 +99,7 @@ void UCreatureMovementComponent::JumpStart()
 	if (OwnerCreature->GetMovementComponent()->IsFalling())
 		return;
 
-	IsJumping = true;
+	bIsJumping = true;
 	OwnerCreature->Jump();
 }
 

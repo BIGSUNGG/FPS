@@ -139,7 +139,7 @@ void AMelee::ComboEnd()
 	bCanAttack = true;
 	CurComboAttack = 0;
 
-	if(bAutomaticRepeatCombo && IsAttacking) // 공격 중이고 콤보를 반복할 수 있는지
+	if(bAutomaticRepeatCombo && bIsAttacking) // 공격 중이고 콤보를 반복할 수 있는지
 		TryAttack();
 }
 
@@ -181,7 +181,7 @@ void AMelee::OnCanInputNextComboEvent()
 {
 	bCanInputNextCombo = true;
 	
-	if (bAutomaticCombo && IsAttacking)
+	if (bAutomaticCombo && bIsAttacking)
 		bInputNextCombo = true;
 }
 
