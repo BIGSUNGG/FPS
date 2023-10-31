@@ -136,6 +136,12 @@ protected:
 	USpringArmComponent* Tp_SpringArm;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Mesh", meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* ArmMesh;
+		
+	// BeginPlay
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|BeginPlay", meta = (AllowPrivateAccess = "true"))
+	ULevelSequence* LevelFadeSquence;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|BeginPlay", meta = (AllowPrivateAccess = "true"))
+	UTextureRenderTarget2D* ScopeRenderTarget;
 
 	// ViewType
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))

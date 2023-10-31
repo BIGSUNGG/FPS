@@ -239,7 +239,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 	bool bCanSubAttack = true; // 보조 공격이 가능한지
 	bool bCanAttack = true; // 공격이 가능한지
-	bool bAttackCanceled = false; // TryAttack 함수에서 Attack함수를 호출할지
+	bool bAttackCancel = false; // TryAttack 함수에서 Attack함수를 호출할지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 	bool bAutomaticAttack = false; // 연사공격이 가능한지

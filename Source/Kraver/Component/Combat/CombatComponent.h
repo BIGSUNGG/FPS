@@ -132,7 +132,7 @@ public:
 	int CountWeapon(); // 무기 슬롯에 있는 무기 개수 구하기
 
 	void SetTeam(ETeam InTeam) { TeamInfo.CurTeam = InTeam; } 
-	void SetUnholsterWhenEquip(bool InValue) { bUnholsterWhenEquip = InValue; }
+	void SetUnholsterWhenEquip(bool InValue) { bUnholsterNextEquip = InValue; }
 
 public:
 	// Attack
@@ -203,7 +203,7 @@ protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Team", meta = (AllowPrivateAccess = "true"))
 	FTeamInfo TeamInfo; // 팀 정보
 
-	bool bCanceledTakeDamage = false; // Server에서만 사용
-	bool bUnholsterWhenEquip = true;  // 무기를 장착했을때 바로 무기를 들것인지
+	bool bCancelNextDamage = false; // Server에서만 사용
+	bool bUnholsterNextEquip = true;  // 무기를 장착했을때 바로 무기를 들것인지
 
 };

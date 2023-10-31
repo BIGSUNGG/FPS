@@ -330,7 +330,7 @@ void AWeapon::OnLocal_RemoveOnOwnerDelegate()
 
 void AWeapon::AttackCancel()
 {
-	bAttackCanceled = true;
+	bAttackCancel = true;
 }
 
 void AWeapon::OnAttackStartEvent()
@@ -461,14 +461,14 @@ void AWeapon::Attack()
 
 void AWeapon::TryAttack()
 {
-	bAttackCanceled = false;
+	bAttackCancel = false;
 	CurAttackDelay = AttackDelay;
 	
 	OnBeforeAttack.Broadcast();
 
-	if (bAttackCanceled) // 공격이 취소되었을 경우
+	if (bAttackCancel) // 공격이 취소되었을 경우
 	{
-		bAttackCanceled = false;
+		bAttackCancel = false;
 		return;
 	}
 	Attack();

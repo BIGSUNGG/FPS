@@ -67,9 +67,9 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 	FKraverDamageResult DamageResult = CalculateDamage(DamageAmount, DamageEvent);
 
 	OnServerBeforeTakeDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
-	if (bCanceledTakeDamage)
+	if (bCancelNextDamage)
 	{
-		bCanceledTakeDamage = false;
+		bCancelNextDamage = false;
 		return 0.f;
 	}
 
@@ -179,7 +179,7 @@ void UCombatComponent::Client_GiveRadialDamageSuccess_Implementation(AActor* Dam
 void UCombatComponent::OnServer_CancelTakeDamage()
 {
 	ERROR_IF_CALLED_ON_CLIENT();
-	bCanceledTakeDamage = true;
+	bCancelNextDamage = true;
 }
 
 // Called when the game starts
@@ -489,9 +489,9 @@ void UCombatComponent::OnLocal_EquipWeaponSuccess(AWeapon* Weapon)
 
 	Weapon->SetOwner(OwnerCreature);
 
-	if (bUnholsterWhenEquip)
+	if (bUnholsterNextEquip)
 	{
-		bUnholsterWhenEquip = false;
+		bUnholsterNextEquip = false;
 		UnholsterWeapon(Weapon);
 	}
 	

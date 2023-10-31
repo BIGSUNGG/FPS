@@ -60,6 +60,11 @@ private:
 
 	FCrosshairsPackage HUDPackage;
 
+	// GameFinish
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|GameFinish", meta = (AllowPrivateAccess = "true"))
+	ULevelSequence* LevelFadeSquence;
+	bool bGameFinish = false;
+
 	// Hitmark
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
 	UTexture2D* Hitmark;

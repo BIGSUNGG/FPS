@@ -57,6 +57,7 @@ void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AContro
 
 	if (DeadCreature->IsPlayerControlled() && bRespawn)
 	{
+		FTimerHandle RespawnTimer;
 		AKraverPlayer* PlayerCharacter = Cast<AKraverPlayer>(DeadCreature);
 		if(PlayerCharacter)
 		{
@@ -72,6 +73,7 @@ void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AContro
 
 	if (bSpectate)
 	{
+		FTimerHandle SpectateTimer;
 		GetWorldTimerManager().SetTimer(
 			SpectateTimer,
 			[=]() { RequsetSpectate(VictimController); },
@@ -101,12 +103,12 @@ void AKraverGameMode::RequestRespawn(AKraverPlayer* RespawnPlayer, AController* 
 
 void AKraverGameMode::RequsetSpectate(AController* PlayerController)
 {
-	KR_LOG(Log, TEXT("Spectate Start"));
-
-	AKraverPlayerController* KraverController = Cast<AKraverPlayerController>(PlayerController);
-	if (!KraverController)
-		return;
-
+	//KR_LOG(Log, TEXT("Spectate Start"));
+	//
+	//AKraverPlayerController* KraverController = Cast<AKraverPlayerController>(PlayerController);
+	//if (!KraverController)
+	//	return;
+	//
 	//AKraverSpectator* Spectator = Cast<AKraverSpectator>(GetWorld()->SpawnActor(SpectatorClass));
 
 }

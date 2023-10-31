@@ -16,6 +16,13 @@
 
 AKraverHud::AKraverHud()
 {
+	// Object
+	static ConstructorHelpers::FObjectFinder<ULevelSequence> LEVEL_FADE_SEQUENCE(TEXT("/Script/LevelSequence.LevelSequence'/Game/InfimaGames/LowPolyShooterPack/Data/Sequences/LS_Fade_Level.LS_Fade_Level'"));
+
+	if (LEVEL_FADE_SEQUENCE.Succeeded())
+		LevelFadeSquence = LEVEL_FADE_SEQUENCE.Object;
+
+	// Class
 	static ConstructorHelpers::FClassFinder<UCombatWidget> COMBAT_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_CombatWidget.WBP_CombatWidget_C"));
 	if (COMBAT_WIDGET.Succeeded())
 		CombatWidgetClass = COMBAT_WIDGET.Class;
@@ -140,6 +147,8 @@ void AKraverHud::DrawHUD()
 
 void AKraverHud::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color)
 {
+	if (bGameFinish) return;
+
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();
 	const FVector2D TextureDrawPoint(
@@ -202,8 +211,24 @@ void AKraverHud::OnAnyCreatureDeathEvent(class ACreature* DeadCreature, class AC
 
 void AKraverHud::OnGameFinishEvent(ETeam WinTeam)
 {
+	bGameFinish = true;
+
+	// 게임을 이겼는지 졌는지 확인
 	ATeamPlayerState* TeamPlayerState = Cast<ATeamPlayerState>(PlayerState);
 	GameFinishWidge->GameFinish(FTeamInfo::CheckIsTeam(WinTeam, TeamPlayerState ? TeamPlayerState->GetPlayerTeam() : ETeam::TEAM_ALL));
+
+	// Start Level Fade
+	if (LevelFadeSquence)
+	{
+		ALevelSequenceActor* OutActor = nullptr;
+		ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LevelFadeSquence, FMovieSceneSequencePlaybackSettings(), OutActor);
+
+		//Sequence Play
+		if (SequencePlayer)
+		{
+			SequencePlayer->PlayReverse();
+		}
+	}
 }
 
 void AKraverHud::FindGameState()

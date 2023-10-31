@@ -145,6 +145,7 @@ void ACreature::BeginPlay()
 		HpBar->SetOwnerCreature(this);
 
 	StartingAimRotation = GetActorRotation();
+
 }
 
 void ACreature::PostInitializeComponents()

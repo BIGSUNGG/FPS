@@ -20,6 +20,11 @@ AKraverPlayer::AKraverPlayer() : Super()
 {
 	NetUpdateFrequency = 300.f;
 
+	static ConstructorHelpers::FObjectFinder<ULevelSequence> LEVEL_FADE_SEQUENCE(TEXT("/Script/LevelSequence.LevelSequence'/Game/InfimaGames/LowPolyShooterPack/Data/Sequences/LS_Fade_Level.LS_Fade_Level'"));
+
+	if (LEVEL_FADE_SEQUENCE.Succeeded())
+		LevelFadeSquence = LEVEL_FADE_SEQUENCE.Object;
+
 	Tp_Root = CreateDefaultSubobject<USceneComponent>(TEXT("Tp_Root"));
 	Tp_SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Tp_SpringArm"));
 
@@ -84,6 +89,26 @@ void AKraverPlayer::BeginPlay()
 			HUD = HUD == nullptr ? Cast<AKraverHud>(KraverController->GetHUD()) : HUD;
 
 		RefreshCurViewType();
+	}
+
+
+	if (IsLocallyControlled() && IsPlayerControlled())
+	{
+		// Start Level Fade
+		if (LevelFadeSquence)
+		{
+			ALevelSequenceActor* OutActor = nullptr;
+			ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LevelFadeSquence, FMovieSceneSequencePlaybackSettings(), OutActor);
+
+			//Sequence Play
+			if (SequencePlayer)
+			{
+				SequencePlayer->Play();
+			}
+		}
+
+		// Set ScopeRenderTarget
+		Capture2DComponent->TextureTarget = ScopeRenderTarget;
 	}
 }
 
