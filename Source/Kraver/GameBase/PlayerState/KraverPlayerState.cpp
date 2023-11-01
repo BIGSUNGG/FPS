@@ -33,10 +33,11 @@ AKraverPlayerState::AKraverPlayerState()
 	OnPawnSet.AddDynamic(this, &ThisClass::OnPawnSetEvent);
 }
 
-void AKraverPlayerState::Server_SetDefaultWeapons_Implementation(TSubclassOf<class AWeapon> InValue, int Index)
+void AKraverPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	KR_LOG(Error, TEXT("H"));
-	DefaultWeapons[Index] = InValue;
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, DefaultWeapons);
 }
 
 void AKraverPlayerState::OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn)
@@ -92,5 +93,8 @@ class AKraverPlayer* AKraverPlayerState::GetOwnerPLayer()
 
 void AKraverPlayerState::SetDefaultWeapons(const TSubclassOf<class AWeapon>& InValue, int Index)
 {
-	Server_SetDefaultWeapons(InValue, Index);
+	if (!IS_SERVER())
+		KR_LOG(Error, TEXT("Called on client"));
+
+	DefaultWeapons[Index] = InValue;
 }

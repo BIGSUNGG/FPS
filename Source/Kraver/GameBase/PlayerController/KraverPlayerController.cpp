@@ -3,7 +3,9 @@
 
 #include "KraverPlayerController.h"
 #include "MultiplayerSessionsSubsystem.h"
+#include Weapon_h
 #include PauseMenuWidget_h
+#include KraverPlayerState_h
 
 void AKraverPlayerController::OnPossess(APawn* aPawn)
 {
@@ -38,6 +40,11 @@ void AKraverPlayerController::ExitGame()
 		MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.AddDynamic(this, &AKraverPlayerController::OnDestroySessionEvent_ExitGame);
 		MultiplayerSessionsSubsystem->DestroySession();
 	}
+}
+
+void AKraverPlayerController::Server_SetDefaultWeapons_Implementation(TSubclassOf<class AWeapon> InValue, int Index)
+{
+	GetPlayerState<AKraverPlayerState>()->SetDefaultWeapons(InValue, Index);
 }
 
 void AKraverPlayerController::OnDestroySessionEvent_ReturnToMainMenu(bool bWasSuccessful)
@@ -89,4 +96,9 @@ void AKraverPlayerController::ShowPauseMenu()
 			PauseMenuWidget->MenuTearDown();
 		}
 	}
+}
+
+void AKraverPlayerController::SetDefaultWeapons(const TSubclassOf<class AWeapon>& InValue, int Index)
+{
+	Server_SetDefaultWeapons(InValue, Index);
 }

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "WeaponSelectWidget.h"
-#include KraverPlayerState_h
+#include KraverPlayerController_h
 
 void UWeaponSelectWidget::NativeConstruct()
 {
@@ -11,8 +11,8 @@ void UWeaponSelectWidget::NativeConstruct()
 
 void UWeaponSelectWidget::SelectWeapon(TSubclassOf<AWeapon> WeaponClass, FString WeaponName, float Size, int Index)
 {
-	AKraverPlayerState* PlayerState = Cast<AKraverPlayerState>(UGameplayStatics::GetPlayerState(this, 0));
-	if (!PlayerState) return;
+	AKraverPlayerController* PC = Cast<AKraverPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+	if (!PC) return;
 
 	switch (Index)
 	{
@@ -30,5 +30,5 @@ void UWeaponSelectWidget::SelectWeapon(TSubclassOf<AWeapon> WeaponClass, FString
 		break;
 	}
 
-	PlayerState->SetDefaultWeapons(WeaponClass, Index);
+	PC->SetDefaultWeapons(WeaponClass, Index);
 }

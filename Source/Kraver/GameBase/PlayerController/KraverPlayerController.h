@@ -25,6 +25,10 @@ public:
 
 
 protected:
+	// Rpc
+	UFUNCTION(Server, Reliable)
+	virtual void Server_SetDefaultWeapons(TSubclassOf<class AWeapon> InValue, int Index);
+
 	// Delegate
 	UFUNCTION()
 	void OnDestroySessionEvent_ReturnToMainMenu(bool bWasSuccessful);
@@ -33,6 +37,9 @@ protected:
 
 	// Func
 	void ShowPauseMenu();
+
+public:
+	virtual void SetDefaultWeapons(const TSubclassOf<class AWeapon>& InValue, int Index);
 
 protected:
 	// Return

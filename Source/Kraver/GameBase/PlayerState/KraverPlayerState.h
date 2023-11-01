@@ -16,12 +16,9 @@ class KRAVER_API AKraverPlayerState : public APlayerState
 
 public:
 	AKraverPlayerState();
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-	// Rpc
-	UFUNCTION(Server, Reliable)
-	virtual void Server_SetDefaultWeapons(TSubclassOf<class AWeapon> InValue, int Index);
-
 	// Delegate
 	UFUNCTION()
 	virtual void OnPawnSetEvent(APlayerState* Player, APawn* NewPawn, APawn* OldPawn) final; // 새로운 Player 캐릭터가 생성되었을때 호출됨
@@ -42,5 +39,6 @@ protected:
 	class AKraverPlayerController* OwnerController = nullptr;
 
 	// Default Weapon
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 	TArray<TSubclassOf<class AWeapon>> DefaultWeapons;
 };
