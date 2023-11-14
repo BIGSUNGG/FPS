@@ -1,0 +1,12 @@
+Rpc 함수
+함수 이름 앞에 Client_ 이 붙은 경우 Cleint에서 호출되는 Rpc함수임을 명시한것이다
+함수 이름 앞에 Server_ 이 붙은 경우 Server에서 호출되는 Rpc함수임을 명시한것이다
+함수 이름 앞에 Multicast_ 이 붙은 경우 Multicast에서 호출되는 Rpc함수임을 명시한것이다
+
+델리게이트 함수
+함수 이름이 On~함수이름~Event가 붙은 경우 델리게이트에 등록되어 델리게이트에게 호출될 함수임을 명시한것이다
+함수이름 뒤에 Event가 붙은 경우 특정 상태가 되었을경우 Server, Client구분없이 호출될 함수 (Ex : 재장전 시작 시 ReloadStartEvent함수 호출)
+
+일반 함수
+함수 이름 앞에 OnLocal_ 이 붙은 경우 Owner가 LocalCharacter인 Client에서 호출될 함수임을 명시한것이다
+함수 이름 앞에 OnServer_ 이 붙은 경우 Server에서 호출될 함수임을 명시한것이다

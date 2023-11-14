@@ -56,7 +56,7 @@ public:
 	virtual bool CanAttack() override;
 	virtual bool CanSubAttack() override;
 	virtual bool ShouldApplySpread() { return !bIsSubAttacking; }
-	virtual float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; }
+	virtual float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; } // FireBullet함수에서 탄퍼짐을 계산할때 호출
 	int32 GetCurAmmo() { return CurAmmo; }
 	int32 GetMaxAmmo() { return MaxAmmo; }
 	int32 GetTotalAmmo() { return TotalAmmo; }

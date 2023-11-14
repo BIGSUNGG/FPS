@@ -67,22 +67,20 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 	FKraverDamageResult DamageResult = CalculateDamage(DamageAmount, DamageEvent);
 
 	OnServerBeforeTakeDamage.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
-	if (bCancelNextDamage)
+	if (bCancelNextTakeDamage)
 	{
-		bCancelNextDamage = false;
+		bCancelNextTakeDamage = false;
 		return 0.f;
 	}
 
 	KR_LOG(Log, TEXT("Take %d Point Damage by %s"), DamageResult.ActualDamage, *DamageCauser->GetName());
-	CurHp -= DamageResult.ActualDamage;
-	if (CurHp <= 0)
+
+	DecreaseCurHp(DamageResult.ActualDamage);
+	if (CurHp == 0)
 	{
-		CurHp = 0;
-		Client_SetCurHp(CurHp);
 		if (DamageResult.bAlreadyDead == false)
 			Server_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 	}
-	Client_SetCurHp(CurHp);
 
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
@@ -122,6 +120,7 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 		OnClientAfterTakeDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 	}
 
+	OnServer_AutoHealReset();
 	return DamageResult.ActualDamage;
 }
 
@@ -179,7 +178,7 @@ void UCombatComponent::Client_GiveRadialDamageSuccess_Implementation(AActor* Dam
 void UCombatComponent::OnServer_CancelTakeDamage()
 {
 	ERROR_IF_CALLED_ON_CLIENT();
-	bCancelNextDamage = true;
+	bCancelNextTakeDamage = true;
 }
 
 // Called when the game starts
@@ -193,6 +192,8 @@ void UCombatComponent::BeginPlay()
 	if(OwnerCreature == nullptr)
 		UE_LOG(LogTemp, Fatal, TEXT("Owner Actor is not Creature class"));
 
+	if(IS_SERVER())
+		OnServer_AutoHealReset();
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -268,6 +269,13 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 	if(OwnerPlayer)
 		SetHUDCrosshairs(DeltaTime);
+
+	if (IS_SERVER() && CanAutoHeal() && !GetWorld()->GetTimerManager().IsTimerActive(AutoHealingTimer))
+	{
+		KR_LOG(Warning, TEXT("AutoHealingTimer is not active"));
+		OnServer_AutoHealReset();
+	}
+
 }
 
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
@@ -421,6 +429,14 @@ bool UCombatComponent::IsDead()
 		return true;
 
 	return false;
+}
+
+bool UCombatComponent::CanAutoHeal()
+{
+	if (IsDead())
+		return false;
+
+	return true;
 }
 
 void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
@@ -623,6 +639,37 @@ void UCombatComponent::OnRep_WeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot)
 	}
 }
 
+void UCombatComponent::OnServer_AutoHealStart()
+{
+	ERROR_IF_CALLED_ON_CLIENT();
+
+	GetWorld()->GetTimerManager().ClearTimer(AutoHealingTimer);
+	GetWorld()->GetTimerManager().SetTimer(AutoHealingTimer, this, &UCombatComponent::OnServer_AutoHealEvent, AutoHealStartUpdateTime, true, AutoHealStartUpdateTime);
+
+}
+
+void UCombatComponent::OnServer_AutoHealEvent()
+{
+	ERROR_IF_CALLED_ON_CLIENT();
+
+	if (!CanAutoHeal())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AutoHealingTimer);
+		return;
+	}
+
+	IncreaseCurHp(1);
+}
+
+void UCombatComponent::OnServer_AutoHealReset()
+{
+	ERROR_IF_CALLED_ON_CLIENT();
+
+	GetWorld()->GetTimerManager().ClearTimer(AutoHealingTimer);
+	GetWorld()->GetTimerManager().SetTimer(AutoHealingTimer, this, &UCombatComponent::OnServer_AutoHealStart, AutoHealStartTime, false, AutoHealStartTime);
+
+}
+
 bool UCombatComponent::AddWeapon(AWeapon* Weapon)
 {
 	for (auto& Value : WeaponSlot)
@@ -649,4 +696,24 @@ bool UCombatComponent::RemoveWeapon(AWeapon* Weapon)
 	}
 
 	return false;
+}
+
+void UCombatComponent::IncreaseCurHp(int Value)
+{
+	CurHp += Value;
+
+	if (CurHp > MaxHp)
+		CurHp = MaxHp;
+
+	Client_SetCurHp(CurHp);
+}
+
+void UCombatComponent::DecreaseCurHp(int Value)
+{
+	CurHp -= Value;
+
+	if (CurHp < 0)
+		CurHp = 0;
+
+	Client_SetCurHp(CurHp);
 }

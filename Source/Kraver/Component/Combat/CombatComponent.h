@@ -68,7 +68,6 @@ protected:
 	UFUNCTION(Server, Reliable)
 	virtual void Server_HolsterWeapon(AWeapon* Weapon); // Weapon을 집어넣는 함수
 
-
 	// Take Damage
 	UFUNCTION(Client, Reliable)
 	void Client_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
@@ -111,15 +110,21 @@ protected:
 	void OnRep_WeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot);
 
 	// Func
+		// Auto heal
+	void OnServer_AutoHealStart();
+	void OnServer_AutoHealEvent();
+	void OnServer_AutoHealReset();
+
 	bool AddWeapon(AWeapon* Weapon); // 무기 슬롯에 무기 추가
 	bool RemoveWeapon(AWeapon* Weapon); // 무기 슬롯에 무기 제거
 
+	void IncreaseCurHp(int Value);
+	void DecreaseCurHp(int Value);
+
 public:
 	// Getter Setter
-	void SetIsAttacking(bool bAttack);
-	void SetIsSubAttacking(bool bAttack);
-
 	bool IsDead();
+	bool CanAutoHeal();
 
 	int8 FindCurWeaponSlotIndex(); // 현재 장착중인 무기의 인덱스 값 구하기
 	AWeapon* GetCurWeapon() { return CurWeapon; }
@@ -133,6 +138,9 @@ public:
 
 	void SetTeam(ETeam InTeam) { TeamInfo.CurTeam = InTeam; } 
 	void SetUnholsterWhenEquip(bool InValue) { bUnholsterNextEquip = InValue; }
+	void SetIsAttacking(bool bAttack);
+	void SetIsSubAttacking(bool bAttack);
+
 
 public:
 	// Attack
@@ -188,22 +196,29 @@ protected:
 	AKraverPlayerController* Controller;
 	AKraverHud* HUD;
 
+	// Weapon
 	UPROPERTY(ReplicatedUsing = OnRep_CurWeaponEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 	AWeapon* CurWeapon = nullptr; // 현재 무기
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponSlotEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 	TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 	int32 MaxWeaponSlotSize = 3; // WeaponSlot 사이즈
+	bool bUnholsterNextEquip = true;  // 무기를 장착했을때 무기를 들것인지
 
+	// Hp
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
-	int32 CurHp = 100.f; // 현재 Hp
+	int32 CurHp = 100; // 현재 Hp
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
-	int32 MaxHp = 100.f; // 최대 Hp
+	int32 MaxHp = 100; // 최대 Hp
+	bool bCancelNextTakeDamage = false; // 다음 데미지 받기 취소(Server에서만 사용)
 
+	// Auto heal
+	FTimerHandle AutoHealingTimer;
+	const float AutoHealStartTime = 3.f;
+	const float AutoHealStartUpdateTime = 0.05f;
+
+	// Team
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Team", meta = (AllowPrivateAccess = "true"))
 	FTeamInfo TeamInfo; // 팀 정보
-
-	bool bCancelNextDamage = false; // Server에서만 사용
-	bool bUnholsterNextEquip = true;  // 무기를 장착했을때 바로 무기를 들것인지
 
 };
