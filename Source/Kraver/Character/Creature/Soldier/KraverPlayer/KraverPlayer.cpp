@@ -569,6 +569,16 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	Super::OnUnEquipWeaponSuccessEvent(Weapon);
 
+	int TargetIndex = -1;
+	for (int i = 0; i < CombatComponent->GetWeaponSlot().Num(); i++)
+	{
+		if (CombatComponent->GetWeaponSlot()[i] && CombatComponent->GetWeaponSlot()[i] != Weapon)
+		{
+			TargetIndex = i;
+			break;
+		}
+	}
+
 	if (IsLocallyControlled())
 	{
 		ThrowWeapon(Weapon);
@@ -590,24 +600,17 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 		RefreshCurViewType();
 
-		for (int i = 0; i < CombatComponent->GetWeaponSlot().Num(); i++)
+		if(TargetIndex != -1)
+			ChangeWeapon(TargetIndex);
+	}
+	else
+	{
+		if (TargetIndex != -1)
 		{
-			if (CombatComponent->GetWeaponSlot()[i])
-			{
-				ChangeWeapon(i);
-				break;
-			}
+			ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetWeaponSlot()[TargetIndex]->GetUnholsterMontageFpp());
+			GetMesh()->GetAnimInstance()->Montage_Play(CombatComponent->GetWeaponSlot()[TargetIndex]->GetUnholsterMontageTpp());
 		}
 	}
-}
-
-void AKraverPlayer::OnUnholsterWeaponEvent(AWeapon* Weapon)
-{
-	if (!IsValid(Weapon))
-		return;
-
-	Super::OnUnholsterWeaponEvent(Weapon);
-
 }
 
 void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
@@ -724,9 +727,10 @@ void AKraverPlayer::ChangeWeapon(int8 Index)
 		return;
 	}
 
-	if (CombatComponent->GetWeaponSlot()[Index] == nullptr)
+	if (!CombatComponent->GetWeaponSlot()[Index])
 		return;
 
+	KR_LOG(Log, TEXT("Trying to change weapon to %d weapon"), Index);
 	UnholsterIndex = CombatComponent->GetWeaponSlot()[Index] ? Index : -1;
 
 	if (CombatComponent->GetCurWeapon())
@@ -745,8 +749,11 @@ void AKraverPlayer::HolsterWeapon()
 
 void AKraverPlayer::HolsterWeaponEvent()
 {
-	if(!CombatComponent->GetCurWeapon())
+	if (!CombatComponent->GetCurWeapon())
+	{
+		KR_LOG(Warning, TEXT("Cur Wep is null"));
 		return;
+	}
 
 	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetHolsterMontageFpp());
 	GetMesh()->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
@@ -762,12 +769,21 @@ void AKraverPlayer::UnholsterWeapon()
 
 void AKraverPlayer::UnholsterWeaponEvent()
 {
-	if(IsLocallyControlled() && UnholsterIndex != -1)
+	AWeapon* TargetWep;
+	if (IsLocallyControlled() && UnholsterIndex != -1)
+	{
 		CombatComponent->UnholsterWeapon(UnholsterIndex);
+		TargetWep = CombatComponent->GetWeaponSlot()[UnholsterIndex];
+	}
+	else
+		TargetWep = CombatComponent->GetCurWeapon();
 
-	if (!CombatComponent->GetCurWeapon())
+	if (!TargetWep)
+	{
+		KR_LOG(Warning, TEXT("Target Wep is null"));
 		return;
+	}
 
-	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetUnholsterMontageFpp());
-	GetMesh()->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetUnholsterMontageTpp());
+	ArmMesh->GetAnimInstance()->Montage_Play(TargetWep->GetUnholsterMontageFpp());
+	GetMesh()->GetAnimInstance()->Montage_Play(TargetWep->GetUnholsterMontageTpp());
 }

@@ -229,11 +229,11 @@ void UCombatComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	}
 }
 
-int8 UCombatComponent::FindCurWeaponSlotIndex()
+int8 UCombatComponent::FindWeaponSlotIndex(AWeapon* FindWeapon)
 {
 	for (int i = 0; i < WeaponSlot.Num(); i++)
 	{
-		if(CurWeapon == WeaponSlot[i])
+		if(FindWeapon == WeaponSlot[i])
 			return i;
 	}
 
@@ -378,7 +378,7 @@ bool UCombatComponent::UnholsterWeapon(int32 WeaponIndex)
 	return true;
 }
 
-void UCombatComponent::UnholsterWeapon_Implementation(AWeapon* Weapon)
+void UCombatComponent::UnholsterWeapon(AWeapon* Weapon)
 {
 	if (Weapon == nullptr)
 	{
@@ -386,15 +386,16 @@ void UCombatComponent::UnholsterWeapon_Implementation(AWeapon* Weapon)
 		return;
 	}
 	
-	KR_LOG(Log,TEXT("Unholster Weapon %s"),*Weapon->GetName());
 	HolsterWeapon();
+
+	KR_LOG(Log,TEXT("Unholster Weapon %s"),*Weapon->GetName());
 
 	Weapon->OnLocal_Unholster();
 
 	Server_UnholsterWeapon(Weapon);
 }
 
-void UCombatComponent::HolsterWeapon_Implementation()
+void UCombatComponent::HolsterWeapon()
 {
 	for (auto& Weapon : WeaponSlot)
 	{
@@ -408,8 +409,6 @@ void UCombatComponent::HolsterWeapon_Implementation()
 			Server_HolsterWeapon(Weapon);
 		}
 	}
-
-	return;
 }
 
 void UCombatComponent::SetIsAttacking(bool bAttack)
@@ -465,10 +464,10 @@ void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
 
 
 		OnServerEquipWeaponSuccess.Broadcast(Weapon);
-		OnEquipWeaponSuccess.Broadcast(Weapon);
 
 		if(OwnerCreature->IsLocallyControlled())
 			OnLocal_EquipWeaponSuccess(Weapon);
+		OnEquipWeaponSuccess.Broadcast(Weapon);
 	}
 	else
 		KR_LOG(Warning, TEXT("Failed to equip weapon"));
@@ -488,10 +487,11 @@ void UCombatComponent::Server_UnEquipWeapon_Implementation(AWeapon* Weapon)
 			KR_LOG(Error, TEXT("Failed to RemoveWeapon"));
 
 		OnServerUnEquipWeaponSuccess.Broadcast(Weapon);
-		OnUnEquipWeaponSuccess.Broadcast(Weapon);
 
 		if (OwnerCreature->IsLocallyControlled())
 			OnLocal_UnEquipWeaponSuccess(Weapon);
+
+		OnUnEquipWeaponSuccess.Broadcast(Weapon);
 	}
 	else
 		KR_LOG(Warning, TEXT("Failed to unequip weapon"));
@@ -513,7 +513,7 @@ void UCombatComponent::OnLocal_EquipWeaponSuccess(AWeapon* Weapon)
 
 	Weapon->SetOwner(OwnerCreature);
 
-	if (bUnholsterNextEquip)
+	if (bUnholsterNextEquip || CurWeaponIndex == FindWeaponSlotIndex(Weapon))
 	{
 		bUnholsterNextEquip = false;
 		UnholsterWeapon(Weapon);

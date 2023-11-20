@@ -42,9 +42,7 @@ public:
 
 	// Holster Unholster
 	virtual bool UnholsterWeapon(int32 WeaponIndex); // WeaponSlot에 있는 무기를 드는 함수
-	UFUNCTION(Client, Reliable)
 	virtual void UnholsterWeapon(AWeapon* Weapon); // Weapon을 드는 함수
-	UFUNCTION(Client, Reliable)
 	virtual void HolsterWeapon(); // Weapon을 집어넣는 함수
 
 	// Damage Event
@@ -125,7 +123,7 @@ public:
 	bool IsDead();
 	bool CanAutoHeal();
 
-	int8 FindCurWeaponSlotIndex(); // 현재 장착중인 무기의 인덱스 값 구하기
+	int8 FindWeaponSlotIndex(AWeapon* FindWeapon); // 현재 장착중인 무기의 인덱스 값 구하기
 	AWeapon* GetCurWeapon() { return CurWeapon; }
 	int32 GetCurHp() { return CurHp; }
 	int32 GetMaxHp() { return MaxHp; }
@@ -198,11 +196,12 @@ protected:
 	// Weapon
 	UPROPERTY(ReplicatedUsing = OnRep_CurWeaponEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 	AWeapon* CurWeapon = nullptr; // 현재 무기
+	int CurWeaponIndex = 0;
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponSlotEvent, EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 	TArray<AWeapon*> WeaponSlot; // Equip한 무기들을 가지고 있는 배열
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon", meta = (AllowPrivateAccess = "true"))
 	int32 MaxWeaponSlotSize = 3; // WeaponSlot 사이즈
-	bool bUnholsterNextEquip = true;  // 무기를 장착했을때 무기를 들것인지
+	bool bUnholsterNextEquip = false;  // 무기를 장착했을때 무기를 들것인지
 
 	// Hp
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat", meta = (AllowPrivateAccess = "true"))
