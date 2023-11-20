@@ -24,10 +24,21 @@ private:
 	virtual void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color = FLinearColor::White);
 
 protected:
-	// Delegate
+	// Delegate			
 		// Creature
+			// Give Damage
 	UFUNCTION()
 	void OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	UFUNCTION()
+	void OnClientGiveDamagePointSuccessEvent(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	UFUNCTION()
+	void OnClientGiveDamageRadialSuccessEvent(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+			// Take Damage
+	UFUNCTION()
+	void OnClientAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	UFUNCTION()
+	void OnClientAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);	
+			// Death
 	UFUNCTION()
 	void OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
@@ -41,7 +52,14 @@ protected:
 	UFUNCTION()
 	void OnGameFinishEvent(ETeam WinTeam);
 
+		// Destroy
+	UFUNCTION()
+	void OnFloatingDamageDestroyEvent(AActor* Actor);
+
 	// Func
+	void CreateDamagedDirection(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void CreateFloatingDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+
 	void FindGameState();
 	void FindPlayerState();
 
@@ -54,7 +72,7 @@ public:
 	FORCEINLINE void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
 
 private:
-	class ACreature* Player;
+	class AKraverPlayer* KraverPlayer;
 	class AKraverGameState* GameState;
 	class AKraverPlayerState* PlayerState;
 
@@ -74,6 +92,16 @@ private:
 	// Crosshairs
 	bool bDrawCrosshair = true;
 	float CrosshairSpreadMax = 16.f;
+
+	// Floating Damage
+	bool bEnableFloatingDamage = true;
+	TMap<class ACreature*, class AFloatingDamage*> FloatingWidgets;
+	bool DuplicationFloatingDamage = false;
+
+	// Damaged Direction
+	bool bEnableDamagedDirection = true;
+	TMap<class ACreature*, class UDamageDirectionWidget*> DamagedDirectionWidgets;
+	class TSubclassOf<class UDamageDirectionWidget> DamagedDirectionClass;
 
 	// Widget
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Widget", meta = (AllowPrivateAccess = "true"))

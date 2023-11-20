@@ -92,8 +92,7 @@ protected:
 	void Client_GiveRadialDamageSuccess(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	// Death
-	UFUNCTION(Server, Reliable)
-	void Server_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
+	void OnServer_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
 	UFUNCTION(Client, Reliable)
 	void Client_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); 
 	UFUNCTION(NetMulticast, Reliable)
@@ -111,15 +110,15 @@ protected:
 
 	// Func
 		// Auto heal
-	void OnServer_AutoHealStart();
-	void OnServer_AutoHealEvent();
-	void OnServer_AutoHealReset();
+	void OnServer_AutoHealStart(); // 자동 치유 시작 시 호출
+	void OnServer_AutoHealEvent(); // 자동 치유 시 호출
+	void OnServer_AutoHealReset(); // 자동 치유 타이머 리셋
 
 	bool AddWeapon(AWeapon* Weapon); // 무기 슬롯에 무기 추가
 	bool RemoveWeapon(AWeapon* Weapon); // 무기 슬롯에 무기 제거
 
-	void IncreaseCurHp(int Value);
-	void DecreaseCurHp(int Value);
+	void IncreaseCurHp(int Value); // Hp회복 시 호출
+	void DecreaseCurHp(int Value); // Hp감소 시 호출
 
 public:
 	// Getter Setter
@@ -216,6 +215,7 @@ protected:
 	FTimerHandle AutoHealingTimer;
 	const float AutoHealStartTime = 3.f;
 	const float AutoHealStartUpdateTime = 0.05f;
+	const int32 AutoHealHp = 1;
 
 	// Team
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Team", meta = (AllowPrivateAccess = "true"))

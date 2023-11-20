@@ -5,7 +5,6 @@
 #include KraverPlayer_h
 #include KraverGameMode_h
 #include KraverPlayerController_h
-#include DamageIndicatorSubsystem_h
 #include KraverHud_h
 
 AKraverPlayerState::AKraverPlayerState()
@@ -75,8 +74,6 @@ void AKraverPlayerState::OnNewPawn(APawn* NewPawn)
 			return;
 		}
 		KR_LOG(Log, TEXT("New Local Player : %s"), *OwnerPlayer->GetName());
-
-		GetGameInstance()->GetSubsystem<UDamageIndicatorSubsystem>()->SetLocalPlayer(OwnerPlayer);
 	}
 
 	if (IS_SERVER())

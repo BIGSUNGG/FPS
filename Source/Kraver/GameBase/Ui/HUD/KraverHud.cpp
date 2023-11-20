@@ -13,16 +13,18 @@
 #include TeamPlayerState_h
 #include RespawnTimerWidget_h
 #include GameFinishWidget_h
+#include FloatingDamage_h
+#include "Kraver/GameBase/Ui/Widget/DamageDirection/DamageDirectionWidget.h"
 
 AKraverHud::AKraverHud()
 {
 	// Object
 	static ConstructorHelpers::FObjectFinder<ULevelSequence> LEVEL_FADE_SEQUENCE(TEXT("/Script/LevelSequence.LevelSequence'/Game/InfimaGames/LowPolyShooterPack/Data/Sequences/LS_Fade_Level.LS_Fade_Level'"));
-
 	if (LEVEL_FADE_SEQUENCE.Succeeded())
 		LevelFadeSquence = LEVEL_FADE_SEQUENCE.Object;
 
 	// Class
+		// Widget
 	static ConstructorHelpers::FClassFinder<UCombatWidget> COMBAT_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_CombatWidget.WBP_CombatWidget_C"));
 	if (COMBAT_WIDGET.Succeeded())
 		CombatWidgetClass = COMBAT_WIDGET.Class;
@@ -42,6 +44,11 @@ AKraverHud::AKraverHud()
 	static ConstructorHelpers::FClassFinder<UGameFinishWidget> GAMEFINISH_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_GameFinishWidget.WBP_GameFinishWidget_C"));
 	if (GAMEFINISH_WIDGET.Succeeded())
 		GameFinishWidgeClass = GAMEFINISH_WIDGET.Class;
+
+		// FloatingDamage
+	static ConstructorHelpers::FClassFinder<UDamageDirectionWidget> DamagedDirectionFinder(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_DamagedDirection.WBP_DamagedDirection_C"));
+	if (DamagedDirectionFinder.Succeeded())
+		DamagedDirectionClass = DamagedDirectionFinder.Class;
 
 	KillLogWidgets.SetNum(5);
 }
@@ -90,12 +97,16 @@ void AKraverHud::DrawHUD()
 	if (HitmarkAppearanceTime > 0.f)
 	{
 		HitmarkAppearanceTime -= GetWorld()->GetDeltaSeconds();
+		if (HitmarkAppearanceTime < 0.f)
+			HitmarkAppearanceTime = 0.f;
 	}
 
+	// 화면 센터 위치 구하기
 	FVector2D ViewportSize;
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
 	const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
 
+	// 킬로그 Y축 위치 정렬
 	for (int i = 0; i < KillLogWidgets.Num(); i++)
 	{
 		if (KillLogWidgets[i])
@@ -106,6 +117,7 @@ void AKraverHud::DrawHUD()
 	{
 		float SpreadScaled = CrosshairSpreadMax * HUDPackage.CrosshairSpread;
 
+		// 크로스헤어 렌더
 		if(bDrawCrosshair)
 		{
 			if (HUDPackage.CrosshairsCenter)
@@ -135,6 +147,7 @@ void AKraverHud::DrawHUD()
 			}
 		}
 
+		// 히트마크 렌더
 		if (HitmarkAppearanceTime > 0.f)
 		{
 			if (bHitmartCritical)
@@ -169,6 +182,16 @@ void AKraverHud::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FV
 	);
 }
 
+void AKraverHud::OnClientAfterTakePointDamageEvent(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	CreateDamagedDirection(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+}
+
+void AKraverHud::OnClientAfterTakeRadialDamageEvent(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	CreateDamagedDirection(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+}
+
 void AKraverHud::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	if(DamageResult.bAlreadyDead)
@@ -181,6 +204,16 @@ void AKraverHud::OnClientGiveDamageSuccessEvent(AActor* DamagedActor, float Dama
 	bHitmartCritical = DamageResult.bCritical;
 }
 
+void AKraverHud::OnClientGiveDamagePointSuccessEvent(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	CreateFloatingDamage(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+}
+
+void AKraverHud::OnClientGiveDamageRadialSuccessEvent(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	CreateFloatingDamage(DamagedActor, DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+}
+
 void AKraverHud::OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	RespawnTimerWidge->TimerStart();
@@ -188,11 +221,15 @@ void AKraverHud::OnClientDeathEvent(float DamageAmount, FDamageEvent const& Dama
 
 void AKraverHud::OnNewLocalPlayerEvent(AKraverPlayer* NewCreature)
 {
-	Player = NewCreature;
-	if (Player)
+	KraverPlayer = NewCreature;
+	if (KraverPlayer)
 	{
-		Player->CombatComponent->OnClientGiveAnyDamageSuccess.AddDynamic(this, &AKraverHud::OnClientGiveDamageSuccessEvent);
-		Player->CombatComponent->OnClientDeath.AddDynamic(this, &AKraverHud::OnClientDeathEvent);
+		KraverPlayer->CombatComponent->OnClientGiveAnyDamageSuccess.AddDynamic(this, &AKraverHud::OnClientGiveDamageSuccessEvent);
+		KraverPlayer->CombatComponent->OnClientDeath.AddDynamic(this, &AKraverHud::OnClientDeathEvent);
+		KraverPlayer->CombatComponent->OnClientGivePointDamageSuccess.AddDynamic(this, &AKraverHud::OnClientGiveDamagePointSuccessEvent);
+		KraverPlayer->CombatComponent->OnClientGiveRadialDamageSuccess.AddDynamic(this, &AKraverHud::OnClientGiveDamageRadialSuccessEvent);
+		KraverPlayer->CombatComponent->OnClientAfterTakePointDamageSuccess.AddDynamic(this, &AKraverHud::OnClientAfterTakePointDamageEvent);
+		KraverPlayer->CombatComponent->OnClientAfterTakeRadialDamageSuccess.AddDynamic(this, &AKraverHud::OnClientAfterTakeRadialDamageEvent);
 	}
 }
 
@@ -229,6 +266,115 @@ void AKraverHud::OnGameFinishEvent(ETeam WinTeam)
 			SequencePlayer->PlayReverse();
 		}
 	}
+}
+
+void AKraverHud::OnFloatingDamageDestroyEvent(AActor* Actor)
+{
+	AFloatingDamage* FloatingDamage = Cast<AFloatingDamage>(Actor);
+	if (!FloatingDamage)
+		return;
+
+	if (!DuplicationFloatingDamage)
+		FloatingWidgets.Remove(FloatingDamage->GetInchargeActor());
+}
+
+void AKraverHud::CreateDamagedDirection(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	if (!bEnableDamagedDirection)
+		return;
+
+	if (!DamageCauser)
+		return;
+
+	if (DamageResult.ActualDamage <= 0)
+		return;
+
+	if (DamageResult.bAlreadyDead)
+		return;
+
+	ACreature* Creature;
+	AActor* FindActor = DamageCauser;
+	while (true)
+	{
+		Creature = Cast<ACreature>(FindActor);
+		if (Creature)
+			break;
+
+		if (!FindActor->GetOwner())
+			return;
+
+		FindActor = FindActor->GetOwner();
+	}
+
+	// 해당 Creature에게 할당된 DamagedDirectionWidget이 있을 경우
+	if (DamagedDirectionWidgets.Contains(Creature))
+	{
+		// 해당 위젯 종료
+		UDamageDirectionWidget* ExistWidget = DamagedDirectionWidgets[Creature];
+		if (ExistWidget)
+			ExistWidget->EndWidget();
+	}
+
+	// 위젯 생성
+	FVector WidgetLocation; // 위젯 스폰 위치 설정
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		FPointDamageEvent const& PointDamageEvent = static_cast<FPointDamageEvent const&>(DamageEvent);
+		WidgetLocation = PointDamageEvent.HitInfo.TraceStart;
+	}
+	else if(DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	{
+		FRadialDamageEvent const& RadialDamageEvent = static_cast<FRadialDamageEvent const&>(DamageEvent);
+		WidgetLocation = RadialDamageEvent.Origin;
+	}
+	else
+	{
+		KR_LOG(Warning, TEXT("Unknown Damage Event Type"));
+		return;
+	}
+
+	UDamageDirectionWidget* Widget = Cast<UDamageDirectionWidget>(CreateWidget<UDamageDirectionWidget>(GetWorld(), DamagedDirectionClass));
+	Widget->Initialize(KraverPlayer, WidgetLocation);
+	Widget->AddToViewport();
+	DamagedDirectionWidgets.Add(Creature, Widget);
+}
+
+void AKraverHud::CreateFloatingDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+{
+	if (!bEnableFloatingDamage)
+		return;
+
+	if (DamageResult.ActualDamage == 0)
+		return;
+
+	if (DamageResult.bAlreadyDead)
+		return;
+
+	ACreature* Creature = Cast<ACreature>(DamagedActor);
+	if (!Creature)
+		return;
+
+	UKraverDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UKraverDamageType>();
+	if (DamageType->AttackType == EKraverDamageType::ASSASSINATION)
+		return;
+
+	AFloatingDamage* FloatingDamage;
+
+	if (!DuplicationFloatingDamage && FloatingWidgets.Contains(Creature))
+		FloatingDamage = FloatingWidgets[Creature];
+	else
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = DamageCauser;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		FloatingDamage = GetWorld()->SpawnActor<AFloatingDamage>(SpawnParams);
+		FloatingDamage->OnDestroy.AddDynamic(this, &AKraverHud::OnFloatingDamageDestroyEvent);
+
+		if (!DuplicationFloatingDamage)
+			FloatingWidgets.Add(Creature, FloatingDamage);
+	}
+
+	FloatingDamage->ShowFloatingDamage(DamagedActor, DamageEvent, DamageResult);
 }
 
 void AKraverHud::FindGameState()

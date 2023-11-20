@@ -11,7 +11,6 @@
 #include AdvanceMovementComponent_h
 #include SoldierAnimInstance_h
 #include AttachmentMagazineComponent_h
-#include DamageIndicatorSubsystem_h
 #include WeaponReloadComponent_h
 #include AttachmentScopeComponent_h
 #include WeaponAdsComponent_h

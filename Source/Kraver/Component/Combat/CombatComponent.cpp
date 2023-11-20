@@ -75,13 +75,17 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 
 	KR_LOG(Log, TEXT("Take %d Point Damage by %s"), DamageResult.ActualDamage, *DamageCauser->GetName());
 
+	// 체력 감소
 	DecreaseCurHp(DamageResult.ActualDamage);
+
+	// 체력이 없을 경우
 	if (CurHp == 0)
 	{
 		if (DamageResult.bAlreadyDead == false)
-			Server_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+			OnServer_Death(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 	}
 
+	// 데미지 타입 확인
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		FPointDamageEvent const& PointDamageEvent = static_cast<FPointDamageEvent const&>(DamageEvent);
@@ -92,8 +96,8 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 		if (AttackerCobatComp)
 			AttackerCobatComp->Client_GivePointDamageSuccess(GetOwner(), DamageAmount, PointDamageEvent, EventInstigator, DamageCauser, DamageResult);
 
-		OnClientAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, PointDamageEvent, EventInstigator, DamageCauser, DamageResult);
-		OnClientAfterTakePointDamageSuccess.Broadcast(DamageAmount, PointDamageEvent, EventInstigator, DamageCauser, DamageResult);
+		OnServerAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, PointDamageEvent, EventInstigator, DamageCauser, DamageResult);
+		OnServerAfterTakePointDamageSuccess.Broadcast(DamageAmount, PointDamageEvent, EventInstigator, DamageCauser, DamageResult);
 	}
 	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
 	{
@@ -105,8 +109,8 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 		if (AttackerCobatComp)
 			AttackerCobatComp->Client_GiveRadialDamageSuccess(GetOwner(), DamageAmount, RadialDamageEvent, EventInstigator, DamageCauser, DamageResult);
 
-		OnClientAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, RadialDamageEvent, EventInstigator, DamageCauser, DamageResult);
-		OnClientAfterTakeRadialDamageSuccess.Broadcast(DamageAmount, RadialDamageEvent, EventInstigator, DamageCauser, DamageResult);
+		OnServerAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, RadialDamageEvent, EventInstigator, DamageCauser, DamageResult);
+		OnServerAfterTakeRadialDamageSuccess.Broadcast(DamageAmount, RadialDamageEvent, EventInstigator, DamageCauser, DamageResult);
 	}
 	else
 	{
@@ -116,8 +120,8 @@ float UCombatComponent::OnServer_TakeDamage(float DamageAmount, FDamageEvent con
 		if (AttackerCobatComp)
 			AttackerCobatComp->Client_GiveDamageSuccess(GetOwner(), DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 
-		OnClientAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
-		OnClientAfterTakeDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+		OnServerAfterTakeAnyDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
+		OnServerAfterTakeDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 	}
 
 	OnServer_AutoHealReset();
@@ -270,10 +274,11 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	if(OwnerPlayer)
 		SetHUDCrosshairs(DeltaTime);
 
+	// 자동 치유가 정상적으로 할당되어 있는지
 	if (IS_SERVER() && CanAutoHeal() && !GetWorld()->GetTimerManager().IsTimerActive(AutoHealingTimer))
 	{
 		KR_LOG(Warning, TEXT("AutoHealingTimer is not active"));
-		OnServer_AutoHealReset();
+		OnServer_AutoHealReset(); 
 	}
 
 }
@@ -436,6 +441,9 @@ bool UCombatComponent::CanAutoHeal()
 	if (IsDead())
 		return false;
 
+	if (CurHp == MaxHp) // 최대 체력이면
+		return false;
+
 	return true;
 }
 
@@ -574,7 +582,7 @@ void UCombatComponent::Multicast_TakeRadialDamage_Implementation(float DamageAmo
 	OnMulticastAfterTakeRadialDamageSuccess.Broadcast(DamageAmount, DamageEvent, EventInstigator, DamageCauser, DamageResult);
 }
 
-void UCombatComponent::Server_Death_Implementation(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
+void UCombatComponent::OnServer_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	AKraverGameMode* KraverGameMode = GetWorld()->GetAuthGameMode<AKraverGameMode>();
 	if(KraverGameMode)
@@ -658,12 +666,18 @@ void UCombatComponent::OnServer_AutoHealEvent()
 		return;
 	}
 
-	IncreaseCurHp(1);
+	IncreaseCurHp(AutoHealHp);
 }
 
 void UCombatComponent::OnServer_AutoHealReset()
 {
 	ERROR_IF_CALLED_ON_CLIENT();
+
+	if (!CanAutoHeal())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AutoHealingTimer);
+		return;
+	}
 
 	GetWorld()->GetTimerManager().ClearTimer(AutoHealingTimer);
 	GetWorld()->GetTimerManager().SetTimer(AutoHealingTimer, this, &UCombatComponent::OnServer_AutoHealStart, AutoHealStartTime, false, AutoHealStartTime);
