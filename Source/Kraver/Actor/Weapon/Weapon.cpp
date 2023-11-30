@@ -27,7 +27,6 @@ AWeapon::AWeapon()
 	TppWeaponMesh->SetAnimInstanceClass(UAnimInstance::StaticClass());
 	TppWeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	TppWeaponMesh->SetSimulatePhysics(true);
-
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_TppHolster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_TP_CH_AR_01_Holster.AM_TP_CH_AR_01_Holster'"));
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_FppHolster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_FP_PCH_AR_01_Holster.AM_FP_PCH_AR_01_Holster'"));
 
@@ -152,7 +151,7 @@ void AWeapon::Tick(float DeltaTime)
 		}
 	}
 
-	if (OwnerCreature)
+	if (OwnerCreature && OwnerCreature->CombatComponent->IsDead() == false)
 	{
 		if (OwnerCreature->CombatComponent->GetCurWeapon() != this) // OwnerCreature의 현재 무기가 이 무기가 아닐 경우
 		{
@@ -461,6 +460,8 @@ void AWeapon::Attack()
 
 void AWeapon::TryAttack()
 {
+	KR_LOG(Log, TEXT("Try Attack"));
+
 	bAttackCancel = false;
 	CurAttackDelay = AttackDelay;
 	
@@ -469,6 +470,7 @@ void AWeapon::TryAttack()
 	if (bAttackCancel) // 공격이 취소되었을 경우
 	{
 		bAttackCancel = false;
+		KR_LOG(Log, TEXT("Attack Canceled"));
 		return;
 	}
 	Attack();

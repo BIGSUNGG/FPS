@@ -23,9 +23,7 @@ public:
 
 protected:
 	// Function
-	virtual bool OnServer_Equipped(ACreature* Character) override; // Character에게 장착됨
 	virtual bool OnServer_UnEquipped() override; // 장착해제됨
-	virtual bool OnLocal_Unholster() override; // Character 손에 들려짐
 	virtual bool OnLocal_Holster() override; // Character 손에서 집어넣어짐
 
 	virtual void OnLocal_AddOnOwnerDelegate() override;
@@ -33,11 +31,13 @@ protected:
 
 	virtual void OnAttackStartEvent() override; // 캐릭터의 공격이 시작하였을때 호출되는 함수
 
+	virtual void Attack() override;
 	virtual void ComboStart(); // 콤보를 시작할 때 호출
 	virtual void NextComboAttack(); // 다음 콤보 공격할 때 호출
 	virtual void ComboEnd(); // 콤보가 끝날때 호출
 
-	virtual void StartSwingEvent(); // 무기를 휘두를 때 호출
+	virtual void SwingStart();
+	virtual void SwingStartEvent(); // 무기를 휘두를 때 호출
 
 	// Rpc
 	UFUNCTION(Server, Reliable)
@@ -57,7 +57,6 @@ protected:
 	void OnAttackNextComboEvent(); // 몽타주에서 다음 콤보를 실행할지 확인하는 노티파이가 호출되었을 때 호출
 	UFUNCTION()
 	void OnComboEndEvent(); // 다음 콤보가 실행되지않고 몽타주에서 콤보가 끝났다는것을 알리는 노티파이가 호출되었을 때 호출
-	virtual void Attack() override;
 
 public:
 	// Getter Setter

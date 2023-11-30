@@ -36,6 +36,8 @@ public:
 protected:
 	// input event
 	UFUNCTION(BlueprintCallable)
+	virtual void HolsterButtonPressed() final;
+	UFUNCTION(BlueprintCallable)
 	virtual void EquipButtonPressed() final;
 	UFUNCTION(BlueprintCallable)
 	virtual void UnEquipButtonPressed() final;

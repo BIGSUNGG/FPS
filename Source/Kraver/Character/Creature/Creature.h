@@ -255,4 +255,5 @@ protected:
 	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Dissolve", meta = (AllowPrivateAccess = "true"))
 	UMaterialInstance* DissolveMaterialInstance;
+
 }; 

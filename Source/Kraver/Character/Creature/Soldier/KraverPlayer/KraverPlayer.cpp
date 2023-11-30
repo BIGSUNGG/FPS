@@ -68,7 +68,7 @@ void AKraverPlayer::BeginPlay()
 
 	CameraBasicFov = Camera->FieldOfView;
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance());
-	if((AnimInstance))
+	if(AnimInstance)
 	{
 		AnimInstance->OnWeapon_Holster.AddDynamic(this, &ThisClass::OnTp_Weapon_HolsterEvent);
 	}
@@ -126,9 +126,6 @@ void AKraverPlayer::Tick(float DeltaTime)
 	KraverController = KraverController == nullptr ? Cast<AKraverPlayerController>(Controller) : KraverController;
 	if (KraverController)
 		HUD = HUD == nullptr ? Cast<AKraverHud>(KraverController->GetHUD()) : HUD;
-
-	if (IsLocallyControlled() == false)
-		Camera->SetRelativeRotation(FRotator(AO_Pitch, AO_Yaw, 0.0f));
 
 	ClientTick(DeltaTime);
 	ServerClientTick(DeltaTime);
@@ -270,6 +267,7 @@ void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
 	PlayerInputComponent->BindAction(TEXT("ChangeView"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeView);
+	PlayerInputComponent->BindAction(TEXT("Holster"), EInputEvent::IE_Pressed, this, &AKraverPlayer::HolsterButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Equip"), EInputEvent::IE_Pressed, this, &AKraverPlayer::EquipButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("UnEquip"), EInputEvent::IE_Pressed, this, &AKraverPlayer::UnEquipButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("ChangeWeapon1"), EInputEvent::IE_Pressed, this, &AKraverPlayer::ChangeWeapon1Pressed);
@@ -297,6 +295,13 @@ USkeletalMeshComponent* AKraverPlayer::GetCurMainMesh()
 		return nullptr;
 		break;
 	}
+}
+
+
+void AKraverPlayer::HolsterButtonPressed()
+{
+	UnholsterIndex = -1;
+	HolsterWeapon();
 }
 
 void AKraverPlayer::EquipButtonPressed()

@@ -2,10 +2,11 @@
 
 
 #include "ControlHud.h"
+#include ControlGameWidget_h
 
 AControlHud::AControlHud()
 {
-	static ConstructorHelpers::FClassFinder<UContentWidget> CONTROL_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_ControlGameWidget.WBP_ControlGameWidget"));
+	static ConstructorHelpers::FClassFinder<UControlGameWidget> CONTROL_WIDGET(TEXT("/Game/ProjectFile/GameBase/Widget/WBP_CombatWidget.WBP_CombatWidget_C"));
 	if (CONTROL_WIDGET.Succeeded())
 		ControlWidgetClass = CONTROL_WIDGET.Class;
 }

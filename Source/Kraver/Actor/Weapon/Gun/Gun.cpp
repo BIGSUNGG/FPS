@@ -20,8 +20,16 @@ AGun::AGun() : Super()
 
 void AGun::Tick(float DeltaTime)
 {
+	SpreadUpdate(DeltaTime);
+	RecoilUpdate(DeltaTime);
+
+	Super::Tick(DeltaTime);
+}
+
+void AGun::SpreadUpdate(float DeltaTime)
+{
 	if (OwnerCreature)
-	{		
+	{
 		if (CurAttackDelay > 0) // 발사중일 때 
 			IncreaseSpread(SpreadPerTime * DeltaTime);
 		else // 발사중이 아닐 때
@@ -35,13 +43,18 @@ void AGun::Tick(float DeltaTime)
 		// 속도에 따른 스프레드
 		FVector Velocity = OwnerCreature->GetVelocity();
 		Velocity.Z = 0.f;
-		float Speed =  Velocity.Size();
-		if(Speed > SpreadMaxSpeed)
+		float Speed = Velocity.Size();
+		if (Speed > SpreadMaxSpeed)
 			Speed = SpreadMaxSpeed;
 
 		AdditiveSpreadPerSpeed = Speed * SpreadPerSpeed;
+	}
+}
 
-		// 반동
+void AGun::RecoilUpdate(float DeltaTime)
+{
+	if (OwnerCreature && OwnerCreature->IsLocallyControlled())
+	{
 		float TempRecoilPitch = FMath::FInterpTo(TargetRecoilPitch, 0.f, DeltaTime, 15.f);
 		float TempRecoilYaw = FMath::FInterpTo(TargetRecoilYaw, 0.f, DeltaTime, 15.f);
 
@@ -54,8 +67,6 @@ void AGun::Tick(float DeltaTime)
 		TargetRecoilPitch -= AddRecoilPitch;
 		TargetRecoilYaw -= AddRecoilYaw;
 	}
-
-	Super::Tick(DeltaTime);
 }
 
 void AGun::BeginPlay()

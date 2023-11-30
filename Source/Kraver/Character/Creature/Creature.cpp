@@ -120,6 +120,17 @@ void ACreature::UpdateDissolveMaterial(float DissolveValue)
 
 void ACreature::StartDissolve()
 {
+	// 3인칭 메쉬 Dissolve 실행
+	if (DissolveMaterialInstance)
+	{
+		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
+		for (int i = 0; i < GetMesh()->GetMaterials().Num(); i++)
+			GetMesh()->SetMaterial(i, DynamicDissolveMaterialInstance);
+
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), 0.55f);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
+	}
+
 	DissolveTrack.BindDynamic(this, &ACreature::UpdateDissolveMaterial);
 	if (DissolveCurve && DissolveTimeline)
 	{
@@ -478,6 +489,9 @@ void ACreature::AimOffset(float DeltaTime)
 		FVector2D OutRange(-90.f, 0.f);
 		AO_Pitch = (FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch));
 	}
+
+	if (IsLocallyControlled() == false)
+		Camera->SetRelativeRotation(FRotator(AO_Pitch, AO_Yaw, 0.0f));
 }
 
 void ACreature::TurnInPlace(float DeltaTime)
@@ -620,9 +634,15 @@ void ACreature::OnServerHolsterWeaponEvent(AWeapon* Weapon)
 void ACreature::OnClientDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
 {
 	DisableInput(GetController<APlayerController>());
-	CombatComponent->HolsterWeapon();
-
 	GetCapsuleComponent()->SetCollisionProfileName(FName("DeadPawn"));
+
+	// 무기 감추기
+	AWeapon* Weapon = CombatComponent->GetCurWeapon();
+	if (Weapon)
+	{
+		Weapon->GetTppWeaponMesh()->SetVisibility(false, true);
+		Weapon->GetFppWeaponMesh()->SetVisibility(false, true);
+	}
 }
 
 void ACreature::OnServerDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
@@ -633,7 +653,6 @@ void ACreature::OnServerDeathEvent(float DamageAmount, FDamageEvent const& Damag
 	{
 		OnServer_SimulateMesh();
 	}
-
 }
 
 void ACreature::OnMulticastDeathEvent(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult)
@@ -803,16 +822,6 @@ void ACreature::Multicast_SimulateMesh_Implementation()
 	// HpBar 숨기기
 	HpBarWidget->SetVisibility(false);
 
-	// 3인칭 메쉬 Dissolve 실행
-	if (DissolveMaterialInstance)
-	{
-		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
-		for (int i = 0; i < GetMesh()->GetMaterials().Num(); i++)
-			GetMesh()->SetMaterial(i, DynamicDissolveMaterialInstance);
-
-		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), 0.55f);
-		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
-	}
 	StartDissolve();
 }
 

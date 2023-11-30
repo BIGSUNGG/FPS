@@ -69,7 +69,7 @@ public:
 
 	FORCEINLINE void SetCrosshairsPackage(const FCrosshairsPackage& Package) { HUDPackage = Package; } // HUDPackage를 설정하는 함수
 	FORCEINLINE void SetbDrawCrosshair(bool value) { bDrawCrosshair = value; }
-	FORCEINLINE void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
+	void SetInteractWidget(bool value); // InteractionWidget를 렌더링할지 설정하는 함수
 
 private:
 	class AKraverPlayer* KraverPlayer;

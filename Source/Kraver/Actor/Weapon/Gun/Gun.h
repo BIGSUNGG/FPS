@@ -21,6 +21,9 @@ public:
 	AGun();
 
 	virtual void Tick(float DeltaTime) override;
+	virtual void SpreadUpdate(float DeltaTime);
+	virtual void RecoilUpdate(float DeltaTime);
+
 	virtual void BeginPlay() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

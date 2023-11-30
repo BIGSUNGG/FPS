@@ -16,6 +16,11 @@ void AMelee::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (bCanFirstInputAttack) // 근접 무기는 bCanFirstInputAttack을 사용하지 않음
+	{
+		KR_LOG(Error, TEXT("Melee Weapon's bCanFirstInputAttack is true"));
+		bCanFirstInputAttack = false;
+	}
 	if (bAutomaticAttack) // 근접 무기는 bAutomaticAttack을 사용하지 않음
 	{
 		KR_LOG(Error, TEXT("Melee Weapon's bAutomaticAttack is true"));
@@ -43,22 +48,10 @@ void AMelee::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
 	DOREPLIFETIME_CONDITION(ThisClass, CurComboAttack, COND_SkipOwner);
 }
 
-bool AMelee::OnServer_Equipped(ACreature* Character)
-{
-	bool bSuccess = Super::OnServer_Equipped(Character);
-	return bSuccess;
-}
-
 bool AMelee::OnServer_UnEquipped()
 {
 	bool bSuccess = Super::OnServer_UnEquipped();
 	ComboEnd();
-	return bSuccess;
-}
-
-bool AMelee::OnLocal_Unholster()
-{
-	bool bSuccess = Super::OnLocal_Unholster();
 	return bSuccess;
 }
 
@@ -143,7 +136,13 @@ void AMelee::ComboEnd()
 		TryAttack();
 }
 
-void AMelee::StartSwingEvent()
+void AMelee::SwingStart()
+{
+	SwingStartEvent();
+	Server_SwingStart(CurComboAttack);
+}
+
+void AMelee::SwingStartEvent()
 {
 	OnPlayTppMontage.Broadcast(AttackMontagesTpp[CurComboAttack], 1.f);
 	OnPlayFppMontage.Broadcast(AttackMontagesFpp[CurComboAttack], 1.f);
@@ -173,7 +172,7 @@ void AMelee::Multicast_SwingStart_Implementation(int Combo)
 	if (!OwnerCreature || !OwnerCreature->IsLocallyControlled())
 	{
 		CurComboAttack = Combo;
-		StartSwingEvent();
+		SwingStartEvent();
 	}
 }
 
@@ -226,8 +225,6 @@ void AMelee::Attack()
 	if (IsComboAttacking() == false) // 콤보 중이지 않으면
 		ComboStart(); // 콤보 시작
 	
-	StartSwingEvent(); // 공격 몽타주 호출
-	Server_SwingStart(CurComboAttack);
-
+	SwingStart(); // 공격 몽타주 호출
 	Super::Attack();
 }
