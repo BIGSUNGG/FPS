@@ -4,6 +4,23 @@
 #include "KraverPlayerFppAnimInstance.h"
 #include KraverPlayer_h
 
+UKraverPlayerFppAnimInstance::UKraverPlayerFppAnimInstance()
+{
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_FppHolster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_FP_PCH_AR_01_Holster.AM_FP_PCH_AR_01_Holster'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_FppUnholster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_FP_PCH_AR_01_Unholster.AM_FP_PCH_AR_01_Unholster'"));
+
+	if (MONTAGE_FppHolster.Succeeded())
+		HolsterMontage = MONTAGE_FppHolster.Object;
+	else
+		KR_LOG(Error, TEXT("Failed to find HolsterMontageFpp asset"));
+
+	if (MONTAGE_FppUnholster.Succeeded())
+		UnholsterMontage = MONTAGE_FppUnholster.Object;
+	else
+		KR_LOG(Error, TEXT("Failed to find UnholsterMontageFpp asset"));
+
+}
+
 void UKraverPlayerFppAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();

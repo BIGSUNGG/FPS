@@ -15,6 +15,8 @@ class KRAVER_API UKraverPlayerFppAnimInstance : public UKraverPlayerAnimInstance
 	GENERATED_BODY()
 	
 public:
+	UKraverPlayerFppAnimInstance();
+
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	virtual void WeaponSway(float DeltaSeconds);

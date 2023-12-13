@@ -23,7 +23,12 @@ public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+public:
+	void PlayHolsteWeaponrMontage();
+	void PlayUnholsteWeaponrMontage();
+
 protected:
+#pragma region AnimNotify
 	// Animation Notify
 		// Weapon
 	UFUNCTION()
@@ -54,7 +59,12 @@ protected:
 	void AnimNotify_Reload_OpenFinish();
 	UFUNCTION()
 	void AnimNotify_Reload_InsertFinish();
+#pragma endregion AnimNotify
 
+public:
+	bool IsPlayingHolsterWeapon() { return Montage_IsPlaying(HolsterMontage); }
+	bool IsPlayingUnholsterWeapon() { return Montage_IsPlaying(UnholsterMontage); }
+	
 public:
 	FAnimNotifyDele OnWeapon_Holster;
 	FAnimNotifyDele OnWeapon_Unholster;
@@ -94,4 +104,10 @@ protected:
 	UAnimSequence* AnimWeaponSubAttackTpp;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon|Animation", Meta = (AllowPrivateAccess = true))
 	UBlendSpace* AnimWeaponMovementTpp;	
+
+	// Montage
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
+	UAnimMontage* HolsterMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
+	UAnimMontage* UnholsterMontage;
 };

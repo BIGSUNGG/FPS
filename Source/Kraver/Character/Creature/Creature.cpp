@@ -6,9 +6,9 @@
 #include CreatureMovementComponent_h
 #include WeaponReloadComponent_h
 #include CreatureAnimInstance_h
+#include SoldierAnimInstance_h
 #include KraverGameMode_h
 #include HpBarWidget_h
-#include Melee_h
 
 // Sets default values
 ACreature::ACreature()
@@ -255,9 +255,9 @@ bool ACreature::CanAttack()
 {
 	if (CombatComponent->GetCurWeapon())
 	{
-		if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetHolsterMontageTpp()))
+		if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingHolsterWeapon())
 			return false;
-		if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetUnholsterMontageTpp()))
+		if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingUnholsterWeapon())
 			return false;
 	}
 
@@ -268,9 +268,9 @@ bool ACreature::CanSubAttack()
 {
 	if (CombatComponent->GetCurWeapon())
 	{
-		if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetHolsterMontageTpp()))
+		if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingHolsterWeapon())
 			return false;
-		if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(CombatComponent->GetCurWeapon()->GetUnholsterMontageTpp()))
+		if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingUnholsterWeapon())
 			return false;
 	}
 
@@ -568,18 +568,6 @@ void ACreature::OnUnholsterWeaponEvent(AWeapon* Weapon)
 
 	if(IsLocallyControlled())
 	{
-		switch (Weapon->GetWeaponType())
-		{
-		case EWeaponType::NONE:
-			break;
-		case EWeaponType::GUN:
-			break;
-		case EWeaponType::MELEE:
-			break;
-		default:
-			break;
-		}
-	
 		UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
 		if (AssassinateComp)
 		{
@@ -601,23 +589,9 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 	// 무기의 델리게이트에 함수 제거
 	Weapon->OnPlayTppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.RemoveDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);
-	GetMesh()->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageTpp());
 
 	if (IsLocallyControlled())
 	{
-	
-		switch (Weapon->GetWeaponType())
-		{
-		case EWeaponType::NONE:
-			break;
-		case EWeaponType::GUN:
-			break;
-		case EWeaponType::MELEE:
-			break;
-		default:
-			break;
-		}
-	
 		UWeaponAssassinateComponent* AssassinateComp = Weapon->FindComponentByClass<UWeaponAssassinateComponent>();
 		if (AssassinateComp)
 		{

@@ -7,7 +7,6 @@
 
 UCreatureAnimInstance::UCreatureAnimInstance()
 {
-
 }
 
 void UCreatureAnimInstance::NativeBeginPlay()

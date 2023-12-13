@@ -58,6 +58,8 @@ protected:
 	// Rpc
 	UFUNCTION(Server, Reliable)
 	void Server_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ThrowWeapon(AWeapon* Weapon, FTransform Transform, FVector Direction);
 		
 	virtual void Client_Assassinated_Implementation(ACreature* Attacker, FAssassinateInfo AssassinateInfo) override;
 
@@ -140,7 +142,7 @@ protected:
 		
 	// BeginPlay
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|BeginPlay", meta = (AllowPrivateAccess = "true"))
-	ULevelSequence* LevelFadeSquence;
+	ULevelSequence* LevelFadeSquence;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|BeginPlay", meta = (AllowPrivateAccess = "true"))
 	UTextureRenderTarget2D* ScopeRenderTarget;
 

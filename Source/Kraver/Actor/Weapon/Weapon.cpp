@@ -14,7 +14,7 @@ AWeapon::AWeapon()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	//bAsyncPhysicsTickEnabled = true;
-	SetReplicateMovement(true);
+	SetReplicateMovement(false);
 	NetUpdateFrequency = 1000.f;
 	MinNetUpdateFrequency = 30.f;
 	NetPriority = 2.f;
@@ -27,31 +27,6 @@ AWeapon::AWeapon()
 	TppWeaponMesh->SetAnimInstanceClass(UAnimInstance::StaticClass());
 	TppWeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	TppWeaponMesh->SetSimulatePhysics(true);
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_TppHolster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_TP_CH_AR_01_Holster.AM_TP_CH_AR_01_Holster'"));
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_FppHolster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_FP_PCH_AR_01_Holster.AM_FP_PCH_AR_01_Holster'"));
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_TppUnholster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_TP_CH_AR_01_Unholster.AM_TP_CH_AR_01_Unholster'"));
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> MONTAGE_FppUnholster(TEXT("Engine.AnimMontage'/Game/InfimaGames/AnimatedLowPolyWeapons/Art/Characters/Animations/ARs/AM_FP_PCH_AR_01_Unholster.AM_FP_PCH_AR_01_Unholster'"));
-
-	if (MONTAGE_TppHolster.Succeeded())
-		HolsterMontageTpp = MONTAGE_TppHolster.Object;
-	else
-		KR_LOG(Error, TEXT("Failed to find HolsterMontageTpp asset"));
-
-	if (MONTAGE_FppHolster.Succeeded())
-		HolsterMontageFpp = MONTAGE_FppHolster.Object;
-	else
-		KR_LOG(Error, TEXT("Failed to find HolsterMontageFpp asset"));
-
-	if (MONTAGE_TppUnholster.Succeeded())
-		UnholsterMontageTpp = MONTAGE_TppUnholster.Object;
-	else
-		KR_LOG(Error, TEXT("Failed to find UnholsterMontageTpp asset"));
-
-	if (MONTAGE_FppUnholster.Succeeded())
-		UnholsterMontageFpp = MONTAGE_FppUnholster.Object;
-	else
-		KR_LOG(Error, TEXT("Failed to find UnholsterMontageFpp asset"));
 
 	SetRootComponent(TppWeaponMesh);
 
@@ -479,7 +454,7 @@ void AWeapon::TryAttack()
 void AWeapon::OnRep_WeaponState(EWeaponState PrevWeaponState)
 {
 	if (PrevWeaponState == EWeaponState::IDLE)
-		UnholsterEvent();
+		EquipEvent();
 
 	if (WeaponState == EWeaponState::IDLE)
 		UnEquipEvent();

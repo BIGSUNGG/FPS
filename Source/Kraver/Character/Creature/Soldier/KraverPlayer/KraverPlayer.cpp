@@ -2,18 +2,17 @@
 
 
 #include "KraverPlayer.h"
-#include Weapon_h
-#include Gun_h
-#include KraverHud_h
-#include KraverPlayerController_h
-#include KraverGameMode_h
-#include CreatureAnimInstance_h
-#include AdvanceMovementComponent_h
-#include SoldierAnimInstance_h
 #include AttachmentMagazineComponent_h
-#include WeaponReloadComponent_h
+#include AdvanceMovementComponent_h
 #include AttachmentScopeComponent_h
+#include KraverPlayerController_h
+#include WeaponReloadComponent_h
+#include CreatureAnimInstance_h
+#include SoldierAnimInstance_h
 #include WeaponAdsComponent_h
+#include KraverGameMode_h
+#include KraverHud_h
+#include Weapon_h
 
 AKraverPlayer::AKraverPlayer() : Super()
 {
@@ -93,6 +92,8 @@ void AKraverPlayer::BeginPlay()
 
 	if (IsLocallyControlled() && IsPlayerControlled())
 	{
+		Capture2DComponent->TextureTarget = ScopeRenderTarget;
+
 		// Start Level Fade
 		if (LevelFadeSquence)
 		{
@@ -105,9 +106,6 @@ void AKraverPlayer::BeginPlay()
 				SequencePlayer->Play();
 			}
 		}
-
-		// Set ScopeRenderTarget
-		Capture2DComponent->TextureTarget = ScopeRenderTarget;
 	}
 }
 
@@ -460,12 +458,25 @@ void AKraverPlayer::ChangeView()
 void AKraverPlayer::ThrowWeapon(AWeapon* Weapon)
 {
 	UPrimitiveComponent* FppWeaponMesh = Weapon->GetFppWeaponMesh();
+	FTransform Transform = FppWeaponMesh->GetComponentTransform();
+	FVector Direction = Camera->GetForwardVector();
+
+	GetWorldTimerManager().SetTimerForNextTick
+	(
+		[=]() {
+		Weapon->GetTppWeaponMesh()->SetWorldTransform(Transform, false, nullptr, ETeleportType::TeleportPhysics);
+		Weapon->GetTppWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
+		Weapon->GetTppWeaponMesh()->AddImpulse(Direction * WeaponThrowPower * Weapon->GetTppWeaponMesh()->GetMass());
+		Weapon->GetTppWeaponMesh()->AddAngularImpulseInDegrees(Direction * WeaponThrowAngularPower, NAME_None, true);
+		}
+	);
+
 
 	Server_ThrowWeapon(
 		Weapon, 
-		FppWeaponMesh->GetComponentTransform(),
-		Camera->GetForwardVector()
-		);
+		Transform,
+		Direction
+	);
 }
 
 void AKraverPlayer::RefreshSpringArm()
@@ -475,12 +486,28 @@ void AKraverPlayer::RefreshSpringArm()
 
 void AKraverPlayer::Server_ThrowWeapon_Implementation(AWeapon* Weapon, FTransform Transform, FVector Direction)
 {
-	Weapon->GetTppWeaponMesh()->SetWorldTransform(Transform, false, nullptr, ETeleportType::TeleportPhysics);
-	Weapon->GetTppWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
-	Weapon->GetTppWeaponMesh()->AddImpulse(Direction * WeaponThrowPower * Weapon->GetTppWeaponMesh()->GetMass());
-	Weapon->GetTppWeaponMesh()->AddAngularImpulseInDegrees(Direction * WeaponThrowAngularPower, NAME_None, true);
+	Multicast_ThrowWeapon(
+		Weapon,
+		Transform,
+		Direction
+	);
 }
 
+
+void AKraverPlayer::Multicast_ThrowWeapon_Implementation(AWeapon* Weapon, FTransform Transform, FVector Direction)
+{
+	if (IsLocallyControlled()) return;
+
+	GetWorldTimerManager().SetTimerForNextTick
+	(
+		[=]() {
+			Weapon->GetTppWeaponMesh()->SetWorldTransform(Transform, false, nullptr, ETeleportType::TeleportPhysics);
+			Weapon->GetTppWeaponMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
+			Weapon->GetTppWeaponMesh()->AddImpulse(Direction * WeaponThrowPower * Weapon->GetTppWeaponMesh()->GetMass());
+			Weapon->GetTppWeaponMesh()->AddAngularImpulseInDegrees(Direction * WeaponThrowAngularPower, NAME_None, true);
+		}
+	);
+}
 
 void AKraverPlayer::Server_HolsterWeapon_Implementation()
 {
@@ -539,7 +566,7 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	if(IsLocallyControlled())
 	{
-		UnholsterWeapon();
+		UnholsterWeaponEvent();
 		
 		Weapon->GetFppWeaponMesh()->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetFppHandSocketName());
 	
@@ -574,16 +601,6 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	Super::OnUnEquipWeaponSuccessEvent(Weapon);
 
-	int TargetIndex = -1;
-	for (int i = 0; i < CombatComponent->GetWeaponSlot().Num(); i++)
-	{
-		if (CombatComponent->GetWeaponSlot()[i] && CombatComponent->GetWeaponSlot()[i] != Weapon)
-		{
-			TargetIndex = i;
-			break;
-		}
-	}
-
 	if (IsLocallyControlled())
 	{
 		ThrowWeapon(Weapon);
@@ -605,16 +622,21 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 		RefreshCurViewType();
 
+		int TargetIndex = -1;
+		for (int i = 0; i < CombatComponent->GetWeaponSlot().Num(); i++)
+		{
+			if (CombatComponent->GetWeaponSlot()[i] && CombatComponent->GetWeaponSlot()[i] != Weapon)
+			{
+				TargetIndex = i;
+				break;
+			}
+		}
 		if(TargetIndex != -1)
 			ChangeWeapon(TargetIndex);
 	}
 	else
 	{
-		if (TargetIndex != -1)
-		{
-			ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetWeaponSlot()[TargetIndex]->GetUnholsterMontageFpp());
-			GetMesh()->GetAnimInstance()->Montage_Play(CombatComponent->GetWeaponSlot()[TargetIndex]->GetUnholsterMontageTpp());
-		}
+		HolsterWeaponEvent();
 	}
 }
 
@@ -624,8 +646,6 @@ void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
 		return;
 
 	Super::OnHolsterWeaponEvent(Weapon);
-
-	ArmMesh->GetAnimInstance()->Montage_Stop(0.f, Weapon->GetAttackMontageFpp());
 }
 
 void AKraverPlayer::Client_SimulateMesh_Implementation()
@@ -661,9 +681,6 @@ void AKraverPlayer::OnAssassinateEndEvent()
 	Super::OnAssassinateEndEvent();
 
 	RefreshCurViewType();
-
-	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
-	ArmMesh->GetAnimInstance()->Montage_Stop(0.f);
 
 }
 
@@ -704,16 +721,16 @@ void AKraverPlayer::OnTp_Weapon_HolsterEvent()
 {
 	if (!IsLocallyControlled()) return;
 
-	ArmMesh->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
-	GetMesh()->GetAnimInstance()->Montage_Stop(1.f, CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
-
 	CombatComponent->HolsterWeapon();
 
 	if(UnholsterIndex == -1)
 		return;
 
-	UnholsterWeapon();
-	UnholsterIndex = -1;
+	GetWorldTimerManager().SetTimerForNextTick([=]() 
+	{
+		UnholsterWeapon();
+		UnholsterIndex = -1;
+	});
 }
 
 void AKraverPlayer::PlayLandedMontage()
@@ -760,35 +777,22 @@ void AKraverPlayer::HolsterWeaponEvent()
 		return;
 	}
 
-	ArmMesh->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetHolsterMontageFpp());
-	GetMesh()->GetAnimInstance()->Montage_Play(CombatComponent->GetCurWeapon()->GetHolsterMontageTpp());
-
+	Cast<USoldierAnimInstance>(ArmMesh->GetAnimInstance())->PlayHolsteWeaponrMontage();
+	Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->PlayHolsteWeaponrMontage();
 }
 
 
 void AKraverPlayer::UnholsterWeapon()
 {
+	if(UnholsterIndex != -1)
+		CombatComponent->UnholsterWeapon(UnholsterIndex);
+
 	UnholsterWeaponEvent();
 	Server_UnholsterWeapon();
 }
 
 void AKraverPlayer::UnholsterWeaponEvent()
 {
-	AWeapon* TargetWep;
-	if (IsLocallyControlled() && UnholsterIndex != -1)
-	{
-		CombatComponent->UnholsterWeapon(UnholsterIndex);
-		TargetWep = CombatComponent->GetWeaponSlot()[UnholsterIndex];
-	}
-	else
-		TargetWep = CombatComponent->GetCurWeapon();
-
-	if (!TargetWep)
-	{
-		KR_LOG(Warning, TEXT("Target Wep is null"));
-		return;
-	}
-
-	ArmMesh->GetAnimInstance()->Montage_Play(TargetWep->GetUnholsterMontageFpp());
-	GetMesh()->GetAnimInstance()->Montage_Play(TargetWep->GetUnholsterMontageTpp());
+	Cast<USoldierAnimInstance>(ArmMesh->GetAnimInstance())->PlayUnholsteWeaponrMontage();
+	Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->PlayUnholsteWeaponrMontage();
 }

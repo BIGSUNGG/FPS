@@ -124,10 +124,6 @@ public:
 
 	virtual UAnimMontage* GetAttackMontageTpp() { return AttackMontageTpp; }
 	virtual UAnimMontage* GetAttackMontageFpp() { return AttackMontageFpp; }
-	virtual UAnimMontage* GetUnholsterMontageTpp() { return UnholsterMontageTpp; }
-	virtual UAnimMontage* GetUnholsterMontageFpp() { return UnholsterMontageFpp; }
-	virtual UAnimMontage* GetHolsterMontageTpp() { return HolsterMontageTpp; }
-	virtual UAnimMontage* GetHolsterMontageFpp() { return HolsterMontageFpp; }
 
 	void SetWeaponVisibility(bool Value, bool bDoTpp = true, bool bDoFpp = true);
 
@@ -180,14 +176,6 @@ protected:
 	UAnimMontage* AttackMontageFpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
 	UAnimMontage* AttackMontageWep;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-	UAnimMontage* HolsterMontageTpp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-	UAnimMontage* HolsterMontageFpp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-	UAnimMontage* UnholsterMontageTpp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))
-	UAnimMontage* UnholsterMontageFpp;
 	
 	// Anim
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Animation", Meta = (AllowPrivateAccess = true))
