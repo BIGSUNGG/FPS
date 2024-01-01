@@ -92,8 +92,6 @@ void AKraverPlayer::BeginPlay()
 
 	if (IsLocallyControlled() && IsPlayerControlled())
 	{
-		Capture2DComponent->TextureTarget = ScopeRenderTarget;
-
 		// Start Level Fade
 		if (LevelFadeSquence)
 		{
@@ -115,6 +113,33 @@ void AKraverPlayer::Destroyed()
 	Super::Destroyed();
 
 	Capture2DComponent->TextureTarget = nullptr;
+}
+
+
+void AKraverPlayer::OnRep_Controller()
+{
+	Super::OnRep_Controller();
+
+	OnPossessed(Controller);
+}
+
+void AKraverPlayer::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	OnPossessed(NewController);
+}
+
+
+void AKraverPlayer::OnPossessed(AController* NewController)
+{
+	if (!NewController)
+		return;
+
+	if (NewController->IsLocalController() && NewController->IsPlayerController())
+	{
+		Capture2DComponent->TextureTarget = ScopeRenderTarget;
+	}
 }
 
 void AKraverPlayer::Tick(float DeltaTime)

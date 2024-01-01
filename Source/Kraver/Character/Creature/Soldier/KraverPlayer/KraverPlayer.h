@@ -19,6 +19,10 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
 
+	virtual void OnRep_Controller();
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnPossessed(AController* NewController);
+
 	// Tick
 	virtual void Tick(float DeltaTime) override;
 	virtual void ServerClientTick(float DeltaTime);
