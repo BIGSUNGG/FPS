@@ -49,8 +49,8 @@ protected:
 	virtual void IncreaseSpread(float InValue); // 스프레드 반동 늘이기
 	virtual void DecreaseSpread(float InValue); // 스프레드 반동 줄이기
 
+	virtual void OnServer_FireBullet(); // 총을 발사할 때 호출 (공격 범위에 있는적을 트레이스할때 사용, 여러번 호출 가능)
 	virtual void Fire();
-	virtual void FireBullet(); // 총을 발사할 때 호출 (공격 범위에 있는적을 트레이스할때 사용, 여러번 호출 가능)
 	virtual void FireEvent(); // 총을 발사한 후 이벤트
 	virtual void ImpactBulletEvent(FVector ImpactPos); // 총알이 Block되었을때 호출
 

@@ -31,6 +31,4 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Movement|AdvancedMovement", Meta = (AllowPrivateAccess = true))
 	bool IsSliding = false;
 
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	ETurningInPlace TurningInPlace;
 };

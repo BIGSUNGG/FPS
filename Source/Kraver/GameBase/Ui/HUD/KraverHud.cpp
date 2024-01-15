@@ -117,6 +117,32 @@ void AKraverHud::DrawHUD()
 	{
 		float SpreadScaled = CrosshairSpreadMax * HUDPackage.CrosshairSpread;
 
+		// 1ÀÎÄª ¹«±â ·»´õ
+		if (KraverPlayer && KraverPlayer->GetFppCaptureComp() && KraverPlayer->GetFppCaptureComp()->TextureTarget)
+		{
+			//KraverPlayer->GetFppCaptureComp()->TextureTarget->SizeX = ViewportSize.X;
+			//KraverPlayer->GetFppCaptureComp()->TextureTarget->SizeY = ViewportSize.Y;
+
+			//UTextureRenderTarget2D* Texture = KraverPlayer->GetFppCaptureComp()->TextureTarget;
+			//const float TextureWidth = ViewportSize.X;
+			//const float TextureHeight = ViewportSize.Y;
+			//const FVector2D TextureDrawPoint(
+			//	ViewportCenter.X - (TextureWidth / 2.f),
+			//	ViewportCenter.Y - (TextureHeight / 2.f)
+			//);
+			//DrawTexture(
+			//	Texture,
+			//	TextureDrawPoint.X,
+			//	TextureDrawPoint.Y,
+			//	TextureWidth,
+			//	TextureHeight,
+			//	0.f,
+			//	0.f,
+			//	1.f,
+			//	1.f
+			//);
+		}
+
 		// Å©·Î½ºÇì¾î ·»´õ
 		if(bDrawCrosshair)
 		{

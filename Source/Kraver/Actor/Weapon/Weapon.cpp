@@ -175,6 +175,9 @@ bool AWeapon::CanAttack()
 			if (MovementComp && OwnerCreature->GetMovementComponent()->IsFalling() == false && MovementComp->GetMovementState() == EMovementState::SPRINT)
 				return false;
 		}
+
+		if (OwnerCreature->CombatComponent->IsDead())
+			return false;
 	}
 
 	return true;
@@ -189,6 +192,9 @@ bool AWeapon::CanSubAttack()
 			if (MovementComp && OwnerCreature->GetMovementComponent()->IsFalling() == false && MovementComp->GetMovementState() == EMovementState::SPRINT)
 				return false;
 		}
+
+		if (OwnerCreature->CombatComponent->IsDead())
+			return false;
 	}
 
 	return true;

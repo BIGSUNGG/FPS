@@ -10,7 +10,7 @@ ABullet::ABullet()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;	
-	SetReplicateMovement(true);
+	SetReplicateMovement(false);
 
 	BulletMesh = CreateDefaultSubobject<UStaticMeshComponent>("BulletMesh");
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
@@ -56,9 +56,9 @@ void ABullet::Tick(float DeltaTime)
 
 }
 
-void ABullet::FireBullet(FVector& Direction, AActor* Target /*= nullptr*/)
+void ABullet::OnServer_FireBullet(FRotator& Direction, AActor* Target /*= nullptr*/)
 {
-	ProjectileMovementComponent->ConstrainDirectionToPlane(Direction);
+	SetActorRotation(Direction, ETeleportType::ResetPhysics);
 }
 
 void ABullet::HitEvent(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit)

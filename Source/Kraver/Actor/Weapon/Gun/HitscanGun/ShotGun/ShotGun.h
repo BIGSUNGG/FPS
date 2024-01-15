@@ -15,7 +15,7 @@ class KRAVER_API AShotGun : public AHitscanGun
 	GENERATED_BODY()
 
 protected:
-	virtual void FireBullet() override;
+	virtual void OnServer_FireBullet() override;
 
 public:
 	// Getter Setter

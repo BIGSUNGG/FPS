@@ -3,11 +3,11 @@
 
 #include "ShotGun.h"
 
-void AShotGun::FireBullet()
+void AShotGun::OnServer_FireBullet()
 {
 	for (int i = 0; i < NumberOfBullet; i++) // 한번에 발사할 총알 개수만큼 발사
 	{
-		Super::FireBullet();
+		Super::OnServer_FireBullet();
 	}
 }
 

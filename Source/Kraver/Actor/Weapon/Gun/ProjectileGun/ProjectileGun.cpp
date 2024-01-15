@@ -6,9 +6,9 @@
 #include KraverPlayer_h
 #include Bullet_h
 
-void AProjectileGun::FireBullet()
+void AProjectileGun::OnServer_FireBullet()
 {
-	Super::FireBullet();
+	Super::OnServer_FireBullet();
 
 	// 스프레드 구하기
 	FVector Spread;
@@ -52,7 +52,19 @@ void AProjectileGun::FireBullet()
 	else
 		MuzzleLocation = TppWeaponMesh->GetSocketLocation("SOCKET_Muzzle");
 
-	Server_SpawnBullet(MuzzleLocation, BulletDirection.Rotation());
+	OnServer_SpawnBullet(MuzzleLocation, BulletDirection.Rotation());
+
+}
+
+void AProjectileGun::OnServer_SpawnBullet(FVector Location, FRotator Rotation)
+{
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = OwnerCreature;
+	ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(BulletClass, Location, Rotation, SpawnParams);
+	Bullet->OnImpact.AddDynamic(this, &ThisClass::OnBulletImpactEvent);
+	Bullet->OnServer_FireBullet(Rotation);
 
 }
 
@@ -65,17 +77,6 @@ void AProjectileGun::OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPr
 	Direction.Normalize();
 
 	OnServer_ImpactBullet(Hit.ImpactPoint - Direction * 15.f);
-}
-
-void AProjectileGun::Server_SpawnBullet_Implementation(FVector Location, FRotator Rotation)
-{
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = OwnerCreature;
-	ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(BulletClass, Location, Rotation, SpawnParams);
-	Bullet->OnImpact.AddDynamic(this, &ThisClass::OnBulletImpactEvent);
-
 }
 
 void AProjectileGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)

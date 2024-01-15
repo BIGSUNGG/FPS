@@ -30,9 +30,9 @@ void AHitscanGun::Server_FireBulletResult_Implementation(const TArray<FHitResult
 	}
 }
 
-void AHitscanGun::FireBullet()
+void AHitscanGun::OnServer_FireBullet()
 {
-	Super::FireBullet();
+	Super::OnServer_FireBullet();
 
 	// 스프레드 구하기
 	FVector Spread;

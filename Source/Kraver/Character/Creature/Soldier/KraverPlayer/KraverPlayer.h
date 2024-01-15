@@ -17,11 +17,6 @@ public:
 	AKraverPlayer();
 
 	virtual void BeginPlay() override;
-	virtual void Destroyed() override;
-
-	virtual void OnRep_Controller();
-	virtual void PossessedBy(AController* NewController) override;
-	virtual void OnPossessed(AController* NewController);
 
 	// Tick
 	virtual void Tick(float DeltaTime) override;
@@ -58,6 +53,7 @@ protected:
 	virtual void ThrowWeapon(AWeapon* Weapon);
 
 	virtual void RefreshSpringArm(); // SpringArm의 RelativeLocation을 새로고침하는 함수
+	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
 
 	// Rpc
 	UFUNCTION(Server, Reliable)
@@ -83,6 +79,7 @@ protected:
 	virtual void OnUnEquipWeaponSuccessEvent(AWeapon* Weapon) override;
 		
 		// Holster Unholster
+	virtual void OnUnholsterWeaponEvent(AWeapon* Weapon) override; // 무기를 들때 호출되는 함수
 	virtual void OnHolsterWeaponEvent(AWeapon* Weapon) override; // 무기를 넣을때 호출되는 함수
 	
 		// Simulate Mesh
@@ -101,7 +98,6 @@ protected:
 	virtual void OnTp_Weapon_HolsterEvent();
 
 	// Function
-	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
 	virtual void PlayLandedMontage() override;
 	void ChangeWeapon(int8 Index); // 무기 변경
 
@@ -135,8 +131,6 @@ protected:
 	class AKraverHud* HUD;
 
 	// Component
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-	USceneCaptureComponent2D* Capture2DComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Third person", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* Tp_Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Third person", meta = (AllowPrivateAccess = "true"))
@@ -147,8 +141,6 @@ protected:
 	// BeginPlay
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|BeginPlay", meta = (AllowPrivateAccess = "true"))
 	ULevelSequence* LevelFadeSquence;	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|BeginPlay", meta = (AllowPrivateAccess = "true"))
-	UTextureRenderTarget2D* ScopeRenderTarget;
 
 	// ViewType
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))

@@ -23,7 +23,7 @@ protected:
 	virtual void Server_FireBulletResult(const TArray<FHitResult>& BulletHitResults);
 
 	// Function
-	virtual void FireBullet() override;
+	virtual void OnServer_FireBullet() override;
 	virtual void FireBulletResult(const TArray<FHitResult>& BulletHitResults);
 	TArray<FHitResult> CalculateFireHit(FName ProfileName, FVector Spread = FVector(0, 0, 0)); // 발사 결과
 

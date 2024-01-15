@@ -133,15 +133,14 @@ void AGun::OnServer_ImpactBullet(FVector ImpactPos)
 
 void AGun::Server_Fire_Implementation()
 {
-	if (!bInfinityAmmo)
+	if (IS_SERVER() && bInfinityAmmo == false)
 		--CurAmmo;
+
+	OnServer_FireBullet(); // 총알 발사
 }
 
 void AGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)
 {
-	if(OwnerCreature && OwnerCreature->IsLocallyControlled())
-		return;
-
 	ImpactBulletEvent(ImpactPos);
 }
 
@@ -167,18 +166,18 @@ void AGun::DecreaseSpread(float InValue)
 
 void AGun::Fire()
 {
-	if (!IS_SERVER() && !bInfinityAmmo)
+	if (!bInfinityAmmo)
 		--CurAmmo;
+
 	Server_Fire();
 
-	FireBullet(); // 총알 발사
 	FireEvent(); // 발사 이벤트
 	IncreaseRecoil(); // 반동추가
 
 	OnAfterFire.Broadcast();
 }
 
-void AGun::FireBullet()
+void AGun::OnServer_FireBullet()
 {
 	OnFireBullet.Broadcast();
 }

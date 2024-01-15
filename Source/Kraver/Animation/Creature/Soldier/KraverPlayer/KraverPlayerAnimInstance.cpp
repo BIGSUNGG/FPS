@@ -19,8 +19,6 @@ void UKraverPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (KraverPlayer == nullptr)
 		return;
 
-	TurningInPlace = KraverPlayer->GetTurningInPlace();
-
 	UAdvanceMovementComponent* AdvanceMovementComp = Cast<UAdvanceMovementComponent>(KraverPlayer->CreatureMovementComponent);
 	if(AdvanceMovementComp)
 	{

@@ -17,10 +17,15 @@ ACreature::ACreature()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = false;
 
 	Fp_Root = CreateDefaultSubobject<USceneComponent>(TEXT("Fp_Root"));
 	Fp_SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Fp_SpringArm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Fp_Camera"));
+	FppCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>("FppCaptureComponent");
+	ScopeCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>("ScopeCaptureComponent");
 
 	CreatureMovementComponent = CreateDefaultSubobject<UCreatureMovementComponent>("CreatureMovementComponent");
 	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
@@ -63,6 +68,15 @@ ACreature::ACreature()
 	Camera->SetupAttachment(Fp_SpringArm);
 	Camera->bUsePawnControlRotation = true;
 	Camera->SetFieldOfView(110.f);
+
+	FppCaptureComponent->SetupAttachment(Camera);
+	FppCaptureComponent->FOVAngle = 110.f;
+	FppCaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
+	FppCaptureComponent->ProjectionType = ECameraProjectionMode::Orthographic;
+
+	ScopeCaptureComponent->SetupAttachment(Camera);
+	ScopeCaptureComponent->FOVAngle = 110.f;
+	ScopeCaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_RenderScenePrimitives;
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetGenerateOverlapEvents(true);
@@ -155,14 +169,49 @@ void ACreature::BeginPlay()
 	if (HpBar)
 		HpBar->SetOwnerCreature(this);
 
-	StartingAimRotation = GetActorRotation();
+	TppRootRotation = GetActorRotation();
 
+}
+
+void ACreature::Destroyed()
+{
+	Super::Destroyed();
+
+	FppCaptureComponent->TextureTarget = nullptr;
+	ScopeCaptureComponent->TextureTarget = nullptr;
 }
 
 void ACreature::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+}
+
+void ACreature::OnRep_Controller()
+{
+	Super::OnRep_Controller();
+
+	OnPossessed(Controller);
+}
+
+void ACreature::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	OnPossessed(NewController);
+}
+
+
+void ACreature::OnPossessed(AController* NewController)
+{
+	if (!NewController)
+		return;
+
+	if (NewController->IsLocalController() && NewController->IsPlayerController())
+	{
+		FppCaptureComponent->TextureTarget = FppRenderTarget;
+		ScopeCaptureComponent->TextureTarget = ScopeRenderTarget;
+	}
 }
 
 // Called every frame
@@ -181,12 +230,10 @@ void ACreature::Tick(float DeltaTime)
 		if (CombatComponent->GetCurWeapon()->IsSubAttacking() && !CanSubAttack()) // 보조 공격이 불가능할 시 공격 종료
 			CombatComponent->SetIsSubAttacking(false);
 	}
-
 }
 
 void ACreature::CameraTick(float DeltaTime)
 {
-	Camera->SetRelativeLocation(FMath::VInterpTo(Camera->GetRelativeLocation(), TargetCameraRelativeLocation, DeltaTime, 5.f));
 }
 
 void ACreature::Jump()
@@ -234,6 +281,8 @@ void ACreature::OnAssassinateEvent(AActor* AssassinatedActor)
 
 void ACreature::OnAssassinateEndEvent()
 {
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
+
 	// EnableInput
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	EnableInput(PlayerController);
@@ -248,7 +297,6 @@ void ACreature::OnAssassinateEndEvent()
 	FVector RelativeLocation = RelativeTransform.GetLocation();
 	Camera->SetRelativeLocation(RelativeLocation);
 
-	TargetCameraRelativeLocation = FVector::ZeroVector;
 }
 
 bool ACreature::CanAttack()
@@ -464,24 +512,17 @@ void ACreature::AimOffset(float DeltaTime)
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
 	if (Speed == 0.f && !bIsInAir) // 가만히 있을 경우
 	{
-		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
-		AO_Yaw = (DeltaAimRotation.Yaw);
-		bUseControllerRotationYaw = false;
-		if (TurningInPlace == ETurningInPlace::ETIP_NotTurning)
-		{
-			InterpAO_Yaw = AO_Yaw;
-		}
-		bUseControllerRotationYaw = true;
+		AO_Yaw = GetBaseAimRotation().Yaw - TppRootRotation.Yaw;
+
 		TurnInPlace(DeltaTime);
 	}
 	if (Speed > 0.f || bIsInAir) // running, or jumping
 	{
-		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		AO_Yaw = (0.f);
-		bUseControllerRotationYaw = true;
+		AO_Yaw = 0.f;
+		TppRootRotation = GetBaseAimRotation();
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
+
 	AO_Pitch = (GetBaseAimRotation().Pitch);
 	if (AO_Pitch > 90.f && !IsLocallyControlled())
 	{
@@ -489,31 +530,41 @@ void ACreature::AimOffset(float DeltaTime)
 		FVector2D OutRange(-90.f, 0.f);
 		AO_Pitch = (FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch));
 	}
-
-	if (IsLocallyControlled() == false)
-		Camera->SetRelativeRotation(FRotator(AO_Pitch, AO_Yaw, 0.0f));
 }
 
 void ACreature::TurnInPlace(float DeltaTime)
 {
-	if (AO_Yaw > 90.f)
+	float MaxYaw = 45.f;
+	if (AO_Yaw > MaxYaw)
 	{
-		TurningInPlace = ETurningInPlace::ETIP_Right;
+		if (TurningInPlace != ETurningInPlace::ETIP_Right)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_Right;
+			KR_LOG(Log, TEXT("Turn Right"));
+		}
+		InterpRoot_Yaw = GetBaseAimRotation().Yaw;
 	}
-	else if (AO_Yaw < -90.f)
+	else if (AO_Yaw < -MaxYaw)
 	{
-		TurningInPlace = ETurningInPlace::ETIP_Left;
+		if (TurningInPlace != ETurningInPlace::ETIP_Left)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_Left;
+			KR_LOG(Log, TEXT("Turn Left"));
+		}
+		InterpRoot_Yaw = GetBaseAimRotation().Yaw;
 	}
-	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning)
+
+	if(TurningInPlace != ETurningInPlace::ETIP_NotTurning)
 	{
-		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
-		AO_Yaw = InterpAO_Yaw;
-		if (FMath::Abs(AO_Yaw) <= 0.2f)
+		TppRootRotation = FMath::RInterpTo(TppRootRotation, FRotator(0.f, InterpRoot_Yaw, 0.f), DeltaTime, 5.f);
+		float Angle = (TppRootRotation - FRotator(0.f, InterpRoot_Yaw, 0.f)).Yaw;
+		if (FGenericPlatformMath::Abs(Angle) < 1.f)
 		{
 			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
-			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+			KR_LOG(Log, TEXT("Turn Finish"));
 		}
 	}
+
 }
 
 void ACreature::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
@@ -574,6 +625,12 @@ void ACreature::OnUnholsterWeaponEvent(AWeapon* Weapon)
 			AssassinateComp->OnAssassinate.AddDynamic(this, &ACreature::OnAssassinateEvent);
 			AssassinateComp->OnAssassinateEnd.AddDynamic(this, &ACreature::OnAssassinateEndEvent);
 		}	
+
+		for (auto& comp : Weapon->GetFppWeaponPrimitiveInfo())
+		{
+			FppCaptureComponent->ShowOnlyComponent(comp.Value);
+		}
+		KR_LOG(Error, TEXT("%d"), FppCaptureComponent->ShowOnlyComponents.Num());
 	}
 }
 
@@ -598,6 +655,8 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 			AssassinateComp->OnAssassinate.RemoveDynamic(this, &ACreature::OnAssassinateEvent);
 			AssassinateComp->OnAssassinateEnd.RemoveDynamic(this, &ACreature::OnAssassinateEndEvent);
 		}
+
+		FppCaptureComponent->ClearShowOnlyComponents();
 	}
 }
 

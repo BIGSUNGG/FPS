@@ -30,12 +30,16 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
 	virtual void PostInitializeComponents() override;
+
+	virtual void OnRep_Controller();
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnPossessed(AController* NewController);
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void TurnInPlace(float DeltaTime);
 	virtual void CameraTick(float DeltaTime);
 	virtual void Jump() override;
 
@@ -47,28 +51,6 @@ public:
 	virtual void OnAssassinateEvent(AActor* AssassinatedActor); // 캐릭터가 암살을 시작할때 호출
 	UFUNCTION()
 	virtual void OnAssassinateEndEvent(); // 캐릭터가 암살을 당하기 시작할때 호출
-
-public:
-	// Getter Setter
-	virtual bool CanAttack(); // 공격할 수 있는지
-	virtual bool CanSubAttack(); // 보조 공격할 수 있는지
-	virtual bool CanRun(); // 달릴 수 있는지
-
-	FORCEINLINE FRotator GetCreatureAngle() { return Camera ? Camera->GetComponentRotation() - GetMesh()->GetComponentRotation() : FRotator::ZeroRotator; }
-	FORCEINLINE UCameraComponent* GetCamera() { return Camera; }
-	FORCEINLINE bool GetbRunButtonPress() { return bRunButtonPress; }
-	bool GetbJumpButtonPress() { return bJumpButtonPress; }
-	bool GetbCrouchButtonPress() { return bCrouchButtonPress; }
-	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
-	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
-	float CalculateForwardSpeed(); // 컨트롤러 방향 기준으로 앞으로 전진하는 속도
-	float CalculateRightSpeed(); // 컨트롤러 방향 기준으로 옆으로 이동하는 속도
-	float CalculateCurrentFloorSlope(); // 현재 캐릭터가 밟고 있는 바닥의 각도 구하기
-	FVector CaclulateCurrentFllorSlopeVector(); // 현재 캐릭터가 밟고 있는 바닥의 각도를 벡터로 구함
-	virtual USkeletalMeshComponent* GetCurMainMesh() { return GetMesh(); }
-	float GetCurrentInputForward() { return CurrentInputForward; }
-	float GetCurrentInputRight() { return CurrentInputRight; }
-	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 
 protected:
 	// Axis Input
@@ -103,6 +85,7 @@ protected:
 
 	// Tick함수에서 호출될 함수
 	virtual void AimOffset(float DeltaTime);
+	virtual void TurnInPlace(float DeltaTime);
 
 	// Delegate Event
 		// Equip Success
@@ -200,6 +183,32 @@ protected:
 	UFUNCTION()
 	void UpdateDissolveMaterial(float DissolveValue);
 	void StartDissolve();
+
+public:
+	// Getter Setter
+	virtual bool CanAttack(); // 공격할 수 있는지
+	virtual bool CanSubAttack(); // 보조 공격할 수 있는지
+	virtual bool CanRun(); // 달릴 수 있는지
+
+	FORCEINLINE FRotator GetCreatureAngle() { return Camera ? Camera->GetComponentRotation() - GetMesh()->GetComponentRotation() : FRotator::ZeroRotator; }
+	FORCEINLINE UCameraComponent* GetCamera() { return Camera; }
+	FORCEINLINE bool GetbRunButtonPress() { return bRunButtonPress; }
+	bool GetbJumpButtonPress() { return bJumpButtonPress; }
+	bool GetbCrouchButtonPress() { return bCrouchButtonPress; }
+	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
+	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
+	FRotator GetStartingAimRotation() { return TppRootRotation; }
+	float CalculateForwardSpeed(); // 컨트롤러 방향 기준으로 앞으로 전진하는 속도
+	float CalculateRightSpeed(); // 컨트롤러 방향 기준으로 옆으로 이동하는 속도
+	float CalculateCurrentFloorSlope(); // 현재 캐릭터가 밟고 있는 바닥의 각도 구하기
+	FVector CaclulateCurrentFllorSlopeVector(); // 현재 캐릭터가 밟고 있는 바닥의 각도를 벡터로 구함
+	virtual USkeletalMeshComponent* GetCurMainMesh() { return GetMesh(); }
+	USceneCaptureComponent2D* GetFppCaptureComp() { return FppCaptureComponent; }
+	float GetCurrentInputForward() { return CurrentInputForward; }
+	float GetCurrentInputRight() { return CurrentInputRight; }
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
+
+
 public:
 	// Delegate
 	FCrouchDele OnCrouchStart;
@@ -215,6 +224,16 @@ public:
 
 protected:
 	// Component
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
+	USceneCaptureComponent2D* ScopeCaptureComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
+	UTextureRenderTarget2D* ScopeRenderTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
+	USceneCaptureComponent2D* FppCaptureComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
+	UTextureRenderTarget2D* FppRenderTarget;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* Fp_Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
@@ -224,13 +243,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Widget", meta = (AllowPrivateAccess = "true"))
 	class ULookCameraWidgetComponent* HpBarWidget;
 
-	float AO_Yaw;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|AimOffset")
 	float AO_Pitch;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|AimOffset")
+	float AO_Yaw;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|AimOffset")
+	ETurningInPlace TurningInPlace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|AimOffset")
+	FRotator TppRootRotation;
+	float InterpRoot_Yaw;
 
-	FRotator StartingAimRotation;
-	FVector TargetCameraRelativeLocation;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Combat|Resist", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Resist", meta = (AllowPrivateAccess = "true"))
 	float ImpulseResistanceRatio = 1.f;
 
 	// InputState
@@ -241,9 +264,6 @@ protected:
 	bool bJumpButtonPress = false;
 	bool bCrouchButtonPress = false;
 	bool bRunButtonPress = false;
-
-	ETurningInPlace TurningInPlace;
-	float InterpAO_Yaw;
 
 	// Disolve
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Dissolve", meta = (AllowPrivateAccess = "true"))

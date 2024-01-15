@@ -15,15 +15,15 @@ class KRAVER_API AProjectileGun : public AGun
 	GENERATED_BODY()
 	
 protected:
-	virtual void FireBullet() override;
+	virtual void OnServer_FireBullet() override;
+
+	virtual void OnServer_SpawnBullet(FVector Location, FRotator Rotation);
 
 	// Delegate
 	UFUNCTION()
 	virtual void OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);
 
 	// Rpc
-	UFUNCTION(Server, Reliable)
-	virtual void Server_SpawnBullet(FVector Location, FRotator Rotation);
 	virtual void Multicast_ImpactBullet_Implementation(FVector ImpactPos) override;
 
 protected:

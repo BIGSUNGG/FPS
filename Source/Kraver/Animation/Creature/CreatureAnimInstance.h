@@ -58,10 +58,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Movement", Meta = (AllowPrivateAccess = true))
 	EMovementState MovementState; // 캐릭터의 움직임 상태
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Rotation", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Rotation", Meta = (AllowPrivateAccess = true))
 	float AO_Pitch; // 캐릭터가 바라보는 방향기준으로 카메라 Pitch의 차이
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Rotation", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Rotation", Meta = (AllowPrivateAccess = true))
 	float AO_Yaw; // 캐릭터가 바라보는 방향기준으로 카메라 Yaw의 차이
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Rotation", Meta = (AllowPrivateAccess = true))
+	FRotator StartingAimRotation;
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	ETurningInPlace TurningInPlace;
 
 	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))

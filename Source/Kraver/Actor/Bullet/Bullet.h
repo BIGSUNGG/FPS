@@ -24,7 +24,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void FireBullet(FVector& Direction, AActor* Target = nullptr);
+	void OnServer_FireBullet(FRotator& Direction, AActor* Target = nullptr);
 
 protected:
 	virtual void HitEvent(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);

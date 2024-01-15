@@ -39,19 +39,14 @@ AKraverPlayer::AKraverPlayer() : Super()
 	ShowOnlyThirdPerson.Push(GetMesh());
 
 	Tp_Root->SetupAttachment(GetCapsuleComponent());
-	
+
 	Tp_SpringArm->SetupAttachment(Tp_Root);
-	Tp_SpringArm->SetRelativeLocation(FVector(0.f, 45.f, 62.f));
 	Tp_SpringArm->bUsePawnControlRotation = true;
 	Tp_SpringArm->bInheritPitch = true;
 	Tp_SpringArm->bInheritRoll = true;
 	Tp_SpringArm->bInheritYaw = true;
 	Tp_SpringArm->bDoCollisionTest = false;
 	Tp_SpringArm->TargetArmLength = 300.f;
-
-	Capture2DComponent = CreateDefaultSubobject<USceneCaptureComponent2D>("Capture2DComponent");
-	Capture2DComponent->SetupAttachment(Camera);
-	Capture2DComponent->FOVAngle = 110.f;
 
 	GetCharacterMovement()->AirControl = 0.5f;
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
@@ -79,6 +74,7 @@ void AKraverPlayer::BeginPlay()
 	Fp_SpringArmBasicLocation = Fp_SpringArm->GetRelativeLocation();
 	BasicArmLocation = ArmMesh->GetRelativeLocation();
 	BasicArmRotation = ArmMesh->GetRelativeRotation();
+	RefreshCurViewType();
 
 	if (IsLocallyControlled())
 	{
@@ -86,7 +82,6 @@ void AKraverPlayer::BeginPlay()
 		if (KraverController)
 			HUD = HUD == nullptr ? Cast<AKraverHud>(KraverController->GetHUD()) : HUD;
 
-		RefreshCurViewType();
 	}
 
 
@@ -107,41 +102,6 @@ void AKraverPlayer::BeginPlay()
 	}
 }
 
-
-void AKraverPlayer::Destroyed()
-{
-	Super::Destroyed();
-
-	Capture2DComponent->TextureTarget = nullptr;
-}
-
-
-void AKraverPlayer::OnRep_Controller()
-{
-	Super::OnRep_Controller();
-
-	OnPossessed(Controller);
-}
-
-void AKraverPlayer::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
-
-	OnPossessed(NewController);
-}
-
-
-void AKraverPlayer::OnPossessed(AController* NewController)
-{
-	if (!NewController)
-		return;
-
-	if (NewController->IsLocalController() && NewController->IsPlayerController())
-	{
-		Capture2DComponent->TextureTarget = ScopeRenderTarget;
-	}
-}
-
 void AKraverPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -153,12 +113,16 @@ void AKraverPlayer::Tick(float DeltaTime)
 	ClientTick(DeltaTime);
 	ServerClientTick(DeltaTime);
 	LocallyControlTick(DeltaTime);
+
+	SpringArmTick(DeltaTime);
+	WeaponADS(DeltaTime);
+	ArmMeshTick(DeltaTime);
 }
 
 void AKraverPlayer::CameraTick(float DeletaSeconds)
 {
 	Super::CameraTick(DeletaSeconds);
-	
+
 	UAdvanceMovementComponent* AdvanceMovementComp = Cast<UAdvanceMovementComponent>(CreatureMovementComponent);
 
 	if(AdvanceMovementComp)
@@ -246,7 +210,8 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 		Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, CameraBasicFov, DeltaTime, 15.f));
 	}
 
-	Capture2DComponent->FOVAngle = Camera->FieldOfView;
+	ScopeCaptureComponent->FOVAngle = Camera->FieldOfView;
+	FppCaptureComponent->FOVAngle = Camera->FieldOfView;
 }
 
 void AKraverPlayer::SpringArmTick(float DeltaTime)
@@ -256,7 +221,7 @@ void AKraverPlayer::SpringArmTick(float DeltaTime)
 	else
 		FP_SpringArmCrouchLocation.Z = FMath::FInterpTo(FP_SpringArmCrouchLocation.Z, UnCrouchCameraHeight, DeltaTime, 20.f);
 
-	Fp_SpringArm->SetRelativeLocation(Fp_SpringArmBasicLocation + FP_SpringArmCrouchLocation);
+	RefreshSpringArm();
 }
 
 void AKraverPlayer::ClientTick(float DeltaTime)
@@ -278,11 +243,7 @@ void AKraverPlayer::LocallyControlTick(float DeltaTime)
 		return;
 
 	CheckCanInteractionWeapon();
-	
-	WeaponADS(DeltaTime);
 
-	SpringArmTick(DeltaTime);
-	ArmMeshTick(DeltaTime);
 }
 
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -434,15 +395,13 @@ void AKraverPlayer::CheckCanInteractionWeapon()
 
 void AKraverPlayer::ChangeView()
 {
-	if (!IsLocallyControlled())
-		return;
-
 	switch (CurViewType)
 	{
-	case EViewType::FIRST_PERSON:
+	case EViewType::FIRST_PERSON: // Set View type to Tpp
 		CurViewType = EViewType::THIRD_PERSON;
 		Camera->AttachToComponent(Tp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
-		if (IsPlayerControlled())
+		Camera->SetRelativeLocation(Camera->GetRelativeLocation() + FVector(0.f, 45.f, 62.f));
+		if (IsLocallyControlled() && IsPlayerControlled())
 			GetMesh()->SetVisibility(true);
 
 		RefreshSpringArm();
@@ -457,10 +416,11 @@ void AKraverPlayer::ChangeView()
 				TempMesh->SetOwnerNoSee(false);
 		}
 		break;
-	case EViewType::THIRD_PERSON:
+	case EViewType::THIRD_PERSON: // Set View type to Fpp
 		CurViewType = EViewType::FIRST_PERSON;
 		Camera->AttachToComponent(Fp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
-		if (IsPlayerControlled())
+		Camera->SetRelativeLocation(FVector::ZeroVector);
+		if (IsLocallyControlled() && IsPlayerControlled())
 			GetMesh()->SetVisibility(false);
 
 		RefreshSpringArm();
@@ -665,12 +625,23 @@ void AKraverPlayer::OnUnEquipWeaponSuccessEvent(AWeapon* Weapon)
 	}
 }
 
+
+void AKraverPlayer::OnUnholsterWeaponEvent(AWeapon* Weapon)
+{
+	if (!IsValid(Weapon))
+		return;
+
+	Super::OnUnholsterWeaponEvent(Weapon);
+	FppCaptureComponent->ShowOnlyComponent(ArmMesh);
+}
+
 void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)
 {
 	if (!IsValid(Weapon))
 		return;
 
 	Super::OnHolsterWeaponEvent(Weapon);
+
 }
 
 void AKraverPlayer::Client_SimulateMesh_Implementation()
@@ -705,6 +676,7 @@ void AKraverPlayer::OnAssassinateEndEvent()
 {
 	Super::OnAssassinateEndEvent();
 
+	ArmMesh->GetAnimInstance()->Montage_Stop(0.f);
 	RefreshCurViewType();
 
 }
