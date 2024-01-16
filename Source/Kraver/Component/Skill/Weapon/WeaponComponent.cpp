@@ -28,9 +28,11 @@ void UWeaponComponent::BeginPlay()
 		return;
 	}
 
-	OwnerWeapon->OnBeforeAttack.AddDynamic(this, &UWeaponComponent::OnBeforeAttackEvent);
-	OwnerWeapon->OnLocalAddOnDelegate.AddDynamic(this, &UWeaponComponent::OnAddOnDelegateEvent);
-	OwnerWeapon->OnLocalRemoveOnDelegate.AddDynamic(this, &UWeaponComponent::OnRemoveOnDelegateEvent);
+	OwnerWeapon->OnLocalAddOnDelegate.AddDynamic(this, &UWeaponComponent::OnLocal_AddOnDelegateEvent);
+	OwnerWeapon->OnLocalRemoveOnDelegate.AddDynamic(this, &UWeaponComponent::OnLocal_RemoveOnDelegateEvent);
+
+	OwnerWeapon->OnServerAddOnDelegate.AddDynamic(this, &UWeaponComponent::OnServer_AddOnDelegateEvent);
+	OwnerWeapon->OnServerRemoveOnDelegate.AddDynamic(this, &UWeaponComponent::OnServer_RemoveOnDelegateEvent);
 
 }
 
@@ -42,17 +44,22 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-void UWeaponComponent::OnAddOnDelegateEvent(UObject* Object)
+void UWeaponComponent::OnLocal_AddOnDelegateEvent(UObject* Object)
 {
 
 }
 
-void UWeaponComponent::OnRemoveOnDelegateEvent(UObject* Object)
+void UWeaponComponent::OnLocal_RemoveOnDelegateEvent(UObject* Object)
 {
 
 }
 
-void UWeaponComponent::OnBeforeAttackEvent()
+void UWeaponComponent::OnServer_AddOnDelegateEvent(UObject* Object)
+{
+
+}
+
+void UWeaponComponent::OnServer_RemoveOnDelegateEvent(UObject* Object)
 {
 
 }

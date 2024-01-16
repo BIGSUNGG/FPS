@@ -240,10 +240,10 @@ void AGun::Attack()
 
 }
 
-void AGun::Server_Attack_Implementation()
+void AGun::OnServer_Attack()
 {
 	ERROR_IF_CALLED_ON_CLIENT();
-	Super::Server_Attack_Implementation();
+	Super::OnServer_Attack();
 
 	OnServer_Fire();
 }

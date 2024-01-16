@@ -50,7 +50,7 @@ protected:
 
 	virtual void TryAttack() override;
 	virtual void Attack() override;
-	virtual void Server_Attack_Implementation() override;
+	virtual void OnServer_Attack() override;
 	virtual void AttackDelayFinish();
 
 	virtual void OnServer_FireBullet(); // 총을 발사할 때 호출 (공격 범위에 있는적을 트레이스할때 사용, 여러번 호출 가능)

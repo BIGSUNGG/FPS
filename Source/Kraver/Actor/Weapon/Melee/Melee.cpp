@@ -184,6 +184,13 @@ void AMelee::OnServer_SwingResult(const TArray<FHitResult>& Results)
 	}
 }
 
+void AMelee::Client_OnAttackCanceled_Implementation()
+{
+	Super::Client_OnAttackCanceled_Implementation();
+
+	bCanAttack = true;
+}
+
 void AMelee::OnServer_SwingStart()
 {
 	Multicast_SwingStart(CurComboAttack);
@@ -252,10 +259,10 @@ void AMelee::Attack()
 	Super::Attack();
 }
 
-void AMelee::Server_Attack_Implementation()
+void AMelee::OnServer_Attack()
 {
 	ERROR_IF_CALLED_ON_CLIENT();
-	Super::Server_Attack_Implementation();
+	Super::OnServer_Attack();
 
 	OnServer_SwingStart();
 }

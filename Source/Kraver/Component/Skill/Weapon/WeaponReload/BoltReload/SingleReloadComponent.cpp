@@ -6,9 +6,9 @@
 #include Gun_h
 #include SoldierAnimInstance_h
 
-void USingleReloadComponent::OnAddOnDelegateEvent(UObject* Object)
+void USingleReloadComponent::OnLocal_AddOnDelegateEvent(UObject* Object)
 {
-	Super::OnAddOnDelegateEvent(Object);
+	Super::OnLocal_AddOnDelegateEvent(Object);
 
 	ACreature* Creature = Cast<ACreature>(Object);
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());
@@ -19,9 +19,9 @@ void USingleReloadComponent::OnAddOnDelegateEvent(UObject* Object)
 	}
 }
 
-void USingleReloadComponent::OnRemoveOnDelegateEvent(UObject* Object)
+void USingleReloadComponent::OnLocal_RemoveOnDelegateEvent(UObject* Object)
 {
-	Super::OnRemoveOnDelegateEvent(Object);
+	Super::OnLocal_RemoveOnDelegateEvent(Object);
 
 	ACreature* Creature = Cast<ACreature>(Object);
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());

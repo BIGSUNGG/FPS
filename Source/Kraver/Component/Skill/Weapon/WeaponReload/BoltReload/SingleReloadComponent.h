@@ -16,8 +16,8 @@ class KRAVER_API USingleReloadComponent : public UWeaponReloadComponent
 	
 protected:
 	// Delegate
-	virtual void OnAddOnDelegateEvent(UObject* Object) override;
-	virtual void OnRemoveOnDelegateEvent(UObject* Object) override;
+	virtual void OnLocal_AddOnDelegateEvent(UObject* Object) override;
+	virtual void OnLocal_RemoveOnDelegateEvent(UObject* Object) override;
 
 	UFUNCTION()
 	virtual void OnReload_OpenFinishEvent();

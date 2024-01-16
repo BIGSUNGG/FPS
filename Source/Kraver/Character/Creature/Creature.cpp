@@ -120,9 +120,9 @@ void ACreature::OnServer_Assassinated(ACreature* Attacker, FAssassinateInfo Assa
 	Multicast_Assassinated(Attacker, AssassinateInfo);
 }
 
-void ACreature::AssassinatedEnd()
+void ACreature::OnServer_AssassinatedEnd()
 {
-	Server_OnAssassinatedEndEvent();
+	OnServer_SimulateMesh();
 }
 
 void ACreature::UpdateDissolveMaterial(float DissolveValue)
@@ -234,7 +234,7 @@ void ACreature::Tick(float DeltaTime)
 
 		if (bAttackButtonPress && CombatComponent->GetCurWeapon()->IsAttacking() == false && CanAttack())
 		{
-			if (Gun == nullptr || Gun->GetbAutomaticAttack())
+			if (Gun && Gun->GetbAutomaticAttack())
 				CombatComponent->OnLocal_SetIsAttacking(true);
 		}
 		if (bSubAttackButtonPress && CombatComponent->GetCurWeapon()->IsSubAttacking() == false && CanSubAttack())
@@ -301,12 +301,6 @@ void ACreature::OnAssassinateEndEvent()
 	// 카메라 설정
 	Camera->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
 	Camera->AttachToComponent(Fp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
-
-	FTransform HeadTransform = GetMesh()->GetSocketTransform("head", ERelativeTransformSpace::RTS_World);
-	FTransform CameraTransform = Camera->GetComponentTransform();
-	FTransform RelativeTransform = HeadTransform.GetRelativeTransform(CameraTransform);
-	FVector RelativeLocation = RelativeTransform.GetLocation();
-	Camera->SetRelativeLocation(RelativeLocation);
 
 }
 
@@ -893,11 +887,6 @@ void ACreature::SubAttackStart()
 void ACreature::SubAttackEnd()
 {
 	CombatComponent->OnLocal_SetIsSubAttacking(false);
-}
-
-void ACreature::Server_OnAssassinatedEndEvent_Implementation()
-{
-	OnServer_SimulateMesh();
 }
 
 void ACreature::PlayLandedMontage()

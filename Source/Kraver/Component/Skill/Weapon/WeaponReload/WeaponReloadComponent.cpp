@@ -29,9 +29,9 @@ void UWeaponReloadComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 }
 
-void UWeaponReloadComponent::OnAddOnDelegateEvent(UObject* Object)
+void UWeaponReloadComponent::OnLocal_AddOnDelegateEvent(UObject* Object)
 {
-	UWeaponComponent::OnAddOnDelegateEvent(Object);
+	UWeaponComponent::OnLocal_AddOnDelegateEvent(Object);
 
 	ACreature* Creature = Cast<ACreature>(Object);
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());
@@ -41,9 +41,9 @@ void UWeaponReloadComponent::OnAddOnDelegateEvent(UObject* Object)
 	}
 }
 
-void UWeaponReloadComponent::OnRemoveOnDelegateEvent(UObject* Object)
+void UWeaponReloadComponent::OnLocal_RemoveOnDelegateEvent(UObject* Object)
 {
-	UWeaponComponent::OnAddOnDelegateEvent(Object);
+	UWeaponComponent::OnLocal_AddOnDelegateEvent(Object);
 
 	ACreature* Creature = Cast<ACreature>(Object);
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());

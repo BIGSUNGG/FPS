@@ -16,6 +16,8 @@ void UWeaponAssassinateComponent::BeginPlay()
 		KR_LOG(Error, TEXT("Owner is not Melee weapon"));
 		return;
 	}
+
+	OwnerMelee->OnServerBeforeAttack.AddDynamic(this, &UWeaponAssassinateComponent::OnServerBeforeAttackEvent);
 }
 
 void UWeaponAssassinateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -31,9 +33,9 @@ void UWeaponAssassinateComponent::GetLifetimeReplicatedProps(TArray<FLifetimePro
 	DOREPLIFETIME(UWeaponAssassinateComponent, CurAssassinatedCreature);
 }
 
-void UWeaponAssassinateComponent::OnAddOnDelegateEvent(UObject* Object)
+void UWeaponAssassinateComponent::OnLocal_AddOnDelegateEvent(UObject* Object)
 {
-	UWeaponComponent::OnAddOnDelegateEvent(Object);
+	UWeaponComponent::OnLocal_AddOnDelegateEvent(Object);
 
 	ACreature* Creature = Cast<ACreature>(Object);
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());
@@ -44,9 +46,9 @@ void UWeaponAssassinateComponent::OnAddOnDelegateEvent(UObject* Object)
 	}
 }
 
-void UWeaponAssassinateComponent::OnRemoveOnDelegateEvent(UObject* Object)
+void UWeaponAssassinateComponent::OnLocal_RemoveOnDelegateEvent(UObject* Object)
 {
-	UWeaponComponent::OnRemoveOnDelegateEvent(Object);
+	UWeaponComponent::OnLocal_RemoveOnDelegateEvent(Object);
 
 	ACreature* Creature = Cast<ACreature>(Object);
 	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());
@@ -57,8 +59,36 @@ void UWeaponAssassinateComponent::OnRemoveOnDelegateEvent(UObject* Object)
 	}
 }
 
-void UWeaponAssassinateComponent::Assassinate(AActor* Actor)
+void UWeaponAssassinateComponent::OnServer_AddOnDelegateEvent(UObject* Object)
 {
+	UWeaponComponent::OnServer_AddOnDelegateEvent(Object);
+
+	ACreature* Creature = Cast<ACreature>(Object);
+	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->OnMelee_AssassinateAttack.AddDynamic(this, &UWeaponAssassinateComponent::OnServer_AssassinateAttackEvent);
+		AnimInstance->OnMelee_AssassinateEnd.AddDynamic(this, &UWeaponAssassinateComponent::OnServer_AssassinateEndEvent);
+	}
+}
+
+void UWeaponAssassinateComponent::OnServer_RemoveOnDelegateEvent(UObject* Object)
+{
+	UWeaponComponent::OnServer_RemoveOnDelegateEvent(Object);
+
+	ACreature* Creature = Cast<ACreature>(Object);
+	USoldierAnimInstance* AnimInstance = Cast<USoldierAnimInstance>(Creature->GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->OnMelee_AssassinateAttack.RemoveDynamic(this, &UWeaponAssassinateComponent::OnServer_AssassinateAttackEvent);
+		AnimInstance->OnMelee_AssassinateEnd.RemoveDynamic(this, &UWeaponAssassinateComponent::OnServer_AssassinateEndEvent);
+	}
+}
+
+void UWeaponAssassinateComponent::OnServer_Assassinate(AActor* Actor)
+{
+	ERROR_IF_CALLED_ON_CLIENT();
+
 	if (!Actor)
 		return;
 
@@ -69,12 +99,13 @@ void UWeaponAssassinateComponent::Assassinate(AActor* Actor)
 	IsAssassinating = true;
 	CurAssassinatedCreature = Creature;
 
-	OwnerMelee->OnLocalAttackEndEvent();
-	OwnerMelee->OnLocalSubAttackEndEvent();
+	FAssassinateInfo AssassinateInfo;
+	AssassinateInfo.AssassinatedMontagesFpp = AssassinatedMontagesFpp;
+	AssassinateInfo.AssassinatedMontagesTpp = AssassinatedMontagesTpp;
 
-	AssassinateEvent();
-	OnAssassinate.Broadcast(Actor);
-	Server_Assassinate(Actor);
+	CurAssassinatedCreature->OnServer_Assassinated(GetOwnerCreature(), AssassinateInfo);
+
+	Multicast_Assassinate(Actor);
 }
 
 void UWeaponAssassinateComponent::AssassinateEvent()
@@ -125,22 +156,6 @@ std::pair<bool, FHitResult> UWeaponAssassinateComponent::CalculateCanAssassinate
 	return Result;
 }
 
-void UWeaponAssassinateComponent::Server_Assassinate_Implementation(AActor* Actor)
-{
-	ACreature* Creature = Cast<ACreature>(Actor);
-	if (!Creature)
-		return;
-
-	CurAssassinatedCreature = Creature;
-
-	FAssassinateInfo AssassinateInfo;
-	AssassinateInfo.AssassinatedMontagesFpp = AssassinatedMontagesFpp;
-	AssassinateInfo.AssassinatedMontagesTpp = AssassinatedMontagesTpp;
-
-	CurAssassinatedCreature->OnServer_Assassinated(GetOwnerCreature(), AssassinateInfo);	
-	Multicast_Assassinate(Actor);
-}
-
 void UWeaponAssassinateComponent::Multicast_Assassinate_Implementation(AActor* Actor)
 {
 	ACreature* Creature = Cast<ACreature>(Actor);
@@ -149,44 +164,46 @@ void UWeaponAssassinateComponent::Multicast_Assassinate_Implementation(AActor* A
 
 	CurAssassinatedCreature = Creature;
 
-	if (!GetOwnerCreature() || !GetOwnerCreature()->IsLocallyControlled())
-		AssassinateEvent();
-}
-
-void UWeaponAssassinateComponent::Server_OnAssassinateAttackEvent_Implementation()
-{
-	FDamageEvent AssassinateDamageEvent(AssassinateDamageType);
-	GetOwnerCreature()->CombatComponent->OnServer_GiveDamage(CurAssassinatedCreature, AssassinationDamage, AssassinateDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
-}
-
-void UWeaponAssassinateComponent::Server_OnAssassinateEndEvent_Implementation()
-{
-	CurAssassinatedCreature->AssassinatedEnd();
+	if (GetOwnerCreature()->IsLocallyControlled())
+	{
+		OwnerMelee->OnLocalAttackEndEvent();
+		OwnerMelee->OnLocalSubAttackEndEvent();
+		OnAssassinate.Broadcast(Actor);
+	}
+	AssassinateEvent();
 }
 
 void UWeaponAssassinateComponent::OnAssassinateAttackEvent()
 {
-	Server_OnAssassinateAttackEvent();
 }
 
 void UWeaponAssassinateComponent::OnAssassinateEndEvent()
 {
 	IsAssassinating = false;
-
 	OnAssassinateEnd.Broadcast();
-	Server_OnAssassinateEndEvent();
 }
 
-void UWeaponAssassinateComponent::OnBeforeAttackEvent()
+void UWeaponAssassinateComponent::OnServer_AssassinateAttackEvent()
 {
-	UWeaponComponent::OnBeforeAttackEvent();
+	FDamageEvent AssassinateDamageEvent(AssassinateDamageType);
+	GetOwnerCreature()->CombatComponent->OnServer_GiveDamage(CurAssassinatedCreature, AssassinationDamage, AssassinateDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
+}
+
+void UWeaponAssassinateComponent::OnServer_AssassinateEndEvent()
+{
+	CurAssassinatedCreature->OnServer_AssassinatedEnd();
+}
+
+void UWeaponAssassinateComponent::OnServerBeforeAttackEvent()
+{
+	ERROR_IF_CALLED_ON_CLIENT();
 
 	if (bCanAssassination && OwnerMelee->IsComboAttacking() == false) // 콤보 공격중이 아닐때
 	{
 		pair<bool, FHitResult> CanAssassinate = CalculateCanAssassinate(); // 암살 대상 찾기
 		if (CanAssassinate.first)
 		{
-			Assassinate(CanAssassinate.second.GetActor());
+			OnServer_Assassinate(CanAssassinate.second.GetActor());
 			OwnerMelee->AttackCancel();
 			return;
 		}

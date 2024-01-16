@@ -34,7 +34,7 @@ protected:
 	virtual void OnLocalAttackStartEvent() override; // 캐릭터의 공격이 시작하였을때 호출되는 함수
 
 	virtual void Attack() override;
-	virtual void Server_Attack_Implementation() override;
+	virtual void OnServer_Attack() override;
 	virtual void ComboStart(); // 콤보를 시작할 때 호출
 	virtual void NextComboAttack(); // 다음 콤보 공격할 때 호출
 	virtual void ComboEnd(); // 콤보가 끝날때 호출
@@ -45,9 +45,10 @@ protected:
 	virtual void OnServer_SwingResult(const TArray<FHitResult>& Results);
 
 	// Rpc
-	virtual void OnServer_SwingStart();
+	virtual void Client_OnAttackCanceled_Implementation() override;
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_SwingStart(int Combo);
+	virtual void OnServer_SwingStart();
 
 	// Delegate
 	UFUNCTION()

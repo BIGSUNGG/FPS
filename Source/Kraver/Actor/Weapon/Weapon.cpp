@@ -402,22 +402,27 @@ void AWeapon::Server_OnSubAttackEndEvent_Implementation()
 	bIsSubAttacking = false;
 }
 
-void AWeapon::Server_Attack_Implementation()
+void AWeapon::Server_TryAttack_Implementation()
 {
-	//bAttackCancel = false;
-	//OnServerBeforeAttack.Broadcast();
-	//
-	//if (bAttackCancel) // 공격이 취소되었을 경우
-	//{
-	//	bAttackCancel = false;
-	//	KR_LOG(Log, TEXT("Attack Canceled"));
-	//	return;
-	//}
+	bAttackCancel = false;
+	OnServerBeforeAttack.Broadcast();
 
-	Multicast_Attack();
+	if (bAttackCancel) // 공격이 취소되었을 경우
+	{
+		bAttackCancel = false;
+		OnServer_AttackCanceled();
+		return;
+	}
+
+	OnServer_Attack();
 }
 
 void AWeapon::Multicast_Attack_Implementation()
+{
+
+}
+
+void AWeapon::Client_OnAttackCanceled_Implementation()
 {
 
 }
@@ -435,7 +440,13 @@ void AWeapon::Multicast_TakeImpulseAtLocation_Implementation(FVector Impulse, FV
 void AWeapon::Attack()
 {
 	OnAttack.Broadcast();
-	Server_Attack();
+	Server_TryAttack();
+}
+
+void AWeapon::OnServer_Attack()
+{
+	Multicast_Attack();
+
 }
 
 void AWeapon::TryAttack()
@@ -546,6 +557,13 @@ void AWeapon::MakeFppPrimitiveInfo()
 
 	FppWeaponMesh = Cast<USkeletalMeshComponent>(WeaponFppPrimitiveInfo["Root"]);
 	return;
+}
+
+void AWeapon::OnServer_AttackCanceled()
+{
+	KR_LOG(Log, TEXT("Attack Canceled"));
+
+	Client_OnAttackCanceled();
 }
 
 void AWeapon::EquipEvent()

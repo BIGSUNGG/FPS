@@ -21,29 +21,31 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	virtual void OnAddOnDelegateEvent(UObject* Object) override;
-	virtual void OnRemoveOnDelegateEvent(UObject* Object) override;
+	virtual void OnLocal_AddOnDelegateEvent(UObject* Object) override;
+	virtual void OnLocal_RemoveOnDelegateEvent(UObject* Object) override;
+	virtual void OnServer_AddOnDelegateEvent(UObject* Object) override;
+	virtual void OnServer_RemoveOnDelegateEvent(UObject* Object) override;
 
-	virtual void Assassinate(AActor* Actor); // 암살 시작시 호출
+	virtual void OnServer_Assassinate(AActor* Actor); // 암살 시작시 호출
 	virtual void AssassinateEvent();
 	virtual std::pair<bool, FHitResult> CalculateCanAssassinate();
 
 	// Rpc
-	UFUNCTION(Server, Reliable)
-	virtual void Server_Assassinate(AActor* Actor);
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_Assassinate(AActor* Actor);
-	UFUNCTION(Server, Reliable)
-	virtual void Server_OnAssassinateAttackEvent();
-	UFUNCTION(Server, Reliable)
-	virtual void Server_OnAssassinateEndEvent();
 
 	// Delegate
 	UFUNCTION()
 	void OnAssassinateAttackEvent(); // Montage에서 암살 데미지를 주는 노티파이가 호출되었을때 호출
 	UFUNCTION()
 	void OnAssassinateEndEvent(); // Montage에서 암살이 끝나는 노티파이가 호출되었을때 호출
-	virtual void OnBeforeAttackEvent() override; // Melee에서 공격전에 암살이 가능한지 확인하기 위해 호출
+	UFUNCTION()
+	void OnServer_AssassinateAttackEvent(); // Montage에서 암살 데미지를 주는 노티파이가 호출되었을때 호출
+	UFUNCTION()
+	void OnServer_AssassinateEndEvent(); // Montage에서 암살이 끝나는 노티파이가 호출되었을때 호출
+
+	UFUNCTION()
+	virtual void OnServerBeforeAttackEvent(); // Melee에서 공격전에 암살이 가능한지 확인하기 위해 호출
 
 public:
 	FAssassinateDele OnAssassinate;

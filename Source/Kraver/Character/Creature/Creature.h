@@ -15,9 +15,9 @@ class KRAVER_API ACreature : public ACharacter
 {
 	GENERATED_BODY()
 
-	// Friend
-	friend void UWeaponAssassinateComponent::Server_Assassinate_Implementation(AActor* Actor);
-	friend void UWeaponAssassinateComponent::Server_OnAssassinateEndEvent_Implementation();
+public:
+	virtual void OnServer_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
+	virtual void OnServer_AssassinatedEnd();
 
 public:
 	// Sets default values for this character's properties
@@ -152,8 +152,6 @@ protected:
 	virtual void Multicast_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
 	UFUNCTION(Client, Reliable)
 	virtual void Client_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
-	UFUNCTION(Server, Reliable)
-	virtual void Server_OnAssassinatedEndEvent();
 
 		// Jump
 	UFUNCTION(Server, Reliable)
@@ -176,9 +174,6 @@ protected:
 	virtual void PlayLandedMontage();
 
 	virtual void OnServer_SimulateMesh();
-
-	virtual void OnServer_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo);
-	virtual void AssassinatedEnd();
 	
 	UFUNCTION()
 	void UpdateDissolveMaterial(float DissolveValue);

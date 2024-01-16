@@ -68,9 +68,12 @@ protected:
 	virtual void Server_OnSubAttackEndEvent();
 
 	UFUNCTION(Server, Reliable)
-	virtual void Server_Attack();
+	virtual void Server_TryAttack();
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_Attack();
+
+	UFUNCTION(Client, Reliable)
+	virtual void Client_OnAttackCanceled();
 
 	UFUNCTION(Server, Reliable)
 	void Server_TakeImpulseAtLocation(FVector Impulse, FVector ImpactPoint); // Mesh에 Impulse를 주기 위해 사용
@@ -80,6 +83,7 @@ protected:
 	// Delegate
 	virtual void TryAttack(); // 공격을 시도할 때 호출 AttackCancel을 통해 취소될 수 있음 취소되지 않을 경우 Attack 함수 호출
 	virtual void Attack(); // 공격이 취소되지 않았을때 호출
+	virtual void OnServer_Attack(); // 공격이 취소되지 않았을때 호출
 	
 	// OnRep
 	UFUNCTION()
@@ -87,6 +91,8 @@ protected:
 
 	// Func
 	virtual void MakeFppPrimitiveInfo() final; // 1인칭 PrimitiveInfo를 추가
+
+	virtual void OnServer_AttackCanceled();
 
 		// Weapon State에 따라 함수 호출
 	virtual void EquipEvent();
