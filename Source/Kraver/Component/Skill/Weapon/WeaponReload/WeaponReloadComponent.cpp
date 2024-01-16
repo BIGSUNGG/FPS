@@ -97,8 +97,8 @@ void UWeaponReloadComponent::ReloadStart()
 	if(!CanReload())
 		return;
 
-	OwnerGun->OnAttackEndEvent();
-	OwnerGun->OnSubAttackEndEvent();
+	OwnerGun->OnLocalAttackEndEvent();
+	OwnerGun->OnLocalSubAttackEndEvent();
 
 	ReloadStartEvent();
 	Server_ReloadStart();

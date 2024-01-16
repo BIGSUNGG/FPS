@@ -18,14 +18,14 @@ EBTNodeResult::Type UBTTask_AttackTo::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	UCombatComponent* CombatComp = OwnerComp.GetAIOwner()->GetPawn()->FindComponentByClass<UCombatComponent>();
 	if (!CombatComp)
 	{
-		CombatComp->OnAttackEndDelegate.Broadcast();
+		CombatComp->OnLocal_AttackEndDelegate.Broadcast();
 		return EBTNodeResult::Failed;
 	}
 
 	ACreature* Creature = dynamic_cast<ACreature*>(OwnerComp.GetAIOwner()->GetBlackboardComponent()->GetValueAsObject(AGuardAIController::FindEnemyKey));
 	if (!Creature)
 	{
-		CombatComp->OnAttackEndDelegate.Broadcast();
+		CombatComp->OnLocal_AttackEndDelegate.Broadcast();
 		return EBTNodeResult::Failed;
 	}
 
@@ -39,11 +39,11 @@ EBTNodeResult::Type UBTTask_AttackTo::ExecuteTask(UBehaviorTreeComponent& OwnerC
 
 	if (bSuccess)
 	{
-		CombatComp->OnAttackEndDelegate.Broadcast();
+		CombatComp->OnLocal_AttackEndDelegate.Broadcast();
 		return EBTNodeResult::Failed;
 	}
 
-	CombatComp->OnAttackStartDelegate.Broadcast();
+	CombatComp->OnLocalAttackStartDelegate.Broadcast();
 
 	return Result;
 }

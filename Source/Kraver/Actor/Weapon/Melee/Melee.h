@@ -28,23 +28,24 @@ protected:
 
 	virtual void OnLocal_AddOnOwnerDelegate() override;
 	virtual void OnLocal_RemoveOnOwnerDelegate() override;
+	virtual void OnServer_AddOnOwnerDelegate() override;
+	virtual void OnServer_RemoveOnOwnerDelegate() override;
 
-	virtual void OnAttackStartEvent() override; // 캐릭터의 공격이 시작하였을때 호출되는 함수
+	virtual void OnLocalAttackStartEvent() override; // 캐릭터의 공격이 시작하였을때 호출되는 함수
 
 	virtual void Attack() override;
+	virtual void Server_Attack_Implementation() override;
 	virtual void ComboStart(); // 콤보를 시작할 때 호출
 	virtual void NextComboAttack(); // 다음 콤보 공격할 때 호출
 	virtual void ComboEnd(); // 콤보가 끝날때 호출
+	UFUNCTION(Server, Reliable)
+	void Server_ComboEnd();
 
-	virtual void SwingStart();
 	virtual void SwingStartEvent(); // 무기를 휘두를 때 호출
+	virtual void OnServer_SwingResult(const TArray<FHitResult>& Results);
 
 	// Rpc
-	UFUNCTION(Server, Reliable)
-	virtual void Server_SwingResult(const TArray<FHitResult>& Results);
-
-	UFUNCTION(Server, Reliable)
-	virtual void Server_SwingStart(int Combo);
+	virtual void OnServer_SwingStart();
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_SwingStart(int Combo);
 
@@ -52,7 +53,7 @@ protected:
 	UFUNCTION()
 	void OnCanInputNextComboEvent(); // 몽타주에서 다음 공격 입력이 가능한지 알리는 노티파이가 호출되었을 때 호출
 	UFUNCTION()
-	void OnSwingAttackEvent(); // 몽타주에서 공격을 확인하는 노티파이가 호출되었을 때 호출
+	void OnServerSwingAttackEvent(); // 몽타주에서 공격을 확인하는 노티파이가 호출되었을 때 호출
 	UFUNCTION()
 	void OnAttackNextComboEvent(); // 몽타주에서 다음 콤보를 실행할지 확인하는 노티파이가 호출되었을 때 호출
 	UFUNCTION()

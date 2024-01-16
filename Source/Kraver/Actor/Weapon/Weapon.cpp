@@ -107,25 +107,6 @@ void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bIsAttacking && !CanAttack()) // 공격이 불가능한데 공격중일 때 
-		OnAttackEndEvent(); // 공격 종료
-	if (bIsSubAttacking && !CanSubAttack()) // 보조 공격이 불가능한데 보조 공격중일 때 
-		OnSubAttackEndEvent(); // 보조 공격 종료
-
-	if (CurAttackDelay > 0.f)
-	{
-		CurAttackDelay -= DeltaTime;
-		if (CurAttackDelay <= 0.f)
-		{
-			CurAttackDelay = 0.f;
-			if (bCanFirstInputAttack && bFirstInputAttack == true) // 선입력이 입력되어있고 선입력이 공격이 가능할 때 
-			{
-				bFirstInputAttack = false;
-				OnAttackStartEvent(); // 공격 실행
-			}
-		}
-	}
-
 	if (OwnerCreature && OwnerCreature->CombatComponent->IsDead() == false)
 	{
 		if (OwnerCreature->CombatComponent->GetCurWeapon() != this) // OwnerCreature의 현재 무기가 이 무기가 아닐 경우
@@ -168,6 +149,9 @@ bool AWeapon::OnServer_Equipped(ACreature* Character)
 
 bool AWeapon::CanAttack()
 {
+	if (bCanAttack == false)
+		return false;
+
 	if (OwnerCreature && !bAttackWhileSprint)
 	{
 		if (UCreatureMovementComponent * MovementComp = OwnerCreature->GetComponentByClass<UCreatureMovementComponent>())
@@ -185,6 +169,9 @@ bool AWeapon::CanAttack()
 
 bool AWeapon::CanSubAttack()
 {
+	if (bCanSubAttack == false)
+		return false;
+
 	if (OwnerCreature && !bSubAttackWhileSprint)
 	{
 		if (UCreatureMovementComponent* MovementComp = OwnerCreature->GetComponentByClass<UCreatureMovementComponent>())
@@ -253,8 +240,8 @@ bool AWeapon::OnLocal_Unholster()
 	OwnerCreature = Cast<ACreature>(GetOwner());
 
 	// 공격 종료
-	OnAttackEndEvent();
-	OnSubAttackEndEvent();
+	OnLocalAttackEndEvent();
+	OnLocalSubAttackEndEvent();
 
 	OnLocal_AddOnOwnerDelegate();
 
@@ -267,8 +254,8 @@ bool AWeapon::OnLocal_Holster()
 	ERROR_IF_NOT_CALLED_ON_LOCAL_PARAM(false);
 
 	// 공격 종료
-	OnAttackEndEvent();
-	OnSubAttackEndEvent();
+	OnLocalAttackEndEvent();
+	OnLocalSubAttackEndEvent();
 
 	OnLocal_RemoveOnOwnerDelegate();
 
@@ -283,13 +270,13 @@ void AWeapon::OnLocal_AddOnOwnerDelegate()
 	if (OwnerCreature == nullptr)
 		return;
 
-	OwnerCreature->CombatComponent->OnAttackStartDelegate.AddDynamic(this, &AWeapon::OnAttackStartEvent);
-	OwnerCreature->CombatComponent->OnAttackEndDelegate.AddDynamic(this, &AWeapon::OnAttackEndEvent);
+	OwnerCreature->CombatComponent->OnLocalAttackStartDelegate.AddDynamic(this, &AWeapon::OnLocalAttackStartEvent);
+	OwnerCreature->CombatComponent->OnLocal_AttackEndDelegate.AddDynamic(this, &AWeapon::OnLocalAttackEndEvent);
 
-	OwnerCreature->CombatComponent->OnSubAttackStartDelegate.AddDynamic(this, &AWeapon::OnSubAttackStartEvent);
-	OwnerCreature->CombatComponent->OnSubAttackEndDelegate.AddDynamic(this, &AWeapon::OnSubAttackEndEvent);
+	OwnerCreature->CombatComponent->OnLocalSubAttackStartDelegate.AddDynamic(this, &AWeapon::OnLocalSubAttackStartEvent);
+	OwnerCreature->CombatComponent->OnLocalSubAttackEndDelegate.AddDynamic(this, &AWeapon::OnLocalSubAttackEndEvent);
 
-	OnAddOnDelegate.Broadcast(OwnerCreature);
+	OnLocalAddOnDelegate.Broadcast(OwnerCreature);
 }
 
 void AWeapon::OnLocal_RemoveOnOwnerDelegate()
@@ -299,13 +286,33 @@ void AWeapon::OnLocal_RemoveOnOwnerDelegate()
 	if (OwnerCreature == nullptr)
 		return;
 
-	OwnerCreature->CombatComponent->OnAttackStartDelegate.RemoveDynamic(this, &AWeapon::OnAttackStartEvent);
-	OwnerCreature->CombatComponent->OnAttackEndDelegate.RemoveDynamic(this, &AWeapon::OnAttackEndEvent);
+	OwnerCreature->CombatComponent->OnLocalAttackStartDelegate.RemoveDynamic(this, &AWeapon::OnLocalAttackStartEvent);
+	OwnerCreature->CombatComponent->OnLocal_AttackEndDelegate.RemoveDynamic(this, &AWeapon::OnLocalAttackEndEvent);
 
-	OwnerCreature->CombatComponent->OnSubAttackStartDelegate.RemoveDynamic(this, &AWeapon::OnSubAttackStartEvent);
-	OwnerCreature->CombatComponent->OnSubAttackEndDelegate.RemoveDynamic(this, &AWeapon::OnSubAttackEndEvent);
+	OwnerCreature->CombatComponent->OnLocalSubAttackStartDelegate.RemoveDynamic(this, &AWeapon::OnLocalSubAttackStartEvent);
+	OwnerCreature->CombatComponent->OnLocalSubAttackEndDelegate.RemoveDynamic(this, &AWeapon::OnLocalSubAttackEndEvent);
 
-	OnRemoveOnDelegate.Broadcast(OwnerCreature);
+	OnLocalRemoveOnDelegate.Broadcast(OwnerCreature);
+}
+
+void AWeapon::OnServer_AddOnOwnerDelegate()
+{
+	ERROR_IF_CALLED_ON_CLIENT();
+
+	if (OwnerCreature == nullptr)
+		return;
+
+	OnServerAddOnDelegate.Broadcast(OwnerCreature);
+}
+
+void AWeapon::OnServer_RemoveOnOwnerDelegate()
+{
+	ERROR_IF_CALLED_ON_CLIENT();
+
+	if (OwnerCreature == nullptr)
+		return;
+
+	OnServerRemoveOnDelegate.Broadcast(OwnerCreature);
 }
 
 void AWeapon::AttackCancel()
@@ -313,7 +320,7 @@ void AWeapon::AttackCancel()
 	bAttackCancel = true;
 }
 
-void AWeapon::OnAttackStartEvent()
+void AWeapon::OnLocalAttackStartEvent()
 {		
 	if (bIsAttacking == true) // 이미 공격중이면 
 		return;
@@ -321,45 +328,23 @@ void AWeapon::OnAttackStartEvent()
 	if(!CanAttack()) // 공격이 불가능하면
 		return;
 
-	if (CurAttackDelay > 0 && bCanFirstInputAttack) // 공격 딜레이 중이고 선입력이 공격이 가능하면
-	{
-		bFirstInputAttack = true;
-		return;
-	}
-
 	bIsAttacking = true;
-
-	if (bCanAttack)
-	{ 
-		if (!bFirstAttackDelay) // 첫공격 딜레이가 없으면
-			TryAttack();
-
-		if(bAutomaticAttack) // 자동공격이 가능하면
-			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::TryAttack, AttackDelay, true, AttackDelay);	
-
-		if(bFirstAttackDelay && !bAutomaticAttack) // 첫공격 딜레이도 있고 자동공격이 불가능하면
-			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &AWeapon::TryAttack, AttackDelay, false, AttackDelay);
-
-	}
-
 	OnAttackStart.Broadcast();
 	Server_OnAttackStartEvent();
 }
 
-void AWeapon::OnAttackEndEvent()
+void AWeapon::OnLocalAttackEndEvent()
 {
-	bFirstInputAttack = false; // 선입력 취소
 	if (bIsAttacking == false)
 		return;
 
 	bIsAttacking = false;
-	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle); // 자동공격 취소
 	OnAttackEnd.Broadcast();
 
 	Server_OnAttackEndEvent();
 }
 
-void AWeapon::OnSubAttackStartEvent()
+void AWeapon::OnLocalSubAttackStartEvent()
 {	
 	if(!bCanSubAttack)
 		return;
@@ -373,7 +358,7 @@ void AWeapon::OnSubAttackStartEvent()
 	Server_OnSubAttackStartEvent();
 }
 
-void AWeapon::OnSubAttackEndEvent()
+void AWeapon::OnLocalSubAttackEndEvent()
 {
 	bIsSubAttacking = false;
 	OnSubAttackEnd.Broadcast();
@@ -385,12 +370,16 @@ void AWeapon::Server_Unholster_Implementation()
 {
 	WeaponState = EWeaponState::EQUIPPED_UNHOLSTER;
 	UnholsterEvent();
+
+	OnServer_AddOnOwnerDelegate();
 }
 
 void AWeapon::Server_Holster_Implementation()
 {
 	WeaponState = EWeaponState::EQUIPPED_HOLSTER;
 	HolsterEvent();
+
+	OnServer_RemoveOnOwnerDelegate();
 }
 
 void AWeapon::Server_OnAttackStartEvent_Implementation()
@@ -415,6 +404,16 @@ void AWeapon::Server_OnSubAttackEndEvent_Implementation()
 
 void AWeapon::Server_Attack_Implementation()
 {
+	//bAttackCancel = false;
+	//OnServerBeforeAttack.Broadcast();
+	//
+	//if (bAttackCancel) // 공격이 취소되었을 경우
+	//{
+	//	bAttackCancel = false;
+	//	KR_LOG(Log, TEXT("Attack Canceled"));
+	//	return;
+	//}
+
 	Multicast_Attack();
 }
 
@@ -444,8 +443,6 @@ void AWeapon::TryAttack()
 	KR_LOG(Log, TEXT("Try Attack"));
 
 	bAttackCancel = false;
-	CurAttackDelay = AttackDelay;
-	
 	OnBeforeAttack.Broadcast();
 
 	if (bAttackCancel) // 공격이 취소되었을 경우
@@ -554,8 +551,8 @@ void AWeapon::MakeFppPrimitiveInfo()
 void AWeapon::EquipEvent()
 {
 	// 공격과 보조 공격 중지
-	OnAttackEndEvent();
-	OnSubAttackEndEvent();
+	OnLocalAttackEndEvent();
+	OnLocalSubAttackEndEvent();
 
 	// Physics 중지
 	GetTppWeaponMesh()->SetSimulatePhysics(false);
@@ -574,8 +571,8 @@ void AWeapon::UnEquipEvent()
 	if (Character && Character->IsLocallyControlled())
 	{
 		// 공격과 보조 공격 중지
-		OnAttackEndEvent();
-		OnSubAttackEndEvent();
+		OnLocalAttackEndEvent();
+		OnLocalSubAttackEndEvent();
 
 		// OwnerCreature의 델리게이트에 추가된 함수 제거
 		OnLocal_RemoveOnOwnerDelegate();

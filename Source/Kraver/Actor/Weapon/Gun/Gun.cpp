@@ -20,17 +20,28 @@ AGun::AGun() : Super()
 
 void AGun::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
+
 	SpreadUpdate(DeltaTime);
 	RecoilUpdate(DeltaTime);
 
-	Super::Tick(DeltaTime);
+	// 선입력 처리
+	if (CurAttackDelay > 0.f)
+	{
+		CurAttackDelay -= DeltaTime;
+		if (CurAttackDelay <= 0.f)
+		{
+			CurAttackDelay = 0.f;
+			AttackDelayFinish();
+		}
+	}
 }
 
 void AGun::SpreadUpdate(float DeltaTime)
 {
 	if (OwnerCreature)
 	{
-		if (CurAttackDelay > 0) // 발사중일 때 
+		if (CurAttackDelay > 0 || bIsAttacking) // 발사중일 때 
 			IncreaseSpread(SpreadPerTime * DeltaTime);
 		else // 발사중이 아닐 때
 			DecreaseSpread(SpreadForceBack * DeltaTime);
@@ -91,24 +102,45 @@ void AGun::PostInitializeComponents()
 
 }
 
-void AGun::Attack()
+void AGun::OnLocalAttackStartEvent()
 {
-	if (!bIsAttacking) // 공격중이 아닌지
-		return;
-
-	if (OwnerCreature == nullptr)
+	if (CurAttackDelay > 0 && bCanFirstInputAttack) // 공격 딜레이 중이고 선입력이 공격이 가능하면
 	{
-		KR_LOG(Error, TEXT("OwnerCreature is nullptr"), *GetName());
+		bFirstInputAttack = true;
 		return;
 	}
 
-	if (CurAmmo > 0) // 남아있는 총알이 있는지
+	if (bIsAttacking == true) // 이미 공격중이면 
+		return;
+
+	if (!CanAttack()) // 공격이 불가능하면
+		return;
+
+	Super::OnLocalAttackStartEvent();
+	if (bCanAttack)
 	{
-		Fire();
-		Super::Attack();
+		if (!bFirstAttackDelay) // 첫공격 딜레이가 없으면
+			TryAttack();
+
+		if (bAutomaticAttack) // 자동공격이 가능하면
+			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &ThisClass::TryAttack, AttackDelay, true, AttackDelay);
+
+		if (bFirstAttackDelay && !bAutomaticAttack) // 첫공격 딜레이도 있고 자동공격이 불가능하면
+			GetWorldTimerManager().SetTimer(AutomaticAttackHandle, this, &ThisClass::TryAttack, AttackDelay, false, AttackDelay);
+
 	}
-	else // 남아있는 총알이 없으면
-		OnAttackEndEvent(); // 공격 중지
+}
+
+void AGun::OnLocalAttackEndEvent()
+{
+	bFirstInputAttack = false; // 선입력 취소
+
+	if (bIsAttacking == false)
+		return;
+
+	Super::OnLocalAttackEndEvent();
+
+	GetWorldTimerManager().ClearTimer(AutomaticAttackHandle); // 자동공격 취소
 
 }
 
@@ -131,9 +163,9 @@ void AGun::OnServer_ImpactBullet(FVector ImpactPos)
 	Multicast_ImpactBullet(ImpactPos);
 }
 
-void AGun::Server_Fire_Implementation()
+void AGun::OnServer_Fire()
 {
-	if (IS_SERVER() && bInfinityAmmo == false)
+	if (OwnerCreature->IsLocallyControlled() == false && bInfinityAmmo == false)
 		--CurAmmo;
 
 	OnServer_FireBullet(); // 총알 발사
@@ -169,8 +201,6 @@ void AGun::Fire()
 	if (!bInfinityAmmo)
 		--CurAmmo;
 
-	Server_Fire();
-
 	FireEvent(); // 발사 이벤트
 	IncreaseRecoil(); // 반동추가
 
@@ -180,6 +210,51 @@ void AGun::Fire()
 void AGun::OnServer_FireBullet()
 {
 	OnFireBullet.Broadcast();
+}
+
+void AGun::TryAttack()
+{
+	CurAttackDelay = AttackDelay;
+
+	Super::TryAttack();
+}
+
+void AGun::Attack()
+{
+	if (!bIsAttacking) // 공격중이 아닌지
+		return;
+
+	if (OwnerCreature == nullptr)
+	{
+		KR_LOG(Error, TEXT("OwnerCreature is nullptr"), *GetName());
+		return;
+	}
+
+	if (CurAmmo > 0) // 남아있는 총알이 있는지
+	{
+		Fire();
+		Super::Attack();
+	}
+	else // 남아있는 총알이 없으면
+		OnLocalAttackEndEvent(); // 공격 중지
+
+}
+
+void AGun::Server_Attack_Implementation()
+{
+	ERROR_IF_CALLED_ON_CLIENT();
+	Super::Server_Attack_Implementation();
+
+	OnServer_Fire();
+}
+
+void AGun::AttackDelayFinish()
+{
+	if (bCanFirstInputAttack && bFirstInputAttack == true) // 선입력이 입력되어있고 선입력이 공격이 가능할 때 
+	{
+		bFirstInputAttack = false;
+		OnLocalAttackStartEvent(); // 공격 실행
+	}
 }
 
 void AGun::FireEvent()

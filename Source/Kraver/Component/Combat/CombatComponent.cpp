@@ -411,20 +411,24 @@ void UCombatComponent::HolsterWeapon()
 	}
 }
 
-void UCombatComponent::SetIsAttacking(bool bAttack)
+void UCombatComponent::OnLocal_SetIsAttacking(bool bAttack)
 {
+	ERROR_IF_NOT_CALLED_ON_LOCAL();
+
 	if (bAttack)
-		OnAttackStartDelegate.Broadcast();
+		OnLocalAttackStartDelegate.Broadcast();
 	else
-		OnAttackEndDelegate.Broadcast();
+		OnLocal_AttackEndDelegate.Broadcast();
 }
 
-void UCombatComponent::SetIsSubAttacking(bool bAttack)
+void UCombatComponent::OnLocal_SetIsSubAttacking(bool bAttack)
 {
+	ERROR_IF_NOT_CALLED_ON_LOCAL();
+
 	if (bAttack)
-		OnSubAttackStartDelegate.Broadcast();
+		OnLocalSubAttackStartDelegate.Broadcast();
 	else
-		OnSubAttackEndDelegate.Broadcast();
+		OnLocalSubAttackEndDelegate.Broadcast();
 }
 
 bool UCombatComponent::IsDead()

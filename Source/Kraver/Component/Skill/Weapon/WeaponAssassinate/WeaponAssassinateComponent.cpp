@@ -69,8 +69,8 @@ void UWeaponAssassinateComponent::Assassinate(AActor* Actor)
 	IsAssassinating = true;
 	CurAssassinatedCreature = Creature;
 
-	OwnerMelee->OnAttackEndEvent();
-	OwnerMelee->OnSubAttackEndEvent();
+	OwnerMelee->OnLocalAttackEndEvent();
+	OwnerMelee->OnLocalSubAttackEndEvent();
 
 	AssassinateEvent();
 	OnAssassinate.Broadcast(Actor);

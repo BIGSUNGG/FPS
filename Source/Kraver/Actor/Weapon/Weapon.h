@@ -35,19 +35,21 @@ public:
 
 	virtual void OnLocal_AddOnOwnerDelegate();
 	virtual void OnLocal_RemoveOnOwnerDelegate();
+	virtual void OnServer_AddOnOwnerDelegate();
+	virtual void OnServer_RemoveOnOwnerDelegate();
 
 	virtual void AttackCancel(); // 다음 공격 또는 공격 전에 공격을 취소하기 위해 호출
 
 	// Delegate
 	UFUNCTION()
-	virtual void OnAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
+	virtual void OnLocalAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
 	UFUNCTION()
-	virtual void OnAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
+	virtual void OnLocalAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
 
 	UFUNCTION()
-	virtual void OnSubAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
+	virtual void OnLocalSubAttackStartEvent(); // 캐릭터의 공격이 시작하였을때 호출되는 함수
 	UFUNCTION()
-	virtual void OnSubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
+	virtual void OnLocalSubAttackEndEvent(); // 캐릭터의 공격이 끝났을때 호출되는 함수
 protected:
 	// Rpc
 	UFUNCTION(Server, Reliable)
@@ -76,7 +78,7 @@ protected:
 	void Multicast_TakeImpulseAtLocation(FVector Impulse, FVector ImpactPoint);
 
 	// Delegate
-	virtual void TryAttack() final; // 공격을 시도할 때 호출 AttackCancel을 통해 취소될 수 있음 취소되지 않을 경우
+	virtual void TryAttack(); // 공격을 시도할 때 호출 AttackCancel을 통해 취소될 수 있음 취소되지 않을 경우 Attack 함수 호출
 	virtual void Attack(); // 공격이 취소되지 않았을때 호출
 	
 	// OnRep
@@ -129,7 +131,9 @@ public:
 
 public:
 	FAttackDele OnAttack; // 공격
+
 	FAttackDele OnBeforeAttack;
+	FAttackDele OnServerBeforeAttack;
 
 	FAttackStartDele OnAttackStart;
 	FAttackStartDele OnSubAttackStart;
@@ -143,8 +147,10 @@ public:
 	FPlayMontageDele OnPlayTppMontage;
 	FPlayMontageDele OnPlayFppMontage;
 
-	FAddOnDele OnAddOnDelegate;
-	FRemoveOnDele OnRemoveOnDelegate;
+	FAddOnDele OnLocalAddOnDelegate;
+	FRemoveOnDele OnLocalRemoveOnDelegate;
+	FAddOnDele OnServerAddOnDelegate;
+	FRemoveOnDele OnServerRemoveOnDelegate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Component", Meta = (AllowPrivateAccess = true))
 	TArray<UWeaponComponent*> WeaponComponents;
@@ -230,21 +236,9 @@ protected:
 	bool bAttackCancel = false; // TryAttack 함수에서 Attack함수를 호출할지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-	bool bAutomaticAttack = false; // 연사공격이 가능한지
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-	bool bFirstAttackDelay = false; // 첫공격에 딜레이가 있는지
-	bool bFirstInputAttack = false; // 공격 선입력이 입력되어있는지 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-	bool bCanFirstInputAttack = true; // 첫 공격에 딜레이가 추가
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
-	float AttackDelay = 0.2f; // 공격 딜레이
-	float CurAttackDelay = 0.f; // 현재 공격 딜레이
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 	float AttackDamage = 10.f; // 공격을 하였을때 주는 데미지	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UKraverDamageType> AttackDamageType;
 
-	FTimerHandle AutomaticAttackHandle; // 연사공격을 담당하는 TimerHandle
 
 };

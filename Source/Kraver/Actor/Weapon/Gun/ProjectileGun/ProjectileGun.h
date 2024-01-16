@@ -23,9 +23,6 @@ protected:
 	UFUNCTION()
 	virtual void OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit);
 
-	// Rpc
-	virtual void Multicast_ImpactBullet_Implementation(FVector ImpactPos) override;
-
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Bullet", meta = (AllowPrivateAccess = "true"))
 	UClass* BulletClass = nullptr; // ÃÑ¾Ë Å¬·¡½º

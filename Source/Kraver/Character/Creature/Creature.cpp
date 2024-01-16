@@ -9,6 +9,7 @@
 #include SoldierAnimInstance_h
 #include KraverGameMode_h
 #include HpBarWidget_h
+#include Gun_h
 
 // Sets default values
 ACreature::ACreature()
@@ -224,11 +225,21 @@ void ACreature::Tick(float DeltaTime)
 
 	if (CombatComponent->GetCurWeapon())
 	{
-		if (CombatComponent->GetCurWeapon()->IsAttacking() && !CanAttack()) // 공격이 불가능할 시 공격 종료
-			CombatComponent->SetIsAttacking(false);
+		AGun* Gun = Cast<AGun>(CombatComponent->GetCurWeapon());
 
+		if (CombatComponent->GetCurWeapon()->IsAttacking() && !CanAttack()) // 공격이 불가능할 시 공격 종료
+			CombatComponent->OnLocal_SetIsAttacking(false);
 		if (CombatComponent->GetCurWeapon()->IsSubAttacking() && !CanSubAttack()) // 보조 공격이 불가능할 시 공격 종료
-			CombatComponent->SetIsSubAttacking(false);
+			CombatComponent->OnLocal_SetIsSubAttacking(false);
+
+		if (bAttackButtonPress && CombatComponent->GetCurWeapon()->IsAttacking() == false && CanAttack())
+		{
+			if (Gun == nullptr || Gun->GetbAutomaticAttack())
+				CombatComponent->OnLocal_SetIsAttacking(true);
+		}
+		if (bSubAttackButtonPress && CombatComponent->GetCurWeapon()->IsSubAttacking() == false && CanSubAttack())
+			CombatComponent->OnLocal_SetIsSubAttacking(true);
+
 	}
 }
 
@@ -301,26 +312,20 @@ void ACreature::OnAssassinateEndEvent()
 
 bool ACreature::CanAttack()
 {
-	if (CombatComponent->GetCurWeapon())
-	{
-		if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingHolsterWeapon())
-			return false;
-		if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingUnholsterWeapon())
-			return false;
-	}
+	if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingHolsterWeapon())
+		return false;
+	if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingUnholsterWeapon())
+		return false;
 
 	return true;
 }
 
 bool ACreature::CanSubAttack()
 {
-	if (CombatComponent->GetCurWeapon())
-	{
-		if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingHolsterWeapon())
+	if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingHolsterWeapon())
 			return false;
-		if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingUnholsterWeapon())
-			return false;
-	}
+	if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingUnholsterWeapon())
+		return false;
 
 	return true;
 }
@@ -630,7 +635,6 @@ void ACreature::OnUnholsterWeaponEvent(AWeapon* Weapon)
 		{
 			FppCaptureComponent->ShowOnlyComponent(comp.Value);
 		}
-		KR_LOG(Error, TEXT("%d"), FppCaptureComponent->ShowOnlyComponents.Num());
 	}
 }
 
@@ -867,12 +871,12 @@ void ACreature::AttackStart()
 		CreatureMovementComponent->SetMovementState(EMovementState::WALK);
 
 	if(CanAttack())
-		CombatComponent->SetIsAttacking(true);
+		CombatComponent->OnLocal_SetIsAttacking(true);
 }
 
 void ACreature::AttackEnd()
 {
-	CombatComponent->SetIsAttacking(false);
+	CombatComponent->OnLocal_SetIsAttacking(false);
 }
 
 void ACreature::SubAttackStart()
@@ -883,12 +887,12 @@ void ACreature::SubAttackStart()
 	if (CombatComponent->GetCurWeapon()->GetbSubAttackWhileSprint() == false)
 		CreatureMovementComponent->SetMovementState(EMovementState::WALK);
 
-	CombatComponent->SetIsSubAttacking(true);
+	CombatComponent->OnLocal_SetIsSubAttacking(true);
 }
 
 void ACreature::SubAttackEnd()
 {
-	CombatComponent->SetIsSubAttacking(false);
+	CombatComponent->OnLocal_SetIsSubAttacking(false);
 }
 
 void ACreature::Server_OnAssassinatedEndEvent_Implementation()

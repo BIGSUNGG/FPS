@@ -135,16 +135,16 @@ public:
 
 	void SetTeam(ETeam InTeam) { TeamInfo.CurTeam = InTeam; } 
 	void SetUnholsterWhenEquip(bool InValue) { bUnholsterNextEquip = InValue; }
-	void SetIsAttacking(bool bAttack);
-	void SetIsSubAttacking(bool bAttack);
+	void OnLocal_SetIsAttacking(bool bAttack);
+	void OnLocal_SetIsSubAttacking(bool bAttack);
 
 
 public:
 	// Attack
-	FAttackStartDele OnAttackStartDelegate; // 공격을 시작할때 호출
-	FAttackEndDele OnAttackEndDelegate; // 공격을 멈출때 호출
-	FAttackStartDele OnSubAttackStartDelegate; // 공격을 시작할때 호출
-	FAttackEndDele OnSubAttackEndDelegate; // 공격을 멈출때 호출
+	FAttackStartDele OnLocalAttackStartDelegate; // 공격을 시작할때 호출
+	FAttackEndDele OnLocal_AttackEndDelegate; // 공격을 멈출때 호출
+	FAttackStartDele OnLocalSubAttackStartDelegate; // 공격을 시작할때 호출
+	FAttackEndDele OnLocalSubAttackEndDelegate; // 공격을 멈출때 호출
 
 	// Equip
 	FEquipWeaponSuccessDele OnServerEquipWeaponSuccess; // 무기를 장착했을때 호출

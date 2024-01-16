@@ -78,18 +78,3 @@ void AProjectileGun::OnBulletImpactEvent(AActor* Bullet, AActor* OtherActor, UPr
 
 	OnServer_ImpactBullet(Hit.ImpactPoint - Direction * 15.f);
 }
-
-void AProjectileGun::Multicast_ImpactBullet_Implementation(FVector ImpactPos)
-{
-	if(ImpactEffect)
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactEffect, ImpactPos);
-	if (ImpactSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(
-			this,
-			ImpactSound,
-			ImpactPos
-		);
-	}
-}
-

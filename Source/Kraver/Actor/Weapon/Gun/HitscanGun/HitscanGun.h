@@ -18,13 +18,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-	// Rpc
-	UFUNCTION(Server, Reliable)
-	virtual void Server_FireBulletResult(const TArray<FHitResult>& BulletHitResults);
 
 	// Function
 	virtual void OnServer_FireBullet() override;
-	virtual void FireBulletResult(const TArray<FHitResult>& BulletHitResults);
+	virtual void OnServer_FireBulletResult(const TArray<FHitResult>& BulletHitResults);
+
 	TArray<FHitResult> CalculateFireHit(FName ProfileName, FVector Spread = FVector(0, 0, 0)); // 발사 결과
 
 protected:

@@ -10,26 +10,6 @@ void AHitscanGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 }
 
-void AHitscanGun::Server_FireBulletResult_Implementation(const TArray<FHitResult>& BulletHitResults)
-{
-	for (auto& Result : BulletHitResults)
-	{
-		if (IsValid(Result.GetActor()))
-		{
-			FVector Direction = Result.TraceEnd - Result.TraceStart;
-			Direction.Normalize();
-
-			FPointDamageEvent DamageEvent(AttackDamage, Result, Direction, AttackDamageType);
-			OwnerCreature->CombatComponent->OnServer_GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
-			if (Result.bBlockingHit)
-			{
-				FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
-				OnServer_ImpactBullet(ImpaceEffectPos);
-			}
-		}
-	}
-}
-
 void AHitscanGun::OnServer_FireBullet()
 {
 	Super::OnServer_FireBullet();
@@ -47,11 +27,11 @@ void AHitscanGun::OnServer_FireBullet()
 		Spread = FVector::ZeroVector;
 
 	TArray<FHitResult> BulletHitResults = CalculateFireHit(PROFILE_Bullet, Spread);
-	FireBulletResult(BulletHitResults);
+	OnServer_FireBulletResult(BulletHitResults);
 
 }
 
-void AHitscanGun::FireBulletResult(const TArray<FHitResult>& BulletHitResults)
+void AHitscanGun::OnServer_FireBulletResult(const TArray<FHitResult>& BulletHitResults)
 {
 	for (auto& Result : BulletHitResults)
 	{
@@ -60,15 +40,15 @@ void AHitscanGun::FireBulletResult(const TArray<FHitResult>& BulletHitResults)
 			FVector Direction = Result.TraceEnd - Result.TraceStart;
 			Direction.Normalize();
 
+			FPointDamageEvent DamageEvent(AttackDamage, Result, Direction, AttackDamageType);
+			OwnerCreature->CombatComponent->OnServer_GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
 			if (Result.bBlockingHit)
 			{
 				FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;
-				ImpactBulletEvent(ImpaceEffectPos);
+				OnServer_ImpactBullet(ImpaceEffectPos);
 			}
 		}
 	}
-
-	Server_FireBulletResult(BulletHitResults);
 }
 
 TArray<FHitResult> AHitscanGun::CalculateFireHit(FName ProfileName, FVector Spread /*= FVector(0, 0, 0)*/)

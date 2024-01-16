@@ -29,8 +29,8 @@ void UWeaponComponent::BeginPlay()
 	}
 
 	OwnerWeapon->OnBeforeAttack.AddDynamic(this, &UWeaponComponent::OnBeforeAttackEvent);
-	OwnerWeapon->OnAddOnDelegate.AddDynamic(this, &UWeaponComponent::OnAddOnDelegateEvent);
-	OwnerWeapon->OnRemoveOnDelegate.AddDynamic(this, &UWeaponComponent::OnRemoveOnDelegateEvent);
+	OwnerWeapon->OnLocalAddOnDelegate.AddDynamic(this, &UWeaponComponent::OnAddOnDelegateEvent);
+	OwnerWeapon->OnLocalRemoveOnDelegate.AddDynamic(this, &UWeaponComponent::OnRemoveOnDelegateEvent);
 
 }
 

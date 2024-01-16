@@ -32,12 +32,11 @@ public:
 
 protected:
 	// Delegate
-	virtual void Attack() override;
+	virtual void OnLocalAttackStartEvent() override; // 캐릭터의 공격이 시작하였을때 호출되는 함수
+	virtual void OnLocalAttackEndEvent() override; // 캐릭터의 공격이 끝났을때 호출되는 함수
+
 	virtual void OnServer_ImpactBullet(FVector ImpactPos);
 
-	// Rpc
-	UFUNCTION(Server, Reliable)
-	virtual void Server_Fire();
 
 	virtual void Multicast_Attack_Implementation();
 
@@ -49,8 +48,15 @@ protected:
 	virtual void IncreaseSpread(float InValue); // 스프레드 반동 늘이기
 	virtual void DecreaseSpread(float InValue); // 스프레드 반동 줄이기
 
+	virtual void TryAttack() override;
+	virtual void Attack() override;
+	virtual void Server_Attack_Implementation() override;
+	virtual void AttackDelayFinish();
+
 	virtual void OnServer_FireBullet(); // 총을 발사할 때 호출 (공격 범위에 있는적을 트레이스할때 사용, 여러번 호출 가능)
 	virtual void Fire();
+	virtual void OnServer_Fire();
+
 	virtual void FireEvent(); // 총을 발사한 후 이벤트
 	virtual void ImpactBulletEvent(FVector ImpactPos); // 총알이 Block되었을때 호출
 
@@ -58,8 +64,9 @@ public:
 	// Getter Setter
 	virtual bool CanAttack() override;
 	virtual bool CanSubAttack() override;
-	virtual bool ShouldApplySpread() { return !bIsSubAttacking; }
-	virtual float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; } // FireBullet함수에서 탄퍼짐을 계산할때 호출
+	bool GetbAutomaticAttack() { return bAutomaticAttack; }
+	bool ShouldApplySpread() { return !bIsSubAttacking; }
+	float CalculateCurSpread() { return CurBulletSpread + AdditiveSpreadInAir + AdditiveSpreadPerSpeed; } // FireBullet함수에서 탄퍼짐을 계산할때 호출
 	int32 GetCurAmmo() { return CurAmmo; }
 	int32 GetMaxAmmo() { return MaxAmmo; }
 	int32 GetTotalAmmo() { return TotalAmmo; }
@@ -79,6 +86,19 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Effect", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UNiagaraSystem> ImpactEffect; // Bullet이 Block되었을때 실행되는 이펙트
+
+	// Attack
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
+	bool bAutomaticAttack = false; // 연사공격이 가능한지
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
+	bool bFirstAttackDelay = false; // 첫공격에 딜레이가 있는지
+	bool bFirstInputAttack = false; // 공격 선입력이 입력되어있는지 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
+	bool bCanFirstInputAttack = true; // 첫 공격에 딜레이가 추가
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
+	float AttackDelay = 0.2f; // 공격 딜레이
+	float CurAttackDelay = 0.f; // 현재 공격 딜레이
+	FTimerHandle AutomaticAttackHandle; // 연사공격을 담당하는 TimerHandle
 
 	// Ammo
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Ammo", meta = (AllowPrivateAccess = "true"))
