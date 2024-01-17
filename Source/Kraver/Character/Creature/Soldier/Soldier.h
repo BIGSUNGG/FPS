@@ -16,8 +16,6 @@ class KRAVER_API ASoldier : public ACreature
 	GENERATED_BODY()
 
 public:
-	ASoldier();
-
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

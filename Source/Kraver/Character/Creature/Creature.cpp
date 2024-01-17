@@ -12,8 +12,12 @@
 #include Gun_h
 
 // Sets default values
-ACreature::ACreature()
+ACreature::ACreature(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCreatureMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
+	CreatureMovementComponent = CastChecked<UCreatureMovementComponent>(GetCharacterMovement());
+	CreatureMovementComponent->SetIsReplicated(true);
+
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
@@ -28,7 +32,6 @@ ACreature::ACreature()
 	FppCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>("FppCaptureComponent");
 	ScopeCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>("ScopeCaptureComponent");
 
-	CreatureMovementComponent = CreateDefaultSubobject<UCreatureMovementComponent>("CreatureMovementComponent");
 	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>("CombatComponent");
 	CombatComponent->SetIsReplicated(true);
@@ -81,15 +84,6 @@ ACreature::ACreature()
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetGenerateOverlapEvents(true);
-	
-	CreatureMovementComponent->SetIsReplicated(true);
-
-	GetCharacterMovement()->AirControl = 0.25f;
-	GetCharacterMovement()->MaxWalkSpeed = CreatureMovementComponent->GetWalkSpeed();
-	GetCharacterMovement()->MaxWalkSpeedCrouched = CreatureMovementComponent->GetCrouchWalkSpeed();
-	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
-	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
-	GetCharacterMovement()->SetWalkableFloorAngle(50.f);
 
 	HpBarWidget->SetupAttachment(GetCapsuleComponent());
 	HpBarWidget->SetRelativeLocation(FVector(20.f, 0.f, 95.f));
@@ -165,6 +159,7 @@ void ACreature::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CreatureMovementComponent = CastChecked<UCreatureMovementComponent>(GetCharacterMovement());
 	// HpBar วาด็
 	UHpBarWidget* HpBar = Cast<UHpBarWidget>(HpBarWidget->GetWidget());
 	if (HpBar)
@@ -306,6 +301,8 @@ void ACreature::OnAssassinateEndEvent()
 
 bool ACreature::CanAttack()
 {
+	if (CombatComponent->IsDead())
+		return false;
 	if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingHolsterWeapon())
 		return false;
 	if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingUnholsterWeapon())
@@ -316,6 +313,8 @@ bool ACreature::CanAttack()
 
 bool ACreature::CanSubAttack()
 {
+	if (CombatComponent->IsDead())
+		return false;
 	if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingHolsterWeapon())
 			return false;
 	if (Cast<USoldierAnimInstance>(GetMesh()->GetAnimInstance())->IsPlayingUnholsterWeapon())
@@ -480,13 +479,13 @@ void ACreature::RunButtonReleased()
 void ACreature::CrouchButtonPressed()
 {
 	bCrouchButtonPress = true;
-	CreatureMovementComponent->Crouch();
+	CreatureMovementComponent->CrouchStart();
 }
 
 void ACreature::CrouchButtonReleased()
 {
 	bCrouchButtonPress = false;
-	CreatureMovementComponent->UnCrouch();
+	CreatureMovementComponent->CrouchEnd();
 }
 
 void ACreature::JumpingButtonPressed()

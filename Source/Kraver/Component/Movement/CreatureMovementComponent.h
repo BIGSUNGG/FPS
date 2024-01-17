@@ -3,12 +3,12 @@
 #pragma once
 
 #include "Kraver/Kraver.h"
-#include "Components/ActorComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "CreatureMovementComponent.generated.h"
 
 // Creature의 이동을 담당하는 컴포넌트
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class KRAVER_API UCreatureMovementComponent : public UActorComponent
+UCLASS(Config = Game)
+class KRAVER_API UCreatureMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
 
@@ -33,8 +33,8 @@ public:
 	virtual void JumpStart(); // 점프 시작
 	virtual void JumpEnd(); // 점프 종료
 
-	virtual void Crouch(); // 앉기 
-	virtual void UnCrouch(); // 일어나기
+	virtual void CrouchStart(); // 앉기 
+	virtual void CrouchEnd(); // 일어나기
 
 protected:	
 	UFUNCTION(Server, Reliable)
@@ -42,14 +42,13 @@ protected:
 
 public:
 	// Getter Setter
-	virtual bool IsFalling();
 	FORCEINLINE bool IsJumping() { return bIsJumping; }
 	FORCEINLINE float GetSprintSpeed() { return SprintSpeed; }
 	FORCEINLINE float GetWalkSpeed() { return WalkSpeed; }
 	FORCEINLINE float GetCrouchSprintSpeed() { return CrouchSprintSpeed; }
 	FORCEINLINE float GetCrouchRunSpeed() { return CrouchRunSpeed; }
 	FORCEINLINE float GetCrouchWalkSpeed() { return CrouchWalkSpeed; }
-	FORCEINLINE EMovementState GetMovementState() { return MovementState; }
+	FORCEINLINE EMovementState GetMovementState() { return WalkState; }
 
 	virtual void SetMovementState(EMovementState value) final;
 
@@ -62,7 +61,7 @@ protected:
 	bool bIsJumping = false;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Data|State", meta = (AllowPrivateAccess = "true"))
-	EMovementState MovementState = EMovementState::WALK;
+	EMovementState WalkState = EMovementState::WALK;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
 	float SprintSpeed = 900.f; // EMovementState가 SPRINT가 되었을때 설정할 캐릭터 속도

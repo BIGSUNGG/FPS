@@ -14,7 +14,7 @@ class KRAVER_API AKraverPlayer : public ASoldier
 {
 	GENERATED_BODY()
 public:
-	AKraverPlayer();
+	AKraverPlayer(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
 

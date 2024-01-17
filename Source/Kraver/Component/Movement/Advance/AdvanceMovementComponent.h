@@ -30,8 +30,8 @@ public:
 	virtual void JumpStart() override;
 	virtual void JumpEnd() override;
 
-	virtual void Crouch() override;
-	virtual void UnCrouch() override;
+	virtual void CrouchStart() override;
+	virtual void CrouchEnd() override;
 
 protected:
 	// Double Jump
@@ -70,36 +70,36 @@ protected:
 	UFUNCTION(Server, Reliable)
 	virtual void Server_WallRunStart(EWallRunState State);
 	UFUNCTION(Server, Reliable)
-	virtual void Server_WallRunJumpSuccess(FVector PendingLaunchVelocity);
+	virtual void Server_WallRunJumpSuccess(FVector LaunchInVelocity);
 	UFUNCTION(NetMulticast, Reliable)
-	virtual void Multicast_WallRunJumpSuccess(FVector PendingLaunchVelocity);
+	virtual void Multicast_WallRunJumpSuccess(FVector LaunchInVelocity);
 	UFUNCTION(Server, Reliable)
 	virtual void Server_WallRunEnd();
 
 	UFUNCTION(Server, Reliable)
-	virtual void Server_DoubleJump(FVector PendingLaunchVelocity);
+	virtual void Server_DoubleJump(FVector LaunchInVelocity);
 	UFUNCTION(NetMulticast, Reliable)
-	virtual void Multicast_DoubleJump(FVector PendingLaunchVelocity);
+	virtual void Multicast_DoubleJump(FVector LaunchInVelocity);
 
 	UFUNCTION(Server, Reliable)
 	virtual void Server_WallRunHorizonSuccess();
 	UFUNCTION(Server, Reliable)
 	virtual void Server_WallRunVerticalSuccess();
 	UFUNCTION(Server, Reliable)
-	virtual void Server_WallRunSuccess(FVector Location, FRotator Rotation, FVector Velocity, FVector PendingLaunchVelocity);
+	virtual void Server_WallRunSuccess(FVector Location, FRotator Rotation, FVector InVelocity, FVector LaunchInVelocity);
 
 	UFUNCTION(Server, Reliable)
-	virtual void Server_SlideSuccess(FVector Velocity);
+	virtual void Server_SlideSuccess(FVector InVelocity);
 	UFUNCTION(Server, Reliable)
 	virtual void Server_SlideEnd();
 	UFUNCTION(Server, Reliable)
-	virtual void Server_SlideUpdate(FVector Location, FVector Velocity);
+	virtual void Server_SlideUpdate(FVector Location, FVector InVelocity);
 
 public:
 	// Getter Setter
-	virtual bool IsFalling() override;
+	virtual bool IsFalling() const override;
 	bool IsSliding() { return bIsSliding; }
-	const bool IsWallRunning() { return CurWallRunState != EWallRunState::NONE; }
+	bool IsWallRunning() const { return CurWallRunState != EWallRunState::NONE; }
 
 	EWallRunState GetCurWallRunState() { return CurWallRunState; }
 
@@ -124,7 +124,7 @@ protected:
 	float CurWallRunVerticalSpeed = 600.f; // 현재 세로 벽타기 속도
 	float WallRunJumpHeight = 400.f; // 벽타기 도중 점프 높이
 	float WallRunJumpOffForce  = 400.f; 
-	float WallRunTargetGravity = 0.75f; // 벽타기 중 받을 중력
+	float WallRunTargetGravity = 1.f; // 벽타기 중 받을 중력
 	FVector WallRunNormal; // 현재 벽타는 중인 벽의 각도
 	FTimerHandle SuppressWallRunHorizonTimer;
 	FTimerHandle SuppressWallRunVerticalTimer;

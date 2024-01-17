@@ -14,8 +14,12 @@
 #include KraverHud_h
 #include Weapon_h
 
-AKraverPlayer::AKraverPlayer() : Super()
+AKraverPlayer::AKraverPlayer(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UAdvanceMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
+	CreatureMovementComponent = CastChecked<UCreatureMovementComponent>(GetCharacterMovement());
+	CreatureMovementComponent->SetIsReplicated(true);
+
 	NetUpdateFrequency = 300.f;
 
 	static ConstructorHelpers::FObjectFinder<ULevelSequence> LEVEL_FADE_SEQUENCE(TEXT("/Script/LevelSequence.LevelSequence'/Game/InfimaGames/LowPolyShooterPack/Data/Sequences/LS_Fade_Level.LS_Fade_Level'"));

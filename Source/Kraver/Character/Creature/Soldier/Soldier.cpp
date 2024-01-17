@@ -6,12 +6,6 @@
 #include AttachmentMagazineComponent_h
 #include WeaponReloadComponent_h
 
-ASoldier::ASoldier()
-	: Super()
-{
-
-}
-
 void ASoldier::BeginPlay()
 {
 	Super::BeginPlay();

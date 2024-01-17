@@ -18,7 +18,7 @@ void UCreatureMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProp
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME_CONDITION(UCreatureMovementComponent, MovementState, COND_SkipOwner);
+	DOREPLIFETIME_CONDITION(UCreatureMovementComponent, WalkState, COND_SkipOwner);
 	DOREPLIFETIME_CONDITION(UCreatureMovementComponent, bIsJumping, COND_SkipOwner);
 }
 
@@ -35,9 +35,16 @@ void UCreatureMovementComponent::BeginPlay()
 		return;
 	}
 
-	DefaultGravity = OwnerCreature->GetCharacterMovement()->GravityScale;
-	DefaultGroundFriction = OwnerCreature->GetCharacterMovement()->GroundFriction;
-	DefaultBrakingDecelerationWalking = OwnerCreature->GetCharacterMovement()->BrakingDecelerationWalking;
+	AirControl = 0.25f;
+	MaxWalkSpeed = GetWalkSpeed();
+	MaxWalkSpeedCrouched = GetCrouchWalkSpeed();
+	NavAgentProps.bCanCrouch = true;
+	bCanWalkOffLedgesWhenCrouching = true;
+	SetWalkableFloorAngle(50.f);
+
+	DefaultGravity = GravityScale;
+	DefaultGroundFriction = GroundFriction;
+	DefaultBrakingDecelerationWalking = BrakingDecelerationWalking;
 }
 
 // Called every frame
@@ -108,24 +115,19 @@ void UCreatureMovementComponent::JumpEnd()
 	OwnerCreature->StopJumping();
 }
 
-void UCreatureMovementComponent::Crouch()
+void UCreatureMovementComponent::CrouchStart()
 {
 	OwnerCreature->Crouch();
 }
 
-void UCreatureMovementComponent::UnCrouch()
+void UCreatureMovementComponent::CrouchEnd()
 {
 	OwnerCreature->UnCrouch();
 }
 
-bool UCreatureMovementComponent::IsFalling()
-{
-	return OwnerCreature->GetMovementComponent()->IsFalling();
-}
-
 void UCreatureMovementComponent::SetMovementState(EMovementState value)
 {
-	MovementState = value;
+	WalkState = value;
 	switch (value)
 	{
 	case EMovementState::WALK:
@@ -148,7 +150,7 @@ void UCreatureMovementComponent::SetMovementState(EMovementState value)
 
 void UCreatureMovementComponent::Server_SetMovementState_Implementation(EMovementState value)
 {
-	MovementState = value;
+	WalkState = value;
 	switch (value)
 	{
 	case EMovementState::WALK:
