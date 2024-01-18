@@ -41,7 +41,7 @@ void AGun::SpreadUpdate(float DeltaTime)
 {
 	if (OwnerCreature)
 	{
-		if (CurAttackDelay > 0 || bIsAttacking) // 발사중일 때 
+		if (CurAttackDelay > 0 || (bIsAttacking && bAutomaticAttack)) // 발사중일 때 
 			IncreaseSpread(SpreadPerTime * DeltaTime);
 		else // 발사중이 아닐 때
 			DecreaseSpread(SpreadForceBack * DeltaTime);

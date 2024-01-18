@@ -65,7 +65,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Rotation", Meta = (AllowPrivateAccess = true))
 	FRotator StartingAimRotation;
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	ETurningInPlace TurningInPlace;
+	ETurningInPlace TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 
 	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Montage", Meta = (AllowPrivateAccess = true))

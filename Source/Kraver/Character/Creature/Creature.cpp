@@ -26,6 +26,7 @@ ACreature::ACreature(const FObjectInitializer& ObjectInitializer)
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
 
+	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	Fp_Root = CreateDefaultSubobject<USceneComponent>(TEXT("Fp_Root"));
 	Fp_SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Fp_SpringArm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Fp_Camera"));
@@ -58,7 +59,9 @@ ACreature::ACreature(const FObjectInitializer& ObjectInitializer)
 	CombatComponent->OnHolsterWeapon.AddDynamic(this, &ThisClass::OnHolsterWeaponEvent);
 	CombatComponent->OnServerHolsterWeapon.AddDynamic(this, &ThisClass::OnServerHolsterWeaponEvent);
 
-	Fp_Root->SetupAttachment(GetCapsuleComponent());
+	
+	Root->SetupAttachment(GetCapsuleComponent());
+	Fp_Root->SetupAttachment(Root);
 
 	Fp_SpringArm->SetupAttachment(Fp_Root);
 	Fp_SpringArm->SetRelativeLocation(FVector(0.f, 0.f, 75.f));
@@ -85,7 +88,7 @@ ACreature::ACreature(const FObjectInitializer& ObjectInitializer)
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetGenerateOverlapEvents(true);
 
-	HpBarWidget->SetupAttachment(GetCapsuleComponent());
+	HpBarWidget->SetupAttachment(Root);
 	HpBarWidget->SetRelativeLocation(FVector(20.f, 0.f, 95.f));
 	HpBarWidget->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
 	HpBarWidget->SetOwnerNoSee(true);
@@ -159,7 +162,6 @@ void ACreature::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CreatureMovementComponent = CastChecked<UCreatureMovementComponent>(GetCharacterMovement());
 	// HpBar 할당
 	UHpBarWidget* HpBar = Cast<UHpBarWidget>(HpBarWidget->GetWidget());
 	if (HpBar)
@@ -167,6 +169,7 @@ void ACreature::BeginPlay()
 
 	TppRootRotation = GetActorRotation();
 
+	DefaultCapsuleHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
 }
 
 void ACreature::Destroyed()
@@ -181,6 +184,7 @@ void ACreature::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	CreatureMovementComponent = CastChecked<UCreatureMovementComponent>(GetCharacterMovement());
 }
 
 void ACreature::OnRep_Controller()
@@ -215,27 +219,50 @@ void ACreature::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	RootTick(DeltaTime);
 	CameraTick(DeltaTime);
 	AimOffset(DeltaTime);
 
-	if (CombatComponent->GetCurWeapon())
+	if(IsLocallyControlled())
 	{
-		AGun* Gun = Cast<AGun>(CombatComponent->GetCurWeapon());
-
-		if (CombatComponent->GetCurWeapon()->IsAttacking() && !CanAttack()) // 공격이 불가능할 시 공격 종료
-			CombatComponent->OnLocal_SetIsAttacking(false);
-		if (CombatComponent->GetCurWeapon()->IsSubAttacking() && !CanSubAttack()) // 보조 공격이 불가능할 시 공격 종료
-			CombatComponent->OnLocal_SetIsSubAttacking(false);
-
-		if (bAttackButtonPress && CombatComponent->GetCurWeapon()->IsAttacking() == false && CanAttack())
+		if (CombatComponent->GetCurWeapon())
 		{
-			if (Gun && Gun->GetbAutomaticAttack())
-				CombatComponent->OnLocal_SetIsAttacking(true);
+			AGun* Gun = Cast<AGun>(CombatComponent->GetCurWeapon());
+	
+			if (CombatComponent->GetCurWeapon()->IsAttacking() && !CanAttack()) // 공격이 불가능할 시 공격 종료
+				CombatComponent->OnLocal_SetIsAttacking(false);
+			if (CombatComponent->GetCurWeapon()->IsSubAttacking() && !CanSubAttack()) // 보조 공격이 불가능할 시 공격 종료
+				CombatComponent->OnLocal_SetIsSubAttacking(false);
+	
+			if (bAttackButtonPress && CombatComponent->GetCurWeapon()->IsAttacking() == false && CanAttack())
+			{
+				if (Gun && Gun->GetbAutomaticAttack())
+					CombatComponent->OnLocal_SetIsAttacking(true);
+			}
+			if (bSubAttackButtonPress && CombatComponent->GetCurWeapon()->IsSubAttacking() == false && CanSubAttack())
+				CombatComponent->OnLocal_SetIsSubAttacking(true);
+	
 		}
-		if (bSubAttackButtonPress && CombatComponent->GetCurWeapon()->IsSubAttacking() == false && CanSubAttack())
-			CombatComponent->OnLocal_SetIsSubAttacking(true);
-
 	}
+}
+
+
+void ACreature::RootTick(float DeltaTime)
+{
+	FVector Result = FVector::ZeroVector;
+	if (CreatureMovementComponent->IsCrouching())
+	{
+		Result.Z = DefaultCapsuleHalfHeight - GetCharacterMovement()->GetCrouchedHalfHeight();
+		CurCrouchRootHeight = FMath::FInterpTo(CurCrouchRootHeight, CrouchRootHeight, DeltaTime, 10.f);
+	}
+	else
+	{
+		Result.Z = 0.f;
+		CurCrouchRootHeight = FMath::FInterpTo(CurCrouchRootHeight, UnCrouchRootHeight, DeltaTime, 10.f);
+	}
+	Result.Z += CurCrouchRootHeight;
+
+	Root->SetRelativeLocation(Result);
 }
 
 void ACreature::CameraTick(float DeltaTime)

@@ -58,7 +58,6 @@ void ABullet::Tick(float DeltaTime)
 
 void ABullet::OnServer_FireBullet(FRotator& Direction, AActor* Target /*= nullptr*/)
 {
-	SetActorRotation(Direction, ETeleportType::ResetPhysics);
 }
 
 void ABullet::HitEvent(AActor* OtherActor, UPrimitiveComponent* OtherComponent, const FHitResult& Hit)

@@ -26,7 +26,6 @@ public:
 
 	virtual void CameraTilt(float TargetRoll);
 	virtual void CameraTick(float DeletaTime) override;
-	virtual void SpringArmTick(float DeltaTime);
 	virtual void ArmMeshTick(float DeletaTime);
 	virtual void WeaponADS(float DeltaTime);
 
@@ -52,7 +51,6 @@ protected:
 	virtual void ChangeView(); // 현재 카메라 시점을 변경하는 함수
 	virtual void ThrowWeapon(AWeapon* Weapon);
 
-	virtual void RefreshSpringArm(); // SpringArm의 RelativeLocation을 새로고침하는 함수
 	virtual void RefreshCurViewType(); // 현재 카메라 시점으로 새로고침하는 함수
 
 	// Rpc
@@ -157,15 +155,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Interaction", meta = (AllowPrivateAccess = "true"))
 	float InteractionRadius = 5.f; // 장착가능한 무기를 찾는 범위의 반지름
 
-	// Crouch
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-	float CrouchCameraHeight = -40.f; // 앉았을때 목표 카메라 높이
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-	float UnCrouchCameraHeight = 0.f; // 일어났을때 목표 카메라 높이
-
 	float CameraBasicFov = 110.f; // 기본 Fov값
-	FVector Fp_SpringArmBasicLocation; // 기본적으로 적용할 SprintArm의 RelativeLocation
-	FVector FP_SpringArmCrouchLocation; // 추가적으로 적용할 SprintArm의 RelativeLocation
 
 	float WeaponThrowPower = 700.f; // 장착해제된 무기를 던지는 힘
 	FVector WeaponThrowAngularPower = FVector(100, 100, 0); // 장착해제된 무기를 던지는 힘

@@ -44,9 +44,11 @@ void UAdvanceMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 		OwnerCreature->Jump();
 	}
 
-	WallRunUpdate();
-	SlideUpdate();
-
+	if (OwnerCreature->IsLocallyControlled())
+	{
+		WallRunUpdate();
+		SlideUpdate();	
+	}
 }
 
 void UAdvanceMovementComponent::Landed(const FHitResult& Hit)
@@ -622,7 +624,7 @@ void UAdvanceMovementComponent::Server_WallRunSuccess_Implementation(FVector Loc
 {
 	OwnerCreature->SetActorLocation(Location);
 	OwnerCreature->SetActorRotation(Rotation);
-	Velocity = Velocity;
+	Velocity = InVelocity;
 	PendingLaunchVelocity = LaunchVelocity;
 }
 
@@ -632,7 +634,7 @@ void UAdvanceMovementComponent::Server_SlideSuccess_Implementation(FVector InVel
 
 	GroundFriction = SlideGroundFriction;
 	BrakingDecelerationWalking = SlideBrakingDecelerationWalking;
-	Velocity = Velocity;
+	Velocity = InVelocity;
 }
 
 void UAdvanceMovementComponent::Server_SlideEnd_Implementation()
@@ -646,7 +648,7 @@ void UAdvanceMovementComponent::Server_SlideEnd_Implementation()
 void UAdvanceMovementComponent::Server_SlideUpdate_Implementation(FVector Location, FVector InVelocity)
 {
 	OwnerCreature->SetActorLocation(Location);
-	Velocity = Velocity;
+	Velocity = InVelocity;
 }
 
 bool UAdvanceMovementComponent::IsFalling() const

@@ -40,6 +40,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void RootTick(float DeltaTime);
 	virtual void CameraTick(float DeltaTime);
 	virtual void Jump() override;
 
@@ -218,6 +219,9 @@ public:
 	class UCreatureMovementComponent* CreatureMovementComponent;
 
 protected:
+	// Default
+	float DefaultCapsuleHalfHeight;
+
 	// Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 	USceneCaptureComponent2D* ScopeCaptureComponent;
@@ -229,6 +233,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 	UTextureRenderTarget2D* FppRenderTarget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
+	USceneComponent* Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* Fp_Root;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
@@ -247,6 +253,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|AimOffset")
 	FRotator TppRootRotation;
 	float InterpRoot_Yaw;
+	
+	// Crouch
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
+	float CurCrouchRootHeight = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
+	float CrouchRootHeight = -40.f; // 앉았을때 목표 카메라 높이
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
+	float UnCrouchRootHeight = 0.f; // 일어났을때 목표 카메라 높이
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Resist", meta = (AllowPrivateAccess = "true"))
 	float ImpulseResistanceRatio = 1.f;

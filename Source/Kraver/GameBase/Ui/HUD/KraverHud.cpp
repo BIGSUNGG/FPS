@@ -331,6 +331,9 @@ void AKraverHud::CreateDamagedDirection(float DamageAmount, FDamageEvent const& 
 
 		FindActor = FindActor->GetOwner();
 	}
+	
+	if (!Creature) 
+		return;	
 
 	// 해당 Creature에게 할당된 DamagedDirectionWidget이 있을 경우
 	if (DamagedDirectionWidgets.Contains(Creature))
