@@ -246,5 +246,4 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Attack", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UKraverDamageType> AttackDamageType;
 
-
 };

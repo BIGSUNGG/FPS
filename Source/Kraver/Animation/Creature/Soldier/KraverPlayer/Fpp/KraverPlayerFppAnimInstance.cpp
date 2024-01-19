@@ -3,6 +3,7 @@
 
 #include "KraverPlayerFppAnimInstance.h"
 #include KraverPlayer_h
+#include Gun_h
 
 UKraverPlayerFppAnimInstance::UKraverPlayerFppAnimInstance()
 {
@@ -70,14 +71,14 @@ void UKraverPlayerFppAnimInstance::WeaponSway(float DeltaSeconds)
 	return;
 #endif
 
-	float TurnValue = KraverPlayer->GetInputAxisValue("Turn") * SwayValue;
-	float LookUpValue = KraverPlayer->GetInputAxisValue("LookUp") * SwayValue;
+	float TurnValue = KraverPlayer->GetInputAxisValue("Turn") * SwayYawValue;
+	float LookUpValue = KraverPlayer->GetInputAxisValue("LookUp") * SwayYawValue;
 	FRotator WeaponSwayFinalRot;
 	FRotator WeaponSwayInitRot;
 
-	WeaponSwayFinalRot.Roll = LookUpValue * SwayValue;
-	WeaponSwayFinalRot.Yaw = TurnValue * SwayValue;
-	WeaponSwayFinalRot.Pitch = TurnValue * SwayValue;
+	WeaponSwayFinalRot.Roll = LookUpValue * SwayPitchValue;
+	WeaponSwayFinalRot.Yaw = TurnValue * SwayYawValue;
+	WeaponSwayFinalRot.Pitch = TurnValue * SwayYawValue;
 
 	FRotator TargetRot;
 	TargetRot.Roll = WeaponSwayInitRot.Roll - WeaponSwayFinalRot.Roll;
@@ -96,21 +97,19 @@ void UKraverPlayerFppAnimInstance::WeaponSway(float DeltaSeconds)
 	else if (CurWeaponSwayRot.Yaw < MinSwayDegree)
 		CurWeaponSwayRot.Yaw = MinSwayDegree;
 
-	if (CurWeaponSwayRot.Roll > MaxSwayDegree)
-		CurWeaponSwayRot.Roll = MaxSwayDegree;
-	else if (CurWeaponSwayRot.Roll < MinSwayDegree)
-		CurWeaponSwayRot.Roll = MinSwayDegree;
-
 	if (CurWeaponSwayRot.Pitch > MaxSwayDegree)
 		CurWeaponSwayRot.Pitch = MaxSwayDegree;
 	else if (CurWeaponSwayRot.Pitch < MinSwayDegree)
 		CurWeaponSwayRot.Pitch = MinSwayDegree;
 
 	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->CombatComponent->GetCurWeapon()->IsSubAttacking())
-		WeaponSwayResultRot = CurWeaponSwayRot * 0.1f;
+		WeaponSwayResultRot = CurWeaponSwayRot * 0.25f;
 	else
 		WeaponSwayResultRot = CurWeaponSwayRot;
 
+	if (AGun* Gun = Cast<AGun>(KraverPlayer->CombatComponent->GetCurWeapon()))
+		WeaponSwayResultRot += Gun->GetRecoilSwayRot();
+	
 }
 
 

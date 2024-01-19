@@ -58,7 +58,8 @@ protected:
 	TArray<TTuple<FTimeline, float>> ProceduralAnimStates;
 
 	// Weapon Sway
-	float SwayValue = 0.5f;
+	float SwayPitchValue = 1.f;
+	float SwayYawValue = 0.5f;
 	float MaxSwayDegree = 1.f;
 	float MinSwayDegree = -1.f;
 }; 

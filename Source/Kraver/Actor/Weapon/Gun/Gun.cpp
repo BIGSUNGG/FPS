@@ -75,6 +75,9 @@ void AGun::RecoilUpdate(float DeltaTime)
 		OwnerCreature->AddControllerPitchInput(AddRecoilPitch);
 		OwnerCreature->AddControllerYawInput(AddRecoilYaw);
 
+		FRotator TargetRot = FRotator(TargetRecoilYaw, TargetRecoilYaw, TargetRecoilPitch);
+		RecoilSwayRot = FMath::RInterpTo(RecoilSwayRot, TargetRot, DeltaTime, 3.f);
+
 		TargetRecoilPitch -= AddRecoilPitch;
 		TargetRecoilYaw -= AddRecoilYaw;
 	}

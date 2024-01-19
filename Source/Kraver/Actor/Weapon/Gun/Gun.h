@@ -70,6 +70,7 @@ public:
 	int32 GetCurAmmo() { return CurAmmo; }
 	int32 GetMaxAmmo() { return MaxAmmo; }
 	int32 GetTotalAmmo() { return TotalAmmo; }
+	FRotator GetRecoilSwayRot() { return RecoilSwayRot; }
 
 public:
 	FAttackDele OnFireBullet; // 총알을 발사할 때마다 호출 (여러번 호출가능)
@@ -111,6 +112,7 @@ protected:
 	bool bInfinityAmmo = false; // 발사할 때 총알을 소비할지 
 
 	// Recoil
+	FRotator RecoilSwayRot = FRotator::ZeroRotator;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Spread", meta = (AllowPrivateAccess = "true"))
 	float MinSpread; // 발사에 인한 최소 스프레드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Spread", meta = (AllowPrivateAccess = "true"))
