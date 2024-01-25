@@ -71,8 +71,8 @@ void UKraverPlayerFppAnimInstance::WeaponSway(float DeltaSeconds)
 	return;
 #endif
 
-	float TurnValue = KraverPlayer->GetInputAxisValue("Turn") * SwayYawValue;
-	float LookUpValue = KraverPlayer->GetInputAxisValue("LookUp") * SwayYawValue;
+	float TurnValue = KraverPlayer->GetInputAxisValue("Turn");
+	float LookUpValue = KraverPlayer->GetInputAxisValue("LookUp");
 	FRotator WeaponSwayFinalRot;
 	FRotator WeaponSwayInitRot;
 
@@ -87,29 +87,35 @@ void UKraverPlayerFppAnimInstance::WeaponSway(float DeltaSeconds)
 
 	CurWeaponSwayRot = FMath::RInterpTo(CurWeaponSwayRot, TargetRot, DeltaSeconds, 4.f);
 
-	if (CurWeaponSwayRot.Roll > MaxSwayDegree)
-		CurWeaponSwayRot.Roll = MaxSwayDegree;
-	else if (CurWeaponSwayRot.Roll < MinSwayDegree)
-		CurWeaponSwayRot.Roll = MinSwayDegree;
+	if (CurWeaponSwayRot.Roll > MaxSwayPitchDegree)
+		CurWeaponSwayRot.Roll = MaxSwayPitchDegree;
+	else if (CurWeaponSwayRot.Roll < MinSwayPitchDegree)
+		CurWeaponSwayRot.Roll = MinSwayPitchDegree;
 
-	if (CurWeaponSwayRot.Yaw > MaxSwayDegree)
-		CurWeaponSwayRot.Yaw = MaxSwayDegree;
-	else if (CurWeaponSwayRot.Yaw < MinSwayDegree)
-		CurWeaponSwayRot.Yaw = MinSwayDegree;
+	if (CurWeaponSwayRot.Yaw > MaxSwayYawDegree)
+		CurWeaponSwayRot.Yaw = MaxSwayYawDegree;
+	else if (CurWeaponSwayRot.Yaw < MinSwayYawDegree)
+		CurWeaponSwayRot.Yaw = MinSwayYawDegree;
 
-	if (CurWeaponSwayRot.Pitch > MaxSwayDegree)
-		CurWeaponSwayRot.Pitch = MaxSwayDegree;
-	else if (CurWeaponSwayRot.Pitch < MinSwayDegree)
-		CurWeaponSwayRot.Pitch = MinSwayDegree;
+	if (CurWeaponSwayRot.Pitch > MaxSwayYawDegree)
+		CurWeaponSwayRot.Pitch = MaxSwayYawDegree;
+	else if (CurWeaponSwayRot.Pitch < MinSwayYawDegree)
+		CurWeaponSwayRot.Pitch = MinSwayYawDegree;
 
 	if (KraverPlayer->CombatComponent->GetCurWeapon() && KraverPlayer->CombatComponent->GetCurWeapon()->IsSubAttacking())
-		WeaponSwayResultRot = CurWeaponSwayRot * 0.25f;
+	{
+		WeaponSwayResultRot.Yaw = CurWeaponSwayRot.Yaw * 0.25f;
+		WeaponSwayResultRot.Pitch = CurWeaponSwayRot.Pitch * 0.25f;
+		WeaponSwayResultRot.Roll = CurWeaponSwayRot.Roll;
+	}
 	else
 		WeaponSwayResultRot = CurWeaponSwayRot;
 
 	if (AGun* Gun = Cast<AGun>(KraverPlayer->CombatComponent->GetCurWeapon()))
 		WeaponSwayResultRot += Gun->GetRecoilSwayRot();
 	
+	WeaponSwayResultVec.X = WeaponSwayResultRot.Yaw * -2.f;
+	WeaponSwayResultVec.Z = WeaponSwayResultRot.Roll * 0.75f;
 }
 
 

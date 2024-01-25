@@ -50,6 +50,9 @@ protected:
 	FRotator WeaponSwayResultRot;
 	FRotator CurWeaponSwayRot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|ProceduralAnim", Meta = (AllowPrivateAccess = true))
+	FVector WeaponSwayResultVec;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|ProceduralAnim", Meta = (AllowPrivateAccess = true))
 	FVector ProceduralAnimResultVec;
 
 	// ProceduralAnim
@@ -58,8 +61,10 @@ protected:
 	TArray<TTuple<FTimeline, float>> ProceduralAnimStates;
 
 	// Weapon Sway
-	float SwayPitchValue = 1.f;
-	float SwayYawValue = 0.5f;
-	float MaxSwayDegree = 1.f;
-	float MinSwayDegree = -1.f;
+	float SwayPitchValue = -0.5f;
+	float SwayYawValue = 0.25f;
+	float MaxSwayYawDegree = 0.3f;
+	float MinSwayYawDegree = -0.3f;
+	float MaxSwayPitchDegree = 2.f;
+	float MinSwayPitchDegree = -2.f;
 }; 

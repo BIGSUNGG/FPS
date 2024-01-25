@@ -93,7 +93,7 @@ void UCreatureMovementComponent::MoveRight(float NewAxisValue)
 		return;
 
 	NewAxisValue *= InputRightRatio;
-	if (NewAxisValue == 0 || OwnerCreature->Controller == nullptr || NewAxisValue == 0)
+	if (NewAxisValue == 0 || OwnerCreature->Controller == nullptr)
 		return;
 
 	FRotator Rotation = OwnerCreature->GetController()->GetControlRotation();
