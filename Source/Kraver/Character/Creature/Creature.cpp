@@ -107,6 +107,7 @@ float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	
 	float Damage = IS_SERVER() ? CombatComponent->OnServer_TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser) : 0.f;
 	return Damage;
+
 }
 
 void ACreature::OnServer_Assassinated(ACreature* Attacker, FAssassinateInfo AssassinateInfo)

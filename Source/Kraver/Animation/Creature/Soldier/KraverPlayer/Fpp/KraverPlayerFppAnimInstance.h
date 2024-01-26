@@ -63,8 +63,8 @@ protected:
 	// Weapon Sway
 	float SwayPitchValue = -0.5f;
 	float SwayYawValue = 0.25f;
-	float MaxSwayYawDegree = 0.3f;
-	float MinSwayYawDegree = -0.3f;
-	float MaxSwayPitchDegree = 2.f;
-	float MinSwayPitchDegree = -2.f;
+	float MaxSwayYawDegree = 0.2f;
+	float MinSwayYawDegree = -0.2f;
+	float MaxSwayPitchDegree = 0.5f;
+	float MinSwayPitchDegree = -0.5f;
 }; 

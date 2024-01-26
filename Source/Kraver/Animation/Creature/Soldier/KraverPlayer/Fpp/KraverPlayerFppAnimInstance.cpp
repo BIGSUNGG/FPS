@@ -114,7 +114,7 @@ void UKraverPlayerFppAnimInstance::WeaponSway(float DeltaSeconds)
 	if (AGun* Gun = Cast<AGun>(KraverPlayer->CombatComponent->GetCurWeapon()))
 		WeaponSwayResultRot += Gun->GetRecoilSwayRot();
 	
-	WeaponSwayResultVec.X = WeaponSwayResultRot.Yaw * -2.f;
+	WeaponSwayResultVec.X = WeaponSwayResultRot.Yaw * -2.5f;
 	WeaponSwayResultVec.Z = WeaponSwayResultRot.Roll * 0.75f;
 }
 

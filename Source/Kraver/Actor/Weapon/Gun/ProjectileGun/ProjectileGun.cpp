@@ -47,9 +47,9 @@ void AProjectileGun::OnServer_FireBullet()
 	FVector MuzzleLocation;
 
 	AKraverPlayer* Player = Cast<AKraverPlayer>(OwnerCreature);
-	//if (Player)
-	//	MuzzleLocation = FppWeaponMesh->GetSocketLocation("SOCKET_Muzzle");
-	//else
+	if (Player)
+		MuzzleLocation = FppWeaponMesh->GetSocketLocation("SOCKET_Muzzle");
+	else
 		MuzzleLocation = TppWeaponMesh->GetSocketLocation("SOCKET_Muzzle");
 
 	OnServer_SpawnBullet(MuzzleLocation, BulletDirection.Rotation());

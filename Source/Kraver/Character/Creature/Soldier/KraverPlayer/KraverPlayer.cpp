@@ -236,6 +236,17 @@ void AKraverPlayer::LocallyControlTick(float DeltaTime)
 
 	CheckCanInteractionWeapon();
 
+	if (IsPlayerControlled())
+	{
+
+		if (CurViewType == EViewType::FIRST_PERSON)
+		{
+			GetMesh()->SetVisibility(true);
+			GetMesh()->RefreshBoneTransforms(nullptr);
+			GetMesh()->SetVisibility(false);
+		}
+	}
+
 }
 
 void AKraverPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -398,11 +409,17 @@ void AKraverPlayer::ChangeView()
 		{
 			if(TempMesh != nullptr)
 				TempMesh->SetOwnerNoSee(true);
+
+			if (IsLocallyControlled() && IsPlayerControlled())
+				TempMesh->SetVisibility(false);
 		}
 		for (auto& TempMesh : ShowOnlyThirdPerson)	
 		{
 			if (TempMesh != nullptr)
 				TempMesh->SetOwnerNoSee(false);
+
+			if (IsLocallyControlled() && IsPlayerControlled())
+				TempMesh->SetVisibility(true);
 		}
 		break;
 	case EViewType::THIRD_PERSON: // Set View type to Fpp
@@ -414,11 +431,17 @@ void AKraverPlayer::ChangeView()
 		{
 			if (TempMesh != nullptr)
 				TempMesh->SetOwnerNoSee(false);
+
+			if (IsLocallyControlled() && IsPlayerControlled())
+				TempMesh->SetVisibility(true);
 		}
 		for (auto TempMesh : ShowOnlyThirdPerson)
 		{
 			if (TempMesh != nullptr)
 				TempMesh->SetOwnerNoSee(true);
+
+			if (IsLocallyControlled() && IsPlayerControlled())
+				TempMesh->SetVisibility(false);
 		}
 		break;
 	default:
@@ -530,14 +553,12 @@ void AKraverPlayer::OnEquipWeaponSuccessEvent(AWeapon* Weapon)
 
 	Super::OnEquipWeaponSuccessEvent(Weapon);
 
+	Weapon->GetFppWeaponMesh()->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetFppHandSocketName());
+
 	UnholsterWeaponEvent();
 	if(IsLocallyControlled())
-	{
-		
-		Weapon->GetFppWeaponMesh()->AttachToComponent(ArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Weapon->GetFppHandSocketName());
-	
-
-		// 1인칭으로만 보이는 컴포넌트 추가
+	{		
+			// 1인칭으로만 보이는 컴포넌트 추가
 		for(auto& Tuple : Weapon->GetFppWeaponPrimitiveInfo())
 		{
 			if(!Tuple.Value)
