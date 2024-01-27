@@ -121,7 +121,7 @@ void AWeapon::Tick(float DeltaTime)
 			if (IS_SERVER())
 				WeaponState = EWeaponState::EQUIPPED_UNHOLSTER;
 
-			SetWeaponVisibility(true); // 메쉬 보이기
+			SetWeaponVisibility(true, false, true); // 메쉬 보이기
 		}
 	}
 }

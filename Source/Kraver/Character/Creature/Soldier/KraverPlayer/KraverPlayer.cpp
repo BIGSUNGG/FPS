@@ -3,6 +3,7 @@
 
 #include "KraverPlayer.h"
 #include AttachmentMagazineComponent_h
+#include LookCameraWidgetComponent_h
 #include AdvanceMovementComponent_h
 #include AttachmentScopeComponent_h
 #include KraverPlayerController_h
@@ -41,6 +42,7 @@ AKraverPlayer::AKraverPlayer(const FObjectInitializer& ObjectInitializer)
 		
 	ShowOnlyFirstPerson.Push(ArmMesh);
 	ShowOnlyThirdPerson.Push(GetMesh());
+	ShowOnlyThirdPerson.Push(HpBarWidget);
 
 	Tp_Root->SetupAttachment(Root);
 
@@ -119,6 +121,12 @@ void AKraverPlayer::Tick(float DeltaTime)
 
 	WeaponADS(DeltaTime);
 	ArmMeshTick(DeltaTime);
+
+	if (IS_SERVER() || (IsLocallyControlled() && IsPlayerControlled()))
+	{
+		if(GetMesh()->IsSimulatingPhysics() == false)
+			GetMesh()->RefreshBoneTransforms(nullptr);
+	}
 }
 
 void AKraverPlayer::CameraTick(float DeletaSeconds)
@@ -235,17 +243,6 @@ void AKraverPlayer::LocallyControlTick(float DeltaTime)
 		return;
 
 	CheckCanInteractionWeapon();
-
-	if (IsPlayerControlled())
-	{
-
-		if (CurViewType == EViewType::FIRST_PERSON)
-		{
-			GetMesh()->SetVisibility(true);
-			GetMesh()->RefreshBoneTransforms(nullptr);
-			GetMesh()->SetVisibility(false);
-		}
-	}
 
 }
 
