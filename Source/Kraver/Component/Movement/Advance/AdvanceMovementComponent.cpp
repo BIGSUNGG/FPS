@@ -547,7 +547,7 @@ bool UAdvanceMovementComponent::CanSlide()
 	if (WalkState != EMovementState::SPRINT)
 		return false;
 
-	if (OwnerCreature->CalculateForwardSpeed() < MinSlideRequireSpeed)
+	if (FVector2D(Velocity.X, Velocity.Y).Size() < MinSlideRequireSpeed)
 		return false;
 
 	return true;
@@ -558,8 +558,8 @@ void UAdvanceMovementComponent::SlideUpdate()
 	if (!bIsSliding)
 		return;
 
-	float Speed = OwnerCreature->GetVelocity().Size();
-	if (Speed < 20.f) 
+	float Speed = FVector2D(Velocity.X, Velocity.Y).Size();
+	if (Speed < CrouchWalkSpeed)
 	{
 		SlideEnd(false);
 		return;

@@ -254,12 +254,12 @@ void ACreature::RootTick(float DeltaTime)
 	if (CreatureMovementComponent->IsCrouching())
 	{
 		Result.Z = DefaultCapsuleHalfHeight - GetCharacterMovement()->GetCrouchedHalfHeight();
-		CurCrouchRootHeight = FMath::FInterpTo(CurCrouchRootHeight, CrouchRootHeight, DeltaTime, 10.f);
+		CurCrouchRootHeight = FMath::FInterpTo(CurCrouchRootHeight, CrouchRootHeight, DeltaTime, 15.f);
 	}
 	else
 	{
 		Result.Z = 0.f;
-		CurCrouchRootHeight = FMath::FInterpTo(CurCrouchRootHeight, UnCrouchRootHeight, DeltaTime, 10.f);
+		CurCrouchRootHeight = FMath::FInterpTo(CurCrouchRootHeight, UnCrouchRootHeight, DeltaTime, 15.f);
 	}
 	Result.Z += CurCrouchRootHeight;
 

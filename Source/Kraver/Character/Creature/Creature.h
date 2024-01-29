@@ -258,7 +258,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 	float CurCrouchRootHeight = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-	float CrouchRootHeight = -40.f; // 앉았을때 목표 카메라 높이
+	float CrouchRootHeight = -45.f; // 앉았을때 목표 카메라 높이
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 	float UnCrouchRootHeight = 0.f; // 일어났을때 목표 카메라 높이
 
