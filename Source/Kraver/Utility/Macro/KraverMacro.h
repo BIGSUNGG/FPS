@@ -19,6 +19,7 @@
 #define PROFILE_ControlArea "ControlArea"
 
 #define IS_SERVER() UKismetSystemLibrary::IsServer(this)
+#define IS_CLIENT() !IS_SERVER()
 
 // Log
 #define KR_CALLINFO ((IS_SERVER() ? TEXT("Server :") : TEXT("Client :")) + FString(__FUNCTION__) + TEXT("(") + FString::FromInt(__LINE__) + TEXT(")"))

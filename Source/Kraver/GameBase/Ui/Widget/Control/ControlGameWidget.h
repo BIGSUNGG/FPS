@@ -37,4 +37,6 @@ protected:
 	FLinearColor BlueTeamColor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Color", meta = (AllowPrivateAccess = "true"))
 	FLinearColor RedTeamColor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Color", meta = (AllowPrivateAccess = "true"))
+	FLinearColor NoneTeamColor;
 };

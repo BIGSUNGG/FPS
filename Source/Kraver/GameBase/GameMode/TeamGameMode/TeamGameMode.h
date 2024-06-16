@@ -22,7 +22,7 @@ public:
 	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName) override;
 
 protected:
-	virtual void DivideTeam(AController* InPlayer) {}
+	virtual void DivideTeam(AController* InPlayer) {} // 플레이어의 팀을 나눌때 호출
 
 protected:
 	TObjectPtr<class ATeamGameState> TeamGameState;

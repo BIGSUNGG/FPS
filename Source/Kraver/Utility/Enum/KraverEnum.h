@@ -83,3 +83,11 @@ enum class ESettingMenuState : uint8
 	DISPLAY		UMETA(DisplayName = "DISPLAY"),
 	GRAPHIC		UMETA(DisplayName = "GRAPHIC"),
 };
+
+UENUM(BlueprintType)
+enum class EValueState : uint8
+{
+	NORMAL			UMETA(DisplayName = "NORMAL"),
+	INCREASING		UMETA(DisplayName = "INCREASING"),
+	DECREASING		UMETA(DisplayName = "DECREASING"),
+};

@@ -36,48 +36,55 @@ void AControlGameMode::Tick(float DeltaSeconds)
 	if (!ControlGameState)
 		return;
 
-	if(ControlArea)
+	if (!ControlArea)
+		return;
+
+	TTuple<bool, ETeam> TryControlTeamTuple = CalculateControllingTeam(); // 현재 점령 시도중인 팀
+
+	if (TryControlTeamTuple.Key == false) // 아무도 거점에 있지 않다면
 	{
-		ETeam ControllingTeam = CalculateControllingTeam();
-	
-		if(ControllingTeam != ETeam::NONE)
+		// 점령 포인트 감소
+		ControlGameState->DecreaseControlPoint(DeltaSeconds);
+		if (ControlGameState->CurControlPoint <= 0.f) // 점령 포인트 초기화 시켰다면
+			ControlGameState->TryControlTeam = ETeam::NONE;
+	}
+	else // 거점에 누군가 있다면
+	{
+		if (TryControlTeamTuple.Value == ETeam::NONE) // 점령 시도중인 두 팀의 수가 같다면
 		{
-			if (ControlGameState->CurControlTeam == ControllingTeam)
-			{
-				if (ControlGameState->CurControlPoint < 1.f)
-				{
-					ControlGameState->CurControlPoint += ControlIncreaseSpeed * DeltaSeconds;
-					if (ControlGameState->CurControlPoint >= 1.f)
-					{
-						ControlGameState->CurControlPoint = 1.f;
-						GetWorldTimerManager().SetTimer(PointDelayTimer, this, &ThisClass::PointDelayTimerEvent, PointDelay, true);
-					}
-				}
-			}
-			else
-			{
-				ControlGameState->CurControlPoint -= ControlDecreaseSpeed * DeltaSeconds;
-				if (ControlGameState->CurControlPoint <= 0.f)
-				{
-					ControlGameState->CurControlPoint = -ControlGameState->CurControlPoint;
-					ControlGameState->CurControlTeam = ControllingTeam;
-					GetWorldTimerManager().ClearTimer(PointDelayTimer);
-				}
-			}
+			// DO NOTHING
 		}
-		else if(ControlArea->GetRedTeamCount() == 0)
+		else if (TryControlTeamTuple.Value == ControlGameState->CurControlTeam) // 점령중인 팀이 이미 거점을 점령해놨다면
 		{
-			if (GetWorldTimerManager().IsTimerActive(PointDelayTimer))
+			// 점령 포인트 감소
+			ControlGameState->DecreaseControlPoint(DeltaSeconds);
+			if (ControlGameState->CurControlPoint <= 0.f) // 점령 포인트 초기화 시켰다면
+				ControlGameState->TryControlTeam = ETeam::NONE;
+
+		}
+		else // 거점 시도중인 팀이 다른 팀의 거점을 점령중이라면 
+		{
+			if (ControlGameState->TryControlTeam == TryControlTeamTuple.Value)
 			{
-				ControlGameState->CurControlPoint += ControlIncreaseSpeed * DeltaSeconds;
-				if (ControlGameState->CurControlPoint >= 1.f)
-					ControlGameState->CurControlPoint = 1.f;
+				// 점령 포인트 증가
+				ControlGameState->IncreaseControlPoint(DeltaSeconds);
+				if (ControlGameState->CurControlPoint >= 1.f) // 점령 포인트를 다 채웠다면
+				{
+					// 거점을 점령한 팀 변경
+					ControlGameState->CurControlTeam = TryControlTeamTuple.Value;
+					ControlGameState->TryControlTeam = ETeam::NONE;
+					ControlGameState->CurControlPoint = 0.f;
+
+					GetWorldTimerManager().ClearTimer(PointDelayTimer);
+					GetWorldTimerManager().SetTimer(PointDelayTimer, this, &ThisClass::PointDelayTimerEvent, PointDelay, true);
+				}
 			}
 			else
 			{
-				ControlGameState->CurControlPoint -= ControlDecreaseSpeed * DeltaSeconds;
-				if (ControlGameState->CurControlPoint <= 0.f)
-					ControlGameState->CurControlPoint = 0.f;
+				// 점령 포인트 감소
+				ControlGameState->DecreaseControlPoint(DeltaSeconds);
+				if (ControlGameState->CurControlPoint <= 0.f) // 점령 포인트 초기화 시켰다면
+					ControlGameState->TryControlTeam = TryControlTeamTuple.Value;
 			}
 		}
 	}
@@ -119,15 +126,23 @@ void AControlGameMode::DivideTeam(AController* InPlayer)
 	}
 }
 
-ETeam AControlGameMode::CalculateControllingTeam()
+TTuple<bool, ETeam> AControlGameMode::CalculateControllingTeam()
 {
-	if (ControlArea->GetRedTeamCount() == ControlArea->GetBlueTeamCount())
-		return ETeam::NONE;
+	TTuple<bool, ETeam> Result{ false, ETeam::NONE };
 
-	if (ControlArea->GetRedTeamCount() > ControlArea->GetBlueTeamCount())
-		return ETeam::RED;
+	// 점령 시도중인 팀이 있는지
+	if (ControlArea->GetRedTeamCount() > 0 || ControlArea->GetBlueTeamCount() > 0)
+		Result.Key = true;
 
-	return ETeam::BLUE;
+	// 어느 팀이 점령 중인지
+	if(ControlArea->GetRedTeamCount() == ControlArea->GetBlueTeamCount())
+		Result.Value = ETeam::NONE;
+	else if (ControlArea->GetRedTeamCount() > ControlArea->GetBlueTeamCount())
+		Result.Value = ETeam::RED;
+	else
+		Result.Value = ETeam::BLUE;
+
+	return Result;
 }
 
 void AControlGameMode::PointDelayTimerEvent()

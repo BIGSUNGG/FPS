@@ -60,6 +60,8 @@
 #define ControlGameState_h	"Kraver/GameBase/GameState/TeamGameState/ControlGameState/ControlGameState.h"
 
 #define KraverPlayerController_h "Kraver/GameBase/PlayerController/KraverPlayerController.h"
+#define TeamPlayerController_h "Kraver/GameBase/PlayerController/TeamController/TeamPlayerController.h"
+#define ControlPlayerController_h "Kraver/GameBase/PlayerController/TeamController/ControlController/ControlPlayerController.h"
 
 #define KraverPlayerState_h "Kraver/GameBase/PlayerState/KraverPlayerState.h"
 #define TeamPlayerState_h	"Kraver/GameBase/PlayerState/TeamPlayerState/TeamPlayerState.h"

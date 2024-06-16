@@ -16,13 +16,31 @@ void UControlGameWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime
 	BlueTeamPointText->SetText(FText::FromString(FString::FromInt(ControlGameState->GetBlueTeamPoint()) + "%"));
 
 	ControlPointSlider->SetValue(ControlGameState->GetCurControlPoint());
-	switch(ControlGameState->GetCurControlTeam())
+	switch(ControlGameState->GetTryControlTeam())
 	{
 	case ETeam::RED:
 		ControlPointSlider->SetSliderProgressColor(RedTeamColor);
 		break;
 	case ETeam::BLUE:
 		ControlPointSlider->SetSliderProgressColor(BlueTeamColor);
+		break;
+	case ETeam::NONE:
+		ControlPointSlider->SetSliderProgressColor(NoneTeamColor);
+		break;
+	default:
+		break;
+	}
+
+	switch (ControlGameState->GetCurControlTeam())
+	{
+	case ETeam::RED:
+		ControlPointSlider->SetSliderBarColor(RedTeamColor);
+		break;
+	case ETeam::BLUE:
+		ControlPointSlider->SetSliderBarColor(BlueTeamColor);
+		break;
+	case ETeam::NONE:
+		ControlPointSlider->SetSliderBarColor(NoneTeamColor);
 		break;
 	default:
 		break;

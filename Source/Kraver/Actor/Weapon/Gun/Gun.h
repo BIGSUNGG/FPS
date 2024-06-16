@@ -37,10 +37,9 @@ protected:
 
 	virtual void OnServer_ImpactBullet(FVector ImpactPos);
 
-
 	virtual void Multicast_Attack_Implementation();
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	virtual void Multicast_ImpactBullet(FVector ImpactPos);
 
 	// Func

@@ -17,23 +17,19 @@ class KRAVER_API AControlGameMode : public ATeamGameMode
 public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds);
+	virtual void Tick(float DeltaSeconds) override;
 
 protected:
 	virtual void DivideTeam(AController* InPlayer) override;
-	virtual ETeam CalculateControllingTeam();
+	virtual TTuple<bool, ETeam> CalculateControllingTeam(); // 현재 점령중인 팀 구하기
 
 	virtual void PointDelayTimerEvent();
 
 protected:
 	TObjectPtr<class AControlGameState> ControlGameState;
-	class AControlArea* ControlArea;
-
-	// Control
-	float ControlIncreaseSpeed = 0.5f;
-	float ControlDecreaseSpeed = 0.5f;
+	class AControlArea* ControlArea; // 점령 구역
 
 	// Point
-	float PointDelay = 0.5f;
+	float PointDelay = 0.5f; // 점령 중 포인트를 얻는 속도
 	FTimerHandle PointDelayTimer;
 };
