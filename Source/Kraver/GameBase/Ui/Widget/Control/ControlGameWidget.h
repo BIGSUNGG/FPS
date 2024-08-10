@@ -34,9 +34,9 @@ protected:
 	URadialSlider* ControlPointSlider;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Color", meta = (AllowPrivateAccess = "true"))
-	FLinearColor BlueTeamColor;
+	FLinearColor BlueTeamColor; // 블루팀 색
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Color", meta = (AllowPrivateAccess = "true"))
-	FLinearColor RedTeamColor;
+	FLinearColor RedTeamColor; // 레드팀 색
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Color", meta = (AllowPrivateAccess = "true"))
-	FLinearColor NoneTeamColor;
+	FLinearColor NoneTeamColor; // 기본 색
 };

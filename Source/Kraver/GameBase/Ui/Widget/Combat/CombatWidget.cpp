@@ -14,6 +14,7 @@ void UCombatWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 	if (Creature == nullptr)
 		return;
 
+	// HP 텍스트 설정
 	CurHpText->SetText(FText::AsNumber(Creature->CombatComponent->GetCurHp()));
 	MaxHpText->SetText(FText::AsNumber(Creature->CombatComponent->GetMaxHp()));
 
@@ -23,6 +24,7 @@ void UCombatWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 		{
 			case EWeaponType::GUN:
 			{
+				// 탄약 텍스트 설정
 				AGun* Weapon = Cast<AGun>(Creature->CombatComponent->GetCurWeapon());
 				CurAmmoText->SetText(FText::AsNumber(Weapon->GetCurAmmo()));
 				TotalAmmoText->SetText(FText::AsNumber(Weapon->GetTotalAmmo()));

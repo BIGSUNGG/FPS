@@ -52,8 +52,7 @@ void AKraverPlayerController::OnDestroySessionEvent_ReturnToMainMenu(bool bWasSu
 	UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem = GetGameInstance()->GetSubsystem<UMultiplayerSessionsSubsystem>();
 	if (!MultiplayerSessionsSubsystem) return;
 
-	MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.RemoveDynamic(this, &AKraverPlayerController::OnDestroySessionEvent_ReturnToMainMenu);
-
+	// 메인 메뉴로 이동
 	UWorld* World = GetWorld();
 	if (World)
 	{
@@ -72,9 +71,9 @@ void AKraverPlayerController::OnDestroySessionEvent_ReturnToMainMenu(bool bWasSu
 
 void AKraverPlayerController::OnDestroySessionEvent_ExitGame(bool bWasSuccessful)
 {
+	// 게임 종료
 	KR_LOG(Log, TEXT("Request Exit Game"));
 	ConsoleCommand("quit");
-
 }
 
 void AKraverPlayerController::ShowPauseMenu()

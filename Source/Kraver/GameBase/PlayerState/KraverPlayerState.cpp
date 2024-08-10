@@ -11,6 +11,7 @@ AKraverPlayerState::AKraverPlayerState()
 {
 	DefaultWeapons.SetNum(3);
 
+	// 기본 무기 설정
 	static ConstructorHelpers::FClassFinder<AWeapon> MAIN_WEAPON(TEXT("/Game/ProjectFile/Actor/Weapon/Hitscan/BP_Hitscan_Assult.BP_Hitscan_Assult_C"));
 	if (MAIN_WEAPON.Succeeded())
 	{

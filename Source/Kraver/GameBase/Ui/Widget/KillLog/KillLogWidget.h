@@ -22,12 +22,13 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* AttackerNameText;
+	UTextBlock* AttackerNameText; // 공격한 캐릭터 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* VictimNameText;
+	UTextBlock* VictimNameText; // 사망한 캐릭터
 
-	FString AttackerName;
-	FString VictimName;
-	float CurLifeTime = 0.f;
+	FString AttackerName; // 공격한 캐릭터 이름
+	FString VictimName; // 사망한 캐릭터 이름
+	float LifeTIme = 5.f; // 로그 유지 시간
+	float CurLifeTime = 0.f; // 남은 유지 시간
 
 };

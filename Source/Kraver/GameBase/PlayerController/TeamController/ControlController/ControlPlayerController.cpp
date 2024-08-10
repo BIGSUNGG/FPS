@@ -15,8 +15,7 @@ void AControlPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	KR_LOG(Log, TEXT("Hd"));
-
+	// 값 보간 틱 호출
 	if (ControlGameState)
 		ControlGameState->InterpTick(DeltaSeconds);
 	else if (GetWorld())

@@ -31,5 +31,5 @@ protected:
 
 	// Point
 	float PointDelay = 0.5f; // 점령 중 포인트를 얻는 속도
-	FTimerHandle PointDelayTimer;
+	FTimerHandle PointDelayTimer; // 점령 포인트를 얻는 타이머
 };

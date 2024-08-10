@@ -16,6 +16,8 @@ void UControlGameWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime
 	BlueTeamPointText->SetText(FText::FromString(FString::FromInt(ControlGameState->GetBlueTeamPoint()) + "%"));
 
 	ControlPointSlider->SetValue(ControlGameState->GetCurControlPoint());
+
+	// 점령 시도 중인 팀 설정
 	switch(ControlGameState->GetTryControlTeam())
 	{
 	case ETeam::RED:
@@ -31,6 +33,7 @@ void UControlGameWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime
 		break;
 	}
 
+	// 현재 거점을 점령한 팀 설정
 	switch (ControlGameState->GetCurControlTeam())
 	{
 	case ETeam::RED:

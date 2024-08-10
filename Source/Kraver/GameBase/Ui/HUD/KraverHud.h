@@ -21,6 +21,11 @@ public:
 	virtual void DrawHUD() override;
 
 private:	
+	// 조준점 그리기
+	// Texture : 그릴 텍스쳐
+	// ViewportCenter : 화면 중앙 위치
+	// Spread : 현재 탄퍼짐 정도
+	// Color : 조준점 색
 	virtual void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color = FLinearColor::White);
 
 protected:

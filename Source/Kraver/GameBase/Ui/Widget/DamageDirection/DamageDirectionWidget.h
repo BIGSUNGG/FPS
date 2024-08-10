@@ -27,7 +27,7 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	AActor* Actor;
+	AActor* Actor; // 공격한 액터
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	FVector HitLocation;
+	FVector HitLocation; // 공격한 위치
 };

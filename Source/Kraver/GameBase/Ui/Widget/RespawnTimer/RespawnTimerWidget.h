@@ -26,6 +26,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* RespawnTimeText;
 
-	float RemainRespawnTime;
+	float RemainRespawnTime; // 남은 리스폰 시간
 
 };

@@ -19,8 +19,8 @@ public:
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lobby", meta = (AllowPrivateAccess = "true"))
-	FString TravelMapPath = "/Game/ProjectFile/Maps/ControlMap";
+	FString TravelMapPath = "/Game/ProjectFile/Maps/ControlMap"; // 다음 맵의 파일 주소
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lobby", meta = (AllowPrivateAccess = "true"))
-	int NeedPlayer = 4;
+	int NeedPlayer = 4; // 다음 맵으로 넘어가기위해 필요한 플레이어 수
 
 };

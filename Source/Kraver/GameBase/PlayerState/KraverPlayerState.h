@@ -35,10 +35,10 @@ public:
 	FNewKraverPlayer OnNewPlayer;
 
 protected:
-	class AKraverPlayer* OwnerPlayer = nullptr;
+	class AKraverPlayer* OwnerPlayer = nullptr; 
 	class AKraverPlayerController* OwnerController = nullptr;
 
 	// Default Weapon
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-	TArray<TSubclassOf<class AWeapon>> DefaultWeapons;
+	TArray<TSubclassOf<class AWeapon>> DefaultWeapons; // 기본 무기
 };

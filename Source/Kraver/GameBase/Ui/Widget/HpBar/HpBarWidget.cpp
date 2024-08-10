@@ -10,6 +10,7 @@ void UHpBarWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 	if (OwnerCreature)
 	{
+		// HP Bar ¼³Á¤
 		float HpRatio = (float)OwnerCreature->CombatComponent->GetCurHp() / (float)OwnerCreature->CombatComponent->GetMaxHp();
 		HpBar->SetPercent(HpRatio);
 

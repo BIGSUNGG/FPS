@@ -19,7 +19,7 @@ public:
 	virtual void SetColor(const FColor Color);
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* DamageText;
+	UTextBlock* DamageText; 
 
-	int32 CurDamage = 0;
+	int32 CurDamage = 0; // 현재까지 준 데미지
 };

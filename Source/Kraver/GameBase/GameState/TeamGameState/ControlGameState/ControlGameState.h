@@ -19,6 +19,7 @@ class KRAVER_API AControlGameState : public ATeamGameState
 
 public:
 	virtual void Tick(float DeltaSeconds) override;
+	// Replicate되는 값을 보간하기 위해 호출되는 틱
 	virtual void InterpTick(float DeltaSeconds);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -39,9 +40,9 @@ public:
 
 protected:
 	UPROPERTY(Replicated)
-	TArray<APlayerState*> BlueTeamArray;
+	TArray<APlayerState*> BlueTeamArray; // 블루 팀 목록
 	UPROPERTY(Replicated)
-	TArray<APlayerState*> RedTeamArray;
+	TArray<APlayerState*> RedTeamArray; // 레드 팀 목록
 
 	// Control
 	UPROPERTY(ReplicatedUsing = OnRep_TryControlTeam)

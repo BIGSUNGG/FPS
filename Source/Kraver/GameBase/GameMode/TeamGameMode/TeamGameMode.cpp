@@ -29,6 +29,7 @@ void ATeamGameMode::Logout(AController* Exiting)
 
 FString ATeamGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal /*= TEXT("")*/)
 {
+	// 플레이어 팀 나누기
 	DivideTeam(NewPlayerController);
 
 	return Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
@@ -43,9 +44,11 @@ AActor* ATeamGameMode::FindPlayerStart_Implementation(AController* Player, const
 		return Super::FindPlayerStart_Implementation(Player, IncomingName);
 	}
 
+	// 플레이어 스폰 위치 구하기
 	TArray<AActor*> PlayerStarts;
 	UGameplayStatics::GetAllActorsOfClass(this, ATeamPlayerStart::StaticClass(), PlayerStarts);
 
+	// 스폰될 수 있는 스폰 위치 구하기
 	TArray<AActor*> CanSpawnStarts;
 	for (auto& Start : PlayerStarts)
 	{
@@ -57,6 +60,7 @@ AActor* ATeamGameMode::FindPlayerStart_Implementation(AController* Player, const
 			CanSpawnStarts.Add(TeamStart);
 	}
 
+	// 스폰될 수 있는 스폰 위치에서 랜덤으로 스폰 위치 구하기
 	if (CanSpawnStarts.Num() > 0)
 	{
 		int32 Selection = FMath::RandRange(0, CanSpawnStarts.Num() - 1);

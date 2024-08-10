@@ -15,7 +15,9 @@ class KRAVER_API AKraverGameState : public AGameState
 	GENERATED_BODY()
 	
 public:
+	// 플레이어 사망 시 호출
 	void CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
+	// 게임 종료 시 호출
 	void GameFinish(ETeam WinTeam);
 
 protected:
@@ -26,7 +28,7 @@ protected:
 	virtual void Multicast_GameFinish(ETeam WinTeam);
 
 public:
-	FPlayerStateDeathDele OnCreatureDeath;
-	FGameFinish OnGameFinish;
+	FPlayerStateDeathDele OnCreatureDeath; // 플레이어 사망 시 호출
+	FGameFinish OnGameFinish; // 게임 종료 시 호출
 
 };

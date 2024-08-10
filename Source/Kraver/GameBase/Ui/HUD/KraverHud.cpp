@@ -94,6 +94,7 @@ void AKraverHud::DrawHUD()
 {
 	Super::DrawHUD();
 
+	// 히트마크 남은 시간 감소
 	if (HitmarkAppearanceTime > 0.f)
 	{
 		HitmarkAppearanceTime -= GetWorld()->GetDeltaSeconds();
@@ -106,7 +107,7 @@ void AKraverHud::DrawHUD()
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
 	const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
 
-	// 킬로그 Y축 위치 정렬
+	// 킬로그 위치 정렬
 	for (int i = 0; i < KillLogWidgets.Num(); i++)
 	{
 		if (KillLogWidgets[i])
@@ -118,32 +119,11 @@ void AKraverHud::DrawHUD()
 		float SpreadScaled = CrosshairSpreadMax * HUDPackage.CrosshairSpread;
 
 		// 1인칭 무기 렌더
-		if (KraverPlayer && KraverPlayer->GetFppCaptureComp() && KraverPlayer->GetFppCaptureComp()->TextureTarget)
-		{
-			//KraverPlayer->GetFppCaptureComp()->TextureTarget->SizeX = ViewportSize.X;
-			//KraverPlayer->GetFppCaptureComp()->TextureTarget->SizeY = ViewportSize.Y;
+		//if (KraverPlayer && KraverPlayer->GetFppCaptureComp() && KraverPlayer->GetFppCaptureComp()->TextureTarget)
+		//{
+		//}
 
-			//UTextureRenderTarget2D* Texture = KraverPlayer->GetFppCaptureComp()->TextureTarget;
-			//const float TextureWidth = ViewportSize.X;
-			//const float TextureHeight = ViewportSize.Y;
-			//const FVector2D TextureDrawPoint(
-			//	ViewportCenter.X - (TextureWidth / 2.f),
-			//	ViewportCenter.Y - (TextureHeight / 2.f)
-			//);
-			//DrawTexture(
-			//	Texture,
-			//	TextureDrawPoint.X,
-			//	TextureDrawPoint.Y,
-			//	TextureWidth,
-			//	TextureHeight,
-			//	0.f,
-			//	0.f,
-			//	1.f,
-			//	1.f
-			//);
-		}
-
-		// 크로스헤어 렌더
+		// 조준점 렌더
 		if(bDrawCrosshair)
 		{
 			if (HUDPackage.CrosshairsCenter)
@@ -387,8 +367,8 @@ void AKraverHud::CreateFloatingDamage(AActor* DamagedActor, float DamageAmount, 
 	if (DamageType->AttackType == EKraverDamageType::ASSASSINATION)
 		return;
 
+	// 데미지를 받은 액터에 대한 AFloatingDamage 클래스 구하기
 	AFloatingDamage* FloatingDamage;
-
 	if (!DuplicationFloatingDamage && FloatingWidgets.Contains(Creature))
 		FloatingDamage = FloatingWidgets[Creature];
 	else

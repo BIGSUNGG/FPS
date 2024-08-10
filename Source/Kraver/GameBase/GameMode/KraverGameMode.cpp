@@ -55,6 +55,7 @@ void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AContro
 		return;
 	}
 
+	// 리스폰 허용 시 플레이어 캐릭터 리스폰 타이머에 등록
 	if (DeadCreature->IsPlayerControlled() && bRespawn)
 	{
 		FTimerHandle RespawnTimer;
@@ -70,18 +71,6 @@ void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AContro
 			);
 		}
 	}
-
-	if (bSpectate)
-	{
-		FTimerHandle SpectateTimer;
-		GetWorldTimerManager().SetTimer(
-			SpectateTimer,
-			[=]() { RequsetSpectate(VictimController); },
-			SpectateStartTime,
-			false,
-			SpectateStartTime
-		);
-	}
 }
 
 void AKraverGameMode::RequestRespawn(AKraverPlayer* RespawnPlayer, AController* PlayerController)
@@ -95,22 +84,12 @@ void AKraverGameMode::RequestRespawn(AKraverPlayer* RespawnPlayer, AController* 
 
 	KR_LOG(Log, TEXT("Player Respawn"));
 
+	// 플레이어 캐릭터 초기화
 	RespawnPlayer->Reset();
 	RespawnPlayer->Destroy();
 
+	// 플레이어 캐릭터 생성
 	RestartPlayer(PlayerController);
-}
-
-void AKraverGameMode::RequsetSpectate(AController* PlayerController)
-{
-	//KR_LOG(Log, TEXT("Spectate Start"));
-	//
-	//AKraverPlayerController* KraverController = Cast<AKraverPlayerController>(PlayerController);
-	//if (!KraverController)
-	//	return;
-	//
-	//AKraverSpectator* Spectator = Cast<AKraverSpectator>(GetWorld()->SpawnActor(SpectatorClass));
-
 }
 
 void AKraverGameMode::RequestDefaultWeapon(AKraverPlayerState* Player, const TArray<TSubclassOf<class AWeapon>>& RequestWeapons)
@@ -119,6 +98,7 @@ void AKraverGameMode::RequestDefaultWeapon(AKraverPlayerState* Player, const TAr
 	if (!KraverPlayer)
 		return;
 
+	// 플레이어 기본 무기 설정
 	GetWorldTimerManager().SetTimerForNextTick([=]()
 	{
 		SpawnDefaultWeapon(Player, RequestWeapons);
@@ -130,6 +110,7 @@ void AKraverGameMode::SpawnDefaultWeapon(class AKraverPlayerState* Player, const
 	if (!Player)
 		return;
 
+	// 기본 무기 장착
 	for (auto& Class : RequestWeapons)
 	{
 		if (!Class)
@@ -148,16 +129,19 @@ void AKraverGameMode::GameFinishEvent(ETeam WinTeam)
 	KR_LOG(Log, TEXT("Game finish"));
 	IsGameFinish = true;
 
+	// 게임 속도 설정
 	AWorldSettings* WorldSetting = GetWorld()->GetWorldSettings();
 	if (WorldSetting)
 		WorldSetting->SetTimeDilation(GameFinishTimeDilation);
 
+	// 게임 종료 타이머 설정
 	GetWorldTimerManager().SetTimer(GameFinishExitTimer, this, &ThisClass::OnGameFinishExitTimerEvent, GameFinishExitTime * GameFinishTimeDilation, false, GameFinishExitTime * GameFinishTimeDilation);
 	KraverGameState->GameFinish(WinTeam);
 }
 
 void AKraverGameMode::OnGameFinishExitTimerEvent()
 {
+	// 게임 종료
 	AKraverPlayerController* PC = Cast<AKraverPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	if (!PC) return;
 

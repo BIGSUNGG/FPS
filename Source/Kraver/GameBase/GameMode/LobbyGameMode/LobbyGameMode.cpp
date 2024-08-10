@@ -8,13 +8,14 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
+	// 플레이어가 충분히 들어온다면 맵 이동
 	int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num(); // 현재 들어와있는 플레이어의 수를 구함
 	if (NumberOfPlayers >= NeedPlayer)
 	{
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			bUseSeamlessTravel = false;
+			bUseSeamlessTravel = true;
 			KR_LOG(Log, TEXT("Try to change Map"));
 			bool Success = World->ServerTravel(TravelMapPath + "?listen"); // 맵 변경
 			if(Success)

@@ -23,7 +23,7 @@ void UKillLogWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
 bool UKillLogWidget::Initialize(const FString& InAttackerName, const FString& InVictimName)
 {
-	CurLifeTime = 5.f;
+	CurLifeTime = LifeTIme;
 	AttackerName = InAttackerName;
 	VictimName = InVictimName;
 	SetVisibility(ESlateVisibility::Visible);

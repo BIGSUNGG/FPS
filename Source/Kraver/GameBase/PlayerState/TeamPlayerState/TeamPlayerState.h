@@ -28,6 +28,6 @@ public:
 
 protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Data|Team", meta = (AllowPrivateAccess = "true"))
-	ETeam PlayerTeam;
+	ETeam PlayerTeam; // 플레이어가 속한 팀
 
 };
