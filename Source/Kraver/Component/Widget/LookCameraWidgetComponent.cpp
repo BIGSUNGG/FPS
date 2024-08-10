@@ -13,6 +13,7 @@ void ULookCameraWidgetComponent::TickComponent(float DeltaTime, ELevelTick TickT
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	// 카메라 바라보기
 	APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0);
 	if (CameraManager)
 	{

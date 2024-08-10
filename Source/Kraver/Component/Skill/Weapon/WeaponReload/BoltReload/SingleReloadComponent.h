@@ -19,6 +19,7 @@ protected:
 	virtual void OnLocal_AddOnDelegateEvent(UObject* Object) override;
 	virtual void OnLocal_RemoveOnDelegateEvent(UObject* Object) override;
 
+	// Reload : Open -> Insert นÝบน -> Close
 	UFUNCTION()
 	virtual void OnReload_OpenFinishEvent();
 	UFUNCTION()

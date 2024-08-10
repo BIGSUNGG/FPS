@@ -26,10 +26,12 @@ void URocketMagazineComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 		return;
 	}
 	
+	// 남은 탄약이 있다면 보여지기
 	if (OwnerGun->GetCurAmmo() > 0)
 	{
 		SetMagazineVisibility(true);
 	}
+	// 남은 탄약이 없다면 가리기
 	else if(!IsGrabMagazine)
 	{
 		SetMagazineVisibility(false);

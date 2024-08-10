@@ -27,14 +27,20 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void Landed(const FHitResult& Hit);
 
-	virtual void MoveForward(float NewAxisValue); // 정면으로 이동
-	virtual void MoveRight(float NewAxisValue); // 측면으로 이동
+	// 정면으로 이동
+	virtual void MoveForward(float NewAxisValue); 
+	// 측면으로 이동
+	virtual void MoveRight(float NewAxisValue); 
 
-	virtual void JumpStart(); // 점프 시작
-	virtual void JumpEnd(); // 점프 종료
+	// 점프 시작
+	virtual void JumpStart(); 
+	// 점프 종료
+	virtual void JumpEnd(); 
 
-	virtual void CrouchStart(); // 앉기 
-	virtual void CrouchEnd(); // 일어나기
+	// 앉기 
+	virtual void CrouchStart(); 
+	// 일어나기
+	virtual void CrouchEnd(); 
 
 protected:	
 	UFUNCTION(Server, Reliable)
@@ -50,6 +56,7 @@ public:
 	FORCEINLINE float GetCrouchWalkSpeed() { return CrouchWalkSpeed; }
 	FORCEINLINE EMovementState GetMovementState() { return WalkState; }
 
+	// 현재 걷기 상태 변경
 	virtual void SetMovementState(EMovementState value) final;
 
 protected:

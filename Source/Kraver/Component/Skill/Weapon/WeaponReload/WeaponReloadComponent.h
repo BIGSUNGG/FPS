@@ -64,12 +64,12 @@ protected:
 	AGun* OwnerGun;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload", Meta = (AllowPrivateAccess = true))
-	bool bReloadWhileSprint = false;
+	bool bReloadWhileSprint = false; // 달리기 도중 재장전이 가능한지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attachment", Meta = (AllowPrivateAccess = true))
-	FVector GrabRelativeLocation;
+	FVector GrabRelativeLocation; // 장착할 탄창 위치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attachment", Meta = (AllowPrivateAccess = true))
-	FRotator GrabRelativeRotation;
+	FRotator GrabRelativeRotation; // 장착할 탄창 방향
 
 	// Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))

@@ -51,9 +51,10 @@ void USingleReloadComponent::OnReload_InsertFinishEvent()
 	AKraverPlayer* Player = Cast<AKraverPlayer>(Creature);
 	UAnimInstance* FppAnimInstance = Player->GetArmMesh()->GetAnimInstance();
 
-
+	// 재장전할 탄약이 있다면 장전 반복
 	if (OwnerGun->GetCurAmmo() < OwnerGun->GetMaxAmmo() && OwnerGun->GetMaxAmmo() > 0)
 		ReloadInstert();
+	// 재장전할 탄약이 없다면 장전 종료
 	else
 		ReloadClose();
 }

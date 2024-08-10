@@ -138,7 +138,7 @@ std::pair<bool, FHitResult> UWeaponAssassinateComponent::CalculateCanAssassinate
 		Params
 	);
 
-	// 대상이 뒤돌고있는지
+	// 대상이 뒤돌아있는지
 	if (bSuccess)
 	{
 		FTransform OwnerTransform = GetOwnerCreature()->GetTransform();

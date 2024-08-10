@@ -14,6 +14,7 @@ void UWeaponAdsComponent::BeginPlay()
 
 void UWeaponAdsComponent::OnSubAttackStartEvent()
 {
+	// 스코프 머테리얼 설정
 	if (ScopeMaterial)
 	{
 		UPrimitiveComponent* ScopeMesh = OwnerWeapon->GetFppWeaponPrimitiveInfo()["Scope"];
@@ -24,6 +25,7 @@ void UWeaponAdsComponent::OnSubAttackStartEvent()
 
 void UWeaponAdsComponent::OnSubAttackEndEvent()
 {
+	// 기본 머테리얼 설정
 	if (OriginScopeMaterial)
 	{
 		UPrimitiveComponent* ScopeMesh = OwnerWeapon->GetFppWeaponPrimitiveInfo()["Scope"];

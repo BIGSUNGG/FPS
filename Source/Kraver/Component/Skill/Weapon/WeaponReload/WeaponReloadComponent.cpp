@@ -84,7 +84,6 @@ void UWeaponReloadComponent::OnAfterFireEvent()
 	// 발사이후 총알이 없을시 자동 재장전 시작
 	KR_LOG(Log, TEXT("%d"), OwnerGun->GetCurAmmo());
 
-
 	if (OwnerGun->GetCurAmmo() <= 0)
 	{
 		KR_LOG(Log, TEXT("Auto Reload Start"));

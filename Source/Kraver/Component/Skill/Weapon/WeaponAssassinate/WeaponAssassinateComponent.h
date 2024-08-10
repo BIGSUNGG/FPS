@@ -54,13 +54,13 @@ public:
 protected:
 	class AMelee* OwnerMelee = nullptr;
 
-	bool IsAssassinating = false;
+	bool IsAssassinating = false; // 암살하고 있는지
 	UPROPERTY(Replicated)
-	ACreature* CurAssassinatedCreature;
+	ACreature* CurAssassinatedCreature; // 암살하고 있는 캐릭터
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
-	bool bCanAssassination = true;
+	bool bCanAssassination = true; // 암살할 수 있는지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
-	float AssassinationDamage = 1000.f;
+	float AssassinationDamage = 1000.f; // 암살 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AssassinateMontagesTpp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Combat|Assassination", meta = (AllowPrivateAccess = "true"))
