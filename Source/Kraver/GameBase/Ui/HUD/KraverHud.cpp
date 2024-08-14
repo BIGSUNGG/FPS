@@ -166,7 +166,8 @@ void AKraverHud::DrawHUD()
 
 void AKraverHud::DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor Color)
 {
-	if (bGameFinish) return;
+	if (bGameFinish || (KraverPlayer && KraverPlayer->CombatComponent->IsDead()))
+		return;
 
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();

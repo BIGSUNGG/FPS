@@ -27,18 +27,26 @@ class MULTIPLAYERSESSIONS_API UMultiplayerSessionsSubsystem : public UGameInstan
 public:
 	UMultiplayerSessionsSubsystem();
 
-	//
-	// To handle session functionality. The Menu class will call these
-	//
+	// 세션 만들기
+	// NumPublicConnections : 최대 플레이어 수
+	// MatchType : 매치 타입
 	void CreateSession(int32 NumPublicConnections, FString MatchType);
+
+	// 세션 찾기
+	// MaxSearchResults : 찾을 세션의 최대 수
 	void FindSessions(int32 MaxSearchResults);
+	
+	// 세션 참가 
+	// SessionResult : 참가할 세션
 	void JoinSession(const FOnlineSessionSearchResult& SessionResult);
+
+	// 현재 세션 제거
 	void DestroySession();
+
+	// 현재 세션 시작
 	void StartSession();
 
-	//
-	// Our own custom delegates for the Menu class to bind callbacks to
-	//
+	// 세션 델리게이트
 	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete;
 	FMultiplayerOnFindSessionsComplete MultiplayerOnFindSessionsComplete;
 	FMultiplayerOnJoinSessionComplete MultiplayerOnJoinSessionComplete;
@@ -47,10 +55,7 @@ public:
 
 protected:
 
-	//
-	// Internal callbacks for the delegates we'll add to the Online Session Interface delegate list.
-	// Thise don't need to be called outside this class.
-	//
+	// 델리게이트 콜백 함수
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
@@ -62,10 +67,7 @@ private:
 	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;
 	TSharedPtr<FOnlineSessionSearch> LastSessionSearch;
 
-	//
-	// To add to the Online Session Interface delegate list.
-	// We'll bind our MultiplayerSessionsSubsystem internal callbacks to these.
-	//
+	// 온라인 세션 인터페이스 델리게이트
 	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
 	FDelegateHandle CreateSessionCompleteDelegateHandle;
 	FOnFindSessionsCompleteDelegate FindSessionsCompleteDelegate;

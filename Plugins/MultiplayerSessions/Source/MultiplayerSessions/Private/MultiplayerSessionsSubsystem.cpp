@@ -36,7 +36,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 		DestroySession();
 	}
 
-	// Store the delegate in a FDelegateHandle so we can later remove it from the delegate list
+	// 생성 성공 시 호출할 델리게이트 등록
 	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
 
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
@@ -55,7 +55,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	{
 		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
 
-		// Broadcast our own custom delegate
+		// 세션 생성 성공 알리기
 		MultiplayerOnCreateSessionComplete.Broadcast(false);
 	}
 }

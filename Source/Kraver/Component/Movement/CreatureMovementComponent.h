@@ -84,6 +84,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Movement", meta = (AllowPrivateAccess = "true"))
 	float CrouchSprintSpeed = 450.f; // 앉았을때 설정할 캐릭터 속도
 
+	// Input
+	float CurrentInputForward = 0.f;
+	float CurrentInputRight = 0.f;
+
 	// Default Movement
 	float DefaultGravity = 0.f;
 	float DefaultGroundFriction = 0.f;

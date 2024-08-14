@@ -221,7 +221,6 @@ void AKraverPlayer::WeaponADS(float DeltaTime)
 	}
 
 	ScopeCaptureComponent->FOVAngle = Camera->FieldOfView;
-	FppCaptureComponent->FOVAngle = Camera->FieldOfView;
 }
 
 void AKraverPlayer::ClientTick(float DeltaTime)
@@ -397,7 +396,7 @@ void AKraverPlayer::ChangeView()
 {
 	switch (CurViewType)
 	{
-	case EViewType::FIRST_PERSON: // Set View type to Tpp
+	case EViewType::FIRST_PERSON: // 1ÀÎÄª¿¡¼­ 3ÀÎÄªÀ¸·Î º¯°æ
 		CurViewType = EViewType::THIRD_PERSON;
 		Camera->AttachToComponent(Tp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
 		Camera->SetRelativeLocation(Camera->GetRelativeLocation() + FVector(0.f, 45.f, 62.f));
@@ -419,7 +418,7 @@ void AKraverPlayer::ChangeView()
 				TempMesh->SetVisibility(true);
 		}
 		break;
-	case EViewType::THIRD_PERSON: // Set View type to Fpp
+	case EViewType::THIRD_PERSON: // 3ÀÎÄª¿¡¼­ 1ÀÎÄªÀ¸·Î º¯°æ
 		CurViewType = EViewType::FIRST_PERSON;
 		Camera->AttachToComponent(Fp_SpringArm, FAttachmentTransformRules::SnapToTargetIncludingScale);
 		Camera->SetRelativeLocation(FVector::ZeroVector);
@@ -631,7 +630,6 @@ void AKraverPlayer::OnUnholsterWeaponEvent(AWeapon* Weapon)
 		return;
 
 	Super::OnUnholsterWeaponEvent(Weapon);
-	FppCaptureComponent->ShowOnlyComponent(ArmMesh);
 }
 
 void AKraverPlayer::OnHolsterWeaponEvent(AWeapon* Weapon)

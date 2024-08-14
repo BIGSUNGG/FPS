@@ -62,6 +62,8 @@ void UCreatureMovementComponent::Landed(const FHitResult& Hit)
 
 void UCreatureMovementComponent::MoveForward(float NewAxisValue)
 {
+	CurrentInputForward = NewAxisValue;
+
 	if(!OwnerCreature)
 		return;
 
@@ -89,6 +91,8 @@ void UCreatureMovementComponent::MoveForward(float NewAxisValue)
 
 void UCreatureMovementComponent::MoveRight(float NewAxisValue)
 {
+	CurrentInputRight = NewAxisValue;
+
 	if (!OwnerCreature)
 		return;
 

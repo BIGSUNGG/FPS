@@ -140,11 +140,11 @@ void UAdvanceMovementComponent::DoubleJump()
 {
 	bCanDoubleJump = false;
 
-	// 더블점프 힘 계산
 	FVector LaunchPower(0, 0, DobuleJumpPower.Z);
 
 	UCharacterMovementComponent* MovementComp = OwnerCreature->GetCharacterMovement();
 
+	// 현재 속도 구하기
 	FVector Right = OwnerCreature->GetControlRotation().Vector().GetSafeNormal2D().RotateAngleAxis(-90.0f, FVector::UpVector);
 	float RightSpeed = -FVector::DotProduct(Velocity, Right) / Right.Size2D();
 
@@ -154,29 +154,29 @@ void UAdvanceMovementComponent::DoubleJump()
 	float ForwardLaunchPower;
 	float RightLaunchPower;
 
-	if (OwnerCreature->GetCurrentInputForward() > 0.f && ForwardSpeed > DobuleJumpPower.X * OwnerCreature->GetCurrentInputForward())
+	if (CurrentInputForward > 0.f && ForwardSpeed > DobuleJumpPower.X * CurrentInputForward)
 		ForwardLaunchPower = ForwardSpeed;
-	else if (OwnerCreature->GetCurrentInputForward() < 0.f && -ForwardSpeed > DobuleJumpPower.X * -OwnerCreature->GetCurrentInputForward())
+	else if (CurrentInputForward < 0.f && -ForwardSpeed > DobuleJumpPower.X * -CurrentInputForward)
 		ForwardLaunchPower = ForwardSpeed;
 	else
-		ForwardLaunchPower = DobuleJumpPower.X * OwnerCreature->GetCurrentInputForward();
+		ForwardLaunchPower = DobuleJumpPower.X * CurrentInputForward;
 
-	if (OwnerCreature->GetCurrentInputRight() > 0.f && RightSpeed > DobuleJumpPower.Y * OwnerCreature->GetCurrentInputRight())
+	if (CurrentInputRight > 0.f && RightSpeed > DobuleJumpPower.Y * CurrentInputRight)
 		RightLaunchPower = RightSpeed;
-	else if (OwnerCreature->GetCurrentInputRight() < 0.f && -RightSpeed > DobuleJumpPower.Y * -OwnerCreature->GetCurrentInputRight())
+	else if (CurrentInputRight < 0.f && -RightSpeed > DobuleJumpPower.Y * -CurrentInputRight)
 		RightLaunchPower = RightSpeed;
 	else
-		RightLaunchPower = DobuleJumpPower.Y * OwnerCreature->GetCurrentInputRight();
+		RightLaunchPower = DobuleJumpPower.Y * CurrentInputRight;
 
 	bool bOverideXY = false;
-	if (OwnerCreature->GetCurrentInputForward() != 0.f)
+	if (CurrentInputForward != 0.f)
 	{
 		FRotator Rotation = OwnerCreature->GetController()->GetControlRotation();
 		FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
 		LaunchPower += FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X) * ForwardLaunchPower;
 		bOverideXY = true;
 	}
-	if (OwnerCreature->GetCurrentInputRight() != 0.f)
+	if (CurrentInputRight != 0.f)
 	{
 		FRotator Rotation = OwnerCreature->GetController()->GetControlRotation();
 		FRotator YawRotation(0.f, Rotation.Yaw, 0.f);

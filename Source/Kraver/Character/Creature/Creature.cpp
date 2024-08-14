@@ -30,7 +30,6 @@ ACreature::ACreature(const FObjectInitializer& ObjectInitializer)
 	Fp_Root = CreateDefaultSubobject<USceneComponent>(TEXT("Fp_Root"));
 	Fp_SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Fp_SpringArm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Fp_Camera"));
-	FppCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>("FppCaptureComponent");
 	ScopeCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>("ScopeCaptureComponent");
 
 	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
@@ -75,11 +74,6 @@ ACreature::ACreature(const FObjectInitializer& ObjectInitializer)
 	Camera->SetupAttachment(Fp_SpringArm);
 	Camera->bUsePawnControlRotation = true;
 	Camera->SetFieldOfView(110.f);
-
-	FppCaptureComponent->SetupAttachment(Camera);
-	FppCaptureComponent->FOVAngle = 110.f;
-	FppCaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
-	FppCaptureComponent->ProjectionType = ECameraProjectionMode::Orthographic;
 
 	ScopeCaptureComponent->SetupAttachment(Camera);
 	ScopeCaptureComponent->FOVAngle = 110.f;
@@ -177,7 +171,6 @@ void ACreature::Destroyed()
 {
 	Super::Destroyed();
 
-	FppCaptureComponent->TextureTarget = nullptr;
 	ScopeCaptureComponent->TextureTarget = nullptr;
 }
 
@@ -210,7 +203,6 @@ void ACreature::OnPossessed(AController* NewController)
 
 	if (NewController->IsLocalController() && NewController->IsPlayerController())
 	{
-		FppCaptureComponent->TextureTarget = FppRenderTarget;
 		ScopeCaptureComponent->TextureTarget = ScopeRenderTarget;
 	}
 }
@@ -433,15 +425,11 @@ FVector ACreature::CaclulateCurrentFllorSlopeVector()
 
 void ACreature::MoveForward(float NewAxisValue)
 {
-	CurrentInputForward = NewAxisValue;
-	
 	CreatureMovementComponent->MoveForward(NewAxisValue);
 }
 
 void ACreature::MoveRight(float NewAxisValue)
 {
-	CurrentInputRight = NewAxisValue;
-
 	CreatureMovementComponent->MoveRight(NewAxisValue);
 }
 
@@ -651,11 +639,6 @@ void ACreature::OnUnholsterWeaponEvent(AWeapon* Weapon)
 			AssassinateComp->OnAssassinate.AddDynamic(this, &ACreature::OnAssassinateEvent);
 			AssassinateComp->OnAssassinateEnd.AddDynamic(this, &ACreature::OnAssassinateEndEvent);
 		}	
-
-		for (auto& comp : Weapon->GetFppWeaponPrimitiveInfo())
-		{
-			FppCaptureComponent->ShowOnlyComponent(comp.Value);
-		}
 	}
 }
 
@@ -680,8 +663,6 @@ void ACreature::OnHolsterWeaponEvent(AWeapon* Weapon)
 			AssassinateComp->OnAssassinate.RemoveDynamic(this, &ACreature::OnAssassinateEvent);
 			AssassinateComp->OnAssassinateEnd.RemoveDynamic(this, &ACreature::OnAssassinateEndEvent);
 		}
-
-		FppCaptureComponent->ClearShowOnlyComponents();
 	}
 }
 

@@ -22,6 +22,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
+
 	// Function
 	virtual bool OnServer_UnEquipped() override; // 장착해제됨
 	virtual bool OnLocal_Holster() override; // Character 손에서 집어넣어짐
@@ -33,6 +34,7 @@ protected:
 
 	virtual void OnLocalAttackStartEvent() override; // 캐릭터의 공격이 시작하였을때 호출되는 함수
 
+	/* Attack : Attack -> Combo Start -> (OnCanInputNextComboEvent -> Combo Swing -> OnAttackNextComboEvent-> NextComboAttack) 반복 -> Combo End*/
 	virtual void Attack() override;
 	virtual void OnServer_Attack() override;
 	virtual void ComboStart(); // 콤보를 시작할 때 호출

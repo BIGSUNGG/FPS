@@ -35,6 +35,8 @@ protected:
 
 	virtual void OnRep_Controller();
 	virtual void PossessedBy(AController* NewController) override;
+
+	// 서버와 클라이언트에서 빙의 시 호출
 	virtual void OnPossessed(AController* NewController);
 
 public:	
@@ -177,8 +179,8 @@ protected:
 	virtual void OnServer_SimulateMesh();
 	
 	UFUNCTION()
+	void StartDissolve(); 
 	void UpdateDissolveMaterial(float DissolveValue);
-	void StartDissolve();
 
 public:
 	// Getter Setter
@@ -199,11 +201,7 @@ public:
 	float CalculateCurrentFloorSlope(); // 현재 캐릭터가 밟고 있는 바닥의 각도 구하기
 	FVector CaclulateCurrentFllorSlopeVector(); // 현재 캐릭터가 밟고 있는 바닥의 각도를 벡터로 구함
 	virtual USkeletalMeshComponent* GetCurMainMesh() { return GetMesh(); }
-	USceneCaptureComponent2D* GetFppCaptureComp() { return FppCaptureComponent; }
-	float GetCurrentInputForward() { return CurrentInputForward; }
-	float GetCurrentInputRight() { return CurrentInputRight; }
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
-
 
 public:
 	// Delegate
@@ -227,11 +225,6 @@ protected:
 	USceneCaptureComponent2D* ScopeCaptureComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
 	UTextureRenderTarget2D* ScopeRenderTarget;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-	USceneCaptureComponent2D* FppCaptureComponent;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|Camera", meta = (AllowPrivateAccess = "true"))
-	UTextureRenderTarget2D* FppRenderTarget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Component|First person", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* Root;
@@ -266,8 +259,6 @@ protected:
 	float ImpulseResistanceRatio = 1.f;
 
 	// InputState
-	float CurrentInputForward = 0.f;
-	float CurrentInputRight = 0.f;
 	bool bAttackButtonPress = false;
 	bool bSubAttackButtonPress = false;
 	bool bJumpButtonPress = false;
