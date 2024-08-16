@@ -400,7 +400,7 @@ float ACreature::CalculateCurrentFloorSlope()
 	return 0.0f;
 }
 
-FVector ACreature::CaclulateCurrentFllorSlopeVector()
+FVector ACreature::CaclulateCurrentFloorSlopeVector()
 {
 	UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement();
 

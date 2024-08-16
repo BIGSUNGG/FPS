@@ -55,7 +55,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	{
 		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
 
-		// 技记 积己 己傍 舅府扁
+		// 技记 积己 角菩 舅府扁
 		MultiplayerOnCreateSessionComplete.Broadcast(false);
 	}
 }

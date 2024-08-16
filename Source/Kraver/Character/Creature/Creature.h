@@ -199,7 +199,7 @@ public:
 	float CalculateForwardSpeed(); // 컨트롤러 방향 기준으로 앞으로 전진하는 속도
 	float CalculateRightSpeed(); // 컨트롤러 방향 기준으로 옆으로 이동하는 속도
 	float CalculateCurrentFloorSlope(); // 현재 캐릭터가 밟고 있는 바닥의 각도 구하기
-	FVector CaclulateCurrentFllorSlopeVector(); // 현재 캐릭터가 밟고 있는 바닥의 각도를 벡터로 구함
+	FVector CaclulateCurrentFloorSlopeVector(); // 현재 캐릭터가 밟고 있는 바닥의 각도를 벡터로 구함
 	virtual USkeletalMeshComponent* GetCurMainMesh() { return GetMesh(); }
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 

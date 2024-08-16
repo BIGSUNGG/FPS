@@ -36,7 +36,7 @@ public:
 	// MaxSearchResults : 찾을 세션의 최대 수
 	void FindSessions(int32 MaxSearchResults);
 	
-	// 세션 참가 
+	// 세션 검색 
 	// SessionResult : 참가할 세션
 	void JoinSession(const FOnlineSessionSearchResult& SessionResult);
 
@@ -68,14 +68,19 @@ private:
 	TSharedPtr<FOnlineSessionSearch> LastSessionSearch;
 
 	// 온라인 세션 인터페이스 델리게이트
+
 	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
 	FDelegateHandle CreateSessionCompleteDelegateHandle;
+
 	FOnFindSessionsCompleteDelegate FindSessionsCompleteDelegate;
 	FDelegateHandle FindSessionsCompleteDelegateHandle;
+
 	FOnJoinSessionCompleteDelegate JoinSessionCompleteDelegate;
 	FDelegateHandle JoinSessionCompleteDelegateHandle;
+
 	FOnDestroySessionCompleteDelegate DestroySessionCompleteDelegate;
 	FDelegateHandle DestroySessionCompleteDelegateHandle;
+
 	FOnStartSessionCompleteDelegate StartSessionCompleteDelegate;
 	FDelegateHandle StartSessionCompleteDelegateHandle;
 

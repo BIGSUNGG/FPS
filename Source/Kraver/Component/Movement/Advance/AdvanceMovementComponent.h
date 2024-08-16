@@ -67,33 +67,36 @@ protected:
 	void ResetSlideSuppression();
 
 	// Rpc
+
+	// Wall Run
 	UFUNCTION(Server, Reliable)
 	virtual void Server_WallRunStart(EWallRunState State);
-	UFUNCTION(Server, Reliable)
-	virtual void Server_WallRunJumpSuccess(FVector LaunchInVelocity);
-	UFUNCTION(NetMulticast, Reliable)
-	virtual void Multicast_WallRunJumpSuccess(FVector LaunchInVelocity);
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void Server_WallRunHorizonUpdate(FVector Direction);
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void Server_WallRunVerticalUpdate(FVector Direction, float WallRunVerticalSpeed);
+	UFUNCTION(Server, Reliable, WithValidation)
 	virtual void Server_WallRunEnd();
+	
+	// Wall Run Jump
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void Server_WallRunJump(FVector InVelocity, FVector InPendingLaunchVelocity);
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void Multicast_WallRunJump();
 
-	UFUNCTION(Server, Reliable)
+	// Double Jump
+	UFUNCTION(Server, Reliable, WithValidation)
 	virtual void Server_DoubleJump(FVector LaunchInVelocity);
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_DoubleJump(FVector LaunchInVelocity);
 
+	// Slide
 	UFUNCTION(Server, Reliable)
-	virtual void Server_WallRunHorizonSuccess();
-	UFUNCTION(Server, Reliable)
-	virtual void Server_WallRunVerticalSuccess();
-	UFUNCTION(Server, Reliable)
-	virtual void Server_WallRunSuccess(FVector Location, FRotator Rotation, FVector InVelocity, FVector LaunchInVelocity);
-
-	UFUNCTION(Server, Reliable)
-	virtual void Server_SlideSuccess(FVector InVelocity);
-	UFUNCTION(Server, Reliable)
-	virtual void Server_SlideEnd();
-	UFUNCTION(Server, Reliable)
+	virtual void Server_SlideStart(FVector InVelocity);
+	UFUNCTION(Server, Reliable, WithValidation)
 	virtual void Server_SlideUpdate(FVector Location, FVector InVelocity);
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void Server_SlideEnd();
 
 public:
 	// Getter Setter
@@ -124,7 +127,7 @@ protected:
 	float CurWallRunVerticalSpeed = 600.f; // 현재 세로 벽타기 속도
 	float WallRunJumpHeight = 400.f; // 벽타기 도중 점프 높이
 	float WallRunJumpOffForce  = 400.f; 
-	float WallRunTargetGravity = 1.f; // 벽타기 중 받을 중력
+	float WallRunTargetGravity = 0.f; // 벽타기 중 받을 중력
 	FVector WallRunNormal; // 현재 벽타는 중인 벽의 각도
 	FTimerHandle SuppressWallRunHorizonTimer;
 	FTimerHandle SuppressWallRunVerticalTimer;

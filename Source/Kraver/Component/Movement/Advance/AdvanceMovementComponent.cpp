@@ -117,9 +117,7 @@ void UAdvanceMovementComponent::CrouchEnd()
 void UAdvanceMovementComponent::WallRunJump()
 {
 	if (IsWallRunning()) // 벽타기 중이면
-	{
-		WallRunEnd(0.35); // 벽타기 중지
-		
+	{		
 		// 벽타기 점프 방향 구하기
 		FVector LaunchVector;
 		LaunchVector.X = WallRunNormal.X * WallRunJumpOffForce;
@@ -127,8 +125,12 @@ void UAdvanceMovementComponent::WallRunJump()
 		LaunchVector.Z = WallRunJumpHeight;
 		OwnerCreature->LaunchCharacter(LaunchVector, false, true);
 		OwnerCreature->OnJumped();
+		KR_LOG_VECTOR(WallRunNormal);
+		KR_LOG_VECTOR(LaunchVector);
+		KR_LOG_VECTOR(PendingLaunchVelocity);
 
-		Server_WallRunJumpSuccess(PendingLaunchVelocity);
+		Server_WallRunJump(Velocity, PendingLaunchVelocity);
+		WallRunEnd(0.35); // 벽타기 중지
 	}
 	else
 	{
@@ -151,23 +153,35 @@ void UAdvanceMovementComponent::DoubleJump()
 	FVector Forward = OwnerCreature->GetControlRotation().Vector().GetSafeNormal2D();
 	float ForwardSpeed = FVector::DotProduct(Velocity, Forward) / Forward.Size2D();
 
+	// 돌진 속도 구하기
 	float ForwardLaunchPower;
 	float RightLaunchPower;
 
-	if (CurrentInputForward > 0.f && ForwardSpeed > DobuleJumpPower.X * CurrentInputForward)
+	// 현재 정면 속도가 돌진 속도보다 빠르다면
+	if ((CurrentInputForward > 0.f && ForwardSpeed > DobuleJumpPower.X * CurrentInputForward) ||
+		(CurrentInputForward < 0.f && -ForwardSpeed > DobuleJumpPower.X * -CurrentInputForward)) 
+	{
 		ForwardLaunchPower = ForwardSpeed;
-	else if (CurrentInputForward < 0.f && -ForwardSpeed > DobuleJumpPower.X * -CurrentInputForward)
-		ForwardLaunchPower = ForwardSpeed;
+	}
+	// 현재 정면 속도보다 돌진 속도보다 빠르다면
 	else
+	{
 		ForwardLaunchPower = DobuleJumpPower.X * CurrentInputForward;
+	}
 
-	if (CurrentInputRight > 0.f && RightSpeed > DobuleJumpPower.Y * CurrentInputRight)
+	// 현재 좌우 속도가 돌진 속도보다 빠르다면
+	if ((CurrentInputRight > 0.f && RightSpeed > DobuleJumpPower.Y * CurrentInputRight) ||
+		(CurrentInputRight < 0.f && -RightSpeed > DobuleJumpPower.Y * -CurrentInputRight))
+	{
 		RightLaunchPower = RightSpeed;
-	else if (CurrentInputRight < 0.f && -RightSpeed > DobuleJumpPower.Y * -CurrentInputRight)
-		RightLaunchPower = RightSpeed;
+	}
+	// 현재 좌우 속도보다 돌진 속도보다 빠르다면
 	else
+	{
 		RightLaunchPower = DobuleJumpPower.Y * CurrentInputRight;
+	}
 
+	// 돌진 실행
 	bool bOverideXY = false;
 	if (CurrentInputForward != 0.f)
 	{
@@ -187,7 +201,7 @@ void UAdvanceMovementComponent::DoubleJump()
 	OwnerCreature->LaunchCharacter(LaunchPower, bOverideXY, true);
 	OwnerCreature->OnJumped();
 
-	Server_DoubleJump(PendingLaunchVelocity);
+	Server_DoubleJump(LaunchPower);
 
 	KR_LOG(Log, TEXT("Dobule Jump Power : %f %f"), ForwardLaunchPower, RightLaunchPower);
 }
@@ -207,8 +221,9 @@ bool UAdvanceMovementComponent::WallRunUpdate()
 			WallRunVerticalSuccess = WallRunVerticalUpdate(); // 세로 벽타기 시작
 			if (WallRunVerticalSuccess) // 벽타기 성공했을때
 			{
-				Server_WallRunVerticalSuccess();
-				Server_WallRunSuccess(OwnerCreature->GetActorLocation(), OwnerCreature->GetActorRotation(), Velocity, PendingLaunchVelocity);
+				FVector WallRunDir = PendingLaunchVelocity;
+				WallRunDir.Normalize();
+				Server_WallRunVerticalUpdate(WallRunDir, CurWallRunVerticalSpeed);
 				return true;
 			}
 		}
@@ -218,20 +233,9 @@ bool UAdvanceMovementComponent::WallRunUpdate()
 			WallRunHorizonSuccess = WallRunHorizonUpdate(); // 가로 벽타기 시작
 			if (WallRunHorizonSuccess) // 벽타기 성공했을때
 			{
-				KR_LOG(Log, TEXT("%f"), OwnerCreature->GetVelocity().Z);
-
-				if (bWallRunGravity) // 벽타기 중 개별적인 중력을 적용할지
-					GravityScale = WallRunTargetGravity; // 중력 적용
-
-				// 벽타기 중 아래로 내려가지 않도록 속도 조정
-				if (OwnerCreature->GetVelocity().Z < 0.f) 
-				{
-					GravityScale = 0.f;
-					PendingLaunchVelocity.Z = 0.f;
-				}
-
-				Server_WallRunHorizonSuccess();
-				Server_WallRunSuccess(OwnerCreature->GetActorLocation(), OwnerCreature->GetActorRotation(), Velocity, PendingLaunchVelocity);
+				FVector WallRunDir = PendingLaunchVelocity;
+				WallRunDir.Normalize();
+				Server_WallRunHorizonUpdate(WallRunDir);
 				return true;
 			}
 		}
@@ -248,7 +252,6 @@ bool UAdvanceMovementComponent::WallRunHorizonUpdate()
 		if (!IsWallRunning())
 			WallRunStart(EWallRunState::WALLRUN_RIGHT);
 
-		KR_LOG(Log, TEXT("dd"));
 		return true;
 	}
 	else if (CurWallRunState == EWallRunState::WALLRUN_RIGHT)
@@ -263,7 +266,6 @@ bool UAdvanceMovementComponent::WallRunHorizonUpdate()
 		if (!IsWallRunning())
 			WallRunStart(EWallRunState::WALLRUN_LEFT);
 
-		KR_LOG(Log, TEXT("dd2"));
 		return true;
 	}
 	else if (CurWallRunState != EWallRunState::WALLRUN_LEFT)
@@ -368,7 +370,7 @@ void UAdvanceMovementComponent::SlideStart()
 	Velocity.Y = SlidePower.Y;
 	Super::CrouchStart();
 
-	Server_SlideSuccess(Velocity);
+	Server_SlideStart(Velocity);
 
 	KR_LOG(Log, TEXT("Slide Start : %f %f"), SlidePower.X, SlidePower.Y);
 }
@@ -409,6 +411,9 @@ void UAdvanceMovementComponent::ResetSlideSuppression()
 
 void UAdvanceMovementComponent::Server_WallRunStart_Implementation(EWallRunState State)
 {
+	GravityScale = 0.f;
+	PendingLaunchVelocity.Z = 0.f;
+	bCanDoubleJump = true;
 	CurWallRunState = State;
 }
 
@@ -442,6 +447,10 @@ void UAdvanceMovementComponent::WallRunStart(EWallRunState State)
 	if (IsWallRunning())
 		return;
 
+	if (bWallRunGravity) // 벽타기 중 개별적인 중력을 적용할지
+		GravityScale = WallRunTargetGravity; // 중력 적용
+
+	PendingLaunchVelocity.Z = 0.f;
 	bCanDoubleJump = true;
 	CurWallRunState = State;
 	Server_WallRunStart(State);
@@ -565,7 +574,8 @@ void UAdvanceMovementComponent::SlideUpdate()
 		return;
 	}
 
-	FVector Slope = OwnerCreature->CaclulateCurrentFllorSlopeVector();
+	// 미끄러질 힘 구하기
+	FVector Slope = OwnerCreature->CaclulateCurrentFloorSlopeVector();
 	FVector SlopePhysics = Slope * SlideSlopeSpeed;
 	SlopePhysics.Z = 0.f;
 	Velocity += SlopePhysics;
@@ -573,14 +583,23 @@ void UAdvanceMovementComponent::SlideUpdate()
 	Server_SlideUpdate(OwnerCreature->GetActorLocation(), Velocity);
 }
 
-void UAdvanceMovementComponent::Server_WallRunJumpSuccess_Implementation(FVector LaunchVelocity)
+void UAdvanceMovementComponent::Server_WallRunJump_Implementation(FVector InVelocity, FVector InPendingLaunchVelocity)
 {
-	PendingLaunchVelocity = LaunchVelocity;
+	Velocity = InVelocity;
+	PendingLaunchVelocity = InPendingLaunchVelocity;
 
-	Multicast_WallRunJumpSuccess(LaunchVelocity);
+	Multicast_WallRunJump();
 }
 
-void UAdvanceMovementComponent::Multicast_WallRunJumpSuccess_Implementation(FVector LaunchVelocity)
+bool UAdvanceMovementComponent::Server_WallRunJump_Validate(FVector InVelocity, FVector InPendingLaunchVelocity)
+{
+	if (CurWallRunState == EWallRunState::NONE)
+		return false;
+
+	return true;
+}
+
+void UAdvanceMovementComponent::Multicast_WallRunJump_Implementation()
 {
 	UCreatureAnimInstance* CreatureAnim = Cast<UCreatureAnimInstance>(OwnerCreature->GetMesh()->GetAnimInstance());
 	OwnerCreature->GetMesh()->GetAnimInstance()->Montage_Play(CreatureAnim->GetJumpMontage());
@@ -592,10 +611,27 @@ void UAdvanceMovementComponent::Server_WallRunEnd_Implementation()
 	GravityScale = DefaultGravity;
 }
 
+bool UAdvanceMovementComponent::Server_WallRunEnd_Validate()
+{
+	if (CurWallRunState == EWallRunState::NONE)
+		return false;
+
+	return true;
+}
+
 void UAdvanceMovementComponent::Server_DoubleJump_Implementation(FVector LaunchVelocity)
 {
+	bCanDoubleJump = false;
 	PendingLaunchVelocity = LaunchVelocity;
 	Multicast_DoubleJump(LaunchVelocity);
+}
+
+bool UAdvanceMovementComponent::Server_DoubleJump_Validate(FVector LaunchInVelocity)
+{
+	if (bCanDoubleJump == false)
+		return false;
+
+	return true;
 }
 
 void UAdvanceMovementComponent::Multicast_DoubleJump_Implementation(FVector LaunchVelocity)
@@ -604,31 +640,36 @@ void UAdvanceMovementComponent::Multicast_DoubleJump_Implementation(FVector Laun
 	OwnerCreature->GetMesh()->GetAnimInstance()->Montage_Play(CreatureAnim->GetJumpMontage());
 }
 
-void UAdvanceMovementComponent::Server_WallRunHorizonSuccess_Implementation()
+void UAdvanceMovementComponent::Server_WallRunHorizonUpdate_Implementation(FVector Direction)
 {
-	if (bWallRunGravity)
-		GravityScale = WallRunTargetGravity;
-	if (OwnerCreature->GetVelocity().Z < 0.f)
-	{
-		GravityScale = 0.f;
-		PendingLaunchVelocity.Z = 0.f;
-	}
+	PendingLaunchVelocity = Direction * WallRunHorizonSpeed;
 }
 
-void UAdvanceMovementComponent::Server_WallRunVerticalSuccess_Implementation()
+bool UAdvanceMovementComponent::Server_WallRunHorizonUpdate_Validate(FVector Direction)
 {
-	GravityScale = 0.f;
+	if (CurWallRunState == EWallRunState::WALLRUN_LEFT)
+		return true;
+
+	if (CurWallRunState == EWallRunState::WALLRUN_RIGHT)
+		return true;
+
+	return false;
 }
 
-void UAdvanceMovementComponent::Server_WallRunSuccess_Implementation(FVector Location, FRotator Rotation, FVector InVelocity, FVector LaunchVelocity)
+void UAdvanceMovementComponent::Server_WallRunVerticalUpdate_Implementation(FVector Direction, float WallRunVerticalSpeed)
 {
-	OwnerCreature->SetActorLocation(Location);
-	OwnerCreature->SetActorRotation(Rotation);
-	Velocity = InVelocity;
-	PendingLaunchVelocity = LaunchVelocity;
+	PendingLaunchVelocity = Direction * WallRunVerticalSpeed;
+}	
+
+bool UAdvanceMovementComponent::Server_WallRunVerticalUpdate_Validate(FVector Direction, float WallRunVerticalSpeed)
+{
+	if (CurWallRunState != EWallRunState::WALLRUN_VERTICAL)
+		return false;
+
+	return true;
 }
 
-void UAdvanceMovementComponent::Server_SlideSuccess_Implementation(FVector InVelocity)
+void UAdvanceMovementComponent::Server_SlideStart_Implementation(FVector InVelocity)
 {
 	bIsSliding = true;
 
@@ -645,10 +686,26 @@ void UAdvanceMovementComponent::Server_SlideEnd_Implementation()
 	BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
 }
 
+bool UAdvanceMovementComponent::Server_SlideEnd_Validate()
+{
+	if (bIsSliding == false)
+		return false;
+
+	return true;
+}
+
 void UAdvanceMovementComponent::Server_SlideUpdate_Implementation(FVector Location, FVector InVelocity)
 {
 	OwnerCreature->SetActorLocation(Location);
 	Velocity = InVelocity;
+}
+
+bool UAdvanceMovementComponent::Server_SlideUpdate_Validate(FVector Location, FVector InVelocity)
+{
+	if (bIsSliding == false)
+		return false;
+
+	return true;
 }
 
 bool UAdvanceMovementComponent::IsFalling() const
