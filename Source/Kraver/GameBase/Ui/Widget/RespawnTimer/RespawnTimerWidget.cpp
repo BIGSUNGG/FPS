@@ -20,6 +20,14 @@ void URespawnTimerWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTim
 		if (RemainRespawnTime <= 0.f)
 		{
 			SetVisibility(ESlateVisibility::Hidden);
+
+			APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+			if (PlayerController)
+			{
+				FInputModeGameOnly InputModeData;
+				PlayerController->SetInputMode(InputModeData);
+				PlayerController->SetShowMouseCursor(false);
+			}
 			RemainRespawnTime = 0.f;
 		}
 
@@ -32,4 +40,13 @@ void URespawnTimerWidget::TimerStart()
 {
 	SetVisibility(ESlateVisibility::Visible);
 	RemainRespawnTime = AKraverGameMode::GetRespawnTime();
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		FInputModeGameAndUI InputModeData;
+		InputModeData.SetWidgetToFocus(TakeWidget());
+		PlayerController->SetInputMode(InputModeData);
+		PlayerController->SetShowMouseCursor(true);
+	}
 }

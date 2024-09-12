@@ -7,6 +7,8 @@ void UWeaponSelectWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	SetIsFocusable(true);
+
 }
 
 void UWeaponSelectWidget::SelectWeapon(TSubclassOf<AWeapon> WeaponClass, FString WeaponName, float Size, int Index)

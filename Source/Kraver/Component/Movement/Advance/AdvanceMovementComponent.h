@@ -138,7 +138,7 @@ protected:
 
 	bool bSlideSupressed = false; // 슬라이딩이 불가능한지
 	float MinSlideRequireSpeed = 600.f; // 슬라이딩을 시작하기 위해 필요한 최소 속도
-	float SlideSlopeSpeed = 35.f; // 바닥 각도에 따라 미끄러지는 속도
+	float SlideSlopeSpeed = 100.f; // 바닥 각도에 따라 미끄러지는 속도
 	float SlideSpeed = 1500.f; // 슬라이딩 시작할때 속도
 	float SlideGroundFriction = 0.f;
 	float SlideBrakingDecelerationWalking = 1400.f;

@@ -31,8 +31,6 @@ protected:
 	// Widget
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UReturnMainMenuWidget* ReturnMainMenu;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	class UWeaponSelectWidget* WeaponSelectMenu;
 
 	// Setting
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
