@@ -46,8 +46,8 @@ public:
 	virtual void HolsterWeapon(); // Weapon을 집어넣는 함수
 
 	// Damage Event
-	virtual float OnServer_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
-	virtual float OnServer_GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 데미지를 주는 함수 (클라이언트에서 서버로 GiveDamage이벤트 호출)
+	virtual float OnServer_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser); // 데미지를 받는 함수 (서버에서 클라이언트로 TakeDamage이벤트 호출)
+	virtual float OnServer_GiveDamage(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser); // 데미지를 주는 함수 (클라이언트에서 서버로 GiveDamage이벤트 호출)
 
 	virtual void OnServer_CancelTakeDamage(); // 데미지 취소
 
@@ -68,33 +68,33 @@ protected:
 
 	// Take Damage
 	UFUNCTION(Client, Reliable)
-	void Client_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(Client, Reliable)
-	void Client_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(Client, Reliable)
-	void Client_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Multicast_TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Multicast_TakePointDamage(float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Multicast_TakeRadialDamage(float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	// Give Damage
 	UFUNCTION(Client, Reliable)
-	void Client_GiveDamageSuccess(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_GiveDamageSuccess(AActor* DamagedActor, float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(Client, Reliable)
-	void Client_GivePointDamageSuccess(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_GivePointDamageSuccess(AActor* DamagedActor, float DamageAmount, FPointDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(Client, Reliable)
-	void Client_GiveRadialDamageSuccess(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult);
+	void Client_GiveRadialDamageSuccess(AActor* DamagedActor, float DamageAmount, FRadialDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	// Death
-	void OnServer_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
+	void OnServer_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult); // Hp가 0이하가 되었을경우 호출
 	UFUNCTION(Client, Reliable)
-	void Client_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); 
+	void Client_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult);
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser, FKraverDamageResult const& DamageResult); 
+	void Multicast_Death(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, ACreature* DamageCauser, FKraverDamageResult const& DamageResult);
 
 	// Hp
 	UFUNCTION(Client, Reliable)

@@ -16,14 +16,14 @@ class KRAVER_API AKraverGameState : public AGameState
 	
 public:
 	// 플레이어 사망 시 호출
-	void CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
+	void CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, ACreature* AttackerCreature, AController* AttackerController, FKraverDamageResult const& DamageResult);
 	// 게임 종료 시 호출
 	void GameFinish(ETeam WinTeam);
 
 protected:
 	// Rpc
 	UFUNCTION(NetMulticast, Reliable)
-	virtual void Multicast_CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
+	virtual void Multicast_CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, ACreature* AttackerCreature, AController* AttackerController, FKraverDamageResult const& DamageResult);
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_GameFinish(ETeam WinTeam);
 

@@ -99,7 +99,7 @@ float ACreature::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
-	float Damage = IS_SERVER() ? CombatComponent->OnServer_TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser) : 0.f;
+	float Damage = IS_SERVER() ? CombatComponent->OnServer_TakeDamage(DamageAmount, DamageEvent, EventInstigator, CastChecked<ACreature>(DamageCauser)) : 0.f;
 	return Damage;
 
 }

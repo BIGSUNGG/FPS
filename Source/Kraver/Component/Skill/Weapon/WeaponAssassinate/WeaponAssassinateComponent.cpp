@@ -186,7 +186,7 @@ void UWeaponAssassinateComponent::OnAssassinateEndEvent()
 void UWeaponAssassinateComponent::OnServer_AssassinateAttackEvent()
 {
 	FDamageEvent AssassinateDamageEvent(AssassinateDamageType);
-	GetOwnerCreature()->CombatComponent->OnServer_GiveDamage(CurAssassinatedCreature, AssassinationDamage, AssassinateDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee);
+	GetOwnerCreature()->CombatComponent->OnServer_GiveDamage(CurAssassinatedCreature, AssassinationDamage, AssassinateDamageEvent, GetOwnerCreature()->GetController(), OwnerMelee->GetOwnerCreature());
 }
 
 void UWeaponAssassinateComponent::OnServer_AssassinateEndEvent()

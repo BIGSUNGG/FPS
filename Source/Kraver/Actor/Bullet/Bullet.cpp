@@ -119,7 +119,7 @@ void ABullet::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 	ShotDirection.Normalize();
 
 	FPointDamageEvent DamageEvent(BulletDamage, Hit, ShotDirection, HitDamageType);
-	CombatComp->OnServer_GiveDamage(OtherActor, BulletDamage, DamageEvent, CurActor->GetInstigatorController(), GetOwner());
+	CombatComp->OnServer_GiveDamage(OtherActor, BulletDamage, DamageEvent, CurActor->GetInstigatorController(), CastChecked<AWeapon>(Owner)->GetOwnerCreature());
 
 	OnImpact.Broadcast(this, OtherActor, OtherComponent, Hit);
 }

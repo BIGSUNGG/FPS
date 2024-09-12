@@ -15,7 +15,7 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			bUseSeamlessTravel = true;
+			bUseSeamlessTravel = false; 
 			KR_LOG(Log, TEXT("Try to change Map"));
 			bool Success = World->ServerTravel(TravelMapPath + "?listen"); // 맵 변경
 			if(Success)

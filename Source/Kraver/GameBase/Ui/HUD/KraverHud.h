@@ -53,7 +53,7 @@ protected:
 
 		// Game State
 	UFUNCTION()
-	void OnAnyCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
+	void OnAnyCreatureDeathEvent(class ACreature* VictimCreature, class AController* VictimController, ACreature* AttackerCreature, AController* AttackerController, FKraverDamageResult const& DamageResult);
 	UFUNCTION()
 	void OnGameFinishEvent(ETeam WinTeam);
 

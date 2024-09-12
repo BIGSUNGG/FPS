@@ -240,7 +240,7 @@ void AKraverHud::OnNewLocalPlayerEvent(AKraverPlayer* NewCreature)
 	}
 }
 
-void AKraverHud::OnAnyCreatureDeathEvent(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
+void AKraverHud::OnAnyCreatureDeathEvent(class ACreature* VictimCreature, class AController* VictimController, ACreature* AttackerCreature, AController* AttackerController, FKraverDamageResult const& DamageResult)
 {
 	for (int i = KillLogWidgets.Num() - 1; i >= 1; i--)
 	{
@@ -250,7 +250,10 @@ void AKraverHud::OnAnyCreatureDeathEvent(class ACreature* DeadCreature, class AC
 	}
 
 	UKillLogWidget* KillLogWidget = Cast<UKillLogWidget>(KillLogWidgets[0]);
-	KillLogWidget->Initialize(AttackerController ? AttackerController->GetName() : AttackerActor->GetName(), VictimController ? VictimController->GetName() : DeadCreature->GetName());
+
+	FString AttackerName = AttackerCreature->GetPlayerState() ? AttackerCreature->GetPlayerState()->GetPlayerName() : AttackerCreature->GetName();
+	FString VictimName = VictimCreature->GetPlayerState() ? VictimCreature->GetPlayerState()->GetPlayerName() : VictimCreature->GetName();
+	KillLogWidget->Initialize(AttackerName, VictimName);
 }
 
 void AKraverHud::OnGameFinishEvent(ETeam WinTeam)

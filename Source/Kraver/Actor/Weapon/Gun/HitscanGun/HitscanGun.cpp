@@ -41,7 +41,7 @@ void AHitscanGun::OnServer_FireBulletResult(const TArray<FHitResult>& BulletHitR
 			Direction.Normalize();
 
 			FPointDamageEvent DamageEvent(AttackDamage, Result, Direction, AttackDamageType);
-			OwnerCreature->CombatComponent->OnServer_GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
+			OwnerCreature->CombatComponent->OnServer_GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), OwnerCreature);
 			if (Result.bBlockingHit)
 			{
 				FVector ImpaceEffectPos = Result.ImpactPoint - OwnerCreature->GetCamera()->GetForwardVector() * 15.f;

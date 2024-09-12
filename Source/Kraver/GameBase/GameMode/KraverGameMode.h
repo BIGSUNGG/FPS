@@ -24,7 +24,7 @@ public:
 	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName) override;
 	
 	// Creature사망 시 호출
-	virtual void CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult);
+	virtual void CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, ACreature* AttackerCreature, AController* AttackerController, FKraverDamageResult const& DamageResult);
 
 	// 플레이어 리스폰 요청
 	// RespawnPlayer : 리스폰할 플레이어 캐릭터

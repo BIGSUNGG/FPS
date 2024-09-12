@@ -42,12 +42,12 @@ AActor* AKraverGameMode::FindPlayerStart_Implementation(AController* Player, con
 	return PlayerStarts[Selection];
 }
 
-void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
+void AKraverGameMode::CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, ACreature* AttackerCreature, AController* AttackerController, FKraverDamageResult const& DamageResult)
 {
 	KraverGameState = KraverGameState ? KraverGameState : Cast<AKraverGameState>(GameState);
 	if (KraverGameState)
 	{
-		KraverGameState->CreatureDeath(DeadCreature, VictimController, AttackerActor, AttackerController, DamageResult);
+		KraverGameState->CreatureDeath(DeadCreature, VictimController, AttackerCreature, AttackerController, DamageResult);
 	}
 	else
 	{

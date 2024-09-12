@@ -179,7 +179,7 @@ void AMelee::OnServer_SwingResult(const TArray<FHitResult>& Results)
 		if (IsValid(Result.GetActor()))
 		{
 			FPointDamageEvent DamageEvent(AttackDamage, Result, OwnerCreature->GetCamera()->GetForwardVector(), AttackDamageType);
-			OwnerCreature->CombatComponent->OnServer_GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), this);
+			OwnerCreature->CombatComponent->OnServer_GiveDamage(Result.GetActor(), AttackDamage, DamageEvent, OwnerCreature->GetController(), OwnerCreature);
 		}
 	}
 }

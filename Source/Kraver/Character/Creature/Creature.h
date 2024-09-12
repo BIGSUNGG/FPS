@@ -179,8 +179,8 @@ protected:
 	virtual void OnServer_SimulateMesh();
 	
 	UFUNCTION()
-	void StartDissolve(); 
 	void UpdateDissolveMaterial(float DissolveValue);
+	void StartDissolve(); 
 
 public:
 	// Getter Setter

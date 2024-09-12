@@ -35,7 +35,7 @@ void ARocket::GiveDamage(AActor* OtherActor, UPrimitiveComponent* OtherComponent
 		ExplosionFalloff, // DamageFalloff
 		ExplosionDamageType, // DamageTypeClass
 		IgnoreActors, // IgnoreActors
-		this, // DamageCauser
+		CastChecked<AWeapon>(Owner)->GetOwnerCreature(), // DamageCauser
 		GetInstigatorController(),
 		TraceChannel
 		);

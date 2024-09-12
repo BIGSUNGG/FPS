@@ -3,9 +3,9 @@
 
 #include "KraverGameState.h"
 
-void AKraverGameState::CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
+void AKraverGameState::CreatureDeath(class ACreature* DeadCreature, class AController* VictimController, ACreature* AttackerCreature, AController* AttackerController, FKraverDamageResult const& DamageResult)
 {
-	Multicast_CreatureDeath(DeadCreature, VictimController, AttackerActor, AttackerController, DamageResult);
+	Multicast_CreatureDeath(DeadCreature, VictimController, AttackerCreature, AttackerController, DamageResult);
 }
 
 void AKraverGameState::GameFinish(ETeam WinTeam)
@@ -13,9 +13,9 @@ void AKraverGameState::GameFinish(ETeam WinTeam)
 	Multicast_GameFinish(WinTeam);
 }
 
-void AKraverGameState::Multicast_CreatureDeath_Implementation(class ACreature* DeadCreature, class AController* VictimController, AActor* AttackerActor, AController* AttackerController, FKraverDamageResult const& DamageResult)
+void AKraverGameState::Multicast_CreatureDeath_Implementation(class ACreature* VictimCreature, class AController* VictimController, ACreature* AttackerCreature, AController* AttackerController, FKraverDamageResult const& DamageResult)
 {
-	OnCreatureDeath.Broadcast(DeadCreature, VictimController, AttackerActor, AttackerController, DamageResult);
+	OnCreatureDeath.Broadcast(VictimCreature, VictimController, AttackerCreature, AttackerController, DamageResult);
 }
 
 void AKraverGameState::Multicast_GameFinish_Implementation(ETeam WinTeam)
