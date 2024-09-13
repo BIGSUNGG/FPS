@@ -627,6 +627,20 @@ void ACreature::OnUnholsterWeaponEvent(AWeapon* Weapon)
 	if (!IsValid(Weapon))
 		return;
 
+	GetWorld()->GetTimerManager().SetTimerForNextTick([=]()
+		{
+			Weapon->GetTppWeaponMesh()->AttachToComponent
+			(
+				GetMesh(),
+				FAttachmentTransformRules::SnapToTargetIncludingScale,
+				Weapon->GetTppHandSocketName()
+			);
+
+			Weapon->GetTppWeaponMesh()->SetVisibility(true);
+			Weapon->GetTppWeaponMesh()->bOnlyOwnerSee = false;
+		}
+	);
+
 	// 무기의 델리게이트에 함수 등록
 	Weapon->OnPlayTppMontage.AddDynamic(this, &ACreature::OnPlayWeaponTppMontageEvent);
 	Weapon->OnPlayFppMontage.AddDynamic(this, &ACreature::OnPlayWeaponFppMontageEvent);

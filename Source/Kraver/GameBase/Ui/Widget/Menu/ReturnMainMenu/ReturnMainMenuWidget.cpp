@@ -38,7 +38,7 @@ void UReturnMainMenuWidget::MenuTearDown()
 			PlayerController->SetInputMode(InputModeData);
 			PlayerController->SetShowMouseCursor(false);
 		}
-	}
+	}	
 	if (ReturnButton && ReturnButton->OnClicked.IsBound())
 	{
 		ReturnButton->OnClicked.RemoveDynamic(this, &UReturnMainMenuWidget::OnReturnButtonClickEvent);

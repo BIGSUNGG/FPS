@@ -621,7 +621,6 @@ void UCombatComponent::OnRep_CurWeaponEvent(AWeapon* PrevWeapon)
 
 	if (CurWeapon)
 		OnUnholsterWeapon.Broadcast(CurWeapon);
-
 }
 
 void UCombatComponent::OnRep_WeaponSlotEvent(TArray<AWeapon*> PrevWeaponSlot)
